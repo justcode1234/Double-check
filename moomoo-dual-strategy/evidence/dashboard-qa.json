@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "session_date_utc": "2026-11-17",
+  "scope": "Local dashboard browser QA, not broker execution or release acceptance",
+  "dashboard_url": "http://127.0.0.1:8876/",
+  "forward_ledger": {
+    "read_only_verification": true,
+    "events": 8,
+    "manual_control_events": 0,
+    "orders": 0,
+    "paper_fills": 0,
+    "shadow_fills": 0,
+    "orb_nav_usd": 50000,
+    "noise_area_nav_usd": 50000,
+    "total_pnl_usd": 0,
+    "execution_enabled": false,
+    "runtime": "SHADOW",
+    "local_audit_valid": true,
+    "broker_lifecycle_verified": false,
+    "provider_origin_verified": false
+  },
+  "control_checks": {
+    "database": "Isolated disposable QA database, separate from forward ledger",
+    "start": "Disabled in both cards; server rejects activation",
+    "orb_stop": "Durable strategy-scoped RISK_HALTED lock with one MANUAL_CONTROL; B remained SHADOW",
+    "noise_area_failed_stop": "Synthetic POST transport failure: explicit unconfirmed warning, exactly one attempt, no automatic retry, no new lock/event",
+    "noise_area_recovery": "Native fetch restored; explicit Stop succeeded; both QA strategies locked with two total control events",
+    "capital_preserved": true,
+    "broker_cancel_or_close_sent": false,
+    "stop_semantics": "Local entry lock only; no broker liquidation, process shutdown, capital reset or rearm"
+  },
+  "view_checks": {
+    "status_http": 200,
+    "exports": ["/export/status.json", "/export/audit.csv", "/export/equity.csv"],
+    "export_status_and_content_type_passed": true,
+    "strategy_filter": "ORB filter returned four scoped events; clearing filters restored eight events",
+    "no_match_search": "Explicit no-events-match message",
+    "start_blocker_expansion": "Remained open across periodic refresh",
+    "synthetic_status_outage": "Previously displayed values retained and marked stale; explicit error; no database mutation",
+    "status_recovery": "Native fetch restored; alert hidden and stale class cleared",
+    "console_errors_or_warnings_on_final_check": 0
+  },
+  "viewport_checks": {
+    "method": "Isolated headless Microsoft Edge with CDP Emulation.setDeviceMetricsOverride",
+    "requested_widths_px": [320, 390, 768, 1440],
+    "measured_document_scroll_widths_px": [307, 375, 753, 1425],
+    "document_horizontal_overflow": false,
+    "audit_table": "Horizontal scrolling contained inside table wrapper",
+    "both_cards_and_controls_present": true
+  },
+  "screenshots": {
+    "desktop": "evidence/dashboard.png",
+    "mobile": "evidence/dashboard-mobile.png",
+    "full_page": "evidence/dashboard-full.png",
+    "provenance": "Genuine local Edge browser captures, not generated mockups; visually inspected"
+  },
+  "limitations": [
+    "UI and synthetic control tests do not verify a real practice-order lifecycle or stop latency",
+    "No independently authenticated broker transport or continuous close-only supervisor is running",
+    "Cloud agents and schedules are not deployed",
+    "This file records observed QA outcomes; it is not cryptographic proof against the file owner"
+  ]
+}

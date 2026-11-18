@@ -1,0 +1,13 @@
+moomoo-dual-strategy/.venv/
+moomoo-dual-strategy/private/
+moomoo-dual-strategy/.env
+moomoo-dual-strategy/logs/
+moomoo-dual-strategy/data-cache/*
+!moomoo-dual-strategy/data-cache/normalized/
+moomoo-dual-strategy/reports/backtest_*/
+!moomoo-dual-strategy/reports/backtest_b85841adb51f96b7/
+.DS_Store
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/

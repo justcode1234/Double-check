@@ -1,0 +1,37 @@
+{
+  "scope": "Isolated QA journal data-cache/forward-browser-qa-enpclplh/decisions.sqlite3 served on loopback port 62201; synthetic/recorded label fixtures only, not provider evidence. Production ledger private/ledger.sqlite3 and dashboard 8876 untouched.",
+  "labels": {
+    "at": "2026-11-17T18:38:33.978Z",
+    "portfolios": [
+      {"strategy": "orb", "feed": "SYNTHETIC", "visible_badge": "synthetic", "nav": 50000, "pnl": 0, "orders": 0, "fills": 0},
+      {"strategy": "noise_area", "feed": "RECORDED_UNVERIFIED", "visible_badge": "recorded unverified", "nav": 50000, "pnl": 0, "orders": 0, "fills": 0}
+    ],
+    "provenance_label": "SHADOW / DECISIONS ONLY — NO FILLS",
+    "feed_note_rendered": true,
+    "start_disabled": true,
+    "execution_enabled": false,
+    "exports_http_200": ["/export/status.json", "/export/audit.csv", "/export/equity.csv"]
+  },
+  "stop": {
+    "at": "2026-11-17T18:39:05.898Z",
+    "target": "noise_area",
+    "events_before": 16,
+    "events_after": 17,
+    "result_runtime": {"orb": "SHADOW", "noise_area": "RISK_HALTED"},
+    "manual_locked": {"orb": false, "noise_area": true},
+    "feedback": "SPY Noise-Area: local entry lock saved. Broker cancellation and liquidation were NOT performed; broker-flat status remains unverified. The dashboard stays running.",
+    "start_http_status": 409
+  },
+  "stale_and_invalid_proof": {
+    "at": "2026-11-17T18:40:41.697Z",
+    "fixture": "Aged ORB evidence plus a QA-only MARK with invalid proof (event id qa-invalid-proof)",
+    "api_feed_status": ["STALE", "UNVERIFIED"],
+    "visible_badges": ["stale", "unverified"],
+    "badge_classes": ["badge danger", "badge neutral"],
+    "start_disabled": true,
+    "execution_enabled": false,
+    "document_horizontal_overflow": false
+  },
+  "console": "Only the expected 409 from the deliberate Start-blocked request.",
+  "limitations": "Labels never show FRESH or CONNECTED; no live feed, broker transport, order or fill was exercised."
+}

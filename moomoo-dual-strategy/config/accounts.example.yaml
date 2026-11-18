@@ -1,0 +1,11 @@
+environment: SIMULATE
+market_id: 100
+practice_account_id: null
+account_source: sim_trade_account_list
+is_competition: false
+user_confirmed_practice_selection: false
+allocation_usd:
+  orb: 50000
+  noise_area: 50000
+shorts_verified: false
+mapping_file: private/accounts.json

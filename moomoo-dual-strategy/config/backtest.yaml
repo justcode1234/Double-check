@@ -1,0 +1,67 @@
+schema_version: 1
+mode: SHADOW
+initial_nav: 50000
+lookback_sessions: 14
+optimization_enabled: false
+holdout_policy: "Predetermined dates and fixed parameters; untouched means no parameter tuning, not a claim that raw data was never inspected."
+data:
+  intraday: data-cache/normalized/intraday_5m.csv
+  daily: data-cache/normalized/daily.csv
+  timestamp_unit: epoch_milliseconds_utc
+  timestamp_semantics: end
+  minutes: 5
+  price_divisor: 1
+  volume_divisor: 1
+  turnover_divisor: 1
+  adjustment: unverified_source_adjustment_and_corporate_actions
+  symbols: {US.SPY: SPY, US.AAPL: AAPL, US.NVDA: NVDA}
+  intraday_start: '2026-10-01'
+  daily_start: '2026-09-01'
+  end: '2026-11-16'
+splits:
+  in_sample: ['2026-10-21', '2026-10-22', '2026-10-23', '2026-10-26', '2026-10-27', '2026-10-28', '2026-10-29', '2026-10-30']
+  walk_forward: ['2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06']
+  holdout: ['2026-11-09', '2026-11-10', '2026-11-11', '2026-11-12', '2026-11-13', '2026-11-16']
+risk:
+  stock_fraction: 0.15
+  spy_fraction: 0.40
+  sector_fraction: 0.30
+  max_positions: 4
+  gross_fraction: 1.0
+  stop_risk_fraction: 0.0025
+  daily_loss_fraction: 0.0125
+  reduce_drawdown: 0.02
+  reduce_recovery: 0.015
+  halt_drawdown: 0.035
+  terminal_drawdown: 0.05
+  halt_rearm: none_without_external_authorization
+  flatten_minutes_before_close: 5
+execution:
+  fee_per_order: 0.99
+  sell_fee_per_share: 0.000166
+  sell_fee_cap: 8.30
+  closed_bar_volume_participation: 0.01
+  spread_bps: 1.0
+  stop_atr_multiple: 0.10
+  fill: next_bar_open
+  no_take_profit: true
+  vwap: turnover
+research:
+  annualized_ratio_min_sessions: 60
+  published_noise_daily_vol_target: 0.02
+  published_noise_max_leverage: 4.0
+  hypothetical_borrow_apr: 0.03
+  hypothetical_financing_apr: 0.06
+  corporate_action_previous_close_shocks: [-0.01, 0.01]
+  orb_selection_limit: 8
+  orb_original_selection_limit: 20
+scenarios:
+  normal: {slippage_bps: 1.0}
+  stressed_slippage: {slippage_bps: 10.0}
+  delayed_orders: {slippage_bps: 1.0, delay_bars: 1}
+  partial_fills: {slippage_bps: 1.0, partial: true}
+  missed_tick: {slippage_bps: 1.0, missed_tick: '10:30'}
+  stale_data: {slippage_bps: 1.0, outage: stale_data, outage_start: '10:30', outage_end: '11:00', adverse_gap: 0.02}
+  disconnection: {slippage_bps: 1.0, outage: disconnection, outage_start: '10:30', outage_end: '11:00', adverse_gap: 0.02}
+  sentinel_failure: {slippage_bps: 1.0, outage: sentinel_failure, outage_start: '10:30', outage_end: '11:00', adverse_gap: 0.02}
+  overnight_holiday_failure: {slippage_bps: 10.0, force_carry: true, adverse_gap: 0.05}

@@ -1,0 +1,129 @@
+# Project-owned role contracts, NOT Qoder API payloads or installed skills.
+schema: dual-strategy.local-roles/v1
+revision: 1
+status: NOT DEPLOYED
+roles:
+  coordinator:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [orb, noise_area]
+    engine: orchestration_only
+    outputs: [dispatch_spec, status_summary]
+    exposure_effect: none
+    instructions: >-
+      Coordinate bounded runs with separate portfolio envelopes and pinned revisions.
+      Cloud orchestrates; deterministic local code alone computes signals, sizing,
+      calendar guards and risk decisions. Never override rejection or grant approval.
+      Shared threads/filesystem are not broker-account or credential isolation.
+  researcher:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [orb, noise_area]
+    engine: read_only
+    outputs: [data_quality_report, setup_explanation]
+    exposure_effect: none
+    instructions: >-
+      Describe only timestamped, provenance-labelled market snapshots and completed
+      history supplied by a future read-only adapter. No forecasts as order authority.
+      Missing history/calendar/data means blocked, never fabricated observations.
+  signal_a:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [orb]
+    engine: dual_strategy.strategies.orb
+    outputs: [signal_proposal]
+    exposure_effect: proposal_only
+    instructions: >-
+      Portfolio A only: deterministic five-minute ORB, individual US stocks, no ETFs
+      or SPY. Use pinned orb configuration and A-only NAV/state. Emit proposals or
+      no-trade reasons, never order tools, monetary discretion or risk overrides.
+  signal_b:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [noise_area]
+    engine: dual_strategy.strategies.noise_area
+    outputs: [signal_proposal]
+    exposure_effect: proposal_only
+    instructions: >-
+      Portfolio B only: deterministic SPY Noise-Area at completed half-hour ticks.
+      Use pinned noise_area configuration and B-only NAV/state. Emit proposals or
+      no-trade reasons, never order tools, monetary discretion or risk overrides.
+  risk_supervisor:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [orb, noise_area]
+    engine: veto_only
+    outputs: [veto, risk_explanation]
+    exposure_effect: veto_only
+    instructions: >-
+      Inspect each portfolio separately; may veto, never approve, resize upward,
+      override deterministic gates, unlock terminal halts or reset capital.
+      Absence of veto is not approval. Missing local sentinel blocks entries.
+  watchdog:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [orb, noise_area]
+    engine: close_only
+    outputs: [block_entries, cancel_close_request, alert]
+    exposure_effect: close_only
+    instructions: >-
+      Detect missing/stale sentinel and block entries. Propose cancel/close only
+      through a future deterministic local close-only boundary; never add, reverse,
+      open or cross portfolio/account scopes. Covering a short must not cross zero.
+      No broker tools are attached. Cloud bounded runs cannot replace the independent
+      local sentinel, guarantee latency, or provide continuous stop protection.
+  auditor:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [orb, noise_area]
+    engine: read_only
+    outputs: [audit_report, veto]
+    exposure_effect: veto_only
+    instructions: >-
+      Read-only independent audit of redacted ledger, gates, acknowledgements and
+      configuration hashes. May veto, never place/increase orders, edit ledger or
+      release halts. Report ambiguous fills and reconciliation gaps explicitly.
+  paper_executor:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [orb, noise_area]
+    engine: disabled_local_boundary
+    outputs: [blocked_setup]
+    exposure_effect: none
+    instructions: >-
+      Reserved local deterministic boundary, not a Cloud monetary decision maker.
+      Disabled: no connector, account selection, orders or credentials. Future
+      practice-only execution requires all release gates, exact verified account
+      mapping, US SIMULATE guard and reconciliation before retries. Never live,
+      competition, reset, transfer, cross-subsidy or unsupported short/order tools.
+  reporter:
+    version: 1
+    enabled: false
+    cloud_id: null
+    tool_allowlist: []
+    scope: [orb, noise_area]
+    engine: read_only
+    outputs: [daily_report, comparison_export]
+    exposure_effect: none
+    instructions: >-
+      Read-only aggregation of independent ledgers; redact identifiers and secrets.
+      Distinguish broker cash from each virtual USD 50000 allocation and actual
+      reconciled practice fills from shadow/hypothetical results. Report dollar and
+      percentage returns, data age, failures and missing evidence; no invented NAV,
+      P&L, Cloud IDs or deployment claims. Reports never mutate trading state.

@@ -1,0 +1,16 @@
+{
+  "recorded_at_utc": "2026-11-18T15:19:30Z",
+  "purpose": "Bounded continuous close-only sentinel run against the authenticated practice broker (CLI OAuth). Isolated validation ledger only; NOT strategy performance. Comparison ledger untouched.",
+  "transport": "AUTHENTICATED_CLI (moomoo CLI v0.5.0, quote-only OAuth)",
+  "isolated_ledger": "private/sentinel-cli/validation.sqlite3",
+  "strategy": "noise_area",
+  "account": "authorized ordinary U.S. practice account (SIMULATE, market 100, type 1); ID redacted; competition account never addressed",
+  "run": {"ticks": 5, "elapsed_seconds": 20.969, "measured_frequency_hz": 0.2384, "seconds_per_tick_approx": 4.19},
+  "heartbeats_written": 5,
+  "last_healthy": false,
+  "healthy_false_reason": "Strategy runtime is SHADOW; risk.entries_allowed is False, so the sentinel correctly reports risk_state_blocks_entries. A flat, released strategy would report healthy.",
+  "audit_chain_verified": true,
+  "latency_finding": "Each tick performs multiple authenticated CLI subprocess calls (account_list, cash_info, position_list, quote, final reconciliation), measuring ~4.2 s/tick (0.24 Hz). This is honest measured loop latency, NOT a sub-second stop guarantee. CLI polling is too slow for tight 0.10xATR stop protection; a faster streaming transport (e.g. OpenD push) would be required for sub-second stops. Triggered-stop quote-to-order latency still requires a demonstrated stop event.",
+  "broker_flat_after": true,
+  "provider_origin_verified": false
+}

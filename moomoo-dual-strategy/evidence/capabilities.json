@@ -1,0 +1,37 @@
+{
+  "observed_at_utc": "2026-11-17T16:59:11Z",
+  "source": "Authenticated Moomoo MCP tool schemas and read-only responses",
+  "tools_discovered": 104,
+  "paper_account_creation_tool_exposed": false,
+  "new_accounts_created": 0,
+  "ordinary_us_practice_accounts_discovered": 1,
+  "competition_accounts_excluded": 1,
+  "candidate_is_empty": true,
+  "candidate_broker_cash_usd": 1000000,
+  "candidate_broker_nav_usd": 1000000,
+  "broker_balance_changed": false,
+  "strategy_initial_nav_usd": {"orb": 50000, "noise_area": 50000},
+  "allowed_paper_order_type_codes": {"limit": 1, "market": 3},
+  "native_paper_stop_exposed": false,
+  "order_submission_idempotent": false,
+  "submission_timeout_policy": "Reconcile orders and positions before any retry; ambiguous submission stays blocked",
+  "fills_endpoint_exposed": false,
+  "paper_fee_endpoint_exposed": false,
+  "current_execution_mode": "SHADOW",
+  "user_authorized_shared_practice_account": true,
+  "account_mode_requested": "SHARED PRACTICE ACCOUNT — TWO VIRTUAL $50K SUB-LEDGERS",
+  "authorization_note": "User explicitly approved the discovered ordinary practice account; execution remains subject to safety gates",
+  "order_count_this_experiment": 0,
+  "local_moomoo_cli_available": false,
+  "local_cloud_connector_available": false,
+  "blockers": [
+    "Two-account creation is not exposed by current MCP; manual additional same-market account capability unverified",
+    "Point-in-time ORB universe, corporate actions and release-quality historical validation remain incomplete",
+    "Paper lifecycle, independent stop service, quote-to-order latency and restart acceptance tests not yet passed",
+    "Cloud Agents plugin/connector and cloud OAuth Vault not available in this session"
+  ],
+  "references": [
+    "https://open.moomoo.com/cli/sim",
+    "https://moomoo-qoder-challenge-rgkelnyuzbm.qoder.website/"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "recorded_at_utc": "2026-11-18T15:22:30Z",
+  "purpose": "Empirical probe of the practice sim broker's order-rejection behavior, to design reject/UNKNOWN acceptance tests. Practice account only; all probe orders cancelled; account left flat. Not strategy performance.",
+  "account": "authorized ordinary U.S. practice account (SIMULATE, market 100, type 1); ID redacted; competition account never addressed",
+  "transport": "AUTHENTICATED_CLI (moomoo CLI v0.5.0)",
+  "probes": [
+    {"order": "BUY US.SPY 1 LIMIT 732.123 (sub-penny)", "result": "ACCEPTED as WORKING (status 2, cum 0); not rejected; cancelled"},
+    {"order": "BUY US.SPY 1 LIMIT 0.001 (far below market)", "result": "ACCEPTED as WORKING (status 2, cum 0); not rejected; cancelled"},
+    {"order": "BUY US.AAPL 1 LIMIT 1 (far below market)", "result": "ACCEPTED as WORKING (status 2, cum 0); not rejected; cancelled"},
+    {"order": "BUY US.ZZZZZ 1 LIMIT 1 (unknown symbol)", "result": "REJECTED at API: rc 1, '[SERVER_ERROR] backend business error'; NO order_id created; no history row"}
+  ],
+  "findings": [
+    "The sim broker is permissive: valid-format orders with invalid/non-marketable prices rest as WORKING rather than REJECTED. No status-6 (REJECTED) history row was produced for any valid-symbol probe.",
+    "Genuine broker-side rejection occurs for unknown symbols as an API error with no order created. Through PaperExecutor this surfaces as no verified acknowledgement -> order status UNKNOWN (reservation retained), the ambiguous-acknowledgement path.",
+    "A never-created UNKNOWN order has no broker_order_id and no history row, so it cannot be reconciled via read_history_order (which requires an owned broker_order_id present in history). Recovering it requires confirming absence in broker history/positions and then releasing the reservation — a dedicated UNKNOWN-recovery path.",
+    "The instrument guard ({US.AAPL, US.SPY}) intentionally restricts reconciliation; an unknown-symbol reject test would require a reviewed extension."
+  ],
+  "broker_flat_after": true,
+  "implication_for_gate": "Broker status-6 REJECTED evidence is not obtainable for valid symbols in this permissive sim; the meaningful adverse acknowledgement path is UNKNOWN (submit error/timeout). Unit tests cover UNKNOWN fail-closed + no-blind-retry; a live reconciled UNKNOWN-recovery acceptance test requires the dedicated recovery path."
+}

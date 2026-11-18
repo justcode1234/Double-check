@@ -1,0 +1,102 @@
+{
+  "label": "AGENT_RELAYED_SUPERVISED_PRACTICE_LIFECYCLE",
+  "purpose": "One supervised 1-share US.SPY order-lifecycle validation on the explicitly authorized shared ordinary U.S. practice account. Not strategy output, not strategy performance, not a competition-account trade.",
+  "date_utc": "2026-11-17",
+  "driver": "scripts/supervised_lifecycle.py",
+  "ledger": "private/lifecycle/validation.sqlite3 (isolated validation ledger; the strategy comparison ledger private/ledger.sqlite3 is untouched)",
+  "account": {
+    "environment": "SIMULATE",
+    "market_id": 100,
+    "account_type": 1,
+    "title_class": "ordinary U.S. paper trading (not the challenge account)",
+    "account_id": "withheld; stored only as sha256 account_key in the ledger",
+    "competition_account_touched": false
+  },
+  "transport": "AGENT_RELAYED: the driver wrote request files and Qoder called the paper-only Moomoo MCP tool with exactly those arguments; observation time is the response-file mtime (slightly after the actual call). Provider origin is NOT independently authenticated.",
+  "tools_used": [
+    "mcp__moomoo__sim_trade_account_list",
+    "mcp__moomoo__sim_trade_cash_info",
+    "mcp__moomoo__sim_trade_input_order",
+    "mcp__moomoo__sim_trade_history_order_list",
+    "mcp__moomoo__sim_trade_position_list"
+  ],
+  "orders": [
+    {
+      "intent_id": "dabab5c20c689378dfcb270bb31ef2db",
+      "side": "BUY", "qty": 1, "order_type": "LIMIT", "limit_price": "732.67",
+      "broker_order_id": "3327555", "broker_status": 4, "ledger_status": "FILLED",
+      "avg_fill_price": "731.04", "broker_update_time_utc": "2026-11-17T18:48:33Z",
+      "challenge_fee_model": "0.99"
+    },
+    {
+      "intent_id": "9bb7651f491ec84e0d4db1353e51e5e9",
+      "side": "SELL (close_only)", "qty": 1, "order_type": "LIMIT", "limit_price": "729.66",
+      "broker_order_id": "3327557", "broker_status": 4, "ledger_status": "FILLED",
+      "avg_fill_price": "731.11", "broker_update_time_utc": "2026-11-17T18:51:09Z",
+      "challenge_fee_model": "0.990166"
+    }
+  ],
+  "result": {
+    "gross_pnl": "0.07",
+    "challenge_fee_model_total": "1.980166",
+    "validation_ledger_realized_pnl": "-1.910166",
+    "validation_ledger_noise_area_nav": "49998.089834",
+    "broker_reported_position_profit": "0.07",
+    "broker_recorded_fees": "not reported by sim tools (null)",
+    "broker_position_after": "SPY qty 0",
+    "ledger_positions_after": []
+  },
+  "audit": {
+    "chain_verified": true,
+    "observations_verified": true,
+    "broker_observations": 9,
+    "orders": 2,
+    "paper_fill_updates": 2,
+    "local_consistency": true,
+    "reconciled": true,
+    "broker_lifecycle": true,
+    "provider_origin_verified": false,
+    "errors": []
+  },
+  "cancel_path": {
+    "driver": "scripts/supervised_lifecycle.py --cancel",
+    "ledger": "private/lifecycle-cancel/validation.sqlite3 (separate isolated validation ledger)",
+    "transport": "AGENT_RELAYED (same limitations as above)",
+    "tools_used": [
+      "mcp__moomoo__sim_trade_account_list",
+      "mcp__moomoo__sim_trade_cash_info",
+      "mcp__moomoo__sim_trade_input_order",
+      "mcp__moomoo__sim_trade_history_order_list",
+      "mcp__moomoo__sim_trade_cancel_order",
+      "mcp__moomoo__sim_trade_position_list"
+    ],
+    "order": {
+      "intent_id": "4f55ac4a2a76a0a5f1ba85d02b505c9b",
+      "side": "BUY", "qty": 1, "order_type": "LIMIT", "limit_price": "700.00",
+      "reference_last_price": "731.2354 (non-marketable by design)",
+      "broker_order_id": "3327564",
+      "broker_create_time_utc": "2026-11-17T18:59:43Z",
+      "observed_working": {"broker_status": 2, "ledger_status": "WORKING", "cum_qty": "0"},
+      "cancel_response": {"ret_code": 0},
+      "observed_terminal": {"broker_status": 5, "ledger_status": "CANCELLED", "cum_qty": "0", "broker_update_time_utc": "2026-11-17T19:00:54Z"}
+    },
+    "event_sequence": ["INITIAL_CAPITAL", "INITIAL_CAPITAL", "ACCOUNT_MAPPING", "ACCOUNT_MAPPING", "ORDER_REQUEST", "ORDER_ACK", "ORDER_STATUS", "CANCEL_REQUEST", "CANCEL_RESPONSE", "ORDER_STATUS"],
+    "result": {
+      "fills": 0,
+      "validation_ledger_noise_area_nav": "50000",
+      "ledger_positions_after": [],
+      "broker_position_after": "SPY qty 0",
+      "reservation_released": true
+    },
+    "audit": {
+      "chain_verified": true, "observations_verified": true, "broker_observations": 8, "orders": 1,
+      "paper_fill_updates": 0, "local_consistency": true, "reconciled": true, "broker_lifecycle": true,
+      "provider_origin_verified": false, "errors": []
+    }
+  },
+  "not_demonstrated": [
+    "partial fills, rejects and UNKNOWN recovery against the broker (covered only by unit tests); a broker cancel of a WORKING order IS demonstrated once (cancel_path)",
+    "autonomous execution, continuous close-only sentinel, independently authenticated transport"
+  ],
+  "paper_active": false
+}

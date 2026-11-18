@@ -1,0 +1,61 @@
+{
+  "recorded_at_utc": "2026-11-18T15:13:51.736766+00:00",
+  "purpose": "Authenticated practice-order lifecycle (CLI OAuth transport), isolated validation ledger only; NOT strategy performance. Comparison ledger private/ledger.sqlite3 untouched.",
+  "transport": "AUTHENTICATED_CLI (moomoo CLI v0.5.0, quote-only OAuth scope; sim orders permitted without live trade scope)",
+  "account": "authorized ordinary U.S. practice account (SIMULATE, market 100, type 1); ID redacted; competition account never addressed",
+  "isolated_ledger": "private/lifecycle-cli6/validation.sqlite3",
+  "fills": [
+    {
+      "side": 1,
+      "qty": 1,
+      "price": "732.15",
+      "at": "2026-11-18T15:13:12+00:00"
+    },
+    {
+      "side": -1,
+      "qty": 1,
+      "price": "732.09",
+      "at": "2026-11-18T15:13:21+00:00"
+    }
+  ],
+  "orders": [
+    {
+      "symbol": "US.SPY",
+      "side": 1,
+      "qty": 1,
+      "status": "FILLED",
+      "cumulative_qty": 1
+    },
+    {
+      "symbol": "US.SPY",
+      "side": -1,
+      "qty": 1,
+      "status": "FILLED",
+      "cumulative_qty": 1
+    }
+  ],
+  "broker_flat_after": true,
+  "validation_nav": 49997.959834,
+  "validation_realized_pnl": -2.040166,
+  "validation_fees_model": 1.980166,
+  "audit": {
+    "chain_verified": true,
+    "observations_verified": true,
+    "orders": 2,
+    "paper_fill_updates": 2,
+    "errors": [],
+    "local_errors": [],
+    "broker_errors": [],
+    "local_consistency": true,
+    "reconciled": true,
+    "broker_lifecycle": true,
+    "provider_origin_verified": false
+  },
+  "chain_verified": true,
+  "broker_quirk_fixes": [
+    "whole-second broker timestamp granularity grace at request/observation boundaries (strict sub-second ordering preserved)",
+    "normalize indicative avg_fill_price to 0 when cum_qty=0"
+  ],
+  "provider_origin_verified": false,
+  "note": "Sim fill latency observed ~4-6s for marketable limits; script polls up to 30s before fallback cancel. Ad-hoc sells on a flat sim account open shorts (sim permits shorting); only close-only sells against own longs are used."
+}

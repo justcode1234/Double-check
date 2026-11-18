@@ -1,0 +1,57 @@
+{
+  "mode": "SUPERVISED_PRACTICE_TRADING (user-authorized 2026-11-18; see reports/supervised_trading_authorization.md)",
+  "portfolio": "B \u2014 SPY Noise-Area (long-only, 40% own-NAV notional)",
+  "account": "authorized ordinary U.S. practice account (SIMULATE, market 100, type 1); ID redacted; competition account never addressed",
+  "transport": "AUTHENTICATED_CLI (moomoo CLI v0.5.0)",
+  "data_basis": "5-minute SPY bars, autype 0, 14 prior complete sessions (2026-10-29..2026-11-17) + today closed bars; 5-minute turnover VWAP (documented deviation from preferred 1-minute)",
+  "engine": "dual_strategy.strategies.noise_area.noise_area_signal (tested baseline, VM=1, lookback 14)",
+  "decisions": [
+    {
+      "at": "2026-11-18T10:30:00-05:00",
+      "target_side": 0,
+      "reason": "inside_noise_or_vwap_filter",
+      "actionable": true,
+      "order_placed": false,
+      "metrics": {
+        "sigma": 0.006176789719154434,
+        "upper": 738.0206134911026,
+        "lower": 727.9158721381026,
+        "vwap": 731.9372552265861,
+        "price": 731.91,
+        "today_open": 733.49,
+        "previous_close": 732.44
+      },
+      "note": "Price inside noise band and below VWAP -> flat. No trade forced; strategy holds no position."
+    },
+    {
+      "at": "2026-11-18T11:00:00-05:00",
+      "target_side": 0,
+      "reason": "inside_noise_or_vwap_filter",
+      "action": "hold",
+      "order_placed": false
+    },
+    {
+      "at": "2026-11-18T11:30:00-05:00",
+      "target_side": 0,
+      "reason": "inside_noise_or_vwap_filter",
+      "action": "hold",
+      "order_placed": false
+    }
+  ],
+  "next_decision_ticks_et": [
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30"
+  ],
+  "flatten_before_et": "16:00 (13:00 on 2026-11-27)",
+  "broker_flat": true,
+  "caveat": "CLI sentinel backstop ~0.24 Hz (~4.2 s/tick); suitable for B half-hour cadence, not sub-second stops. Not autonomous PAPER_ACTIVE; not competition ranking.",
+  "last_updated_utc": "2026-11-18T16:35:00Z"
+}

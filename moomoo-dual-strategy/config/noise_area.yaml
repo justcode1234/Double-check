@@ -1,0 +1,9 @@
+strategy_id: noise_area
+initial_nav: 50000
+mode: SHADOW
+symbol: US.SPY
+lookback_sessions: 14
+volatility_multiplier: 1.0
+notional_fraction: 0.40
+interpretation: target_position_vwap
+shorts_enabled: false

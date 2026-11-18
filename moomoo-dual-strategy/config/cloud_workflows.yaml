@@ -1,0 +1,122 @@
+# LOCAL ORCHESTRATION MODEL ONLY. NOT DEPLOYED. NOT AN API REQUEST.
+# No cron registration, credentials, Cloud resources, tools or execution enabled.
+schema: dual-strategy.local-cloud/v1
+revision: 1
+status: NOT DEPLOYED
+api_request_ready: false
+cloud_writes_enabled: false
+paper_execution_enabled: false
+timezone: America/New_York
+calendar: XNYS
+window:
+  start: '2026-11-17'
+  end: '2026-11-28'
+  sessions: ['2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20', '2026-11-23', '2026-11-24', '2026-11-25', '2026-11-27']
+  closed: ['2026-11-26']
+  early_closes:
+    '2026-11-27': '13:00'
+portfolios:
+  A:
+    strategy_id: orb
+    state_namespace: orb
+    account_binding_ref: private:orb_practice
+    initial_virtual_nav: 50000
+    state: BLOCKED_SETUP
+    instruments: US_INDIVIDUAL_STOCKS_NO_ETFS
+  B:
+    strategy_id: noise_area
+    state_namespace: noise_area
+    account_binding_ref: private:noise_area_practice
+    initial_virtual_nav: 50000
+    state: BLOCKED_SETUP
+    instruments: US.SPY
+roles:
+  path: src/dual_strategy/agents/roles.yaml
+  revision: 1
+guards:
+  exchange_calendar_required: true
+  half_day_aware: true
+  local_sentinel_required: true
+  cloud_replaces_sentinel: false
+  missing_data_policy: block_entries_alert
+  missed_run_policy: skip_expired_block_entries_alert
+  retry_policy: reconcile_before_retry_same_key
+  max_concurrent_runs_per_portfolio: 1
+  automatic_attempts: 1
+  run_expiration_seconds: 60
+  max_data_age_seconds:
+    quote: 5
+    account: 15
+    sentinel: 5
+    bar: 90
+  idempotency_fields: [strategy_id, session_date, symbol, signal_id, workflow, scheduled_for, config_hash]
+  ledger_requires_atomic_persistent_deduplication: true
+  financial_decisions: deterministic_local_only
+  paper_activation: blocked_pending_all_release_gates
+# roles are ordered stages; scope containing both means separate portfolio envelopes.
+# The executor stage returns BLOCKED_SETUP, not an order. Coordinator owns dispatch specs.
+# These are candidate times, not registered schedules or continuous safety services.
+schedules:
+  research:
+    revision: 1
+    enabled: false
+    timezone: America/New_York
+    roles: [researcher]
+    scope: [orb, noise_area]
+    timing: {kind: open_offset, minutes: -30}
+  pipeline_a:
+    revision: 1
+    enabled: false
+    timezone: America/New_York
+    roles: [signal_a, risk_supervisor, auditor, paper_executor]
+    scope: [orb]
+    # 09:35 through 10:29, each completed minute; 10:30 is the exclusive deadline.
+    timing: {kind: orb_closed_minutes}
+  pipeline_b:
+    revision: 1
+    enabled: false
+    timezone: America/New_York
+    roles: [signal_b, risk_supervisor, auditor, paper_executor]
+    scope: [noise_area]
+    timing: {kind: spy_closed_half_hours}
+  risk_audit:
+    revision: 1
+    enabled: false
+    timezone: America/New_York
+    roles: [risk_supervisor, auditor]
+    scope: [orb, noise_area]
+    timing: {kind: session_interval, minutes: 5}
+  watchdog:
+    revision: 1
+    enabled: false
+    timezone: America/New_York
+    roles: [watchdog]
+    scope: [orb, noise_area]
+    timing: {kind: session_interval, minutes: 1}
+  flatten:
+    revision: 1
+    enabled: false
+    timezone: America/New_York
+    roles: [watchdog]
+    scope: [orb, noise_area]
+    timing: {kind: close_offset, minutes: -5}
+  verify_close:
+    revision: 1
+    enabled: false
+    timezone: America/New_York
+    roles: [auditor]
+    scope: [orb, noise_area]
+    timing: {kind: close_offset, minutes: -2}
+  report:
+    revision: 1
+    enabled: false
+    timezone: America/New_York
+    roles: [reporter]
+    scope: [orb, noise_area]
+    timing: {kind: close_offset, minutes: 10}
+# Raw-file SHA-256; drift (including line endings) blocks validation. Never auto-repin.
+pins:
+  config/orb.yaml: 96b5d337cf212351124b5ac43f532a300885d24c1f6c2a11c825d032c548b4c4
+  config/noise_area.yaml: e17e13ef7809f851f3a88e722af2cd2acccd11e5d783c9cfeb0042d1cfad6228
+  config/risk.yaml: 531d79ab321b620f09220c97016329f520cbc911770b868d07e99df6698511bd
+  src/dual_strategy/agents/roles.yaml: a89a1d3ee58af0d5a0468cb3c59d738eb3168414fcdf696fecec4981cd36ef11

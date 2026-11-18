@@ -1,0 +1,38 @@
+{
+  "purpose": "First verified Qoder Cloud Agents read-only deployment run (reporter role). Infrastructure evidence only; not strategy performance, not a trading lifecycle, not provider authentication.",
+  "recorded_at_utc": "2026-11-17T19:14:30Z",
+  "workspace": {"workspace_id": "ws_00vnsoy7hph4w8q5g6op", "name": "Personal", "type": "personal", "can_write": true},
+  "discovery": {
+    "list_accessible_workspaces": "callable, 200, 1 personal workspace",
+    "list_models": "callable, 200, 17 enabled models",
+    "list_vaults": "callable, 200, 0 vaults (no Moomoo OAuth Vault attached)",
+    "preexisting_agents_environments_deployments": "none (all lists empty before creation)"
+  },
+  "environment": {"id": "env_00vsofk17gyypde68qh5", "name": "dual-strategy-readonly-env", "created_at": "2026-11-17T19:09:58.134494Z", "networking": "limited; allow_mcp_servers=false; allow_package_managers=false; allowed_hosts=[]"},
+  "agents": [
+    {"id": "agent_00vsofk9gmsxsdkn9xzn", "name": "dual-strategy-reporter", "version": 1, "model": "efficient", "tools": "Read/Glob/Grep only", "mcp_servers": [], "skills": []},
+    {"id": "agent_00vsofkg6v4sgevl8nuw", "name": "dual-strategy-auditor", "version": 1, "model": "efficient", "tools": "Read/Glob/Grep only", "mcp_servers": [], "skills": []},
+    {"id": "agent_00vsofkm5mbcw3wabuff", "name": "dual-strategy-watchdog", "version": 1, "model": "efficient", "tools": "Read/Glob/Grep only", "mcp_servers": [], "skills": []}
+  ],
+  "deployments": [
+    {"id": "dep_00vsohxz2pds0rlsfz9m", "name": "dual-strategy-reporter-ondemand", "agent_version": 1, "schedule": null, "status": "active", "vault_ids": [], "runs": 1},
+    {"id": "dep_00vsohy62x1j4nhmbtt8", "name": "dual-strategy-auditor-ondemand", "agent_version": 1, "schedule": null, "status": "active", "vault_ids": [], "runs": 0},
+    {"id": "dep_00vsohycvn3eo0rgykf0", "name": "dual-strategy-watchdog-ondemand", "agent_version": 1, "schedule": null, "status": "active", "vault_ids": [], "runs": 0}
+  ],
+  "verified_run": {
+    "run_id": "drun_00vsol73mss8x3gddi35",
+    "deployment_id": "dep_00vsohxz2pds0rlsfz9m",
+    "session_id": "sess_00vsol73uaha84oej553",
+    "trigger": "manual",
+    "created_at": "2026-11-17T19:11:43Z",
+    "session_created_at": "2026-11-17T19:11:43.546633Z",
+    "final_agent_message_event_id": "evt_00vsoltbka6m8bs6jv1o",
+    "final_agent_message_processed_at": "2026-11-17T19:12:11.544903Z",
+    "session_status_after_run": "idle",
+    "error": null,
+    "active_seconds": 27.993801,
+    "usage_total_credits": 0.23,
+    "notes": "Single bounded manual run to prove the deployment loop. Auditor and watchdog deployments were created but never run. No schedule exists, so the XNYS Nov 26 closure / Nov 27 13:00 ET early close impose no firing risk. Cloud roles hold no Moomoo tools or credentials."
+  },
+  "reporter_output_text": "# Daily Comparison Report — 2026-11-17\n\n**Snapshot verified:** 2026-11-17 ~19:04 UTC · **Reporter:** dual-strategy-reporter · **Role:** read-only (no order, execution or trading tools attached; nothing in this report mutates trading state)\n\n## Account context\n- One authorized ordinary U.S. practice account (SIMULATE), account ID redacted. Official competition account **untouched**.\n- Capital structure: **shared practice account holding two independent virtual $50,000 sub-ledgers.**\n- Broker cash ~$1,000,000 is **not** strategy capital and is excluded from all return math below.\n\n## Portfolio A — stock-only 5-minute Opening Range Breakout\n(0.10x prior-daily-ATR stop, no fixed profit target)\n\n| Item | Value | Label |\n|---|---|---|\n| Initial NAV | $50,000.00 | virtual sub-ledger |\n| Current NAV | $50,000.00 | virtual sub-ledger |\n| Realized P&L | $0.00 | — |\n| Unrealized P&L | $0.00 | — |\n| Total return | **$0.00 / 0.00%** | **SHADOW / HYPOTHETICAL** |\n| Strategy orders | 0 | — |\n| Strategy fills | 0 | **no fills occurred; nothing to label as actual execution** |\n\n## Portfolio B — SPY Noise-Area intraday momentum\n(14-session lookback, VWAP trigger, 40% exposure cap)\n\n| Item | Value | Label |\n|---|---|---|\n| Initial NAV | $50,000.00 | virtual sub-ledger |\n| Current NAV | $50,000.00 | virtual sub-ledger |\n| Realized P&L | $0.00 | — |\n| Unrealized P&L | $0.00 | — |\n| Total return | **$0.00 / 0.00%** | **SHADOW / HYPOTHETICAL** |\n| Strategy orders | 0 | — |\n| Strategy fills | 0 | **no fills occurred** |\n\n## Risk-limit state\n- Both sub-ledgers flat: 0 open positions, 0 exposure, 0 drawdown. No loss limit, stop or exposure cap has been approached or breached — a $0.00 P&L cannot breach a limit.\n- Portfolio A's 0.10x prior-daily-ATR stop has **never armed** (no entry). Portfolio B's 40% exposure cap is **untested** (no position sized).\n- `PAPER_ACTIVE` has **never been enabled**; no authenticated continuous local sentinel is running, so no live risk-limit enforcement path is currently exercised.\n\n## Evidence gaps\n1. **No reconciled broker practice fills supplied** — all figures above are SHADOW/HYPOTHETICAL ledger state, not strategy executions.\n2. Current NAVs are **not reconciled against broker positions**; the $50,000 values are carried-forward allocations.\n3. Strict ORB release validation is **BLOCKED**: no point-in-time universe/metadata, corporate actions unverified.\n4. The 29 research backtest runs are **hypothetical** and are **not** release validation.\n5. Supervised validation round trip (BUY 1 SPY @731.04 → close-only SELL @731.11, broker flat after; separate BUY LIMIT @700 cancelled, 0 fills) ran on an **isolated validation ledger**, was **agent-relayed**, and is **infrastructure plumbing evidence only — not strategy performance** for A or B.\n6. Zero trades means signal generation, sizing and exit logic are **unobserved**; no behavioral evidence exists either way.\n\n## Comparison\nNone is supportable. The two sub-ledgers are identical in every dimension (0.00% SHADOW return, $0 P&L, 0 orders, 0 fills), so any \"comparison\" would be an artifact of empty state rather than of strategy quality.\n\n**No winner, no outperformance claim, and no competition-account recommendation can be established from zero-trade shadow ledgers.** This report is not evidence that either strategy works, and it is not a trading instruction.\n\n**Local test suite:** 842 passed, 55 subtests, 4 dependency warnings (code-health only; unrelated to market performance).\n\n**Data age:** snapshot ~19:04 UTC on 2026-11-17; treat as stale for any next-session decision."
+}

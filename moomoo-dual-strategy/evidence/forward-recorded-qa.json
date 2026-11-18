@@ -1,0 +1,241 @@
+{
+  "observed_at": "2026-11-17T18:36:28.775978+00:00",
+  "mode": "SHADOW_DECISIONS_ONLY",
+  "journal": "data-cache\\forward-recorded-_uruahl9\\decisions.sqlite3",
+  "config_hash": "7be942e1d3da73e6f487469fe72017815fbe6c8c6b5696fab5bbbad57c056da5",
+  "commands": [
+    [
+      "init"
+    ],
+    [
+      "import-bars",
+      "--strategy",
+      "orb",
+      "--file",
+      "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\forward-recorded-_uruahl9\\orb-prior14.csv",
+      "--source",
+      "prepared-history:orb-prior14.csv:sha256:164996ae66cbfd82773da9bda0a2de93cd71596969afa56befd4efbb27e20d8e",
+      "--provenance",
+      "RECORDED",
+      "--minutes",
+      "5",
+      "--price-scale",
+      "1",
+      "--turnover-scale",
+      "1",
+      "--volume-scale",
+      "1",
+      "--timestamp-semantics",
+      "end",
+      "--adjustment",
+      "unadjusted"
+    ],
+    [
+      "import-bars",
+      "--strategy",
+      "noise_area",
+      "--file",
+      "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\forward-recorded-_uruahl9\\noise_area-prior14.csv",
+      "--source",
+      "prepared-history:noise_area-prior14.csv:sha256:61b9945555634e5000660d40a2545ad5772d5d3694156aa2003e880bbdbce0b7",
+      "--provenance",
+      "RECORDED",
+      "--minutes",
+      "5",
+      "--price-scale",
+      "1",
+      "--turnover-scale",
+      "1",
+      "--volume-scale",
+      "1",
+      "--timestamp-semantics",
+      "end",
+      "--adjustment",
+      "unadjusted"
+    ],
+    [
+      "tick",
+      "--strategy",
+      "orb",
+      "--tick",
+      "2026-11-17T18:36:00+00:00",
+      "--observation",
+      "d27aec7ac6d87ad5edb795e431f1f73eec66ef53defbb517157c442a2e8d348d"
+    ],
+    [
+      "tick",
+      "--strategy",
+      "orb",
+      "--tick",
+      "2026-11-17T18:36:00+00:00",
+      "--observation",
+      "d27aec7ac6d87ad5edb795e431f1f73eec66ef53defbb517157c442a2e8d348d"
+    ],
+    [
+      "tick",
+      "--strategy",
+      "noise_area",
+      "--tick",
+      "2026-11-17T18:36:00+00:00",
+      "--observation",
+      "6229982f3e09fc2cfbd794c640729be327e6f017d7e650814c85698e0aff8355"
+    ],
+    [
+      "tick",
+      "--strategy",
+      "noise_area",
+      "--tick",
+      "2026-11-17T18:36:00+00:00",
+      "--observation",
+      "6229982f3e09fc2cfbd794c640729be327e6f017d7e650814c85698e0aff8355"
+    ]
+  ],
+  "decisions": {
+    "orb": {
+      "schema_version": 1,
+      "mode": "SHADOW_DECISIONS_ONLY",
+      "strategy": "orb",
+      "tick": "2026-11-17T18:36:00+00:00",
+      "references": [
+        "d27aec7ac6d87ad5edb795e431f1f73eec66ef53defbb517157c442a2e8d348d"
+      ],
+      "digest": "7be942e1d3da73e6f487469fe72017815fbe6c8c6b5696fab5bbbad57c056da5",
+      "request_hash": "48e60b9020e12133f4a9775c887baa979f244219375755826bc65bb3e160458b",
+      "recorded_at": "2026-11-17T18:36:24.524740+00:00",
+      "expires_at": "2026-11-17T18:37:00+00:00",
+      "signal": {
+        "strategy": "orb",
+        "symbol": "",
+        "at": "2026-11-17T13:36:00-05:00",
+        "target_side": 0,
+        "reason": "strict_orb_point_in_time_universe_and_metadata_unavailable",
+        "stop_distance": null,
+        "metadata": {
+          "actionable": false
+        },
+        "corporate_actions": "UNVERIFIED_ZERO_DIVIDEND_DIAGNOSTIC"
+      },
+      "risk": {
+        "candidate_target_qty": 0,
+        "approved_qty": 0,
+        "execution_allowed": false,
+        "assessment": "DIAGNOSTIC_AT_BAR_CLOSE_ONLY",
+        "rejections": [
+          "strict_orb_point_in_time_universe_and_metadata_unavailable"
+        ],
+        "execution_blockers": [
+          "decision_only_no_transport",
+          "provider_origin_unverified",
+          "corporate_actions_unverified",
+          "paper_release_gates_unverified"
+        ],
+        "shared_broker_cash_checked": false
+      },
+      "mark_reference": null,
+      "input_provenance": {
+        "d27aec7ac6d87ad5edb795e431f1f73eec66ef53defbb517157c442a2e8d348d": "RECORDED"
+      },
+      "provider_origin_verified": false,
+      "runtime": {
+        "strategy": "orb",
+        "runtime": "SHADOW",
+        "nav": 50000.0,
+        "day_start_nav": 50000.0,
+        "high_water_nav": 50000.0,
+        "session": null,
+        "daily_locked": false,
+        "reduced": false,
+        "halted_on": null,
+        "reason": "decision_only"
+      },
+      "execution_allowed": false
+    },
+    "noise_area": {
+      "schema_version": 1,
+      "mode": "SHADOW_DECISIONS_ONLY",
+      "strategy": "noise_area",
+      "tick": "2026-11-17T18:36:00+00:00",
+      "references": [
+        "6229982f3e09fc2cfbd794c640729be327e6f017d7e650814c85698e0aff8355"
+      ],
+      "digest": "7be942e1d3da73e6f487469fe72017815fbe6c8c6b5696fab5bbbad57c056da5",
+      "request_hash": "087df18df7167e9c647f5d750c1192ff2e53966390837f84f17632ee38689ba8",
+      "recorded_at": "2026-11-17T18:36:27.282607+00:00",
+      "expires_at": "2026-11-17T18:37:00+00:00",
+      "signal": {
+        "strategy": "noise_area",
+        "symbol": "US.SPY",
+        "at": "2026-11-17T13:36:00-05:00",
+        "target_side": 0,
+        "reason": "not_decision_tick",
+        "stop_distance": null,
+        "metadata": {
+          "interpretation": "target_position",
+          "variant": "long_only",
+          "bar_timestamp": "closed_end",
+          "lookback": 14,
+          "vm": 1.0,
+          "actionable": false,
+          "vwap_method": "turnover"
+        },
+        "corporate_actions": "UNVERIFIED_ZERO_DIVIDEND_DIAGNOSTIC"
+      },
+      "risk": {
+        "candidate_target_qty": 0,
+        "approved_qty": 0,
+        "execution_allowed": false,
+        "assessment": "DIAGNOSTIC_AT_BAR_CLOSE_ONLY",
+        "rejections": [
+          "not_decision_tick"
+        ],
+        "execution_blockers": [
+          "decision_only_no_transport",
+          "provider_origin_unverified",
+          "corporate_actions_unverified",
+          "paper_release_gates_unverified"
+        ],
+        "shared_broker_cash_checked": false
+      },
+      "mark_reference": null,
+      "input_provenance": {
+        "6229982f3e09fc2cfbd794c640729be327e6f017d7e650814c85698e0aff8355": "RECORDED"
+      },
+      "provider_origin_verified": false,
+      "runtime": {
+        "strategy": "noise_area",
+        "runtime": "SHADOW",
+        "nav": 50000.0,
+        "day_start_nav": 50000.0,
+        "high_water_nav": 50000.0,
+        "session": null,
+        "daily_locked": false,
+        "reduced": false,
+        "halted_on": null,
+        "reason": "decision_only"
+      },
+      "execution_allowed": false
+    }
+  },
+  "snapshots": {
+    "orb": {
+      "initial_nav": 50000.0,
+      "nav": 50000.0,
+      "total_pnl": 0.0,
+      "paper_fill_count": 0,
+      "shadow_fill_count": 0
+    },
+    "noise_area": {
+      "initial_nav": 50000.0,
+      "nav": 50000.0,
+      "total_pnl": 0.0,
+      "paper_fill_count": 0,
+      "shadow_fill_count": 0
+    }
+  },
+  "event_count": 14,
+  "retry_identical": true,
+  "actual_forward_ledger_unchanged": true,
+  "provider_origin_verified": false,
+  "orders": 0,
+  "fills": 0
+}

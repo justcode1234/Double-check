@@ -1,0 +1,188 @@
+{
+ "splits": {
+  "data": {
+   "split_list": [
+    {
+     "ex_date": 1366257600,
+     "ex_date_str": "2013-04-18",
+     "rate": "1→4",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为4股"
+    },
+    {
+     "ex_date": 1710302400,
+     "ex_date_str": "2024-03-13",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.4USD"
+    },
+    {
+     "ex_date": 1720497600,
+     "ex_date_str": "2024-07-09",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.4USD"
+    },
+    {
+     "ex_date": 1726632000,
+     "ex_date_str": "2024-09-18",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.4USD"
+    },
+    {
+     "ex_date": 1734498000,
+     "ex_date_str": "2024-12-18",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.4USD"
+    },
+    {
+     "ex_date": 1744257600,
+     "ex_date_str": "2025-04-10",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.416USD"
+    },
+    {
+     "ex_date": 1750219200,
+     "ex_date_str": "2025-06-18",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.416USD"
+    },
+    {
+     "ex_date": 1758081600,
+     "ex_date_str": "2025-09-17",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.416USD"
+    },
+    {
+     "ex_date": 1766034000,
+     "ex_date_str": "2025-12-18",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.416USD"
+    },
+    {
+     "ex_date": 1775707200,
+     "ex_date_str": "2026-04-09",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.44USD"
+    },
+    {
+     "ex_date": 1781150400,
+     "ex_date_str": "2026-06-11",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.44USD"
+    },
+    {
+     "ex_date": 1789617600,
+     "ex_date_str": "2026-09-17",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.44USD"
+    }
+   ]
+  },
+  "pagination": {
+   "has_more": false,
+   "next_key": "-1"
+  }
+ },
+ "dividends": {
+  "dividend_list": [
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/10/08",
+    "dividend_per_share": 0.44,
+    "ex_date": "2026/09/17",
+    "pub_date": "2026/09/04",
+    "record_date": "2026/09/17",
+    "statement": "Cash Dividend: 0.44 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/07/02",
+    "dividend_per_share": 0.44,
+    "ex_date": "2026/06/11",
+    "pub_date": "2026/05/29",
+    "record_date": "2026/06/11",
+    "statement": "Cash Dividend: 0.44 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/04/23",
+    "dividend_per_share": 0.44,
+    "ex_date": "2026/04/09",
+    "pub_date": "2026/02/25",
+    "record_date": "2026/04/09",
+    "statement": "Cash Dividend: 0.44 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/01/08",
+    "dividend_per_share": 0.416,
+    "ex_date": "2025/12/18",
+    "pub_date": "2025/12/05",
+    "record_date": "2025/12/18",
+    "statement": "Cash Dividend: 0.416 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2025/10/09",
+    "dividend_per_share": 0.416,
+    "ex_date": "2025/09/17",
+    "pub_date": "2025/09/05",
+    "record_date": "2025/09/17",
+    "statement": "Cash Dividend: 0.416 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2025/07/10",
+    "dividend_per_share": 0.416,
+    "ex_date": "2025/06/18",
+    "pub_date": "2025/06/06",
+    "record_date": "2025/06/18",
+    "statement": "Cash Dividend: 0.416 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2025/04/24",
+    "dividend_per_share": 0.416,
+    "ex_date": "2025/04/10",
+    "pub_date": "2025/03/28",
+    "record_date": "2025/04/10",
+    "statement": "Cash Dividend: 0.416 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2025/01/09",
+    "dividend_per_share": 0.4,
+    "ex_date": "2024/12/18",
+    "pub_date": "2024/12/06",
+    "record_date": "2024/12/18",
+    "statement": "Cash Dividend: 0.4 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2024/10/08",
+    "dividend_per_share": 0.4,
+    "ex_date": "2024/09/18",
+    "pub_date": "2024/09/06",
+    "record_date": "2024/09/18",
+    "statement": "Cash Dividend: 0.4 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2024/07/25",
+    "dividend_per_share": 0.4,
+    "ex_date": "2024/07/09",
+    "pub_date": "2024/06/28",
+    "record_date": "2024/07/09",
+    "statement": "Cash Dividend: 0.4 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2024/04/11",
+    "dividend_per_share": 0.4,
+    "ex_date": "2024/03/13",
+    "pub_date": "2024/02/29",
+    "record_date": "2024/03/14",
+    "statement": "Cash Dividend: 0.4 USD Per Share"
+   }
+  ]
+ }
+}

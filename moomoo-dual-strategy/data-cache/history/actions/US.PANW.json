@@ -1,0 +1,27 @@
+{
+ "splits": {
+  "data": {
+   "split_list": [
+    {
+     "ex_date": 1663128000,
+     "ex_date_str": "2022-09-14",
+     "rate": "1→3",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为3股"
+    },
+    {
+     "ex_date": 1734325200,
+     "ex_date_str": "2024-12-16",
+     "rate": "1→2",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为2股"
+    }
+   ]
+  },
+  "pagination": {
+   "has_more": false,
+   "next_key": "-1"
+  }
+ },
+ "dividends": {}
+}

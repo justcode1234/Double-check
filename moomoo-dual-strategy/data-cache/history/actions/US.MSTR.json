@@ -1,0 +1,34 @@
+{
+ "splits": {
+  "data": {
+   "split_list": [
+    {
+     "ex_date": 948949200,
+     "ex_date_str": "2000-01-27",
+     "rate": "1→2",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为2股"
+    },
+    {
+     "ex_date": 1028088000,
+     "ex_date_str": "2002-07-31",
+     "rate": "10→1",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "10股合并为1股"
+    },
+    {
+     "ex_date": 1723089600,
+     "ex_date_str": "2024-08-08",
+     "rate": "1→10",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为10股"
+    }
+   ]
+  },
+  "pagination": {
+   "has_more": false,
+   "next_key": "-1"
+  }
+ },
+ "dividends": {}
+}

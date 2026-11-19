@@ -1,0 +1,126 @@
+{
+ "fetched_at_utc": "2026-11-18T17:45:45.532946+00:00",
+ "industry": {
+  "US.AAPL": [
+   "Consumer Electronics"
+  ],
+  "US.AES": [
+   "Utilities - Diversified"
+  ],
+  "US.AMD": [
+   "Semiconductors"
+  ],
+  "US.AMZN": [
+   "Internet Retail"
+  ],
+  "US.ASML": [
+   "Semiconductor Equipment & Materials"
+  ],
+  "US.AVGO": [
+   "Semiconductors"
+  ],
+  "US.BE": [
+   "Electrical Equipment & Parts"
+  ],
+  "US.BRK.B": [
+   "Insurance - Diversified"
+  ],
+  "US.CAT": [
+   "Farm & Heavy Construction Machinery"
+  ],
+  "US.CRM": [
+   "Software - Application"
+  ],
+  "US.CRWD": [
+   "Software - Infrastructure"
+  ],
+  "US.CRWV": [
+   "Software - Infrastructure"
+  ],
+  "US.DELL": [
+   "Computer Hardware"
+  ],
+  "US.GEV": [
+   "Specialty Industrial Machinery"
+  ],
+  "US.GOOGL": [
+   "Internet Content & Information"
+  ],
+  "US.INTC": [
+   "Semiconductors"
+  ],
+  "US.LITE": [
+   "Communication Equipment"
+  ],
+  "US.LLY": [
+   "Drug Manufacturers - General"
+  ],
+  "US.MDLN": [
+   "Medical Instruments & Supplies"
+  ],
+  "US.META": [
+   "Internet Content & Information"
+  ],
+  "US.MRVL": [
+   "Semiconductors"
+  ],
+  "US.MSFT": [
+   "Software - Infrastructure"
+  ],
+  "US.MSTR": [
+   "Software - Application"
+  ],
+  "US.MU": [
+   "Semiconductors"
+  ],
+  "US.NBIS": [
+   "Internet Content & Information"
+  ],
+  "US.NVDA": [
+   "Semiconductors"
+  ],
+  "US.PANW": [
+   "Software - Infrastructure"
+  ],
+  "US.PLTR": [
+   "Software - Infrastructure"
+  ],
+  "US.SKHY": [
+   "Semiconductors"
+  ],
+  "US.SNDK": [
+   "Computer Hardware"
+  ],
+  "US.SPCX": [
+   "Aerospace & Defense"
+  ],
+  "US.STX": [
+   "Computer Hardware"
+  ],
+  "US.TGT": [
+   "Discount Stores"
+  ],
+  "US.TJX": [
+   "Apparel Retail"
+  ],
+  "US.TSLA": [
+   "Auto Manufacturers"
+  ],
+  "US.TSM": [
+   "Semiconductors"
+  ],
+  "US.TTWO": [
+   "Electronic Gaming & Multimedia"
+  ],
+  "US.UNH": [
+   "Healthcare Plans"
+  ],
+  "US.V": [
+   "Credit Services"
+  ],
+  "US.WMT": [
+   "Discount Stores"
+  ]
+ },
+ "note": "current Moomoo INDUSTRY plates at fetch time; not point-in-time"
+}

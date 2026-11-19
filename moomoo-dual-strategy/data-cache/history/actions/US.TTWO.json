@@ -1,0 +1,38 @@
+{
+ "splits": {
+  "data": {
+   "split_list": [
+    {
+     "ex_date": 1113278400,
+     "ex_date_str": "2005-04-12",
+     "rate": "2→3",
+     "reform_type": "SPLIT",
+     "scheme_statement": "2股拆为3股"
+    },
+    {
+     "ex_date": 1222315200,
+     "ex_date_str": "2008-09-25",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.0001USD"
+    }
+   ]
+  },
+  "pagination": {
+   "has_more": false,
+   "next_key": "-1"
+  }
+ },
+ "dividends": {
+  "dividend_list": [
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2008/10/06",
+    "dividend_per_share": 0.0001,
+    "ex_date": "2008/09/25",
+    "pub_date": "2008/09/25",
+    "record_date": "2008/09/29",
+    "statement": "Cash Dividend: 0.0001 USD Per Share"
+   }
+  ]
+ }
+}

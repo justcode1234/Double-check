@@ -1,0 +1,1252 @@
+{
+ "splits": {
+  "data": {
+   "split_list": [
+    {
+     "ex_date": 859870800,
+     "ex_date_str": "1997-04-01",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 891234000,
+     "ex_date_str": "1998-03-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 922770000,
+     "ex_date_str": "1999-03-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 954392400,
+     "ex_date_str": "2000-03-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 977806800,
+     "ex_date_str": "2000-12-26",
+     "rate": "1→2",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为2股"
+    },
+    {
+     "ex_date": 985842000,
+     "ex_date_str": "2001-03-29",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1017205200,
+     "ex_date_str": "2002-03-27",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1048827600,
+     "ex_date_str": "2003-03-28",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1055995200,
+     "ex_date_str": "2003-06-19",
+     "rate": "1→2",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为2股"
+    },
+    {
+     "ex_date": 1080622800,
+     "ex_date_str": "2004-03-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1112158800,
+     "ex_date_str": "2005-03-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1117512000,
+     "ex_date_str": "2005-05-31",
+     "rate": "1→2",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为2股"
+    },
+    {
+     "ex_date": 1143694800,
+     "ex_date_str": "2006-03-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1175140800,
+     "ex_date_str": "2007-03-29",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1206936000,
+     "ex_date_str": "2008-03-31",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1238472000,
+     "ex_date_str": "2009-03-31",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1270094400,
+     "ex_date_str": "2010-04-01",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.03USD"
+    },
+    {
+     "ex_date": 1275537600,
+     "ex_date_str": "2010-06-03",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.125USD"
+    },
+    {
+     "ex_date": 1284091200,
+     "ex_date_str": "2010-09-10",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.125USD"
+    },
+    {
+     "ex_date": 1291352400,
+     "ex_date_str": "2010-12-03",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.125USD"
+    },
+    {
+     "ex_date": 1299128400,
+     "ex_date_str": "2011-03-03",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.125USD"
+    },
+    {
+     "ex_date": 1307073600,
+     "ex_date_str": "2011-06-03",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.1625USD"
+    },
+    {
+     "ex_date": 1314936000,
+     "ex_date_str": "2011-09-02",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.1625USD"
+    },
+    {
+     "ex_date": 1323061200,
+     "ex_date_str": "2011-12-05",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.1625USD"
+    },
+    {
+     "ex_date": 1330578000,
+     "ex_date_str": "2012-03-01",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.1625USD"
+    },
+    {
+     "ex_date": 1339560000,
+     "ex_date_str": "2012-06-13",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.2125USD"
+    },
+    {
+     "ex_date": 1347422400,
+     "ex_date_str": "2012-09-12",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.2125USD"
+    },
+    {
+     "ex_date": 1354856400,
+     "ex_date_str": "2012-12-07",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.2125USD"
+    },
+    {
+     "ex_date": 1363147200,
+     "ex_date_str": "2013-03-13",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.2125USD"
+    },
+    {
+     "ex_date": 1371096000,
+     "ex_date_str": "2013-06-13",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.28USD"
+    },
+    {
+     "ex_date": 1378872000,
+     "ex_date_str": "2013-09-11",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.28USD"
+    },
+    {
+     "ex_date": 1386133200,
+     "ex_date_str": "2013-12-04",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.28USD"
+    },
+    {
+     "ex_date": 1394596800,
+     "ex_date_str": "2014-03-12",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.28USD"
+    },
+    {
+     "ex_date": 1402545600,
+     "ex_date_str": "2014-06-12",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.375USD"
+    },
+    {
+     "ex_date": 1410321600,
+     "ex_date_str": "2014-09-10",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.375USD"
+    },
+    {
+     "ex_date": 1417582800,
+     "ex_date_str": "2014-12-03",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.375USD"
+    },
+    {
+     "ex_date": 1426046400,
+     "ex_date_str": "2015-03-11",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.375USD"
+    },
+    {
+     "ex_date": 1433995200,
+     "ex_date_str": "2015-06-11",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.5USD"
+    },
+    {
+     "ex_date": 1441771200,
+     "ex_date_str": "2015-09-09",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.5USD"
+    },
+    {
+     "ex_date": 1449032400,
+     "ex_date_str": "2015-12-02",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.5USD"
+    },
+    {
+     "ex_date": 1457499600,
+     "ex_date_str": "2016-03-09",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.5USD"
+    },
+    {
+     "ex_date": 1465963200,
+     "ex_date_str": "2016-06-15",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.625USD"
+    },
+    {
+     "ex_date": 1473220800,
+     "ex_date_str": "2016-09-07",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.625USD"
+    },
+    {
+     "ex_date": 1480482000,
+     "ex_date_str": "2016-11-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.625USD"
+    },
+    {
+     "ex_date": 1488949200,
+     "ex_date_str": "2017-03-08",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.625USD"
+    },
+    {
+     "ex_date": 1497499200,
+     "ex_date_str": "2017-06-15",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.75USD"
+    },
+    {
+     "ex_date": 1504756800,
+     "ex_date_str": "2017-09-07",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.75USD"
+    },
+    {
+     "ex_date": 1512018000,
+     "ex_date_str": "2017-11-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.75USD"
+    },
+    {
+     "ex_date": 1520485200,
+     "ex_date_str": "2018-03-08",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.75USD"
+    },
+    {
+     "ex_date": 1529035200,
+     "ex_date_str": "2018-06-15",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.9USD"
+    },
+    {
+     "ex_date": 1536206400,
+     "ex_date_str": "2018-09-06",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.9USD"
+    },
+    {
+     "ex_date": 1543554000,
+     "ex_date_str": "2018-11-30",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.9USD"
+    },
+    {
+     "ex_date": 1552021200,
+     "ex_date_str": "2019-03-08",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.9USD"
+    },
+    {
+     "ex_date": 1560484800,
+     "ex_date_str": "2019-06-14",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.08USD"
+    },
+    {
+     "ex_date": 1568347200,
+     "ex_date_str": "2019-09-13",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.08USD"
+    },
+    {
+     "ex_date": 1575608400,
+     "ex_date_str": "2019-12-06",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.08USD"
+    },
+    {
+     "ex_date": 1584072000,
+     "ex_date_str": "2020-03-13",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.08USD"
+    },
+    {
+     "ex_date": 1592539200,
+     "ex_date_str": "2020-06-19",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.25USD"
+    },
+    {
+     "ex_date": 1599796800,
+     "ex_date_str": "2020-09-11",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.25USD"
+    },
+    {
+     "ex_date": 1607058000,
+     "ex_date_str": "2020-12-04",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.25USD"
+    },
+    {
+     "ex_date": 1615525200,
+     "ex_date_str": "2021-03-12",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.25USD"
+    },
+    {
+     "ex_date": 1623988800,
+     "ex_date_str": "2021-06-18",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.45USD"
+    },
+    {
+     "ex_date": 1631246400,
+     "ex_date_str": "2021-09-10",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.45USD"
+    },
+    {
+     "ex_date": 1638507600,
+     "ex_date_str": "2021-12-03",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.45USD"
+    },
+    {
+     "ex_date": 1646974800,
+     "ex_date_str": "2022-03-11",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.45USD"
+    },
+    {
+     "ex_date": 1655352000,
+     "ex_date_str": "2022-06-16",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.65USD"
+    },
+    {
+     "ex_date": 1662696000,
+     "ex_date_str": "2022-09-09",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.65USD"
+    },
+    {
+     "ex_date": 1669957200,
+     "ex_date_str": "2022-12-02",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.65USD"
+    },
+    {
+     "ex_date": 1678424400,
+     "ex_date_str": "2023-03-10",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.65USD"
+    },
+    {
+     "ex_date": 1686801600,
+     "ex_date_str": "2023-06-15",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.88USD"
+    },
+    {
+     "ex_date": 1694145600,
+     "ex_date_str": "2023-09-08",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.88USD"
+    },
+    {
+     "ex_date": 1701406800,
+     "ex_date_str": "2023-12-01",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.88USD"
+    },
+    {
+     "ex_date": 1709874000,
+     "ex_date_str": "2024-03-08",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息1.88USD"
+    },
+    {
+     "ex_date": 1718596800,
+     "ex_date_str": "2024-06-17",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.1USD"
+    },
+    {
+     "ex_date": 1726459200,
+     "ex_date_str": "2024-09-16",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.1USD"
+    },
+    {
+     "ex_date": 1733720400,
+     "ex_date_str": "2024-12-09",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.1USD"
+    },
+    {
+     "ex_date": 1741579200,
+     "ex_date_str": "2025-03-10",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.1USD"
+    },
+    {
+     "ex_date": 1750046400,
+     "ex_date_str": "2025-06-16",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.21USD"
+    },
+    {
+     "ex_date": 1757908800,
+     "ex_date_str": "2025-09-15",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.21USD"
+    },
+    {
+     "ex_date": 1765170000,
+     "ex_date_str": "2025-12-08",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.21USD"
+    },
+    {
+     "ex_date": 1773028800,
+     "ex_date_str": "2026-03-09",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.21USD"
+    },
+    {
+     "ex_date": 1781496000,
+     "ex_date_str": "2026-06-15",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.32USD"
+    },
+    {
+     "ex_date": 1789358400,
+     "ex_date_str": "2026-09-14",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.32USD"
+    },
+    {
+     "ex_date": 1796619600,
+     "ex_date_str": "2026-12-07",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息2.32USD"
+    }
+   ]
+  },
+  "pagination": {
+   "has_more": false,
+   "next_key": "-1"
+  }
+ },
+ "dividends": {
+  "dividend_list": [
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/12/15",
+    "dividend_per_share": 2.32,
+    "ex_date": "2026/12/07",
+    "pub_date": "2026/11/04",
+    "record_date": "2026/12/07",
+    "statement": "Cash Dividend: 2.32 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/09/22",
+    "dividend_per_share": 2.32,
+    "ex_date": "2026/09/14",
+    "pub_date": "2026/08/12",
+    "record_date": "2026/09/14",
+    "statement": "Cash Dividend: 2.32 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/06/23",
+    "dividend_per_share": 2.32,
+    "ex_date": "2026/06/15",
+    "pub_date": "2026/06/03",
+    "record_date": "2026/06/15",
+    "statement": "Cash Dividend: 2.32 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/03/17",
+    "dividend_per_share": 2.21,
+    "ex_date": "2026/03/09",
+    "pub_date": "2026/02/25",
+    "record_date": "2026/03/09",
+    "statement": "Cash Dividend: 2.21 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2025/12/16",
+    "dividend_per_share": 2.21,
+    "ex_date": "2025/12/08",
+    "pub_date": "2025/11/07",
+    "record_date": "2025/12/08",
+    "statement": "Cash Dividend: 2.21 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2025/09/23",
+    "dividend_per_share": 2.21,
+    "ex_date": "2025/09/15",
+    "pub_date": "2025/08/13",
+    "record_date": "2025/09/15",
+    "statement": "Cash Dividend: 2.21 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2025/06/24",
+    "dividend_per_share": 2.21,
+    "ex_date": "2025/06/16",
+    "pub_date": "2025/06/04",
+    "record_date": "2025/06/16",
+    "statement": "Cash Dividend: 2.21 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2025/03/18",
+    "dividend_per_share": 2.1,
+    "ex_date": "2025/03/10",
+    "pub_date": "2025/02/24",
+    "record_date": "2025/03/10",
+    "statement": "Cash Dividend: 2.1 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2024/12/17",
+    "dividend_per_share": 2.1,
+    "ex_date": "2024/12/09",
+    "pub_date": "2024/11/06",
+    "record_date": "2024/12/09",
+    "statement": "Cash Dividend: 2.1 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2024/09/24",
+    "dividend_per_share": 2.1,
+    "ex_date": "2024/09/16",
+    "pub_date": "2024/08/07",
+    "record_date": "2024/09/16",
+    "statement": "Cash Dividend: 2.1 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2024/06/25",
+    "dividend_per_share": 2.1,
+    "ex_date": "2024/06/17",
+    "pub_date": "2024/06/05",
+    "record_date": "2024/06/17",
+    "statement": "Cash Dividend: 2.1 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2024/03/19",
+    "dividend_per_share": 1.88,
+    "ex_date": "2024/03/08",
+    "pub_date": "2024/02/23",
+    "record_date": "2024/03/11",
+    "statement": "Cash Dividend: 1.88 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2023/12/12",
+    "dividend_per_share": 1.88,
+    "ex_date": "2023/12/01",
+    "pub_date": "2023/11/08",
+    "record_date": "2023/12/04",
+    "statement": "Cash Dividend: 1.88 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2023/09/19",
+    "dividend_per_share": 1.88,
+    "ex_date": "2023/09/08",
+    "pub_date": "2023/08/23",
+    "record_date": "2023/09/11",
+    "statement": "Cash Dividend: 1.88 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2023/06/27",
+    "dividend_per_share": 1.88,
+    "ex_date": "2023/06/15",
+    "pub_date": "2023/06/07",
+    "record_date": "2023/06/19",
+    "statement": "Cash Dividend: 1.88 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2023/03/21",
+    "dividend_per_share": 1.65,
+    "ex_date": "2023/03/10",
+    "pub_date": "2023/02/27",
+    "record_date": "2023/03/13",
+    "statement": "Cash Dividend: 1.65 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2022/12/13",
+    "dividend_per_share": 1.65,
+    "ex_date": "2022/12/02",
+    "pub_date": "2022/11/04",
+    "record_date": "2022/12/05",
+    "statement": "Cash Dividend: 1.65 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2022/09/20",
+    "dividend_per_share": 1.65,
+    "ex_date": "2022/09/09",
+    "pub_date": "2022/08/17",
+    "record_date": "2022/09/12",
+    "statement": "Cash Dividend: 1.65 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2022/06/28",
+    "dividend_per_share": 1.65,
+    "ex_date": "2022/06/16",
+    "pub_date": "2022/06/08",
+    "record_date": "2022/06/20",
+    "statement": "Cash Dividend: 1.65 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2022/03/22",
+    "dividend_per_share": 1.45,
+    "ex_date": "2022/03/11",
+    "pub_date": "2022/02/16",
+    "record_date": "2022/03/14",
+    "statement": "Cash Dividend: 1.45 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2021/12/14",
+    "dividend_per_share": 1.45,
+    "ex_date": "2021/12/03",
+    "pub_date": "2021/11/05",
+    "record_date": "2021/12/06",
+    "statement": "Cash Dividend: 1.45 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2021/09/21",
+    "dividend_per_share": 1.45,
+    "ex_date": "2021/09/10",
+    "pub_date": "2021/08/11",
+    "record_date": "2021/09/13",
+    "statement": "Cash Dividend: 1.45 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2021/06/29",
+    "dividend_per_share": 1.45,
+    "ex_date": "2021/06/18",
+    "pub_date": "2021/06/09",
+    "record_date": "2021/06/21",
+    "statement": "Cash Dividend: 1.45 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2021/03/23",
+    "dividend_per_share": 1.25,
+    "ex_date": "2021/03/12",
+    "pub_date": "2021/02/24",
+    "record_date": "2021/03/15",
+    "statement": "Cash Dividend: 1.25 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2020/12/15",
+    "dividend_per_share": 1.25,
+    "ex_date": "2020/12/04",
+    "pub_date": "2020/11/04",
+    "record_date": "2020/12/07",
+    "statement": "Cash Dividend: 1.25 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2020/09/22",
+    "dividend_per_share": 1.25,
+    "ex_date": "2020/09/11",
+    "pub_date": "2020/08/05",
+    "record_date": "2020/09/14",
+    "statement": "Cash Dividend: 1.25 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2020/06/30",
+    "dividend_per_share": 1.25,
+    "ex_date": "2020/06/19",
+    "pub_date": "2020/06/02",
+    "record_date": "2020/06/22",
+    "statement": "Cash Dividend: 1.25 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2020/03/24",
+    "dividend_per_share": 1.08,
+    "ex_date": "2020/03/13",
+    "pub_date": "2020/02/18",
+    "record_date": "2020/03/16",
+    "statement": "Cash Dividend: 1.08 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2019/12/17",
+    "dividend_per_share": 1.08,
+    "ex_date": "2019/12/06",
+    "pub_date": "2019/11/08",
+    "record_date": "2019/12/09",
+    "statement": "Cash Dividend: 1.08 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2019/09/24",
+    "dividend_per_share": 1.08,
+    "ex_date": "2019/09/13",
+    "pub_date": "2019/08/14",
+    "record_date": "2019/09/16",
+    "statement": "Cash Dividend: 1.08 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2019/06/25",
+    "dividend_per_share": 1.08,
+    "ex_date": "2019/06/14",
+    "pub_date": "2019/06/05",
+    "record_date": "2019/06/17",
+    "statement": "Cash Dividend: 1.08 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2019/03/19",
+    "dividend_per_share": 0.9,
+    "ex_date": "2019/03/08",
+    "pub_date": "2019/02/27",
+    "record_date": "2019/03/11",
+    "statement": "Cash Dividend: 0.9 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2018/12/13",
+    "dividend_per_share": 0.9,
+    "ex_date": "2018/11/30",
+    "pub_date": "2018/11/09",
+    "record_date": "2018/12/03",
+    "statement": "Cash Dividend: 0.9 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2018/09/18",
+    "dividend_per_share": 0.9,
+    "ex_date": "2018/09/06",
+    "pub_date": "2018/08/08",
+    "record_date": "2018/09/07",
+    "statement": "Cash Dividend: 0.9 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2018/06/26",
+    "dividend_per_share": 0.9,
+    "ex_date": "2018/06/15",
+    "pub_date": "2018/06/06",
+    "record_date": "2018/06/18",
+    "statement": "Cash Dividend: 0.9 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2018/03/20",
+    "dividend_per_share": 0.75,
+    "ex_date": "2018/03/08",
+    "pub_date": "2018/02/14",
+    "record_date": "2018/03/09",
+    "statement": "Cash Dividend: 0.75 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2017/12/12",
+    "dividend_per_share": 0.75,
+    "ex_date": "2017/11/30",
+    "pub_date": "2017/11/08",
+    "record_date": "2017/12/01",
+    "statement": "Cash Dividend: 0.75 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2017/09/19",
+    "dividend_per_share": 0.75,
+    "ex_date": "2017/09/07",
+    "pub_date": "2017/08/16",
+    "record_date": "2017/09/08",
+    "statement": "Cash Dividend: 0.75 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2017/06/27",
+    "dividend_per_share": 0.75,
+    "ex_date": "2017/06/15",
+    "pub_date": "2017/06/15",
+    "record_date": "2017/06/19",
+    "statement": "Cash Dividend: 0.75 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2017/03/21",
+    "dividend_per_share": 0.625,
+    "ex_date": "2017/03/08",
+    "pub_date": "2017/03/08",
+    "record_date": "2017/03/10",
+    "statement": "Cash Dividend: 0.625 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2016/12/13",
+    "dividend_per_share": 0.625,
+    "ex_date": "2016/11/30",
+    "pub_date": "2016/11/30",
+    "record_date": "2016/12/02",
+    "statement": "Cash Dividend: 0.625 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2016/09/20",
+    "dividend_per_share": 0.625,
+    "ex_date": "2016/09/07",
+    "pub_date": "2016/09/07",
+    "record_date": "2016/09/09",
+    "statement": "Cash Dividend: 0.625 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2016/06/28",
+    "dividend_per_share": 0.625,
+    "ex_date": "2016/06/15",
+    "pub_date": "2016/06/15",
+    "record_date": "2016/06/17",
+    "statement": "Cash Dividend: 0.625 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2016/03/22",
+    "dividend_per_share": 0.5,
+    "ex_date": "2016/03/09",
+    "pub_date": "2016/03/09",
+    "record_date": "2016/03/11",
+    "statement": "Cash Dividend: 0.5 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2015/12/15",
+    "dividend_per_share": 0.5,
+    "ex_date": "2015/12/02",
+    "pub_date": "2015/12/02",
+    "record_date": "2015/12/04",
+    "statement": "Cash Dividend: 0.5 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2015/09/22",
+    "dividend_per_share": 0.5,
+    "ex_date": "2015/09/09",
+    "pub_date": "2015/09/09",
+    "record_date": "2015/09/11",
+    "statement": "Cash Dividend: 0.5 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2015/06/24",
+    "dividend_per_share": 0.5,
+    "ex_date": "2015/06/11",
+    "pub_date": "2015/06/11",
+    "record_date": "2015/06/15",
+    "statement": "Cash Dividend: 0.5 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2015/03/24",
+    "dividend_per_share": 0.375,
+    "ex_date": "2015/03/11",
+    "pub_date": "2015/03/11",
+    "record_date": "2015/03/13",
+    "statement": "Cash Dividend: 0.375 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2014/12/16",
+    "dividend_per_share": 0.375,
+    "ex_date": "2014/12/03",
+    "pub_date": "2014/12/03",
+    "record_date": "2014/12/05",
+    "statement": "Cash Dividend: 0.375 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2014/09/23",
+    "dividend_per_share": 0.375,
+    "ex_date": "2014/09/10",
+    "pub_date": "2014/09/10",
+    "record_date": "2014/09/12",
+    "statement": "Cash Dividend: 0.375 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2014/06/25",
+    "dividend_per_share": 0.375,
+    "ex_date": "2014/06/12",
+    "pub_date": "2014/06/12",
+    "record_date": "2014/06/16",
+    "statement": "Cash Dividend: 0.375 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2014/03/25",
+    "dividend_per_share": 0.28,
+    "ex_date": "2014/03/12",
+    "pub_date": "2014/03/12",
+    "record_date": "2014/03/14",
+    "statement": "Cash Dividend: 0.28 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2013/12/17",
+    "dividend_per_share": 0.28,
+    "ex_date": "2013/12/04",
+    "pub_date": "2013/12/04",
+    "record_date": "2013/12/06",
+    "statement": "Cash Dividend: 0.28 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2013/09/24",
+    "dividend_per_share": 0.28,
+    "ex_date": "2013/09/11",
+    "pub_date": "2013/09/11",
+    "record_date": "2013/09/13",
+    "statement": "Cash Dividend: 0.28 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2013/06/26",
+    "dividend_per_share": 0.28,
+    "ex_date": "2013/06/13",
+    "pub_date": "2013/06/13",
+    "record_date": "2013/06/17",
+    "statement": "Cash Dividend: 0.28 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2013/03/26",
+    "dividend_per_share": 0.2125,
+    "ex_date": "2013/03/13",
+    "pub_date": "2013/03/13",
+    "record_date": "2013/03/15",
+    "statement": "Cash Dividend: 0.2125 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2012/12/21",
+    "dividend_per_share": 0.2125,
+    "ex_date": "2012/12/07",
+    "pub_date": "2012/12/07",
+    "record_date": "2012/12/11",
+    "statement": "Cash Dividend: 0.2125 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2012/09/21",
+    "dividend_per_share": 0.2125,
+    "ex_date": "2012/09/12",
+    "pub_date": "2012/09/12",
+    "record_date": "2012/09/14",
+    "statement": "Cash Dividend: 0.2125 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2012/06/22",
+    "dividend_per_share": 0.2125,
+    "ex_date": "2012/06/13",
+    "pub_date": "2012/06/13",
+    "record_date": "2012/06/15",
+    "statement": "Cash Dividend: 0.2125 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2012/03/19",
+    "dividend_per_share": 0.1625,
+    "ex_date": "2012/03/01",
+    "pub_date": "2012/03/01",
+    "record_date": "2012/03/05",
+    "statement": "Cash Dividend: 0.1625 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2011/12/21",
+    "dividend_per_share": 0.1625,
+    "ex_date": "2011/12/05",
+    "pub_date": "2011/12/05",
+    "record_date": "2011/12/07",
+    "statement": "Cash Dividend: 0.1625 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2011/09/21",
+    "dividend_per_share": 0.1625,
+    "ex_date": "2011/09/02",
+    "pub_date": "2011/09/02",
+    "record_date": "2011/09/07",
+    "statement": "Cash Dividend: 0.1625 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2011/06/21",
+    "dividend_per_share": 0.1625,
+    "ex_date": "2011/06/03",
+    "pub_date": "2011/06/03",
+    "record_date": "2011/06/07",
+    "statement": "Cash Dividend: 0.1625 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2011/03/21",
+    "dividend_per_share": 0.125,
+    "ex_date": "2011/03/03",
+    "pub_date": "2011/03/03",
+    "record_date": "2011/03/07",
+    "statement": "Cash Dividend: 0.125 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2010/12/21",
+    "dividend_per_share": 0.125,
+    "ex_date": "2010/12/03",
+    "pub_date": "2010/12/03",
+    "record_date": "2010/12/07",
+    "statement": "Cash Dividend: 0.125 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2010/09/28",
+    "dividend_per_share": 0.125,
+    "ex_date": "2010/09/10",
+    "pub_date": "2010/09/10",
+    "record_date": "2010/09/14",
+    "statement": "Cash Dividend: 0.125 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2010/06/21",
+    "dividend_per_share": 0.125,
+    "ex_date": "2010/06/03",
+    "pub_date": "2010/06/03",
+    "record_date": "2010/06/07",
+    "statement": "Cash Dividend: 0.125 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2010/04/20",
+    "dividend_per_share": 0.03,
+    "ex_date": "2010/04/01",
+    "pub_date": "2010/04/01",
+    "record_date": "2010/04/06",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2009/04/16",
+    "dividend_per_share": 0.03,
+    "ex_date": "2009/03/31",
+    "pub_date": "2009/03/31",
+    "record_date": "2009/04/02",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2008/04/16",
+    "dividend_per_share": 0.03,
+    "ex_date": "2008/03/31",
+    "pub_date": "2008/03/31",
+    "record_date": "2008/04/02",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2007/04/16",
+    "dividend_per_share": 0.03,
+    "ex_date": "2007/03/29",
+    "pub_date": "2007/03/29",
+    "record_date": "2007/04/02",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2006/04/17",
+    "dividend_per_share": 0.03,
+    "ex_date": "2006/03/30",
+    "pub_date": "2006/03/30",
+    "record_date": "2006/04/03",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2005/04/18",
+    "dividend_per_share": 0.03,
+    "ex_date": "2005/03/30",
+    "pub_date": "2005/03/30",
+    "record_date": "2005/04/01",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2004/04/16",
+    "dividend_per_share": 0.03,
+    "ex_date": "2004/03/30",
+    "pub_date": "2004/03/30",
+    "record_date": "2004/04/01",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2003/04/17",
+    "dividend_per_share": 0.03,
+    "ex_date": "2003/03/28",
+    "pub_date": "2003/03/28",
+    "record_date": "2003/04/01",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2002/04/17",
+    "dividend_per_share": 0.03,
+    "ex_date": "2002/03/27",
+    "pub_date": "2002/03/27",
+    "record_date": "2002/04/01",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2001/04/18",
+    "dividend_per_share": 0.03,
+    "ex_date": "2001/03/29",
+    "pub_date": "2001/03/29",
+    "record_date": "2001/04/02",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2000/04/19",
+    "dividend_per_share": 0.03,
+    "ex_date": "2000/03/30",
+    "pub_date": "2000/03/30",
+    "record_date": "2000/04/03",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "1999/04/15",
+    "dividend_per_share": 0.03,
+    "ex_date": "1999/03/30",
+    "pub_date": "1999/03/30",
+    "record_date": "1999/04/01",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "1998/04/15",
+    "dividend_per_share": 0.03,
+    "ex_date": "1998/03/30",
+    "pub_date": "1998/03/30",
+    "record_date": "1998/04/01",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   },
+   {
+    "currency": "USD",
+    "dividend_payable_date": "1997/04/15",
+    "dividend_per_share": 0.03,
+    "ex_date": "1997/04/01",
+    "pub_date": "1997/04/01",
+    "record_date": "1997/04/03",
+    "statement": "Cash Dividend: 0.03 USD Per Share"
+   }
+  ]
+ }
+}

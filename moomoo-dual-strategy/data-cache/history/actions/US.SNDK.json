@@ -1,0 +1,20 @@
+{
+ "splits": {
+  "data": {
+   "split_list": [
+    {
+     "ex_date": 1795150800,
+     "ex_date_str": "2026-11-20",
+     "rate": "1→8",
+     "reform_type": "SPLIT",
+     "scheme_statement": "1股拆为8股"
+    }
+   ]
+  },
+  "pagination": {
+   "has_more": false,
+   "next_key": "-1"
+  }
+ },
+ "dividends": {}
+}

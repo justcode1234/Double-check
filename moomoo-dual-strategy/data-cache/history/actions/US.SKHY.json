@@ -1,0 +1,31 @@
+{
+ "splits": {
+  "data": {
+   "split_list": [
+    {
+     "ex_date": 1788148800,
+     "ex_date_str": "2026-08-31",
+     "reform_type": "CONSOLIDATION",
+     "scheme_statement": "1股派股息0.02756USD"
+    }
+   ]
+  },
+  "pagination": {
+   "has_more": false,
+   "next_key": "-1"
+  }
+ },
+ "dividends": {
+  "dividend_list": [
+   {
+    "currency": "USD",
+    "dividend_payable_date": "2026/10/07",
+    "dividend_per_share": 0.02756,
+    "ex_date": "2026/08/31",
+    "pub_date": "2026/08/07",
+    "record_date": "2026/08/31",
+    "statement": "Cash Dividend: 0.02756 USD Per Share"
+   }
+  ]
+ }
+}

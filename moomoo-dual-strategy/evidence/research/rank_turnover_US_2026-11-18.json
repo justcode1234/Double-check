@@ -1,0 +1,802 @@
+[
+  {
+    "change_pct": -1.678,
+    "last_price": 152.85,
+    "name": "英伟达",
+    "symbol": "US.NVDA",
+    "turnover": 30822129454,
+    "volume": 199208651
+  },
+  {
+    "change_pct": -0.284,
+    "last_price": 710.39,
+    "name": "美光科技",
+    "symbol": "US.MU",
+    "turnover": 11229149819,
+    "volume": 15930275
+  },
+  {
+    "change_pct": 3.311,
+    "last_price": 520.08,
+    "name": "美国超微公司",
+    "symbol": "US.AMD",
+    "turnover": 8392412622,
+    "volume": 16468350
+  },
+  {
+    "change_pct": 2.088,
+    "last_price": 144.6599,
+    "name": "SpaceX",
+    "symbol": "US.SPCX",
+    "turnover": 7308935084,
+    "volume": 50763671
+  },
+  {
+    "change_pct": -1.38,
+    "last_price": 786.235,
+    "name": "闪迪",
+    "symbol": "US.SNDK",
+    "turnover": 5838294671,
+    "volume": 7516678
+  },
+  {
+    "change_pct": 1.172,
+    "last_price": 384.565,
+    "name": "特斯拉",
+    "symbol": "US.TSLA",
+    "turnover": 4968361952,
+    "volume": 12991215
+  },
+  {
+    "change_pct": 0.478,
+    "last_price": 353.5951,
+    "name": "苹果",
+    "symbol": "US.AAPL",
+    "turnover": 4929437624,
+    "volume": 13940296
+  },
+  {
+    "change_pct": 3.175,
+    "last_price": 266.079999999,
+    "name": "亚马逊",
+    "symbol": "US.AMZN",
+    "turnover": 4527131165,
+    "volume": 17201221
+  },
+  {
+    "change_pct": 3.19,
+    "last_price": 352.5,
+    "name": "博通",
+    "symbol": "US.AVGO",
+    "turnover": 3860508166,
+    "volume": 11030919
+  },
+  {
+    "change_pct": -0.331,
+    "last_price": 504.56,
+    "name": "微软",
+    "symbol": "US.MSFT",
+    "turnover": 3582419975,
+    "volume": 7105184
+  },
+  {
+    "change_pct": 0.67,
+    "last_price": 282.08,
+    "name": "谷歌-A",
+    "symbol": "US.GOOGL",
+    "turnover": 2745596392,
+    "volume": 9729623
+  },
+  {
+    "change_pct": -0.251,
+    "last_price": 617.315,
+    "name": "Meta Platforms",
+    "symbol": "US.META",
+    "turnover": 2677624562,
+    "volume": 4347670
+  },
+  {
+    "change_pct": 0.539,
+    "last_price": 361.63,
+    "name": "台积电",
+    "symbol": "US.TSM",
+    "turnover": 2611466342,
+    "volume": 7210733
+  },
+  {
+    "change_pct": -0.471,
+    "last_price": 54.91,
+    "name": "英特尔",
+    "symbol": "US.INTC",
+    "turnover": 2330379100,
+    "volume": 42843693
+  },
+  {
+    "change_pct": -8.902,
+    "last_price": 354.99,
+    "name": "联合健康",
+    "symbol": "US.UNH",
+    "turnover": 2295392135,
+    "volume": 6252812
+  },
+  {
+    "change_pct": 1.976,
+    "last_price": 108.1305,
+    "name": "NEBIUS",
+    "symbol": "US.NBIS",
+    "turnover": 1939025684,
+    "volume": 18186332
+  },
+  {
+    "change_pct": 0.565,
+    "last_price": 279.17,
+    "name": "谷歌-C",
+    "symbol": "US.GOOG",
+    "turnover": 1878151996,
+    "volume": 6720679
+  },
+  {
+    "change_pct": -3.407,
+    "last_price": 48.19,
+    "name": "CoreWeave",
+    "symbol": "US.CRWV",
+    "turnover": 1842652780,
+    "volume": 38368291
+  },
+  {
+    "change_pct": -0.525,
+    "last_price": 126.85,
+    "name": "沃尔玛",
+    "symbol": "US.WMT",
+    "turnover": 1648142228,
+    "volume": 13036143
+  },
+  {
+    "change_pct": -1.769,
+    "last_price": 1390.5,
+    "name": "礼来",
+    "symbol": "US.LLY",
+    "turnover": 1534923378,
+    "volume": 1094906
+  },
+  {
+    "change_pct": -1.304,
+    "last_price": 146.8,
+    "name": "迈威尔科技",
+    "symbol": "US.MRVL",
+    "turnover": 1458408530,
+    "volume": 9973844
+  },
+  {
+    "change_pct": 7.497,
+    "last_price": 332.48,
+    "name": "Palo Alto Networks",
+    "symbol": "US.PANW",
+    "turnover": 1445128932,
+    "volume": 4447446
+  },
+  {
+    "change_pct": 7.325,
+    "last_price": 218.8695,
+    "name": "Take-Two互动软件",
+    "symbol": "US.TTWO",
+    "turnover": 1442703005,
+    "volume": 6636657
+  },
+  {
+    "change_pct": -1.83,
+    "last_price": 576.02,
+    "name": "伯克希尔-B",
+    "symbol": "US.BRK.B",
+    "turnover": 1385359143,
+    "volume": 2392308
+  },
+  {
+    "change_pct": 11.005,
+    "last_price": 144.14,
+    "name": "TJX公司",
+    "symbol": "US.TJX",
+    "turnover": 1315957842,
+    "volume": 9315453
+  },
+  {
+    "change_pct": -3.43,
+    "last_price": 93.19,
+    "name": "Strategy",
+    "symbol": "US.MSTR",
+    "turnover": 1303017318,
+    "volume": 14019662
+  },
+  {
+    "change_pct": 0.344,
+    "last_price": 782.6,
+    "name": "GE Vernova",
+    "symbol": "US.GEV",
+    "turnover": 1225111832,
+    "volume": 1562762
+  },
+  {
+    "change_pct": 0.3,
+    "last_price": 15.015,
+    "name": "AES发电",
+    "symbol": "US.AES",
+    "turnover": 1174956808,
+    "volume": 78227083
+  },
+  {
+    "change_pct": 0.426,
+    "last_price": 174.2,
+    "name": "Bloom Energy",
+    "symbol": "US.BE",
+    "turnover": 1163484762,
+    "volume": 6696561
+  },
+  {
+    "change_pct": 7.915,
+    "last_price": 236.96,
+    "name": "CrowdStrike",
+    "symbol": "US.CRWD",
+    "turnover": 1163096348,
+    "volume": 5067192
+  },
+  {
+    "change_pct": -2.232,
+    "last_price": 315.585,
+    "name": "戴尔科技",
+    "symbol": "US.DELL",
+    "turnover": 1095553539,
+    "volume": 3452522
+  },
+  {
+    "change_pct": 0.17,
+    "last_price": 417.48,
+    "name": "Visa",
+    "symbol": "US.V",
+    "turnover": 1079397277,
+    "volume": 2599906
+  },
+  {
+    "change_pct": -1.451,
+    "last_price": 562.505,
+    "name": "卡特彼勒",
+    "symbol": "US.CAT",
+    "turnover": 1072561800,
+    "volume": 1917773
+  },
+  {
+    "change_pct": 0.91,
+    "last_price": 1395.7025,
+    "name": "阿斯麦",
+    "symbol": "US.ASML",
+    "turnover": 1061818206,
+    "volume": 765569
+  },
+  {
+    "change_pct": -0.415,
+    "last_price": 155.91,
+    "name": "Palantir",
+    "symbol": "US.PLTR",
+    "turnover": 1016576235,
+    "volume": 6528397
+  },
+  {
+    "change_pct": 3.768,
+    "last_price": 39.1,
+    "name": "Medline",
+    "symbol": "US.MDLN",
+    "turnover": 1002307695,
+    "volume": 26511237
+  },
+  {
+    "change_pct": 6.998,
+    "last_price": 170.695,
+    "name": "塔吉特",
+    "symbol": "US.TGT",
+    "turnover": 975576559,
+    "volume": 5850664
+  },
+  {
+    "change_pct": -0.64,
+    "last_price": 556.3831,
+    "name": "Lumentum",
+    "symbol": "US.LITE",
+    "turnover": 948265276,
+    "volume": 1711161
+  },
+  {
+    "change_pct": 0.318,
+    "last_price": 123,
+    "name": "SK海力士",
+    "symbol": "US.SKHY",
+    "turnover": 943300589,
+    "volume": 7677705
+  },
+  {
+    "change_pct": -2.984,
+    "last_price": 188.715,
+    "name": "赛富时",
+    "symbol": "US.CRM",
+    "turnover": 896984397,
+    "volume": 4752795
+  },
+  {
+    "change_pct": 2.075,
+    "last_price": 514.869299999,
+    "name": "希捷科技",
+    "symbol": "US.STX",
+    "turnover": 893829655,
+    "volume": 1767362
+  },
+  {
+    "change_pct": 1.714,
+    "last_price": 214.475,
+    "name": "Coherent",
+    "symbol": "US.COHR",
+    "turnover": 890157849,
+    "volume": 4200675
+  },
+  {
+    "change_pct": -3.079,
+    "last_price": 162.06,
+    "name": "埃克森美孚",
+    "symbol": "US.XOM",
+    "turnover": 860864343,
+    "volume": 5274065
+  },
+  {
+    "change_pct": -1.676,
+    "last_price": 15.54,
+    "name": "IREN Ltd",
+    "symbol": "US.IREN",
+    "turnover": 833565714,
+    "volume": 53824073
+  },
+  {
+    "change_pct": 0.286,
+    "last_price": 115.33,
+    "name": "甲骨文",
+    "symbol": "US.ORCL",
+    "turnover": 819549751,
+    "volume": 7120383
+  },
+  {
+    "change_pct": -0.887,
+    "last_price": 327.03,
+    "name": "摩根大通",
+    "symbol": "US.JPM",
+    "turnover": 797700521,
+    "volume": 2434154
+  },
+  {
+    "change_pct": -3.279,
+    "last_price": 207.32,
+    "name": "雪佛龙",
+    "symbol": "US.CVX",
+    "turnover": 782562934,
+    "volume": 3752227
+  },
+  {
+    "change_pct": -2.335,
+    "last_price": 90.73,
+    "name": "ServiceNow",
+    "symbol": "US.NOW",
+    "turnover": 773447077,
+    "volume": 8487693
+  },
+  {
+    "change_pct": 0.021,
+    "last_price": 1110.315,
+    "name": "好市多",
+    "symbol": "US.COST",
+    "turnover": 757187175,
+    "volume": 685305
+  },
+  {
+    "change_pct": -0.016,
+    "last_price": 338.955,
+    "name": "家得宝",
+    "symbol": "US.HD",
+    "turnover": 750666553,
+    "volume": 2230640
+  },
+  {
+    "change_pct": -0.673,
+    "last_price": 98.125,
+    "name": "可口可乐",
+    "symbol": "US.KO",
+    "turnover": 743154315,
+    "volume": 7583013
+  },
+  {
+    "change_pct": 0.344,
+    "last_price": 211.415,
+    "name": "泛林集团",
+    "symbol": "US.LRCX",
+    "turnover": 714023148,
+    "volume": 3391731
+  },
+  {
+    "change_pct": -6.021,
+    "last_price": 51.97,
+    "name": "麦克莫兰铜金",
+    "symbol": "US.FCX",
+    "turnover": 682944501,
+    "volume": 13329745
+  },
+  {
+    "change_pct": -6.234,
+    "last_price": 97.685,
+    "name": "Cerebras Systems",
+    "symbol": "US.CBRS",
+    "turnover": 678765166,
+    "volume": 6931640
+  },
+  {
+    "change_pct": -0.981,
+    "last_price": 204.77,
+    "name": "Moderna",
+    "symbol": "US.MRNA",
+    "turnover": 652977821,
+    "volume": 3203135
+  },
+  {
+    "change_pct": 4.228,
+    "last_price": 121.885,
+    "name": "迪士尼",
+    "symbol": "US.DIS",
+    "turnover": 646008345,
+    "volume": 5400513
+  },
+  {
+    "change_pct": -0.271,
+    "last_price": 643.98,
+    "name": "万事达",
+    "symbol": "US.MA",
+    "turnover": 632022355,
+    "volume": 985453
+  },
+  {
+    "change_pct": 0.511,
+    "last_price": 59.985,
+    "name": "奈飞",
+    "symbol": "US.NFLX",
+    "turnover": 624993732,
+    "volume": 10451888
+  },
+  {
+    "change_pct": -0.869,
+    "last_price": 49.01,
+    "name": "美国银行",
+    "symbol": "US.BAC",
+    "turnover": 596863246,
+    "volume": 12177710
+  },
+  {
+    "change_pct": 1.239,
+    "last_price": 353.56,
+    "name": "应用材料",
+    "symbol": "US.AMAT",
+    "turnover": 591853406,
+    "volume": 1690416
+  },
+  {
+    "change_pct": 0.064,
+    "last_price": 878.09,
+    "name": "高盛",
+    "symbol": "US.GS",
+    "turnover": 586576076,
+    "volume": 672289
+  },
+  {
+    "change_pct": 2.88,
+    "last_price": 291.49,
+    "name": "西部数据",
+    "symbol": "US.WDC",
+    "turnover": 568140907,
+    "volume": 1983631
+  },
+  {
+    "change_pct": -10.625,
+    "last_price": 40.415,
+    "name": "Applied Optoelectronics",
+    "symbol": "US.AAOI",
+    "turnover": 559536150,
+    "volume": 14074817
+  },
+  {
+    "change_pct": -3.216,
+    "last_price": 83.05,
+    "name": "西维斯健康",
+    "symbol": "US.CVS",
+    "turnover": 553904139,
+    "volume": 6637738
+  },
+  {
+    "change_pct": -9.094,
+    "last_price": 403.02,
+    "name": "哈门那",
+    "symbol": "US.HUM",
+    "turnover": 552687096,
+    "volume": 1338188
+  },
+  {
+    "change_pct": 0.663,
+    "last_price": 691.35,
+    "name": "赛默飞世尔",
+    "symbol": "US.TMO",
+    "turnover": 549051249,
+    "volume": 800185
+  },
+  {
+    "change_pct": -5.569,
+    "last_price": 120.2,
+    "name": "Wheaton Precious Metals",
+    "symbol": "US.WPM",
+    "turnover": 540154964,
+    "volume": 4526007
+  },
+  {
+    "change_pct": -1.621,
+    "last_price": 113.155,
+    "name": "Coinbase",
+    "symbol": "US.COIN",
+    "turnover": 537727990,
+    "volume": 4784807
+  },
+  {
+    "change_pct": -1.813,
+    "last_price": 163.6475,
+    "name": "高通",
+    "symbol": "US.QCOM",
+    "turnover": 533769235,
+    "volume": 3255111
+  },
+  {
+    "change_pct": -0.814,
+    "last_price": 276.43,
+    "name": "强生",
+    "symbol": "US.JNJ",
+    "turnover": 527055524,
+    "volume": 1907961
+  },
+  {
+    "change_pct": -0.715,
+    "last_price": 86.0299,
+    "name": "阿里巴巴",
+    "symbol": "US.BABA",
+    "turnover": 522954996,
+    "volume": 6073367
+  },
+  {
+    "change_pct": 0.072,
+    "last_price": 220.62,
+    "name": "劳氏",
+    "symbol": "US.LOW",
+    "turnover": 520601674,
+    "volume": 2394355
+  },
+  {
+    "change_pct": 2.319,
+    "last_price": 36.6815,
+    "name": "耐克",
+    "symbol": "US.NKE",
+    "turnover": 516422256,
+    "volume": 14315306
+  },
+  {
+    "change_pct": 0.346,
+    "last_price": 69.43,
+    "name": "Robinhood",
+    "symbol": "US.HOOD",
+    "turnover": 502407218,
+    "volume": 7323126
+  },
+  {
+    "change_pct": -0.722,
+    "last_price": 170.48,
+    "name": "宝洁",
+    "symbol": "US.PG",
+    "turnover": 500139408,
+    "volume": 2933381
+  },
+  {
+    "change_pct": 3.36,
+    "last_price": 218.71,
+    "name": "Astera Labs",
+    "symbol": "US.ALAB",
+    "turnover": 493727310,
+    "volume": 2302994
+  },
+  {
+    "change_pct": 6.242,
+    "last_price": 302.58,
+    "name": "Cloudflare",
+    "symbol": "US.NET",
+    "turnover": 481739675,
+    "volume": 1629412
+  },
+  {
+    "change_pct": 0.977,
+    "last_price": 402.84,
+    "name": "Applovin",
+    "symbol": "US.APP",
+    "turnover": 481152698,
+    "volume": 1210185
+  },
+  {
+    "change_pct": -1.682,
+    "last_price": 97,
+    "name": "STRATEGY INC VAR RT SER A PERP STRETCH PREFERRED STK",
+    "symbol": "US.STRC",
+    "turnover": 481017900,
+    "volume": 4974916
+  },
+  {
+    "change_pct": -2.845,
+    "last_price": 139.29,
+    "name": "默沙东",
+    "symbol": "US.MRK",
+    "turnover": 476270158,
+    "volume": 3394313
+  },
+  {
+    "change_pct": 6.851,
+    "last_price": 100.74,
+    "name": "Viking Holdings",
+    "symbol": "US.VIK",
+    "turnover": 470994090,
+    "volume": 4753334
+  },
+  {
+    "change_pct": -1.637,
+    "last_price": 288.025,
+    "name": "艾伯维公司",
+    "symbol": "US.ABBV",
+    "turnover": 469012278,
+    "volume": 1621647
+  },
+  {
+    "change_pct": 1.629,
+    "last_price": 96.66,
+    "name": "思科",
+    "symbol": "US.CSCO",
+    "turnover": 465634270,
+    "volume": 4870111
+  },
+  {
+    "change_pct": -4.928,
+    "last_price": 345.84,
+    "name": "瓦莱罗能源",
+    "symbol": "US.VLO",
+    "turnover": 463773693,
+    "volume": 1334719
+  },
+  {
+    "change_pct": -0.831,
+    "last_price": 293.4,
+    "name": "德州仪器",
+    "symbol": "US.TXN",
+    "turnover": 457304294,
+    "volume": 1561825
+  },
+  {
+    "change_pct": 3.785,
+    "last_price": 19.875,
+    "name": "Sellas Life Sciences",
+    "symbol": "US.SLS",
+    "turnover": 447371034,
+    "volume": 22849011
+  },
+  {
+    "change_pct": 0.231,
+    "last_price": 164.29,
+    "name": "波音",
+    "symbol": "US.BA",
+    "turnover": 446937742,
+    "volume": 2747373
+  },
+  {
+    "change_pct": 0.299,
+    "last_price": 142.445,
+    "name": "百事可乐",
+    "symbol": "US.PEP",
+    "turnover": 442679193,
+    "volume": 3120698
+  },
+  {
+    "change_pct": -3.105,
+    "last_price": 231.85,
+    "name": "埃森哲",
+    "symbol": "US.ACN",
+    "turnover": 442626646,
+    "volume": 1898763
+  },
+  {
+    "change_pct": 1.559,
+    "last_price": 186.25,
+    "name": "Arm Holdings",
+    "symbol": "US.ARM",
+    "turnover": 441475698,
+    "volume": 2369603
+  },
+  {
+    "change_pct": 2.21,
+    "last_price": 190.54,
+    "name": "Arista Networks",
+    "symbol": "US.ANET",
+    "turnover": 428044878,
+    "volume": 2286641
+  },
+  {
+    "change_pct": 1.54,
+    "last_price": 69.87,
+    "name": "优步",
+    "symbol": "US.UBER",
+    "turnover": 425466382,
+    "volume": 6150618
+  },
+  {
+    "change_pct": -3.077,
+    "last_price": 228.3,
+    "name": "Adobe",
+    "symbol": "US.ADBE",
+    "turnover": 421312138,
+    "volume": 1838655
+  },
+  {
+    "change_pct": -6.255,
+    "last_price": 104.3,
+    "name": "纽曼矿业",
+    "symbol": "US.NEM",
+    "turnover": 414344156,
+    "volume": 3968825
+  },
+  {
+    "change_pct": -2.298,
+    "last_price": 447.405,
+    "name": "安进",
+    "symbol": "US.AMGN",
+    "turnover": 411226006,
+    "volume": 915473
+  },
+  {
+    "change_pct": -0.256,
+    "last_price": 382.685,
+    "name": "亚德诺",
+    "symbol": "US.ADI",
+    "turnover": 407719193,
+    "volume": 1067574
+  },
+  {
+    "change_pct": -7.31,
+    "last_price": 160.3625,
+    "name": "伊格尔矿业",
+    "symbol": "US.AEM",
+    "turnover": 406022492,
+    "volume": 2537785
+  },
+  {
+    "change_pct": -0.283,
+    "last_price": 186.25,
+    "name": "第一资本信贷",
+    "symbol": "US.COF",
+    "turnover": 405327530,
+    "volume": 2180491
+  },
+  {
+    "change_pct": -3.915,
+    "last_price": 246.87,
+    "name": "Phillips 66",
+    "symbol": "US.PSX",
+    "turnover": 403693470,
+    "volume": 1616646
+  },
+  {
+    "change_pct": 0.783,
+    "last_price": 92.56,
+    "name": "嘉信理财",
+    "symbol": "US.SCHW",
+    "turnover": 401089023,
+    "volume": 4347408
+  }
+]

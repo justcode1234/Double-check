@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="370" font-family="sans-serif" font-size="12">
+<rect width="410" height="370" fill="white"/>
+<text x="205.0" y="22" text-anchor="middle" font-size="14">OOS 2024-2026 daily-return correlation</text>
+<text x="102" y="89.0" text-anchor="end">A1</text>
+<text x="145.0" y="42" text-anchor="middle">A1</text>
+<rect x="110" y="50" width="70" height="70" fill="rgb(255,0,0)" stroke="white"/><text x="145.0" y="89.0" text-anchor="middle">1.00</text>
+<rect x="180" y="50" width="70" height="70" fill="rgb(255,224,224)" stroke="white"/><text x="215.0" y="89.0" text-anchor="middle">0.12</text>
+<rect x="250" y="50" width="70" height="70" fill="rgb(255,245,245)" stroke="white"/><text x="285.0" y="89.0" text-anchor="middle">0.04</text>
+<rect x="320" y="50" width="70" height="70" fill="rgb(240,240,255)" stroke="white"/><text x="355.0" y="89.0" text-anchor="middle">-0.06</text>
+<text x="102" y="159.0" text-anchor="end">B1</text>
+<text x="215.0" y="42" text-anchor="middle">B1</text>
+<rect x="110" y="120" width="70" height="70" fill="rgb(255,224,224)" stroke="white"/><text x="145.0" y="159.0" text-anchor="middle">0.12</text>
+<rect x="180" y="120" width="70" height="70" fill="rgb(255,0,0)" stroke="white"/><text x="215.0" y="159.0" text-anchor="middle">1.00</text>
+<rect x="250" y="120" width="70" height="70" fill="rgb(226,226,255)" stroke="white"/><text x="285.0" y="159.0" text-anchor="middle">-0.11</text>
+<rect x="320" y="120" width="70" height="70" fill="rgb(253,253,255)" stroke="white"/><text x="355.0" y="159.0" text-anchor="middle">-0.01</text>
+<text x="102" y="229.0" text-anchor="end">C1</text>
+<text x="285.0" y="42" text-anchor="middle">C1</text>
+<rect x="110" y="190" width="70" height="70" fill="rgb(255,245,245)" stroke="white"/><text x="145.0" y="229.0" text-anchor="middle">0.04</text>
+<rect x="180" y="190" width="70" height="70" fill="rgb(226,226,255)" stroke="white"/><text x="215.0" y="229.0" text-anchor="middle">-0.11</text>
+<rect x="250" y="190" width="70" height="70" fill="rgb(255,0,0)" stroke="white"/><text x="285.0" y="229.0" text-anchor="middle">1.00</text>
+<rect x="320" y="190" width="70" height="70" fill="rgb(255,239,239)" stroke="white"/><text x="355.0" y="229.0" text-anchor="middle">0.06</text>
+<text x="102" y="299.0" text-anchor="end">SPY</text>
+<text x="355.0" y="42" text-anchor="middle">SPY</text>
+<rect x="110" y="260" width="70" height="70" fill="rgb(240,240,255)" stroke="white"/><text x="145.0" y="299.0" text-anchor="middle">-0.06</text>
+<rect x="180" y="260" width="70" height="70" fill="rgb(253,253,255)" stroke="white"/><text x="215.0" y="299.0" text-anchor="middle">-0.01</text>
+<rect x="250" y="260" width="70" height="70" fill="rgb(255,239,239)" stroke="white"/><text x="285.0" y="299.0" text-anchor="middle">0.06</text>
+<rect x="320" y="260" width="70" height="70" fill="rgb(255,0,0)" stroke="white"/><text x="355.0" y="299.0" text-anchor="middle">1.00</text>
+<text x="205.0" y="358" text-anchor="middle" fill="#666">Pearson correlation of SIMULATED daily net returns</text></svg>

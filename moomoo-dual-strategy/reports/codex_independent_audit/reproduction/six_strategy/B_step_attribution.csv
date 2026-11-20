@@ -1,0 +1,31 @@
+segment,mode,step,trades,gross_return_pct,net_return_pct,sharpe,max_drawdown_pct,avg_gross_exposure,fees_usd,slippage_usd
+oos,cumulative,B0 (published rules),645,36.267,33.031,0.736,-17.469,0.7195,1258.39,359.54
+oos,cumulative,+ sizing: vol-target (median 2.5x) -> fixed 40%,645,4.124,3.742,0.541,-3.141,0.1026,148.46,42.42
+oos,cumulative,+ costs: $0.0035/sh -> $0.99/order + sell fee,645,4.17,1.609,0.241,-4.171,0.1027,1280.59,0.0
+oos,cumulative,+ slippage: $0.001/sh -> 1 bp/side,645,4.027,-3.566,-0.506,-6.743,0.1026,1280.51,2515.85
+oos,cumulative,+ history: skip gaps -> strict 14 sessions,627,3.824,-3.561,-0.509,-6.936,0.1023,1244.78,2447.59
+oos,cumulative,+ exit: 16:00 close -> flatten 15:55,627,4.215,-3.17,-0.475,-6.195,0.1008,1244.78,2448.16
+oos,cumulative,+ risk: none -> daily loss lock 1.25%,627,4.215,-3.17,-0.475,-6.195,0.1008,1244.78,2448.16
+oos,cumulative,+ execution: native -> software profile,627,4.215,-3.17,-0.475,-6.195,0.1008,1244.78,2448.16
+oos,alone (vs B0),sizing: vol-target (median 2.5x) -> fixed 40%,645,4.124,3.742,0.541,-3.141,0.1026,148.46,42.42
+oos,alone (vs B0),costs: $0.0035/sh -> $0.99/order + sell fee,645,36.441,33.827,0.75,-17.21,0.7196,1307.04,0.0
+oos,alone (vs B0),slippage: $0.001/sh -> 1 bp/side,645,34.519,-5.387,-0.054,-31.396,0.7192,1074.28,18878.72
+oos,alone (vs B0),history: skip gaps -> strict 14 sessions,627,29.969,26.911,0.637,-19.513,0.7168,1189.21,339.77
+oos,alone (vs B0),exit: 16:00 close -> flatten 15:55,645,36.897,33.703,0.78,-12.872,0.7088,1242.07,354.88
+oos,alone (vs B0),risk: none -> daily loss lock 1.25%,629,20.668,17.728,0.47,-18.677,0.6911,1143.33,326.67
+oos,alone (vs B0),execution: native -> software profile,645,36.267,33.031,0.736,-17.469,0.7195,1258.39,359.54
+full,cumulative,B0 (published rules),1316,212.014,199.752,1.357,-17.449,0.6756,4768.39,1362.4
+full,cumulative,+ sizing: vol-target (median 2.5x) -> fixed 40%,1316,21.376,20.321,1.241,-3.15,0.1047,410.11,117.17
+full,cumulative,+ costs: $0.0035/sh -> $0.99/order + sell fee,1316,21.018,15.788,0.985,-4.019,0.1046,2615.23,0.0
+full,cumulative,+ slippage: $0.001/sh -> 1 bp/side,1316,20.283,4.149,0.281,-6.672,0.1046,2614.79,5452.42
+full,cumulative,+ history: skip gaps -> strict 14 sessions,1282,18.537,2.911,0.204,-6.821,0.1041,2547.17,5265.74
+full,cumulative,+ exit: 16:00 close -> flatten 15:55,1282,19.566,3.859,0.271,-6.122,0.1026,2547.24,5306.6
+full,cumulative,+ risk: none -> daily loss lock 1.25%,1282,19.566,3.859,0.271,-6.122,0.1026,2547.24,5306.6
+full,cumulative,+ execution: native -> software profile,1282,19.566,3.859,0.271,-6.122,0.1026,2547.24,5306.6
+full,alone (vs B0),sizing: vol-target (median 2.5x) -> fixed 40%,1316,21.376,20.321,1.241,-3.15,0.1047,410.11,117.17
+full,alone (vs B0),costs: $0.0035/sh -> $0.99/order + sell fee,1316,214.361,208.92,1.392,-16.801,0.6756,2720.61,0.0
+full,alone (vs B0),slippage: $0.001/sh -> 1 bp/side,1316,166.57,57.216,0.599,-31.422,0.6754,3420.55,51256.18
+full,alone (vs B0),history: skip gaps -> strict 14 sessions,1282,176.447,165.351,1.226,-19.498,0.6713,4314.92,1232.83
+full,alone (vs B0),exit: 16:00 close -> flatten 15:55,1316,218.036,205.521,1.428,-12.86,0.6653,4866.83,1390.52
+full,alone (vs B0),risk: none -> daily loss lock 1.25%,1274,181.246,169.581,1.291,-18.734,0.6474,4536.72,1296.21
+full,alone (vs B0),execution: native -> software profile,1316,212.014,199.752,1.357,-17.449,0.6756,4768.39,1362.4

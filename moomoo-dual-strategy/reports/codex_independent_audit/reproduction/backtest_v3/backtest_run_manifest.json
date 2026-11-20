@@ -1,0 +1,14 @@
+{
+ "command": ".venv/bin/python -m dual_strategy.research.run --out reports/codex_independent_audit/reproduction/backtest_v3",
+ "git_commit": "561454885e8aa8374682bb9460eff349c4273d16+uncommitted-research-modules",
+ "python": "3.14.7",
+ "elapsed_seconds": 435.2,
+ "data_manifest_content_sha256": "4e0bb91dcad4080c2fc93a0c58d79c696eaa16a9ade77c9417cb17f9a8764820",
+ "data_files": 415,
+ "config_sha256": "c22b12d5d829633f2af58e469424956f3cb2349d0ab123e4e546a58a34aea881",
+ "c_frozen_sha256": "467569c6e46dc57215de7729f766db3bfb37bf6f48c8c434c17de7b3db80e038",
+ "universe_sha256": "5bcc47e775c58f36635aca4e58cb98cc4abe96e48274d80e9d19e73adf77ff57",
+ "numpy": "2.5.5",
+ "pandas": "3.1.1",
+ "variants": 93
+}

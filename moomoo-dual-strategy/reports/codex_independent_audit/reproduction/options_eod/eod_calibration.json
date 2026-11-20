@@ -1,0 +1,7 @@
+{
+ "trades": 51,
+ "mean_predicted_p_loss": 0.6159,
+ "realised_loss_rate": 0.8235,
+ "brier": 0.1832,
+ "brier_climatology": 0.1453
+}

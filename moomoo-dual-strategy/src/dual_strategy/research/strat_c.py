@@ -4,7 +4,7 @@ d = (close_5m - VWAP_5m_HLC3) / ATR14_daily_prior. On 5m bars ending >= 10:00 a 
 and triggers on a later finalized 5m close with d > -band within 6 bars (symmetric short). Entry at the next
 1-minute open (+delay). Exits: 1m low/high touches entry -/+ stop_atr*ATR (checked before the target on the same
 bar), 1m close back at/through the latest finalized 5m VWAP, max hold, or 15:50; non-stop exits fill at the next
-1m open. One position at a time; no entries after 14:30 (half-days: close-150m / close-10m)."""
+1m open. One position at a time; no entries after 14:30 (half-days: close-90m), hard exit 15:50 (half-days: close-10m)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 
 from dual_strategy.research.book import DayBook, hhmm
 from dual_strategy.research.etf import EtfContext
-from dual_strategy.research.execution import BASELINE_EXEC, COMPETITION, Costs, Execution, next_valid, stop_price
+from dual_strategy.research.execution import ETF_COSTS, ETF_EXEC, Costs, Execution, next_valid, stop_price
 
 
 @dataclass(frozen=True)
@@ -29,8 +29,8 @@ class CConfig:
     notional_cap: float = 0.40
     vwap: str = "hlc3"
     loss_lock: float | None = 0.0125
-    costs: Costs = COMPETITION
-    exe: Execution = field(default=BASELINE_EXEC)
+    costs: Costs = ETF_COSTS
+    exe: Execution = field(default=ETF_EXEC)
     label: str = ""
 
 
@@ -48,7 +48,7 @@ def run_day(ctx: EtfContext, t: int, equity: float, cfg: CConfig, book: DayBook)
     c5 = ctx.b5.close[t]
     n = int(b.expected[t])
     close_min = 570 + n
-    last_entry = min(14 * 60 + 30, close_min - 150)
+    last_entry = min(14 * 60 + 30, close_min - 90)    # 14:30 on a 16:00 close, 11:30 on a 13:00 half-day
     hard_exit = min(15 * 60 + 50, close_min - 10)
     atr = ctx.atr14[t]
     sym = ctx.symbol

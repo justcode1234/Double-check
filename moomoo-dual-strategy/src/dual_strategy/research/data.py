@@ -141,7 +141,7 @@ def load_daily(symbol: str, autype: int = 0) -> pd.DataFrame:
 
 
 def _actions(symbol: str) -> dict:
-    return json.loads((HISTORY / "actions" / f"{symbol}.json").read_text())
+    return json.loads((HISTORY / "actions" / f"{symbol}.json").read_text(encoding="utf-8"))
 
 
 def _parse_date(value: str) -> date:
@@ -205,10 +205,10 @@ def verify_splits(symbol: str, tol: float = 0.01) -> dict:
 
 def sector_map() -> dict[str, str]:
     path = HISTORY / "sectors.json"
-    data = json.loads(path.read_text())["industry"] if path.exists() else {}
+    data = json.loads(path.read_text(encoding="utf-8"))["industry"] if path.exists() else {}
     return {s: (v[0] if v else "UNKNOWN") for s, v in data.items()}
 
 
 def file_hashes() -> dict:
     path = HISTORY / "manifest.json"
-    return json.loads(path.read_text()) if path.exists() else {}
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}

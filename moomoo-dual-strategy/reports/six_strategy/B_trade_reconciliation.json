@@ -1,0 +1,46 @@
+{
+ "b0_trades": 645,
+ "b1_trades": 627,
+ "b2_trades": 645,
+ "b2_same_signals_as_b0": true,
+ "matched_b0_b1": 627,
+ "b0_only": 18,
+ "b1_only": 0,
+ "b0_only_gross_bp_sum": 146.012,
+ "b1_only_gross_bp_sum": 0.0,
+ "matched_gross_bp_mean_b0": 1.459,
+ "matched_gross_bp_mean_b1": 1.755,
+ "matched_with_different_exit": 209,
+ "matched_exit_diff_gross_bp_sum": 185.583,
+ "b0_gross_bp_per_trade": 1.645,
+ "b0_cost_bp_per_trade": 0.147,
+ "b2_cost_bp_per_trade": 3.018,
+ "b1_cost_bp_per_trade": 3.017,
+ "b0_avg_notional": 173632.672,
+ "b1_avg_notional": 19522.925,
+ "b0_only_reasons_sample": {
+  "2024-12-12": 2,
+  "2024-12-18": 2,
+  "2024-12-10": 1,
+  "2024-12-09": 1,
+  "2024-12-16": 1
+ },
+ "b1_exit_reasons": {
+  "inside_noise_or_vwap": 418,
+  "flatten_15:55": 209
+ },
+ "by_year_net_gross_bp": {
+  "2024": {
+   "count": 221,
+   "mean": 3.187
+  },
+  "2025": {
+   "count": 217,
+   "mean": 1.552
+  },
+  "2026": {
+   "count": 207,
+   "mean": 0.097
+  }
+ }
+}

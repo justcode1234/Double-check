@@ -17,7 +17,7 @@ import numpy as np
 
 from dual_strategy.research.book import DayBook
 from dual_strategy.research.data import Intraday, load_intraday, sector_map
-from dual_strategy.research.execution import BASELINE_EXEC, COMPETITION, Costs, Execution, next_valid, stop_price
+from dual_strategy.research.execution import BASELINE_EXEC, STOCK_COSTS, Costs, Execution, next_valid, stop_price
 from dual_strategy.research.features import opening_rvol, stock_daily_features
 
 
@@ -37,14 +37,14 @@ class AConfig:
     risk_frac: float = 0.0025
     name_cap: float = 0.15
     max_concurrent: int | None = 4
-    gross_cap: float = 1.0
+    gross_cap: float = 1.0           # repo risk.yaml: gross <= 100% own NAV (handbook 40% rule is PER TICKER; name_cap 15% is stricter)
     sector_cap: float | None = 0.30
     same_bar_stop: str = "pessimistic"
     flatten_before_close: int = 5
     loss_lock: float | None = 0.0125
     entry_deadline: int | None = 10 * 60 + 30   # latest entry fill (minute of day), config/orb.yaml
     liquidity_frac: float | None = 0.01          # max shares vs the last closed bar's volume, config/backtest.yaml
-    costs: Costs = COMPETITION
+    costs: Costs = STOCK_COSTS
     exe: Execution = field(default=BASELINE_EXEC)
     label: str = ""
 

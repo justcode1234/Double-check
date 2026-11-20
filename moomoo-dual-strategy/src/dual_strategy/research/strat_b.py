@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 
 from dual_strategy.research.book import DayBook
 from dual_strategy.research.etf import DECISION_MINUTES, EtfContext, decision_slot
-from dual_strategy.research.execution import BASELINE_EXEC, COMPETITION, Costs, Execution, next_valid
+from dual_strategy.research.execution import ETF_COSTS, ETF_EXEC, Costs, Execution, next_valid
 
 
 @dataclass(frozen=True)
@@ -27,8 +27,8 @@ class BConfig:
     strict_history: bool = True
     flatten_before_close: int = 5     # minutes; 0 = exit at the 16:00 closing price
     loss_lock: float | None = 0.0125
-    costs: Costs = COMPETITION
-    exe: Execution = field(default=BASELINE_EXEC)
+    costs: Costs = ETF_COSTS
+    exe: Execution = field(default=ETF_EXEC)
     label: str = ""
 
 

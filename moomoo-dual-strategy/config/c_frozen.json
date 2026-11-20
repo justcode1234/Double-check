@@ -1,10 +1,10 @@
 {
- "frozen_at_utc": "2026-11-18T18:12:15+00:00",
+ "frozen_at_utc": "2026-11-19T04:31:53+00:00",
  "development_window": [
   "2021-01-04",
   "2022-12-30"
  ],
- "selection_rule": "Highest development-period (2021-2022) daily Sharpe of the competition-sized long/short C1 at 5 bps, among grid cells with >= 100 trades; ties -> closest to the preregistered (0.3, 0.25, 60). If no cell has a positive development Sharpe, freeze the preregistered cell and record a development FAIL. Validation (2023) is reported, never used to re-select.",
+ "selection_rule": "Highest development-period (2021-2022) daily Sharpe of the competition-sized long/short C1 at the baseline cost (competition fees + 1 bp/side), among grid cells with >= 100 trades; ties -> closest to the preregistered (0.3, 0.25, 60). If no cell has a positive development Sharpe, freeze the preregistered cell and record a development FAIL. Validation (2023) is reported, never used to re-select.",
  "preregistered": {
   "band": 0.3,
   "stop_atr": 0.25,
@@ -29,218 +29,218 @@
    "band": 0.2,
    "stop_atr": 0.2,
    "hold": 30,
-   "trades": 526,
-   "sharpe": -9.0969,
-   "net_return_pct": -25.301
+   "trades": 641,
+   "sharpe": -4.1141,
+   "net_return_pct": -11.503
   },
   {
    "band": 0.2,
    "stop_atr": 0.2,
    "hold": 60,
-   "trades": 496,
-   "sharpe": -8.6216,
-   "net_return_pct": -25.948
+   "trades": 596,
+   "sharpe": -4.291,
+   "net_return_pct": -13.066
   },
   {
    "band": 0.2,
    "stop_atr": 0.2,
    "hold": 90,
-   "trades": 487,
-   "sharpe": -7.9818,
-   "net_return_pct": -24.929
+   "trades": 583,
+   "sharpe": -3.7705,
+   "net_return_pct": -12.032
   },
   {
    "band": 0.2,
    "stop_atr": 0.25,
    "hold": 30,
-   "trades": 522,
-   "sharpe": -8.7245,
-   "net_return_pct": -24.274
+   "trades": 637,
+   "sharpe": -3.8109,
+   "net_return_pct": -11.047
   },
   {
    "band": 0.2,
    "stop_atr": 0.25,
    "hold": 60,
-   "trades": 486,
-   "sharpe": -8.0329,
-   "net_return_pct": -25.22
+   "trades": 584,
+   "sharpe": -4.0303,
+   "net_return_pct": -13.195
   },
   {
    "band": 0.2,
    "stop_atr": 0.25,
    "hold": 90,
-   "trades": 476,
-   "sharpe": -7.3263,
-   "net_return_pct": -24.608
-  },
-  {
-   "band": 0.2,
-   "stop_atr": 0.35,
-   "hold": 30,
-   "trades": 520,
-   "sharpe": -8.5145,
-   "net_return_pct": -22.491
-  },
-  {
-   "band": 0.2,
-   "stop_atr": 0.35,
-   "hold": 60,
-   "trades": 481,
-   "sharpe": -7.5166,
-   "net_return_pct": -22.234
-  },
-  {
-   "band": 0.2,
-   "stop_atr": 0.35,
-   "hold": 90,
-   "trades": 463,
-   "sharpe": -6.6539,
-   "net_return_pct": -20.798
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.2,
-   "hold": 30,
-   "trades": 334,
-   "sharpe": -6.7249,
-   "net_return_pct": -18.948
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.2,
-   "hold": 60,
-   "trades": 322,
-   "sharpe": -6.2441,
-   "net_return_pct": -20.09
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.2,
-   "hold": 90,
-   "trades": 314,
-   "sharpe": -5.9479,
-   "net_return_pct": -19.687
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.25,
-   "hold": 30,
-   "trades": 330,
-   "sharpe": -6.65,
-   "net_return_pct": -18.827
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.25,
-   "hold": 60,
-   "trades": 313,
-   "sharpe": -5.9848,
-   "net_return_pct": -19.049
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.25,
-   "hold": 90,
-   "trades": 302,
-   "sharpe": -5.6229,
-   "net_return_pct": -18.881
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.35,
-   "hold": 30,
-   "trades": 327,
-   "sharpe": -6.51,
-   "net_return_pct": -15.936
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.35,
-   "hold": 60,
-   "trades": 304,
-   "sharpe": -5.0685,
-   "net_return_pct": -15.08
-  },
-  {
-   "band": 0.3,
-   "stop_atr": 0.35,
-   "hold": 90,
-   "trades": 288,
-   "sharpe": -4.8333,
-   "net_return_pct": -15.064
-  },
-  {
-   "band": 0.4,
-   "stop_atr": 0.2,
-   "hold": 30,
-   "trades": 157,
-   "sharpe": -3.7149,
-   "net_return_pct": -8.451
-  },
-  {
-   "band": 0.4,
-   "stop_atr": 0.2,
-   "hold": 60,
-   "trades": 150,
-   "sharpe": -3.2442,
-   "net_return_pct": -8.236
-  },
-  {
-   "band": 0.4,
-   "stop_atr": 0.2,
-   "hold": 90,
-   "trades": 148,
-   "sharpe": -3.1803,
-   "net_return_pct": -8.079
-  },
-  {
-   "band": 0.4,
-   "stop_atr": 0.25,
-   "hold": 30,
-   "trades": 157,
-   "sharpe": -3.664,
-   "net_return_pct": -8.401
-  },
-  {
-   "band": 0.4,
-   "stop_atr": 0.25,
-   "hold": 60,
-   "trades": 149,
-   "sharpe": -3.1987,
-   "net_return_pct": -7.852
-  },
-  {
-   "band": 0.4,
-   "stop_atr": 0.25,
-   "hold": 90,
-   "trades": 145,
-   "sharpe": -3.0902,
-   "net_return_pct": -7.591
-  },
-  {
-   "band": 0.4,
-   "stop_atr": 0.35,
-   "hold": 30,
-   "trades": 156,
+   "trades": 569,
    "sharpe": -3.6083,
-   "net_return_pct": -7.416
+   "net_return_pct": -12.812
+  },
+  {
+   "band": 0.2,
+   "stop_atr": 0.35,
+   "hold": 30,
+   "trades": 635,
+   "sharpe": -3.6798,
+   "net_return_pct": -10.156
+  },
+  {
+   "band": 0.2,
+   "stop_atr": 0.35,
+   "hold": 60,
+   "trades": 579,
+   "sharpe": -3.5975,
+   "net_return_pct": -11.426
+  },
+  {
+   "band": 0.2,
+   "stop_atr": 0.35,
+   "hold": 90,
+   "trades": 556,
+   "sharpe": -2.9313,
+   "net_return_pct": -10.034
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.2,
+   "hold": 30,
+   "trades": 421,
+   "sharpe": -4.5342,
+   "net_return_pct": -11.63
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.2,
+   "hold": 60,
+   "trades": 403,
+   "sharpe": -4.2203,
+   "net_return_pct": -12.82
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.2,
+   "hold": 90,
+   "trades": 389,
+   "sharpe": -3.7941,
+   "net_return_pct": -12.474
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.25,
+   "hold": 30,
+   "trades": 417,
+   "sharpe": -4.4356,
+   "net_return_pct": -11.875
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.25,
+   "hold": 60,
+   "trades": 391,
+   "sharpe": -3.9608,
+   "net_return_pct": -12.361
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.25,
+   "hold": 90,
+   "trades": 373,
+   "sharpe": -3.5651,
+   "net_return_pct": -12.13
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.35,
+   "hold": 30,
+   "trades": 414,
+   "sharpe": -3.8832,
+   "net_return_pct": -9.334
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.35,
+   "hold": 60,
+   "trades": 380,
+   "sharpe": -3.0466,
+   "net_return_pct": -9.227
+  },
+  {
+   "band": 0.3,
+   "stop_atr": 0.35,
+   "hold": 90,
+   "trades": 356,
+   "sharpe": -2.7892,
+   "net_return_pct": -9.023
+  },
+  {
+   "band": 0.4,
+   "stop_atr": 0.2,
+   "hold": 30,
+   "trades": 216,
+   "sharpe": -1.8369,
+   "net_return_pct": -3.804
+  },
+  {
+   "band": 0.4,
+   "stop_atr": 0.2,
+   "hold": 60,
+   "trades": 202,
+   "sharpe": -1.7896,
+   "net_return_pct": -4.391
+  },
+  {
+   "band": 0.4,
+   "stop_atr": 0.2,
+   "hold": 90,
+   "trades": 199,
+   "sharpe": -1.7284,
+   "net_return_pct": -4.409
+  },
+  {
+   "band": 0.4,
+   "stop_atr": 0.25,
+   "hold": 30,
+   "trades": 216,
+   "sharpe": -1.6486,
+   "net_return_pct": -3.637
+  },
+  {
+   "band": 0.4,
+   "stop_atr": 0.25,
+   "hold": 60,
+   "trades": 202,
+   "sharpe": -1.636,
+   "net_return_pct": -4.076
+  },
+  {
+   "band": 0.4,
+   "stop_atr": 0.25,
+   "hold": 90,
+   "trades": 197,
+   "sharpe": -1.4835,
+   "net_return_pct": -3.85
+  },
+  {
+   "band": 0.4,
+   "stop_atr": 0.35,
+   "hold": 30,
+   "trades": 215,
+   "sharpe": -1.1721,
+   "net_return_pct": -2.303
   },
   {
    "band": 0.4,
    "stop_atr": 0.35,
    "hold": 60,
-   "trades": 145,
-   "sharpe": -3.0814,
-   "net_return_pct": -6.915
+   "trades": 196,
+   "sharpe": -1.1018,
+   "net_return_pct": -2.508
   },
   {
    "band": 0.4,
    "stop_atr": 0.35,
    "hold": 90,
-   "trades": 139,
-   "sharpe": -3.0328,
-   "net_return_pct": -6.845
+   "trades": 189,
+   "sharpe": -0.9709,
+   "net_return_pct": -2.315
   }
  ],
- "sha256": "98854eb6258701dd808ab9cd9d66ce66ab581632b5a36f7b93043814763d2c1d"
+ "sha256": "467569c6e46dc57215de7729f766db3bfb37bf6f48c8c434c17de7b3db80e038"
 }

@@ -1,0 +1,32 @@
+{
+ "generated_at_utc": "2026-11-19T06:32:02+00:00",
+ "seed": 20261119,
+ "paths": 10000,
+ "horizon": 8,
+ "blocks": [
+  1,
+  2,
+  4,
+  8
+ ],
+ "freeze": {
+  "src/dual_strategy/research/strat_a.py": "96e1ae970a69a192f25a1a9a38ca0c41719953ed14e8fc99808308ab784b53df",
+  "src/dual_strategy/research/strat_b.py": "f097060311a7be0c1d36e5fcd510fe611d684579e1b923eba9c577e87205e610",
+  "src/dual_strategy/research/strat_c.py": "58df8ca4e095afd6951722d2a5a9d36037f286c242eefdf5bb8948a69344b87e",
+  "src/dual_strategy/research/execution.py": "a306ae2669ca2a8e985015f3872f4d4d93dcaf921b988da9c83ea834bc05417c",
+  "src/dual_strategy/research/run.py": "8c905981b4ccf35ca95a882d8a133230585405b27e7364dd89f222900d732e42",
+  "src/dual_strategy/research/book.py": "eaec101a62f64570fe2887ae730a2813159973b201a161489651e2f46356277c",
+  "src/dual_strategy/research/portfolio.py": "ca68c32099957019b000f922d7aa62c8a71784b8521112bc1df0c2cd605e098b",
+  "src/dual_strategy/research/features.py": "f5e19e0ff036ef2716b342fa17a7a3565a64dee0db8e46b2f24503a25b265247",
+  "src/dual_strategy/research/etf.py": "3d3d8647bc52c81d56fbed854aa1ff14f904eec9208927b3522e3548f6c3fc65",
+  "config/c_frozen.json": "88c822f2f18a39f1e57aeddad8ac5965dfaef80d26f1f650306403e9e8310ee6",
+  "config/research_universe.json": "5bcc47e775c58f36635aca4e58cb98cc4abe96e48274d80e9d19e73adf77ff57",
+  "data-cache/history/manifest.json": "c68c60d5b8fb8b3aac5edb490633932e3789a9ffde496fff5026dbff2564742e"
+ },
+ "extra_data": {
+  "US..VIX_daily.csv.gz": "d2d0d5f4702a78a20d2bf7b7470d1d2d9826bc895b2e3dbb6ceb18c8ae195136",
+  "US.SPY_moomoo_iv_hv_260.json": "85536044f23d8cb0b31e7e3d284f065e315e62a4e1b8eadfa0d6d83ce104e6ad"
+ },
+ "chain_status": "D/E/F BACKTEST BLOCKED - HISTORICAL OPTIONS CHAINS MISSING: no files under <user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\options_history\\US.SPY",
+ "command": "PYTHONUTF8=1 .venv/Scripts/python.exe -m dual_strategy.research.six"
+}

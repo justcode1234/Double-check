@@ -12,9 +12,9 @@ from dual_strategy.research.fetch import HISTORY, MOOMOO, ROOT
 
 
 def main() -> None:
-    universe = json.loads((ROOT / "config" / "research_universe.json").read_text())
+    universe = json.loads((ROOT / "config" / "research_universe.json").read_text(encoding="utf-8"))
     out_path = HISTORY / "sectors.json"
-    result = json.loads(out_path.read_text()) if out_path.exists() else {"industry": {}}
+    result = json.loads(out_path.read_text(encoding="utf-8")) if out_path.exists() else {"industry": {}}
     for sym in universe["stocks"]:
         if result["industry"].get(sym):
             continue
@@ -22,7 +22,7 @@ def main() -> None:
         for attempt in range(4):
             time.sleep(3.0)
             proc = subprocess.run([MOOMOO, "plate", sym, "--view", "owner", "--format", "json"],
-                                  capture_output=True, text=True, timeout=60)
+                                  capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
             if proc.returncode == 0:
                 plates = json.loads(proc.stdout).get("sectors") or []
                 names = sorted({p["plate_name"] for p in plates if p.get("plate_type") == "INDUSTRY"})

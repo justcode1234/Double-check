@@ -1,0 +1,6 @@
+,ratio_har,ratio_har,ratio_har,ratio_har,ratio_har,ratio_har,ratio_har,ratio_har,ratio_hv,ratio_hv,ratio_hv,ratio_hv,ratio_hv,ratio_hv,ratio_hv,ratio_hv
+,count,mean,std,min,10%,50%,90%,max,count,mean,std,min,10%,50%,90%,max
+segment,,,,,,,,,,,,,,,,
+dev,182.0,1.129,0.193,0.691,0.888,1.116,1.393,1.827,346.0,1.106,0.278,0.615,0.774,1.074,1.447,2.151
+oos,217.0,0.953,0.17,0.602,0.752,0.944,1.135,1.753,217.0,1.099,0.281,0.495,0.749,1.1,1.409,2.221
+val,157.0,1.007,0.171,0.628,0.798,0.986,1.253,1.461,157.0,1.135,0.206,0.687,0.894,1.132,1.369,1.773

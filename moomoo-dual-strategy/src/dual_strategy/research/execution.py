@@ -40,6 +40,12 @@ class Costs:
 
 
 COMPETITION = Costs("competition", per_order=0.99, sell_per_share=0.000166, sell_cap=8.30, slip_bps=5.0)
+# v2 realistic baselines (the 5 bp COMPETITION profile above is kept as a stress level, not the baseline).
+# SPY: NBBO spread is ~$0.01 on a $470-750 price (~0.15-0.2 bp), so 1 bp/side is ~10x the half-spread and matches
+# config/backtest.yaml's "normal" scenario. Stocks: 3 bp/side, because ORB enters 09:35-10:30 when spreads are wider.
+ETF_COSTS = Costs("competition_etf_1bp", per_order=0.99, sell_per_share=0.000166, sell_cap=8.30, slip_bps=1.0)
+STOCK_COSTS = Costs("competition_stock_3bp", per_order=0.99, sell_per_share=0.000166, sell_cap=8.30, slip_bps=3.0)
+BASELINE_BPS = {"A": 3.0, "B": 1.0, "C": 1.0}
 PAPER_ORB = Costs("paper_orb", per_share=0.0035)
 PAPER_NOISE = Costs("paper_noise", per_share=0.0035, slip_per_share=0.001)
 
@@ -67,6 +73,8 @@ class Execution:
 
 
 BASELINE_EXEC = Execution()
+# SPY software stop: ~4 s polling latency on a $500+ ETF moves the fill ~1-2 bp typical; 2 bp baseline.
+ETF_EXEC = Execution(stop_latency_bps=2.0)
 NATIVE_EXEC = Execution(stop_mode="native", stop_latency_bps=0.0)
 
 

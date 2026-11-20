@@ -254,6 +254,17 @@ def test_c_target_and_sizing():
     assert t["qty"] == math.floor(0.40 * 50_000 / t["entry_fill"]) or t["qty"] == 200
 
 
+def test_c_entries_allowed_until_1430_on_a_full_day():
+    ctx = _c_day(False)
+    for a in (ctx.b1.open, ctx.b1.high, ctx.b1.low, ctx.b1.close):
+        a[0, :] = np.roll(a[0, :], 230)  # setup arms 13:55, re-entry trigger on the bar ending 14:00
+    ctx = _ctx(ctx.b1, atr=1.0)
+    cfg = strat_c.CConfig("c")
+    book = _book(cfg, ctx.days[0])
+    strat_c.run_day(ctx, 0, 50_000, cfg, book)
+    assert [t["entry_time"] for t in book.trades][:1] == ["14:00"]
+
+
 def test_c_no_entry_after_1430():
     ctx = _c_day(False)
     for a in (ctx.b1.open, ctx.b1.high, ctx.b1.low, ctx.b1.close):
@@ -448,12 +459,20 @@ def test_gates_and_verdict():
     from dual_strategy.research import report
     good = {"sessions": 700, "trades": 300, "sharpe": 1.2, "p_bootstrap_sharpe_le_0": 0.01, "data_gap_sessions": 0,
             "excess_vs_matched_pct": 3.0, "max_drawdown_pct": -2.0, "net_return_pct": 4.0, "sharpe_ci95": [0.2, 2.0]}
-    rows = [{"variant": v, "segment": s, **good} for v in ("B1", "B1-slip10", "B1-combined-slip10") for s in ("val", "oos")]
+    rows = [{"variant": v, "segment": s, **good} for v in ("B1", "B1-combined") for s in ("val", "oos")]
+    rows += [{"variant": f"B1-slip{b}", "segment": "oos", **good, "net_return_pct": n}
+             for b, n in ((0, 6.0), (1, 4.0), (2, 2.0), (5, -4.0))]
     wf = {"B1": {"windows": 6, "positive_share": 0.67, "stitched_return_pct": 5.0}}
-    g = report.gates("B", "B1", rows, wf, {})
+    g = report.gates("B", "B1", rows, wf, {}, {"B1": 0.01})
     assert {s for _, s, _ in g} == {"PASS"} and report.verdict(g).startswith("GO")
+    assert report.breakeven_bps(rows, "B1")["bps"] == pytest.approx(3.0)      # 2 bp -> +2%, 5 bp -> -4%
+    assert report.verdict(report.gates("B", "B1", rows, wf, {}, {"B1": 0.2})) == "NO-GO"   # 8-session DD risk
     rows[1]["p_bootstrap_sharpe_le_0"] = 0.2
     assert report.verdict(report.gates("B", "B1", rows, wf, {})) == "NO-GO"
+    assert report.edge_grade(rows[1]) == "WEAK / UNPROVEN"
+    thin = [r for r in rows if not r["variant"].startswith("B1-slip")] + [
+        {"variant": "B1-slip0", "segment": "oos", "net_return_pct": 1.0}, {"variant": "B1-slip1", "segment": "oos", "net_return_pct": 0.0}]
+    assert ("cost_robust", "FAIL") in [(a, b) for a, b, _ in report.gates("B", "B1", thin, wf, {})]
     ga = report.gates("A", "A1", [{**r, "variant": r["variant"].replace("B", "A")} for r in rows[:0]] +
                       [{"variant": "A1", "segment": s, **good} for s in ("val", "oos")], {}, {})
     assert ("data", "EXPLORATORY") in [(a, b) for a, b, _ in ga]

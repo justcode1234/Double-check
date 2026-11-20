@@ -10,6 +10,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -21,7 +22,18 @@ import exchange_calendars
 
 from dual_strategy.data.calendar import NY
 
-MOOMOO = str(Path.home() / ".moomoo/bin/moomoo")
+
+def _find_cli() -> str:
+    """MOOMOO_CLI env var, else the macOS (~/.moomoo/bin) or Windows (%LOCALAPPDATA%/MoomooCLI/bin) install."""
+    if os.environ.get("MOOMOO_CLI"):
+        return os.environ["MOOMOO_CLI"]
+    candidates = [Path.home() / ".moomoo/bin/moomoo"]
+    if os.environ.get("LOCALAPPDATA"):
+        candidates.insert(0, Path(os.environ["LOCALAPPDATA"]) / "MoomooCLI/bin/moomoo.exe")
+    return str(next((p for p in candidates if p.exists()), candidates[-1]))
+
+
+MOOMOO = _find_cli()
 ROOT = Path(__file__).resolve().parents[3]
 HISTORY = ROOT / "data-cache" / "history"
 START = date(2020, 11, 2)
@@ -54,7 +66,7 @@ def cli(args: list[str], log) -> dict | list:
         if wait > 0:
             time.sleep(wait)
         _last_call = time.monotonic()
-        proc = subprocess.run([MOOMOO, *args, "--format", "json"], capture_output=True, text=True, timeout=120)
+        proc = subprocess.run([MOOMOO, *args, "--format", "json"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
         out = proc.stdout.strip() or proc.stderr.strip()
         if proc.returncode == 0:
             return json.loads(out)
@@ -147,7 +159,7 @@ def fetch_actions(symbol: str, log) -> None:
     for kind in ("splits", "dividends"):
         out[kind] = cli(["corporate-actions", symbol, "--type", kind, "--limit", "200"], log)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(out, indent=1, ensure_ascii=False))
+    path.write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     log(f"{symbol} corporate actions saved")
 
 
@@ -167,9 +179,10 @@ def write_manifest(log) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--universe", default=str(ROOT / "config" / "research_universe.json"))
+    parser.add_argument("--intraday-etfs", default="", help="comma list of ETFs to fetch 1m bars for (default: all)")
     args = parser.parse_args()
     HISTORY.mkdir(parents=True, exist_ok=True)
-    logfile = (HISTORY / "fetch.log").open("a")
+    logfile = (HISTORY / "fetch.log").open("a", encoding="utf-8")
 
     def log(msg: str) -> None:
         line = f"{datetime.now(timezone.utc).isoformat(timespec='seconds')} {msg}"
@@ -177,14 +190,20 @@ def main() -> None:
         logfile.write(line + "\n")
         logfile.flush()
 
-    universe = json.loads(Path(args.universe).read_text())
+    universe = json.loads(Path(args.universe).read_text(encoding="utf-8"))
     etfs, stocks = universe["etfs"], universe["stocks"]
+    intraday_etfs = args.intraday_etfs.split(",") if args.intraday_etfs else etfs
+    # SPY first so B/C can run while the (much longer) stock download continues.
+    for sym in intraday_etfs:
+        for autype in (0, 1):
+            fetch_daily(sym, autype, log)
+        fetch_actions(sym, log)
+        fetch_intraday(sym, 1, log)
+    log("ETF intraday DONE")
     for sym in etfs + stocks:
         for autype in (0, 1):
             fetch_daily(sym, autype, log)
         fetch_actions(sym, log)
-    for sym in etfs:
-        fetch_intraday(sym, 1, log)
     for sym in stocks:
         fetch_intraday(sym, 6, log)
     write_manifest(log)

@@ -1,0 +1,9 @@
+{
+ "generated_at_utc": "2026-11-19T05:03:42+00:00",
+ "source": "moomoo CLI history-kline US..VIX ktype 2 autype 0; option-underlying-his-volatility US.SPY --count 260 (max)",
+ "note": "VIX = Cboe 30-day S&P 500 implied volatility index (proxy for SPY 30-day IV). Moomoo SPY IV/HV only last 260 sessions; end-time paging returns empty.",
+ "sha256": {
+  "US..VIX_daily.csv.gz": "d2d0d5f4702a78a20d2bf7b7470d1d2d9826bc895b2e3dbb6ceb18c8ae195136",
+  "US.SPY_moomoo_iv_hv_260.json": "85536044f23d8cb0b31e7e3d284f065e315e62a4e1b8eadfa0d6d83ce104e6ad"
+ }
+}

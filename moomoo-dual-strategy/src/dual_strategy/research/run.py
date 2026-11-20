@@ -24,7 +24,8 @@ import numpy as np
 from dual_strategy.research import strat_a, strat_b, strat_c
 from dual_strategy.research.data import HISTORY, sessions
 from dual_strategy.research.etf import etf_context
-from dual_strategy.research.execution import BASELINE_EXEC, COMPETITION, NATIVE_EXEC, PAPER_NOISE, PAPER_ORB
+from dual_strategy.research.execution import (BASELINE_EXEC, ETF_COSTS, ETF_EXEC, NATIVE_EXEC, PAPER_NOISE, PAPER_ORB,
+                                              STOCK_COSTS)
 from dual_strategy.research.fetch import END, ROOT
 from dual_strategy.research.metrics import metrics
 from dual_strategy.research.portfolio import Result, simulate
@@ -39,8 +40,9 @@ FREEZE_PATH = ROOT / "config" / "c_frozen.json"
 C_GRID = [(b, s, h) for b in (0.20, 0.30, 0.40) for s in (0.20, 0.25, 0.35) for h in (30, 60, 90)]
 C_PREREGISTERED = (0.30, 0.25, 60)
 C_MIN_DEV_TRADES = 100
+SLIP_GRID = (0, 1, 2, 3, 5, 10, 15)
 SELECTION_RULE = (f"Highest development-period (2021-2022) daily Sharpe of the competition-sized long/short C1 at "
-                  f"5 bps, among grid cells with >= {C_MIN_DEV_TRADES} trades; ties -> closest to the preregistered "
+                  f"the baseline cost (competition fees + 1 bp/side), among grid cells with >= {C_MIN_DEV_TRADES} trades; ties -> closest to the preregistered "
                   f"{C_PREREGISTERED}. If no cell has a positive development Sharpe, freeze the preregistered cell "
                   f"and record a development FAIL. Validation (2023) is reported, never used to re-select.")
 
@@ -64,7 +66,7 @@ class Engine:
     def __init__(self) -> None:
         self.spy = etf_context("US.SPY")
         self.spy_ok = self.spy.b1.has_any()
-        universe = json.loads((ROOT / "config" / "research_universe.json").read_text())
+        universe = json.loads((ROOT / "config" / "research_universe.json").read_text(encoding="utf-8"))
         self.ranked = [s for s in universe["stocks"] if list((HISTORY / "k6" / s).glob("*.csv.gz"))]
         self.missing_stocks = [s for s in universe["stocks"] if s not in self.ranked]
         self.stocks = strat_a.stock_universe(tuple(self.ranked)) if self.ranked else {}
@@ -104,7 +106,7 @@ def select_c(engine: Engine, days: list[date]) -> tuple[tuple, list[dict]]:
 def freeze_c(engine: Engine) -> dict:
     """Write the frozen C rule BEFORE any validation/OOS simulation of C; reuse and verify it on reruns."""
     if FREEZE_PATH.exists():
-        rec = json.loads(FREEZE_PATH.read_text())
+        rec = json.loads(FREEZE_PATH.read_text(encoding="utf-8"))
         body = {k: v for k, v in rec.items() if k != "sha256"}
         if hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest() != rec["sha256"]:
             raise SystemExit("config/c_frozen.json was edited after freezing; refusing to run")
@@ -139,7 +141,7 @@ def variants(engine: Engine, frozen: dict) -> list[Variant]:
         abl = {
             "A0-R-QCstop": replace(a0, name="A0-R-QCstop", stop_anchor="range"),
             "A0-R-optimistic": replace(a0, name="A0-R-optimistic", same_bar_stop="optimistic"),
-            "A0-R-competition-fees": replace(a0, name="A0-R-competition-fees", costs=COMPETITION),
+            "A0-R-competition-fees": replace(a0, name="A0-R-competition-fees", costs=STOCK_COSTS),
             "A1-QCstop": replace(a1, name="A1-QCstop", stop_anchor="range"),
             "A1-resting-stop": replace(a1, name="A1-resting-stop", entry="resting_stop", exe=NATIVE_EXEC),
             "A1-touch-market": replace(a1, name="A1-touch-market", entry="touch_market"),
@@ -163,20 +165,23 @@ def variants(engine: Engine, frozen: dict) -> list[Variant]:
     out += [Variant("B0", "B", b0, "headline", "paper: L/S, min(4, 2%/vol14) leverage"),
             Variant("B0-100", "B", replace(b0, name="B0-100", sizing="fixed", fraction=1.0), "headline", "paper rules, 100% NAV"),
             Variant("B1", "B", b1, "headline", "competition L/S, 40% NAV"),
-            Variant("B1-LO", "B", replace(b1, name="B1-LO", shorts=False), "headline", "competition long-only")]
+            Variant("B1-LO", "B", replace(b1, name="B1-LO", shorts=False), "headline", "competition long-only"),
+            Variant("B2", "B", replace(b0, name="B2", sizing="fixed", fraction=0.40, costs=ETF_COSTS,
+                                       label="B0 SIGNALS + COMPETITION SIZING/FEES ONLY"), "headline",
+                    "B0's exact signals/exits (16:00 exit, no loss lock), 40% notional, competition fees + 1 bp")]
     babl = {
         "B1-stateful-trail": replace(b1, name="B1-stateful-trail", stateful=True),
         "B1-hlc3-vwap": replace(b1, name="B1-hlc3-vwap", vwap="hlc3"),
         "B1-skip-history": replace(b1, name="B1-skip-history", strict_history=False),
         "B1-no-losslock": replace(b1, name="B1-no-losslock", loss_lock=None),
         "B1-close-exit": replace(b1, name="B1-close-exit", flatten_before_close=0),
-        "B1-monitor5": replace(b1, name="B1-monitor5", exe=BASELINE_EXEC.with_(monitor_every=5)),
-        "B1-monitor15": replace(b1, name="B1-monitor15", exe=BASELINE_EXEC.with_(monitor_every=15)),
-        "B1-monitor30": replace(b1, name="B1-monitor30", exe=BASELINE_EXEC.with_(monitor_every=30)),
-        "B1-delay1": replace(b1, name="B1-delay1", exe=BASELINE_EXEC.with_(delay=1)),
-        "B1-delay2": replace(b1, name="B1-delay2", exe=BASELINE_EXEC.with_(delay=2)),
-        "B1-delay5": replace(b1, name="B1-delay5", exe=BASELINE_EXEC.with_(delay=5)),
-        "B0-competition-fees": replace(b0, name="B0-competition-fees", costs=COMPETITION),
+        "B1-monitor5": replace(b1, name="B1-monitor5", exe=ETF_EXEC.with_(monitor_every=5)),
+        "B1-monitor15": replace(b1, name="B1-monitor15", exe=ETF_EXEC.with_(monitor_every=15)),
+        "B1-monitor30": replace(b1, name="B1-monitor30", exe=ETF_EXEC.with_(monitor_every=30)),
+        "B1-delay1": replace(b1, name="B1-delay1", exe=ETF_EXEC.with_(delay=1)),
+        "B1-delay2": replace(b1, name="B1-delay2", exe=ETF_EXEC.with_(delay=2)),
+        "B1-delay5": replace(b1, name="B1-delay5", exe=ETF_EXEC.with_(delay=5)),
+        "B0-competition-fees": replace(b0, name="B0-competition-fees", costs=ETF_COSTS),
     }
     out += [Variant(k, "B", c, "ablation") for k, c in babl.items()]
     sel = frozen["selected"]
@@ -200,18 +205,19 @@ def variants(engine: Engine, frozen: dict) -> list[Variant]:
     out += [Variant(k, "C", c, "ablation") for k, c in cabl.items()]
     heads = {v.vid: v for v in out if v.vid in ("A1", "B1", "C1")}
     for vid, v in heads.items():
-        for bps in (0, 2, 5, 10, 15):
+        for bps in SLIP_GRID:
             out.append(Variant(f"{vid}-slip{bps}", v.strategy, replace(v.cfg, name=f"{vid}-slip{bps}",
                                costs=v.cfg.costs.with_slippage(bps)), "slippage"))
+        base = v.cfg.exe
         stress = {
-            "stop-native": BASELINE_EXEC.with_(stop_mode="native", stop_latency_bps=0.0),
-            "stop-stressed": BASELINE_EXEC.with_(stop_mode="stressed"),
-            "delay1": BASELINE_EXEC.with_(delay=1),
-            "delay2": BASELINE_EXEC.with_(delay=2),
-            "reject2pct": BASELINE_EXEC.with_(reject_rate=0.02),
-            "miss2pct": BASELINE_EXEC.with_(miss_rate=0.02),
-            "participation0.05": BASELINE_EXEC.with_(participation=0.05),
-            "combined": BASELINE_EXEC.with_(stop_mode="stressed", delay=1, reject_rate=0.02, miss_rate=0.02),
+            "stop-native": base.with_(stop_mode="native", stop_latency_bps=0.0),
+            "stop-stressed": base.with_(stop_mode="stressed"),
+            "delay1": base.with_(delay=1),
+            "delay2": base.with_(delay=2),
+            "reject2pct": base.with_(reject_rate=0.02),
+            "miss2pct": base.with_(miss_rate=0.02),
+            "participation0.05": base.with_(participation=0.05),
+            "combined": base.with_(stop_mode="stressed", delay=1, reject_rate=0.02, miss_rate=0.02),
         }
         for k, exe in stress.items():
             out.append(Variant(f"{vid}-{k}", v.strategy, replace(v.cfg, name=f"{vid}-{k}", exe=exe), "stress"))
@@ -257,7 +263,7 @@ def main(argv: list[str] | None = None) -> None:
     from dual_strategy.research import report
     parser = argparse.ArgumentParser()
     parser.add_argument("--only", choices=["A", "B", "C"], action="append")
-    parser.add_argument("--out", default=str(ROOT / "reports"))
+    parser.add_argument("--out", default=str(ROOT / "reports" / "backtest_v3"))
     args = parser.parse_args(argv)
     t0 = time.time()
     engine = Engine()

@@ -1,0 +1,14 @@
+{
+ "command": ".venv/bin/python -m dual_strategy.research.run --out reports/backtest_v2",
+ "git_commit": "561454885e8aa8374682bb9460eff349c4273d16+uncommitted-research-modules",
+ "python": "3.14.7",
+ "elapsed_seconds": 441.3,
+ "data_manifest_content_sha256": "4e0bb91dcad4080c2fc93a0c58d79c696eaa16a9ade77c9417cb17f9a8764820",
+ "data_files": 415,
+ "config_sha256": "b0206f394a45d1d426f874eb270ed77d76b1860c2f935dd57b9c41afcc91d94b",
+ "c_frozen_sha256": "467569c6e46dc57215de7729f766db3bfb37bf6f48c8c434c17de7b3db80e038",
+ "universe_sha256": "5bcc47e775c58f36635aca4e58cb98cc4abe96e48274d80e9d19e73adf77ff57",
+ "numpy": "2.5.5",
+ "pandas": "3.1.1",
+ "variants": 92
+}

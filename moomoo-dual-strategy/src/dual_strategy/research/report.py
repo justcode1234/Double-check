@@ -15,12 +15,13 @@ import pandas as pd
 
 from dual_strategy.research.data import (HISTORY, dividends, file_hashes, load_daily, sector_map, split_events,
                                          verify_splits)
+from dual_strategy.research.execution import BASELINE_BPS
 from dual_strategy.research.fetch import END, ROOT
 from dual_strategy.research.metrics import (block_bootstrap, drawdown_ladder, period_table, regime_table,
                                             spy_benchmark)
 from dual_strategy.research.portfolio import START_EQUITY
 
-HEADLINE = {"A": ["A0-R", "A1", "A1-LO"], "B": ["B0", "B0-100", "B1", "B1-LO"], "C": ["C0", "C1", "C1-LO"]}
+HEADLINE = {"A": ["A0-R", "A1", "A1-LO"], "B": ["B0", "B0-100", "B2", "B1", "B1-LO"], "C": ["C0", "C1", "C1-LO"]}
 PRIMARY = {"A": "A1", "B": "B1", "C": "C1"}
 COLORS = ["#1f77b4", "#d62728", "#2ca02c", "#9467bd", "#7f7f7f"]
 SEG_ORDER = ("dev", "val", "oos", "full")
@@ -183,7 +184,47 @@ def data_inventory(engine, hashes: dict) -> str:
 
 
 # ---------------------------------------------------------------- gates
-def gates(strategy: str, vid: str, rows: list[dict], wf_summary: dict, frozen: dict) -> list[tuple[str, str, str]]:
+def breakeven_bps(rows: list[dict], vid: str) -> dict | None:
+    """Per-side slippage (bps) at which OOS net return crosses zero, linearly interpolated on the slippage grid."""
+    pts = sorted((float(r["variant"].rsplit("-slip", 1)[1]), r["net_return_pct"]) for r in rows
+                 if r["segment"] == "oos" and r["variant"].startswith(f"{vid}-slip") and r.get("net_return_pct") is not None)
+    if not pts:
+        return None
+    if pts[0][1] <= 0:
+        return {"bps": 0.0, "above_grid": False, "grid": pts}
+    for (b0, n0), (b1, n1) in zip(pts, pts[1:]):
+        if n1 <= 0:
+            return {"bps": round(b0 + (b1 - b0) * n0 / (n0 - n1), 2), "above_grid": False, "grid": pts}
+    return {"bps": pts[-1][0], "above_grid": True, "grid": pts}
+
+
+def window_dd_risk(res, lo: date, hi: date, window: int = 8, level: float = 0.05) -> float | None:
+    """Share of rolling `window`-session spans (inside [lo, hi]) whose intra-span drawdown reaches `level`.
+    8 sessions ~ the competition's remaining trading window; 5% = the repo's terminal drawdown stop."""
+    d = res.daily
+    r = d[(d.index >= lo) & (d.index <= hi)]["ret"].to_numpy()
+    total = len(r) - window + 1
+    if total <= 0:
+        return None
+    hits = 0
+    for s in range(total):
+        e = np.cumprod(1 + r[s:s + window])
+        p = np.maximum.accumulate(np.concatenate([[1.0], e]))[1:]
+        hits += bool((e / p - 1 <= -level).any())
+    return hits / total
+
+
+def edge_grade(oos: dict) -> str:
+    sh, p = oos.get("sharpe"), oos.get("p_bootstrap_sharpe_le_0")
+    if sh is None:
+        return "N/A"
+    if sh > 0 and p is not None and p < 0.05:
+        return "EDGE"
+    return "WEAK / UNPROVEN" if sh > 0 else "NEGATIVE"
+
+
+def gates(strategy: str, vid: str, rows: list[dict], wf_summary: dict, frozen: dict,
+          dd_risk: dict | None = None) -> list[tuple[str, str, str]]:
     oos, val = _row(rows, vid, "oos"), _row(rows, vid, "val")
     g = []
     if strategy == "A":
@@ -200,16 +241,23 @@ def gates(strategy: str, vid: str, rows: list[dict], wf_summary: dict, frozen: d
     vr = val.get("net_return_pct")
     g.append(("validation_2023", "PASS" if vr is not None and vr > 0 else "FAIL", f"2023 net {_fmt(vr)}%"))
     if vid == PRIMARY[strategy]:
-        s10 = _row(rows, f"{vid}-slip10", "oos").get("net_return_pct")
-        g.append(("cost_10bps", "PASS" if s10 is not None and s10 > 0 else "FAIL", f"OOS net at 10 bps {_fmt(s10)}%"))
-        st = _row(rows, f"{vid}-combined-slip10", "oos").get("net_return_pct")
+        base = BASELINE_BPS[strategy]
+        be = breakeven_bps(rows, vid)
+        if be is not None:
+            ok = be["above_grid"] or be["bps"] >= 2 * base
+            g.append(("cost_robust", "PASS" if ok else "FAIL",
+                      f"break-even slippage {'>' if be['above_grid'] else ''}{be['bps']:.2f} bp/side "
+                      f"(needs >= 2x the {base:g} bp baseline)"))
+        st = _row(rows, f"{vid}-combined", "oos").get("net_return_pct")
         g.append(("stress", "PASS" if st is not None and st > 0 else "FAIL",
-                  f"OOS net, stressed stops + 1-bar delay + 2% rejects + 2% misses + 10 bps: {_fmt(st)}%"))
+                  f"OOS net, stressed stops + 1-bar delay + 2% rejects + 2% misses at baseline slippage: {_fmt(st)}%"))
     ex = oos.get("excess_vs_matched_pct")
     g.append(("vs_exposure_matched_spy", "PASS" if ex is not None and ex > 0 else "FAIL",
               f"OOS excess vs exposure-matched SPY {_fmt(ex)} pp"))
-    dd = oos.get("max_drawdown_pct")
-    g.append(("oos_drawdown_<=5%", "PASS" if dd is not None and dd >= -5 else "FAIL", f"OOS max DD {_fmt(dd)}%"))
+    if dd_risk and dd_risk.get(vid) is not None:
+        share = dd_risk[vid]
+        g.append(("8_session_5pct_drawdown_risk", "PASS" if share <= 0.05 else "FAIL",
+                  f"{100 * share:.1f}% of OOS 8-session spans hit a 5% drawdown (repo terminal stop); limit 5%"))
     if vid in wf_summary:
         w = wf_summary[vid]
         ok = w["stitched_return_pct"] > 0 and w["positive_share"] >= 0.6
@@ -286,6 +334,8 @@ def write_all(out: Path, *, engine, variants, rows, full, frozen, wf, segments, 
         wf_summary["C1"] = {"windows": len(wf), "positive_share": float(np.mean([f["test_net_return_pct"] > 0 for f in wf])),
                             "stitched_return_pct": 100 * (float(np.prod(1 + r)) - 1), "reselected": True,
                             "bootstrap": block_bootstrap(r)}
+    oos_lo, oos_hi = segments["oos"]
+    dd_risk = {vid: window_dd_risk(full[vid], oos_lo, oos_hi) for s in strategies for vid in HEADLINE[s] if vid in full}
     # correlations
     prim = [PRIMARY[s] for s in strategies if PRIMARY[s] in full]
     corr = {}
@@ -384,8 +434,10 @@ def write_all(out: Path, *, engine, variants, rows, full, frozen, wf, segments, 
                 "universe_sha256": hashlib.sha256((ROOT / "config" / "research_universe.json").read_bytes()).hexdigest(),
                 "numpy": np.__version__, "pandas": pd.__version__, "variants": len(variants)}
     (out / "backtest_run_manifest.json").write_text(json.dumps(manifest, indent=1))
+    board = scoreboard(rows, full, wf_summary, wf_tables, frozen, corr, dd_risk, segments, manifest, breakdowns, partial)
+    (out / "scoreboard.json").write_text(json.dumps(board, indent=1, default=str, allow_nan=False))
     if not partial:
-        (out / "final_backtest_audit.md").write_text(_audit_md(rows, wf_summary, frozen, corr, manifest, engine))
+        (out / "final_backtest_audit.md").write_text(_audit_md(rows, wf_summary, frozen, corr, manifest, engine, dd_risk))
 
 
 def _breakdowns_md(b: dict) -> str:
@@ -405,14 +457,17 @@ def _breakdowns_md(b: dict) -> str:
     return "\n".join(md)
 
 
-def _audit_md(rows, wf_summary, frozen, corr, manifest, engine) -> str:
+def _audit_md(rows, wf_summary, frozen, corr, manifest, engine, dd_risk=None) -> str:
     md = ["# Final backtest audit - strategies A, B, C (SIMULATED, offline)\n",
           f"Generated {datetime.now(timezone.utc).isoformat(timespec='seconds')}. This is a historical simulation on "
           "Moomoo bars. No orders were sent and no account was touched. It does not replace `final_audit.md`.\n",
           f"Segments: development 2021-01-04..2022-12-30, validation 2023, untouched OOS 2024-01-02..{END}. "
           "C rules were frozen from development data before any validation/OOS simulation of C.\n",
           "Gate legend: PASS / FAIL / BLOCKED (missing data makes the faithful test impossible) / EXPLORATORY "
-          "(runs, but on biased data, so it cannot support a GO).\n"]
+          "(runs, but on biased data, so it cannot support a GO).\n",
+          "Cost baseline (v2): competition fees + 1 bp/side slippage and 2 bp software-stop latency for SPY "
+          "(B, C); 3 bp/side and 5 bp latency for stocks (A). The previous run used 5 bp/side for everything; "
+          "the full 0-15 bp grid and the break-even slippage are reported for each primary variant.\n"]
     head_cols = ["variant", "trades", "net_return_pct", "expectancy_usd", "expectancy_r", "sharpe", "sharpe_ci95",
                  "max_drawdown_pct", "avg_gross_exposure", "excess_vs_matched_pct", "start", "end"]
     heads = [r for r in rows if r["group"] == "headline" and r["segment"] == "oos"]
@@ -424,7 +479,7 @@ def _audit_md(rows, wf_summary, frozen, corr, manifest, engine) -> str:
         for vid in HEADLINE[s]:
             if not _row(rows, vid, "oos"):
                 continue
-            g = gates(s, vid, rows, wf_summary, frozen)
+            g = gates(s, vid, rows, wf_summary, frozen, dd_risk)
             verdicts[vid] = verdict(g)
             md.append(f"\n### {vid} - {verdicts[vid]}\n")
             md.append(_table([{"gate": a, "status": b, "evidence": c} for a, b, c in g], ["gate", "status", "evidence"]))
@@ -443,3 +498,74 @@ def _audit_md(rows, wf_summary, frozen, corr, manifest, engine) -> str:
               f"sha256 `{manifest['data_manifest_content_sha256']}` ({manifest['data_files']} files), config sha256 "
               f"`{manifest['config_sha256']}`, C freeze sha256 `{manifest['c_frozen_sha256']}`.\n")
     return "\n".join(md)
+
+
+ROLE = {"A0-R": "paper rules (biased 40-stock universe)", "A1": "competition", "A1-LO": "competition, long-only",
+        "B0": "paper rules (vol-target, up to 4x)", "B0-100": "paper rules, 100% NAV", "B1": "competition",
+        "B1-LO": "competition, long-only", "B2": "B0 signals, competition sizing+fees", "C0": "hypothesis, 100% NAV", "C1": "competition", "C1-LO": "competition, long-only"}
+BOARD_KEYS = ["start", "end", "sessions", "trades", "long_trades", "short_trades", "gross_return_pct", "net_return_pct",
+              "annualized_return_pct", "win_rate_pct", "expectancy_usd", "expectancy_r", "profit_factor",
+              "max_drawdown_pct", "sharpe", "sortino", "sharpe_ci95", "p_bootstrap_sharpe_le_0", "avg_gross_exposure",
+              "time_in_market", "fees_usd", "slippage_usd", "spy_buy_hold_pct", "spy_exposure_matched_pct",
+              "excess_vs_matched_pct", "worst_day_pct", "symbols_traded"]
+
+
+def scoreboard(rows, full, wf_summary, wf_tables, frozen, corr, dd_risk, segments, manifest, breakdowns, partial) -> dict:
+    """Compact, UI-ready summary of the run. Everything here is SIMULATED and derived from `rows`/`full`."""
+    variants = []
+    for s in ("A", "B", "C"):
+        for vid in HEADLINE[s]:
+            oos = _row(rows, vid, "oos")
+            if not oos:
+                continue
+            g = gates(s, vid, rows, wf_summary, frozen, dd_risk)
+            strict = _row(rows, f"{vid}-slip5", "oos")
+            variants.append({
+                "variant": vid, "strategy": s, "role": ROLE.get(vid, ""), "primary": vid == PRIMARY[s],
+                "label": oos.get("label"), "note": oos.get("note"),
+                "oos": {k: oos.get(k) for k in BOARD_KEYS},
+                "val": {k: _row(rows, vid, "val").get(k) for k in ("net_return_pct", "sharpe", "trades")},
+                "dev": {k: _row(rows, vid, "dev").get(k) for k in ("net_return_pct", "sharpe", "trades")},
+                "grade": edge_grade(oos), "verdict": verdict(g),
+                "gates": [{"gate": a, "status": b, "evidence": c} for a, b, c in g],
+                "breakeven": breakeven_bps(rows, vid), "dd8_5pct_share": dd_risk.get(vid),
+                "at_5bp": {"net_return_pct": strict.get("net_return_pct"), "sharpe": strict.get("sharpe")} if strict else None,
+                "by_year": breakdowns.get(vid, {}).get("by_year"),
+                "by_regime": breakdowns.get(vid, {}).get("by_regime"),
+                "half_years": wf_tables.get(vid),
+            })
+    lo, hi = segments["oos"]
+    curves, dates = {}, None
+    for v in variants:
+        res = full[v["variant"]]
+        d = res.daily[(res.daily.index >= lo) & (res.daily.index <= hi)]
+        dates = dates or [x.isoformat() for x in d.index]
+        curves[v["variant"]] = [round(x, 3) for x in (100 * np.cumprod(1 + d["ret"].to_numpy())).tolist()]
+    if dates:
+        spy = spy_benchmark([date.fromisoformat(x) for x in dates]).to_numpy()
+        curves["SPY"] = [round(x, 3) for x in (100 * np.cumprod(1 + spy)).tolist()]
+        for v in variants:
+            if v["primary"]:
+                w = v["oos"]["avg_gross_exposure"] or 0.0
+                curves[f"SPY_matched_{v['variant']}"] = [round(x, 3) for x in (100 * np.cumprod(1 + w * spy)).tolist()]
+    comp = [v for v in variants if v["role"].startswith("competition")]
+    ranking = sorted(comp, key=lambda v: (v["oos"]["sharpe"] is None, -(v["oos"]["sharpe"] or 0)))
+    oos_corr = corr.get("oos")
+    return {
+        "label": "SIMULATED offline historical backtest - not live, paper-traded or broker results",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"), "partial_run": partial,
+        "segments": {k: [a.isoformat(), b.isoformat()] for k, (a, b) in segments.items()},
+        "start_equity": START_EQUITY,
+        "cost_baseline": {"A": "competition fees + 3 bp/side slippage, 5 bp software-stop latency, <=15%/stock, <=100% gross",
+                          "B": "competition fees + 1 bp/side slippage, 40% notional (handbook: <=40% per ticker)",
+                          "C": "competition fees + 1 bp/side slippage, 2 bp software-stop latency, <=40% notional",
+                          "fees": "$0.99/order + $0.000166/share sold (cap $8.30); paper-rule variants use $0.0035/share",
+                          "previous_run": "5 bp/side slippage for every instrument (shown per variant as at_5bp)"},
+        "variants": variants,
+        "ranking": [{"variant": v["variant"], "sharpe": v["oos"]["sharpe"], "net_return_pct": v["oos"]["net_return_pct"],
+                     "grade": v["grade"], "verdict": v["verdict"]} for v in ranking],
+        "equity_oos": {"dates": dates or [], "series": curves},
+        "correlation_oos": oos_corr.to_dict() if isinstance(oos_corr, pd.DataFrame) else None,
+        "c_frozen": {k: v for k, v in frozen.items() if k != "grid_development_results"},
+        "manifest": manifest,
+    }

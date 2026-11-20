@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="460" font-family="sans-serif" font-size="11">
+<rect width="660" height="460" fill="#fcfcfb"/>
+<text x="60" y="22" font-size="13" fill="#0b0b0b">P(debit spread loses at expiry): predicted vs realised, OOS 2024-25</text>
+<line x1="60" y1="410" x2="430" y2="410" stroke="#e6e5e0"/><text x="52" y="414" text-anchor="end" fill="#52514e">0.00</text><text x="60" y="426" text-anchor="middle" fill="#52514e">0.00</text>
+<line x1="60" y1="317.5" x2="430" y2="317.5" stroke="#e6e5e0"/><text x="52" y="321.5" text-anchor="end" fill="#52514e">0.25</text><text x="152.5" y="426" text-anchor="middle" fill="#52514e">0.25</text>
+<line x1="60" y1="225.0" x2="430" y2="225.0" stroke="#e6e5e0"/><text x="52" y="229.0" text-anchor="end" fill="#52514e">0.50</text><text x="245.0" y="426" text-anchor="middle" fill="#52514e">0.50</text>
+<line x1="60" y1="132.5" x2="430" y2="132.5" stroke="#e6e5e0"/><text x="52" y="136.5" text-anchor="end" fill="#52514e">0.75</text><text x="337.5" y="426" text-anchor="middle" fill="#52514e">0.75</text>
+<line x1="60" y1="40" x2="430" y2="40" stroke="#e6e5e0"/><text x="52" y="44" text-anchor="end" fill="#52514e">1.00</text><text x="430" y="426" text-anchor="middle" fill="#52514e">1.00</text>
+<line x1="60" y1="410" x2="430" y2="40" stroke="#8a8984" stroke-dasharray="4 4"/>
+<polyline points="274.2,216.3 298.6,179.3 326.5,151.0" fill="none" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="274.2" cy="216.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="298.6" cy="179.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="326.5" cy="151.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="442" y="40" width="14" height="3" fill="#2a78d6"/><text x="460" y="45" fill="#0b0b0b">E bootstrap (zero drift)</text>
+<polyline points="236.8,196.9 260.2,227.3 304.3,156.1 334.2,151.4" fill="none" stroke="#eb6834" stroke-width="2"/>
+<circle cx="236.8" cy="196.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="260.2" cy="227.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="304.3" cy="156.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="334.2" cy="151.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="442" y="58" width="14" height="3" fill="#eb6834"/><text x="460" y="63" fill="#0b0b0b">E bootstrap + drift</text>
+<polyline points="272.6,170.1 295.3,189.5 327.6,209.1" fill="none" stroke="#1baf7a" stroke-width="2"/>
+<circle cx="272.6" cy="170.1" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="295.3" cy="189.5" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="327.6" cy="209.1" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="442" y="76" width="14" height="3" fill="#1baf7a"/><text x="460" y="81" fill="#0b0b0b">Lognormal HV20</text>
+<polyline points="237.3,259.3 266.9,218.7 299.8,150.0 324.2,163.3" fill="none" stroke="#6250d6" stroke-width="2"/>
+<circle cx="237.3" cy="259.3" r="4" fill="#6250d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="266.9" cy="218.7" r="4" fill="#6250d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="299.8" cy="150.0" r="4" fill="#6250d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="324.2" cy="163.3" r="4" fill="#6250d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="442" y="94" width="14" height="3" fill="#6250d6"/><text x="460" y="99" fill="#0b0b0b">Option-implied (risk-neutral)</text>
+<text x="245.0" y="448" text-anchor="middle" fill="#52514e">predicted probability (bins with n &gt;= 20)</text><text x="16" y="230.0" transform="rotate(-90 16 230.0)" text-anchor="middle" fill="#52514e">realised frequency</text><text x="442" y="130" fill="#52514e">dashed = perfect calibration</text></svg>

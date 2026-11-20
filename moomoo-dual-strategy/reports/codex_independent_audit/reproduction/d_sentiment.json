@@ -1,0 +1,58 @@
+{
+ "signal": "GDELT ECON_STOCKMARKET mean tone, 15:30 ET batch, z vs trailing 20 sessions",
+ "days_with_signal": 1215,
+ "gdelt_missing_days": [
+  "2023-03-22",
+  "2025-06-12",
+  "2025-06-16",
+  "2025-06-17",
+  "2025-06-18",
+  "2025-06-20",
+  "2025-06-23",
+  "2025-06-24",
+  "2025-06-25",
+  "2025-06-26",
+  "2025-06-27",
+  "2025-06-30",
+  "2025-07-01"
+ ],
+ "dev": {
+  "days": 488,
+  "up_day_rate": 0.502,
+  "direction_hit_rate": 0.5553,
+  "permutation_p_value": 0.007,
+  "corr_z_next_return": -0.0502,
+  "option_1day_net_per_trade_sentiment_side": -1.23,
+  "option_1day_mid_change_sentiment_side": 7.59,
+  "baseline_always_call_net": -9.57,
+  "baseline_always_put_net": -10.36,
+  "baseline_random_side_expected_net": -9.97,
+  "share_sentiment_side_net_positive": 0.4119
+ },
+ "oos": {
+  "days": 478,
+  "up_day_rate": 0.5837,
+  "direction_hit_rate": 0.5272,
+  "permutation_p_value": 0.2725,
+  "corr_z_next_return": 0.0332,
+  "option_1day_net_per_trade_sentiment_side": -3.56,
+  "option_1day_mid_change_sentiment_side": 6.45,
+  "baseline_always_call_net": -4.42,
+  "baseline_always_put_net": -30.08,
+  "baseline_random_side_expected_net": -17.25,
+  "share_sentiment_side_net_positive": 0.387
+ },
+ "val": {
+  "days": 249,
+  "up_day_rate": 0.5582,
+  "direction_hit_rate": 0.494,
+  "permutation_p_value": 0.6775,
+  "corr_z_next_return": -0.0624,
+  "option_1day_net_per_trade_sentiment_side": -33.42,
+  "option_1day_mid_change_sentiment_side": -26.24,
+  "baseline_always_call_net": -2.31,
+  "baseline_always_put_net": -33.53,
+  "baseline_random_side_expected_net": -17.92,
+  "share_sentiment_side_net_positive": 0.3173
+ }
+}

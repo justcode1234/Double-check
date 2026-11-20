@@ -1,0 +1,206 @@
+{
+ "dev": {
+  "decisions": 503,
+  "events": 2515,
+  "brier_mc": 0.19218,
+  "brier_normal": 0.18639,
+  "brier_hist": 0.19132,
+  "brier_skill_mc_vs_hist": -0.0045,
+  "brier_skill_mc_vs_normal": -0.0311,
+  "reliability": [
+   {
+    "bin": "(-0.001, 0.2]",
+    "n": 799,
+    "mean_pred": 0.112,
+    "realised": 0.239
+   },
+   {
+    "bin": "(0.2, 0.4]",
+    "n": 207,
+    "mean_pred": 0.281,
+    "realised": 0.3
+   },
+   {
+    "bin": "(0.4, 0.6]",
+    "n": 498,
+    "mean_pred": 0.563,
+    "realised": 0.558
+   },
+   {
+    "bin": "(0.6, 0.8]",
+    "n": 213,
+    "mean_pred": 0.748,
+    "realised": 0.667
+   },
+   {
+    "bin": "(0.8, 1.0]",
+    "n": 798,
+    "mean_pred": 0.876,
+    "realised": 0.823
+   }
+  ],
+  "by_k": [
+   {
+    "k": -1.0,
+    "mean_pred": 0.899,
+    "realised": 0.859
+   },
+   {
+    "k": -0.5,
+    "mean_pred": 0.802,
+    "realised": 0.724
+   },
+   {
+    "k": 0.0,
+    "mean_pred": 0.563,
+    "realised": 0.559
+   },
+   {
+    "k": 0.5,
+    "mean_pred": 0.215,
+    "realised": 0.352
+   },
+   {
+    "k": 1.0,
+    "mean_pred": 0.078,
+    "realised": 0.151
+   }
+  ]
+ },
+ "val": {
+  "decisions": 250,
+  "events": 1250,
+  "brier_mc": 0.18716,
+  "brier_normal": 0.18927,
+  "brier_hist": 0.18813,
+  "brier_skill_mc_vs_hist": 0.0052,
+  "brier_skill_mc_vs_normal": 0.0111,
+  "reliability": [
+   {
+    "bin": "(-0.001, 0.2]",
+    "n": 250,
+    "mean_pred": 0.125,
+    "realised": 0.192
+   },
+   {
+    "bin": "(0.2, 0.4]",
+    "n": 250,
+    "mean_pred": 0.294,
+    "realised": 0.392
+   },
+   {
+    "bin": "(0.4, 0.6]",
+    "n": 250,
+    "mean_pred": 0.543,
+    "realised": 0.628
+   },
+   {
+    "bin": "(0.6, 0.8]",
+    "n": 250,
+    "mean_pred": 0.735,
+    "realised": 0.78
+   },
+   {
+    "bin": "(0.8, 1.0]",
+    "n": 250,
+    "mean_pred": 0.857,
+    "realised": 0.872
+   }
+  ],
+  "by_k": [
+   {
+    "k": -1.0,
+    "mean_pred": 0.857,
+    "realised": 0.872
+   },
+   {
+    "k": -0.5,
+    "mean_pred": 0.735,
+    "realised": 0.78
+   },
+   {
+    "k": 0.0,
+    "mean_pred": 0.543,
+    "realised": 0.628
+   },
+   {
+    "k": 0.5,
+    "mean_pred": 0.294,
+    "realised": 0.392
+   },
+   {
+    "k": 1.0,
+    "mean_pred": 0.125,
+    "realised": 0.192
+   }
+  ]
+ },
+ "oos": {
+  "decisions": 719,
+  "events": 3595,
+  "brier_mc": 0.18366,
+  "brier_normal": 0.18497,
+  "brier_hist": 0.18478,
+  "brier_skill_mc_vs_hist": 0.0061,
+  "brier_skill_mc_vs_normal": 0.0071,
+  "reliability": [
+   {
+    "bin": "(-0.001, 0.2]",
+    "n": 719,
+    "mean_pred": 0.116,
+    "realised": 0.172
+   },
+   {
+    "bin": "(0.2, 0.4]",
+    "n": 719,
+    "mean_pred": 0.267,
+    "realised": 0.374
+   },
+   {
+    "bin": "(0.4, 0.6]",
+    "n": 719,
+    "mean_pred": 0.534,
+    "realised": 0.605
+   },
+   {
+    "bin": "(0.6, 0.8]",
+    "n": 719,
+    "mean_pred": 0.751,
+    "realised": 0.768
+   },
+   {
+    "bin": "(0.8, 1.0]",
+    "n": 719,
+    "mean_pred": 0.869,
+    "realised": 0.88
+   }
+  ],
+  "by_k": [
+   {
+    "k": -1.0,
+    "mean_pred": 0.869,
+    "realised": 0.88
+   },
+   {
+    "k": -0.5,
+    "mean_pred": 0.751,
+    "realised": 0.768
+   },
+   {
+    "k": 0.0,
+    "mean_pred": 0.534,
+    "realised": 0.605
+   },
+   {
+    "k": 0.5,
+    "mean_pred": 0.267,
+    "realised": 0.374
+   },
+   {
+    "k": 1.0,
+    "mean_pred": 0.116,
+    "realised": 0.172
+   }
+  ]
+ }
+}

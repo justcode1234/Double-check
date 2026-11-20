@@ -6,6 +6,9 @@ moomoo-dual-strategy/data-cache/*
 !moomoo-dual-strategy/data-cache/normalized/
 moomoo-dual-strategy/reports/backtest_*/
 !moomoo-dual-strategy/reports/backtest_b85841adb51f96b7/
+!moomoo-dual-strategy/reports/backtest_v2/
+!moomoo-dual-strategy/reports/backtest_v3/
+!moomoo-dual-strategy/data-cache/history_extra/
 .DS_Store
 __pycache__/
 *.py[cod]

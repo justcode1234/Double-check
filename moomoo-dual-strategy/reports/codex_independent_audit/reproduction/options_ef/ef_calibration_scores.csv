@@ -1,0 +1,4 @@
+segment,candidates,realised_loss_rate,brier_boot,logloss_boot,mean_pred_boot,brier_drift,logloss_drift,mean_pred_drift,brier_hv,logloss_hv,mean_pred_hv,brier_rn,logloss_rn,mean_pred_rn,brier_climatology_dev_rate
+dev,1652,0.5847,0.24757,0.69099,0.6501,0.25366,0.70844,0.6202,0.24418,0.68179,0.5936,0.23757,0.66772,0.5966,0.24282
+oos,771,0.6135,0.23488,0.6626,0.6407,0.23281,0.6588,0.6235,0.24297,0.67971,0.6166,0.2293,0.65086,0.6079,0.23795
+val,682,0.6041,0.2367,0.66622,0.6351,0.23649,0.66583,0.6344,0.24371,0.68072,0.6112,0.23219,0.65686,0.6028,0.23954

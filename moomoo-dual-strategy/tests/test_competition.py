@@ -207,6 +207,323 @@ def test_broker_refuses_unless_all_three_locks_open(tmp_path):
     assert b.place(planner.Intent("i", "t", "b3", "US.SPY", "BUY", 1, 1.0, 1.0, "r", False)) == "77"
 
 
+@pytest.fixture
+def status_runner(tmp_path):
+    import runpy
+    from types import SimpleNamespace
+    from dual_strategy.execution.moomoo_cli import CASH_INFO, POSITION_LIST
+
+    runner_class = runpy.run_path(str(PROJECT / "scripts" / "run_competition.py"))["Runner"]
+    runner = runner_class.__new__(runner_class)
+    runner.cfg = {**CFG, "execution_enabled": True, "state_dir": "state"}
+    runner.store = Store(tmp_path, runner.cfg)
+    runner.state = runner.store.load()
+    runner._provenance_id = None
+    runner.broker = CompetitionBroker.__new__(CompetitionBroker)
+    runner.broker.acc_id = "TEST"
+    runner.market = SimpleNamespace(quote=lambda symbol: (500.0, datetime.now(timezone.utc)))
+    responses = {CASH_INFO: {"balance": "97500"}, POSITION_LIST: {"positions": []}}
+
+    def transport(tool, arguments):
+        assert arguments == {"acc_id": "TEST", "market": 100}
+        if tool not in responses:
+            pytest.fail("status attempted an unexpected broker operation")
+        return {"data": responses[tool]}
+
+    runner.broker.transport = transport
+    return runner, responses
+
+
+def test_execute_status_reads_broker_nav_without_initializing_state(status_runner, capsys):
+    runner, _ = status_runner
+    runner.status()
+    result = json.loads(capsys.readouterr().out)
+    assert result["nav"] == 97500.0
+    assert result["broker_positions"] == {} and result["attribution_errors"] == []
+    assert result["high_water"] is None and result["halted"] is None
+    assert runner.state == planner.new_state()
+    assert not runner.store.dir.exists()
+
+
+def test_execute_status_exposes_unowned_positions_without_resetting_halt(status_runner, capsys):
+    from dual_strategy.execution.moomoo_cli import POSITION_LIST
+    runner, responses = status_runner
+    responses[POSITION_LIST]["positions"] = [{"symbol": "US.SPY", "qty": "5"}]
+    runner.state.update(initial_nav=100000.0, high_water=104000.0, halted={"reason": "existing halt"})
+    runner.store.save(runner.state)
+    before = runner.store.path.read_bytes()
+    runner.status()
+    result = json.loads(capsys.readouterr().out)
+    assert result["nav"] == 100000.0
+    assert result["broker_positions"] == {"US.SPY": 5}
+    assert result["attribution_errors"] == ["US.SPY: sleeves 0 vs broker 5"]
+    assert result["initial_nav"] == 100000.0 and result["high_water"] == 104000.0
+    assert result["halted"] == {"reason": "existing halt"}
+    assert runner.store.path.read_bytes() == before
+    assert runner.state == json.loads(before)
+    assert not (runner.store.dir / "outbox").exists()
+
+
+def test_plan_status_does_not_observe_a_broker_or_write_state(status_runner, capsys):
+    runner, _ = status_runner
+    runner.broker = None
+    runner.status()
+    result = json.loads(capsys.readouterr().out)
+    assert result["mode"] == "PLAN" and result["nav"] is None
+    assert result["broker_positions"] is None and result["attribution_errors"] == []
+    assert not runner.store.dir.exists()
+
+
+def test_runner_halts_on_rejection_before_sending_another_intent(status_runner):
+    from dual_strategy.execution.moomoo_cli import HISTORY, PLACE
+    runner, _ = status_runner
+    submissions = []
+
+    def transport(tool, arguments):
+        if tool == PLACE:
+            submissions.append(arguments)
+            return {"data": {"order_id": "REJECTED-TEST"}}
+        if tool == HISTORY:
+            return {"data": {"orders": [{"order_id": "REJECTED-TEST", "status": 6,
+                                         "cum_qty": "0", "avg_fill_price": "0", "qty": "1"}]}}
+        pytest.fail("unexpected broker operation")
+
+    runner.broker.transport = transport
+    intents = [planner.Intent(str(k), "t", "h_etf", symbol, "BUY", 1, 100.0, 100.0, "r", False)
+               for k, symbol in enumerate(["US.XLV", "US.XLP"])]
+    with pytest.raises(ExecutionBlocked, match="rejected"):
+        runner.send(intents, "2026-11-20")
+    assert len(submissions) == 1
+    saved = runner.store.load()
+    assert saved["halted"] is not None and "rejected" in saved["halted"]["reason"]
+    assert saved["orders_today"] == 1 and saved["sleeves"] == {"b3": {}, "h_etf": {}}
+    records = runner.store.outbox("2026-11-20")
+    assert [r["event"] for r in records] == ["intent", "acknowledged", "outcome", "order_error"]
+    assert records[2]["status"] == "REJECTED" and records[2]["filled"] == 0
+    assert len({r["audit_id"] for r in records}) == 1
+
+
+def audit_records(runner, kind):
+    records = [json.loads(p.read_text()) for p in (runner.store.dir / "audit").glob("*/*.json")]
+    return [r for r in records if r["kind"] == kind]
+
+
+def restore_account(data):
+    return planner.Account(datetime.fromisoformat(data["at"]), data["cash"], data["positions"],
+                           data["quotes"], data["quote_age_seconds"])
+
+
+def test_audit_store_retains_distinct_full_precision_snapshots(tmp_path):
+    store = Store(tmp_path, {"state_dir": "state"})
+    price = 123.12345678901234
+    first = store.audit("2026-11-20", {"kind": "test", "price": price})
+    second = store.audit("2026-11-20", {"kind": "test", "price": 9.0})
+    assert first != second
+    a = json.loads((store.dir / "audit" / f"{first}.json").read_text())
+    b = json.loads((store.dir / "audit" / f"{second}.json").read_text())
+    assert a["price"] == price and b["price"] == 9.0
+    assert a["audit_id"] == first and a["logged_at"]
+
+
+def test_b3_audit_replays_signal_and_sizing_without_market_access(status_runner, monkeypatch):
+    from types import SimpleNamespace
+    import hashlib
+    import dual_strategy.research.data as research_data
+    runner, _ = status_runner
+    runner.broker = None
+    runner.virtual_nav = 100000.0
+    day = date(2026, 11, 20)
+    previous = date(2026, 11, 19)
+    prior = prior_days()
+    today = bars(day, [100.0, 100.1, 100.2, 100.3, 100.35, 100.4])
+    runner.market = SimpleNamespace(
+        b3_inputs=lambda *args, **kwargs: (prior, today),
+        daily=lambda *args: pd.DataFrame({"close": [100.123456789]}, index=[previous]),
+        quote=lambda symbol: (500.0, datetime.now(timezone.utc)))
+    monkeypatch.setattr(research_data, "dividends", lambda symbol: {day: 0.123456789})
+    runner.b3("10:00", day)
+    saved, = audit_records(runner, "b3")
+    inputs = saved["inputs"]
+    restore_bar = lambda b: Bar5(**{**b, "end": datetime.fromisoformat(b["end"])})
+    decision = b3_decision(
+        [restore_bar(b) for b in inputs["today"]],
+        {date.fromisoformat(d): [restore_bar(b) for b in rows] for d, rows in inputs["prior"].items()},
+        inputs["prev_close"], inputs["dividend_today"], datetime.fromisoformat(inputs["at"]),
+        datetime.fromisoformat(inputs["session_open"]), inputs["lookback"], inputs["width"])
+    assert decision.target == saved["decision"]["target"] == 1
+    assert decision.metrics == saved["decision"]["metrics"]
+    assert inputs["prev_close"] == 100.123456789 and inputs["dividend_today"] == 0.123456789
+    provenance, = audit_records(runner, "provenance")
+    assert saved["provenance_id"] == provenance["audit_id"]
+    cfg = provenance["config"]
+    assert cfg["risk"]["name_cap_usd"] == 40000 and cfg["allocation"]["b3"] == 0.8
+    assert "account_file" not in cfg and "state_dir" not in cfg
+    source = provenance["sources"]["src/dual_strategy/competition/signals.py"]
+    assert hashlib.sha256(source["text"].encode()).hexdigest() == source["sha256"]
+    assert provenance["environment"]["python"] and provenance["environment"]["packages"]["pandas"]
+    intents, reason = planner.plan_b3(saved["state"], restore_account(saved["account"]), saved["session"],
+                                      decision, cfg, datetime.fromisoformat(saved["now"]))
+    assert [i.to_dict() for i in intents] == saved["intents"]
+    assert reason == saved["reason"] == "entry" and intents[0].qty == 79
+    assert runner.store.outbox(day.isoformat())[0]["audit_id"] == saved["audit_id"]
+
+
+def test_h_audit_retains_full_panel_after_next_plan(status_runner):
+    from types import SimpleNamespace
+    runner, _ = status_runner
+    asof = date(2026, 11, 19)
+    days = pd.bdate_range(end=asof, periods=130).date.tolist()
+    runner.cfg["h_etf"] = {**CFG["h_etf"], "core": ["US.SPY"], "sectors": [], "top_sectors": 0}
+    up = [100 + 0.345678912345 * k for k in range(130)]
+    dip = up[:-2] + [up[-3] - 3, up[-3] - 6]
+    panel = {"US.SPY": pd.DataFrame({"close": dip, "volume": 1e6, "adjusted": dip}, index=days)}
+    runner.market = SimpleNamespace(h_panel=lambda *args: panel)
+    runner.plan_h(asof)
+    original = runner.state["h_plan_audit_id"]
+    path = runner.store.dir / "audit" / f"{original}.json"
+    before = path.read_bytes()
+    panel["US.SPY"].loc[asof, "adjusted"] += 0.0123456789
+    runner.plan_h(asof)
+    assert runner.state["h_plan_audit_id"] != original and path.read_bytes() == before
+    saved = json.loads(before)
+    inputs = saved["inputs"]
+    daily = {s: pd.DataFrame(data=f["data"], columns=f["columns"],
+                             index=[date.fromisoformat(d) for d in f["index"]])
+             for s, f in inputs["daily"].items()}
+    provenance, = audit_records(runner, "provenance")
+    result = h_plan(daily, date.fromisoformat(inputs["asof"]),
+                    {s: date.fromisoformat(d) for s, d in inputs["held"].items()},
+                    [date.fromisoformat(d) for d in inputs["sessions"]], provenance["config"]["h_etf"])
+    assert result.entries == saved["plan"]["entries"] == ["US.SPY"]
+    assert result.metrics == saved["plan"]["metrics"]
+    assert daily["US.SPY"].adjusted.iloc[-1] == dip[-1]
+    assert result.metrics["US.SPY"]["rsi2"] != round(result.metrics["US.SPY"]["rsi2"], 4)
+
+
+def test_h_open_audit_links_signal_account_intent_and_fill(status_runner, monkeypatch):
+    from dual_strategy.execution.moomoo_cli import HISTORY, PLACE
+    runner, _ = status_runner
+    now = datetime(2026, 11, 20, 9, 30, 10, tzinfo=NY)
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return now.astimezone(tz) if tz else now.replace(tzinfo=None)
+
+    monkeypatch.setitem(runner.h_open.__globals__, "datetime", Clock)
+    runner.market.quote = lambda symbol: (500.0, now.astimezone(timezone.utc))
+    runner.state["h_plan"] = {"asof": "2026-11-19", "entries": ["US.SPY"], "exits": {}, "blocked": None}
+    signal_id = runner.store.audit("2026-11-19", {"kind": "h_plan", "plan": runner.state["h_plan"]})
+    runner.state["h_plan_audit_id"] = signal_id
+    original_transport = runner.broker.transport
+
+    def transport(tool, args):
+        if tool == PLACE:
+            return {"data": {"order_id": "FILL-TEST"}}
+        if tool == HISTORY:
+            return {"data": {"orders": [{"order_id": "FILL-TEST", "status": 4, "qty": "3",
+                                         "cum_qty": "3", "avg_fill_price": "500.123456789"}]}}
+        return original_transport(tool, args)
+
+    runner.broker.transport = transport
+    runner.h_open()
+    saved, = audit_records(runner, "h_open")
+    provenance, = audit_records(runner, "provenance")
+    assert saved["signal_audit_id"] == signal_id
+    intents, reason = planner.plan_h_open(saved["state"], restore_account(saved["account"]), saved["session"],
+                                          saved["plan"], provenance["config"], datetime.fromisoformat(saved["now"]))
+    assert [i.to_dict() for i in intents] == saved["intents"] and reason == saved["reason"]
+    records = runner.store.outbox("2026-11-20")
+    assert [r["event"] for r in records] == ["intent", "acknowledged", "outcome"]
+    assert all(r["audit_id"] == saved["audit_id"] for r in records)
+    assert records[-1]["filled"] == 3 and records[-1]["avg_price"] == 500.123456789
+    assert runner.state["sleeves"]["h_etf"] == {"US.SPY": 3}
+
+
+def test_risk_audit_replays_mark_and_emergency_exit(status_runner, monkeypatch):
+    from copy import deepcopy
+    from dual_strategy.execution.moomoo_cli import CASH_INFO, POSITION_LIST
+    runner, responses = status_runner
+    session = runner.session()
+    runner.state.update(initial_nav=100000.0, high_water=100000.0, day=session, day_start_nav=100000.0)
+    runner.state["sleeves"]["b3"] = {"US.SPY": 5}
+    responses[CASH_INFO]["balance"] = "96000"
+    responses[POSITION_LIST]["positions"] = [{"symbol": "US.SPY", "qty": "5"}]
+    monkeypatch.setattr(runner.broker, "place", lambda intent: "RISK-TEST")
+    monkeypatch.setattr(runner.broker, "wait", lambda *args: {"order_id": "RISK-TEST", "status": "FILLED",
+                                                            "filled": 5, "avg_price": 499.75, "qty": 5})
+    runner.risk()
+    saved, = audit_records(runner, "risk")
+    provenance, = audit_records(runner, "provenance")
+    state = deepcopy(saved["state_before"])
+    account = restore_account(saved["account"])
+    reason = planner.mark_risk(state, account, saved["session"], provenance["config"])
+    assert reason == saved["reason"] == "daily_loss_lock"
+    assert state == saved["state_after"] and saved["state_before"]["locked_day"] is None
+    intents = planner.plan_flatten(state, account, saved["session"], reason, provenance["config"],
+                                    datetime.fromisoformat(saved["now"]))
+    assert [i.to_dict() for i in intents] == saved["intents"] and intents[0].qty == 5
+    assert runner.store.outbox(session)[0]["audit_id"] == saved["audit_id"]
+
+
+@pytest.mark.parametrize("last_close,missing_bar,target", [(100.1, False, 0), (100.4, True, None)])
+def test_b3_audit_retains_no_trade_and_incomplete_inputs(status_runner, monkeypatch, last_close, missing_bar, target):
+    from types import SimpleNamespace
+    import dual_strategy.research.data as research_data
+    runner, _ = status_runner
+    runner.broker = None
+    runner.virtual_nav = 100000.0
+    day = date(2026, 11, 20)
+    today = bars(day, [100.0] * 5 + [last_close])
+    if missing_bar:
+        today.pop(2)
+    runner.market = SimpleNamespace(
+        b3_inputs=lambda *args, **kwargs: (prior_days(), today),
+        daily=lambda *args: pd.DataFrame({"close": [100.0]}, index=[date(2026, 11, 19)]),
+        quote=lambda symbol: (500.0, datetime.now(timezone.utc)))
+    monkeypatch.setattr(research_data, "dividends", lambda symbol: {})
+    runner.b3("10:00", day)
+    saved, = audit_records(runner, "b3")
+    assert saved["decision"]["target"] == target and saved["intents"] == []
+    assert len(saved["inputs"]["today"]) == (5 if missing_bar else 6)
+    assert runner.store.outbox(day.isoformat()) == []
+
+
+def test_flatten_audit_replays_only_selected_sleeve(status_runner, monkeypatch):
+    from dual_strategy.execution.moomoo_cli import POSITION_LIST
+    runner, responses = status_runner
+    runner.state["sleeves"] = {"b3": {"US.SPY": 5}, "h_etf": {"US.SPY": 2}}
+    responses[POSITION_LIST]["positions"] = [{"symbol": "US.SPY", "qty": "7"}]
+    monkeypatch.setattr(runner.broker, "place", lambda intent: "FLAT-TEST")
+    monkeypatch.setattr(runner.broker, "wait", lambda *args: {"order_id": "FLAT-TEST", "status": "FILLED",
+                                                            "filled": 5, "avg_price": 499.75, "qty": 5})
+    runner.flatten("b3", "b3_scheduled_flatten")
+    saved, = audit_records(runner, "flatten")
+    provenance, = audit_records(runner, "provenance")
+    replay = planner.plan_flatten(saved["state"], restore_account(saved["account"]), saved["session"],
+                                  saved["reason"], provenance["config"], datetime.fromisoformat(saved["now"]),
+                                  saved["sleeves"])
+    assert [i.to_dict() for i in replay] == saved["intents"] and replay[0].qty == 5
+    assert runner.state["sleeves"] == {"b3": {}, "h_etf": {"US.SPY": 2}}
+    assert all(r["audit_id"] == saved["audit_id"] for r in runner.store.outbox(saved["session"]))
+
+
+def test_missing_audit_write_prevents_order_submission(status_runner, monkeypatch):
+    runner, _ = status_runner
+    submissions = []
+    monkeypatch.setattr(runner.broker, "place", lambda intent: submissions.append(intent) or "TEST")
+    monkeypatch.setattr(runner.broker, "wait", lambda *args: {"status": "FILLED", "filled": 1, "avg_price": 100})
+
+    def disk_full(*args):
+        raise OSError("audit disk full")
+
+    monkeypatch.setattr(runner.store, "audit", disk_full, raising=False)
+    intent = planner.Intent("audit-test", "t", "b3", "US.SPY", "BUY", 1, 100, 100, "r", False)
+    with pytest.raises(OSError, match="audit disk full"):
+        runner.send([intent], "2026-11-20")
+    assert submissions == [] and runner.store.outbox("2026-11-20") == []
+
+
 def test_config_ships_disabled_and_split_80_20():
     assert CFG["execution_enabled"] is False
     assert CFG["allocation"] == {"b3": 0.80, "h_etf": 0.20}

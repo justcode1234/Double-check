@@ -39,7 +39,7 @@ Python: `.venv/Scripts/python.exe` (Windows) or `.venv/bin/python` (macOS). Full
   - no real money, live-order tools or real-account permissions
   - no funds transfers, reset/revive cards or leverage
   - no duplicate identities and no bypassing Moomoo rules
-- **Never touch, trade, reset or revive the competition account** ("Moomoo x Qoder AI Paper Trading Agent Challenge", account_type 2).
+- **The competition paper account is authorized by the user on 2026-11-20 for scripts/run_competition.py only; reset/revive cards and live accounts remain forbidden**.
 - Never guess account IDs. Never reveal secrets/tokens or the practice account ID in public artifacts. Secrets belong only in Vault or server environment.
 - A must never spend B's virtual cash or vice versa. If shared broker buying power is short, reject or reduce orders.
 - Never reintroduce a 1.0×ATR stop or a fixed 2R target. Never claim the 0.10×ATR stop guarantees a maximum loss.

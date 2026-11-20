@@ -10,6 +10,7 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 import yaml
 
@@ -41,6 +42,19 @@ class Store:
         (self.dir / "outbox").mkdir(parents=True, exist_ok=True)
         with (self.dir / "outbox" / f"{session}.jsonl").open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(record, default=str) + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+
+    def audit(self, session: str, record: dict) -> str:
+        audit_id = f"{session}/{uuid4().hex}"
+        path = self.dir / "audit" / f"{audit_id}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        record = {**record, "audit_id": audit_id, "logged_at": datetime.now(timezone.utc).isoformat()}
+        with path.open("x", encoding="utf-8") as fh:
+            json.dump(record, fh, default=str)
+            fh.flush()
+            os.fsync(fh.fileno())
+        return audit_id
 
     def outbox(self, session: str) -> list[dict]:
         p = self.dir / "outbox" / f"{session}.jsonl"

@@ -18,10 +18,14 @@ competition account file; otherwise the runner refuses before contacting any acc
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
+from copy import deepcopy
+from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
+from importlib.metadata import version
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -32,6 +36,7 @@ from dual_strategy.competition.market import Market, MarketDataError  # noqa: E4
 from dual_strategy.competition.signals import b3_decision, b3_decision_times, h_plan  # noqa: E402
 from dual_strategy.competition.store import Store, load_config  # noqa: E402
 from dual_strategy.data.calendar import NY, session_bounds  # noqa: E402
+from dual_strategy.execution.moomoo_paper import ExecutionBlocked
 
 import exchange_calendars  # noqa: E402
 
@@ -70,6 +75,7 @@ class Runner:
         self.cfg = {**self.cfg, "state_dir": state_dir}
         self.store = Store(PROJECT, self.cfg)
         self.state = self.store.load()
+        self._provenance_id = None
         self.market = Market()
         self.broker = None
         self.virtual_nav = nav
@@ -105,24 +111,51 @@ class Runner:
         return (now or datetime.now(timezone.utc)).astimezone(NY).date().isoformat()
 
     # ------------------------------------------------------------------ orders
-    def send(self, intents, session):
+    def audit(self, session, kind, **data):
+        if self._provenance_id is None:
+            files = ["scripts/run_competition.py", "src/dual_strategy/data/calendar.py",
+                     "src/dual_strategy/execution/moomoo_cli.py", "src/dual_strategy/execution/moomoo_paper.py",
+                     "src/dual_strategy/research/data.py"]
+            files += [f"src/dual_strategy/competition/{name}.py"
+                      for name in ("signals", "planner", "market", "broker", "store")]
+            sources = {}
+            for name in files:
+                text = (PROJECT / name).read_text(encoding="utf-8")
+                sources[name] = {"text": text, "sha256": hashlib.sha256(text.encode()).hexdigest()}
+            self._provenance_id = self.store.audit("provenance", {
+                "kind": "provenance", "schema_version": 1,
+                "config": {k: v for k, v in self.cfg.items() if k not in ("account_file", "state_dir")},
+                "sources": sources, "environment": {"python": sys.version,
+                    "packages": {name: version(name) for name in ("pandas", "numpy", "exchange-calendars", "PyYAML")}}})
+        return self.store.audit(session, {"kind": kind, "session": session,
+            "mode": "EXECUTE" if self.broker else "PLAN", "provenance_id": self._provenance_id, **data})
+
+    def send(self, intents, session, audit_id=None):
+        audit_id = audit_id or self.audit(session, "orders", state=self.state, intents=[i.to_dict() for i in intents])
         for i in intents:
-            self.store.append(session, {"event": "intent", **i.to_dict(), "mode": "EXECUTE" if self.broker else "PLAN"})
+            link = {"intent_id": i.intent_id, "audit_id": audit_id}
+            self.store.append(session, {"event": "intent", **i.to_dict(), "audit_id": audit_id,
+                                        "mode": "EXECUTE" if self.broker else "PLAN"})
             if not self.broker:
                 log(intent=i.to_dict(), sent=False)
                 continue
             placed = datetime.now(timezone.utc)
+            oid = None
             try:
                 oid = self.broker.place(i)
                 self.state["orders_today"] += 1
+                self.store.append(session, {"event": "acknowledged", **link, "order_id": oid})
                 result = self.broker.wait(oid, placed, self.cfg["risk"]["order_wait_seconds"])
+                if result["status"] == "REJECTED":
+                    self.store.append(session, {"event": "outcome", **link, **result})
+                    raise ExecutionBlocked("broker rejected order; human reconciliation required")
             except Exception as exc:                     # ambiguous: block entries until reconciled by a human
                 self.state["halted"] = self.state["halted"] or {"at": placed.isoformat(), "reason": f"order error: {exc}"}
-                self.store.append(session, {"event": "order_error", "intent_id": i.intent_id, "error": str(exc)})
+                self.store.append(session, {"event": "order_error", **link, "order_id": oid, "error": str(exc)})
                 self.store.save(self.state)
                 raise
             planner.apply_fill(self.state, i, result["filled"], session)
-            self.store.append(session, {"event": "outcome", "intent_id": i.intent_id, **result})
+            self.store.append(session, {"event": "outcome", **link, **result})
             log(intent=i.intent_id, outcome=result)
         self.store.save(self.state)
 
@@ -130,12 +163,16 @@ class Runner:
     def risk(self, symbols=()):
         acct = self.account(list(symbols))
         session = self.session()
+        before = deepcopy(self.state)
         reason = planner.mark_risk(self.state, acct, session, self.cfg)
         self.store.save(self.state)
+        now = datetime.now(NY)
+        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now) if reason else []
+        audit_id = self.audit(session, "risk", account=asdict(acct), state_before=before, state_after=self.state,
+                              now=now, reason=reason, intents=[i.to_dict() for i in intents])
         if reason:
-            intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, datetime.now(NY))
             log(risk=reason, nav=acct.nav, high_water=self.state["high_water"], flatten=len(intents))
-            self.send(intents, session)
+            self.send(intents, session, audit_id)
         return acct
 
     # ------------------------------------------------------------------ commands
@@ -147,9 +184,15 @@ class Runner:
             panel = self.market.h_panel(c["core"] + c["sectors"], asof)
         except MarketDataError as exc:
             self.state["h_plan"] = {"asof": asof.isoformat(), "blocked": str(exc), "entries": [], "exits": {}}
+            self.state["h_plan_audit_id"] = self.audit(asof.isoformat(), "h_plan_blocked", asof=asof,
+                                                      held=held, error=str(exc))
             self.store.save(self.state)
             return log(h_plan=self.state["h_plan"])
-        p = h_plan(panel, asof, held, sessions_until(asof), c)
+        sessions = sessions_until(asof)
+        p = h_plan(panel, asof, held, sessions, c)
+        self.state["h_plan_audit_id"] = self.audit(asof.isoformat(), "h_plan", inputs={
+            "asof": asof, "held": held, "sessions": sessions,
+            "daily": {s: f.to_dict(orient="split") for s, f in panel.items()}}, plan=asdict(p))
         self.state["h_plan"] = {"asof": asof.isoformat(), "universe": p.universe, "entries": p.entries,
                                 "exits": p.exits, "blocked": p.blocked,
                                 "metrics": {s: {k: (round(v, 4) if isinstance(v, float) else v) for k, v in m.items()}
@@ -162,11 +205,16 @@ class Runner:
         session = self.session()
         prior = [s for s in sessions_until(date.fromisoformat(session)) if s < date.fromisoformat(session)][-1]
         if not plan or plan.get("blocked") or plan["asof"] != prior.isoformat():
+            self.audit(session, "h_open_skipped", plan=plan, reason="no unblocked plan from the previous close")
             return log(h_open="skipped", why="no unblocked plan from the previous close", plan_asof=plan and plan.get("asof"))
         acct = self.risk(plan["entries"] + list(plan["exits"]))
-        intents, why = planner.plan_h_open(self.state, acct, session, plan, self.cfg, datetime.now(NY))
+        now = datetime.now(NY)
+        intents, why = planner.plan_h_open(self.state, acct, session, plan, self.cfg, now)
+        audit_id = self.audit(session, "h_open", plan=plan, signal_audit_id=self.state.get("h_plan_audit_id"),
+                              state=self.state, account=asdict(acct), now=now, reason=why,
+                              intents=[i.to_dict() for i in intents])
         log(h_open=why, intents=len(intents))
-        self.send(intents, session)
+        self.send(intents, session, audit_id)
 
     def b3(self, at: str | None = None, day: date | None = None):
         if day and self.broker:
@@ -194,6 +242,7 @@ class Runner:
             prior, today_bars = self.market.b3_inputs(sym, today, self.cfg["b3"]["lookback_sessions"], replay=day is not None)
             prev_close = self.market.daily(sym, prev_day - timedelta(days=7), prev_day, 0).close.loc[prev_day]
         except (MarketDataError, KeyError) as exc:
+            self.audit(today.isoformat(), "b3_blocked", symbol=sym, at=tick, error=str(exc))
             return log(b3="blocked", why=str(exc))
         from dual_strategy.research.data import dividends   # cached corporate actions (SPY ex-dates through 2026-09)
         dividend = dividends(sym).get(today, 0.0)
@@ -201,9 +250,16 @@ class Runner:
                                self.cfg["b3"]["lookback_sessions"], self.cfg["b3"]["band_width"])
         acct = self.risk([sym])
         intents, why = planner.plan_b3(self.state, acct, today.isoformat(), decision, self.cfg, now)
+        audit_id = self.audit(today.isoformat(), "b3", inputs={
+            "today": [asdict(b) for b in today_bars],
+            "prior": {d.isoformat(): [asdict(b) for b in rows] for d, rows in prior.items()},
+            "prev_close": float(prev_close), "dividend_today": dividend, "at": tick, "session_open": bounds[0],
+            "lookback": self.cfg["b3"]["lookback_sessions"], "width": self.cfg["b3"]["band_width"]},
+            decision=asdict(decision), state=self.state, account=asdict(acct), now=now, reason=why,
+            intents=[i.to_dict() for i in intents])
         log(b3={"at": key, "target": decision.target, "reason": decision.reason,
                 "metrics": {k: round(v, 5) for k, v in decision.metrics.items() if isinstance(v, float)}}, plan=why)
-        self.send(intents, today.isoformat())
+        self.send(intents, today.isoformat(), audit_id)
         if self.broker:
             self.state["b3_done"].append(key)
             self.store.save(self.state)
@@ -211,12 +267,18 @@ class Runner:
     def flatten(self, sleeve: str, reason: str):
         sleeves = planner.SLEEVES if sleeve == "all" else (sleeve,)
         acct = self.account([s for sl in sleeves for s in self.state["sleeves"][sl]])
-        intents = planner.plan_flatten(self.state, acct, self.session(), reason, self.cfg, datetime.now(NY), sleeves)
-        self.send(intents, self.session())
+        session, now = self.session(), datetime.now(NY)
+        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now, sleeves)
+        audit_id = self.audit(session, "flatten", state=self.state, account=asdict(acct), now=now,
+                              sleeves=sleeves, reason=reason, intents=[i.to_dict() for i in intents])
+        self.send(intents, session, audit_id)
 
     def status(self):
         s = self.state
+        acct = self.account() if self.broker else None
         log(mode="EXECUTE" if self.broker else "PLAN", execution_enabled=self.cfg["execution_enabled"],
+            nav=acct.nav if acct else None, broker_positions=acct.positions if acct else None,
+            attribution_errors=planner.attribution_errors(s, acct) if acct else [],
             allocation=self.cfg["allocation"], initial_nav=s["initial_nav"], high_water=s["high_water"],
             halt_level=None if s["high_water"] is None else round(s["high_water"] * (1 - self.cfg["risk"]["halt_drawdown_fraction"]), 2),
             halted=s["halted"], locked_day=s["locked_day"], half_size=s["reduced"], sleeves=s["sleeves"],

@@ -1,6 +1,6 @@
 # Dual strategy safety contract
 
-This project is a practice-paper experiment, not a competition-account executor. Never address live accounts, live order APIs, reset/revival APIs, or the official competition account. Existing strategy-review documents describe older settings; the current configuration uses ORB 0.10 daily ATR, no profit target, and SPY-only Noise-Area.
+The competition paper account is authorized by the user on 2026-11-20 for scripts/run_competition.py only; reset/revive cards and live accounts remain forbidden. Existing strategy-review documents describe older settings; the current configuration uses ORB 0.10 daily ATR, no profit target, and SPY-only Noise-Area.
 
 Use independent USD 50,000 event-ledgers. Broker cash is not strategy capital. Never mix hypothetical data or fills with broker-reconciled results. Account IDs and credentials belong only in gitignored private storage; redact exported evidence. Do not commit or publish without the user's request.
 

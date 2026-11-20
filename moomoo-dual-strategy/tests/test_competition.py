@@ -102,15 +102,18 @@ class Decision:
         self.target, self.at, self.reason, self.metrics = target, at, "x", {"open_0930": open_0930}
 
 
-def test_b3_sizing_80pct_sleeve_40pct_position_and_half_size():
+def test_b3_sizing_from_config_with_cap_and_half_size():
     st = planner.new_state()
     planner.mark_risk(st, acct(), "2026-11-20", CFG)
     intents, why = planner.plan_b3(st, acct(), "2026-11-20", Decision(1), CFG, datetime.now(NY))
     i = intents[0]
     assert why == "entry" and i.side == "BUY" and i.limit_price == round(500 * 1.0005, 2)
-    assert i.qty == int(0.8 * 0.4 * 100_000 // i.limit_price)
+    frac = CFG["allocation"]["b3"] * CFG["b3"]["position_fraction_of_sleeve"]
+    cap = CFG["risk"]["name_cap_usd"]
+    assert i.qty == int(min(frac * 100_000, cap) // i.limit_price)
     st["reduced"] = True
-    assert planner.plan_b3(st, acct(), "2026-11-20", Decision(1), CFG, datetime.now(NY))[0][0].qty == int(16_000 // i.limit_price)
+    half = planner.plan_b3(st, acct(), "2026-11-20", Decision(1), CFG, datetime.now(NY))[0][0].qty
+    assert half == int(min(frac * 100_000 * 0.5, cap) // i.limit_price)
 
 
 def test_b3_exit_allowed_but_entry_blocked_when_halted():
@@ -230,3 +233,15 @@ def test_dashboard_payload_and_store_reads_create_nothing(tmp_path):
     s = Store(tmp_path, {"state_dir": "private/competition/plan"})
     s.load(), s.outbox("2026-11-20"), s.latest_session()
     assert not (tmp_path / "private").exists()
+
+
+def test_spy_cap_is_per_symbol_across_sleeves_and_b3_is_80pct():
+    assert CFG["allocation"]["b3"] * CFG["b3"]["position_fraction_of_sleeve"] == pytest.approx(0.80)
+    st = planner.new_state()
+    planner.mark_risk(st, acct(), "2026-11-20", CFG)
+    i = planner.plan_b3(st, acct(), "2026-11-20", Decision(1), CFG, datetime.now(NY))[0][0]
+    assert i.qty * i.limit_price <= CFG["risk"]["name_cap_usd"] and i.qty == int(40_000 // i.limit_price)
+    st["sleeves"]["b3"]["US.SPY"] = 79
+    a = acct(positions={"US.SPY": 79})
+    out, _ = planner.plan_h_open(st, a, "2026-11-20", {"exits": {}, "entries": ["US.SPY"]}, CFG, datetime.now(NY))
+    assert out == [] or out[0].qty * out[0].limit_price + 79 * 500 <= CFG["risk"]["name_cap_usd"] + 1e-6

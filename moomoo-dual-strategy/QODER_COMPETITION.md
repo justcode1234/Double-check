@@ -15,7 +15,7 @@ Until then, use PLAN mode only. PLAN sends nothing.
 
 | Part | Where | Status |
 |---|---|---|
-| Rules and parameters | [config/competition.yaml](config/competition.yaml) | B3 80% / H 20% of account NAV; 3.5% account halt; ships with `execution_enabled: false` |
+| Rules and parameters | [config/competition.yaml](config/competition.yaml) | B3 80% / H 20% of account NAV. B3 targets its whole sleeve (80% of NAV) but is capped at the $40,000 per-symbol purchase cap, so about 40% of a $100k account. 3.5% account halt. Ships with `execution_enabled: false`. |
 | Signals | [src/dual_strategy/competition/signals.py](src/dual_strategy/competition/signals.py) | B3 matches the research engine on all 7,421 hourly decisions from 2021 to 2025. H's universe and entries match on all 1,243 sessions. |
 | Risk and sizing | [src/dual_strategy/competition/planner.py](src/dual_strategy/competition/planner.py) | Account halt (permanent), daily lock, half size, sleeve ownership of shares, $40k per-name cap, no leverage, long-only |
 | Broker gate | [src/dual_strategy/competition/broker.py](src/dual_strategy/competition/broker.py) | Refuses unless all 3 locks are open (section 3); allowlists exactly one account; LIMIT orders only; reconciles every order from broker history |
@@ -23,7 +23,7 @@ Until then, use PLAN mode only. PLAN sends nothing.
 | Dashboard | `python -m dual_strategy.cli serve --port 8876`, then http://127.0.0.1:8876/competition | Read-only: sleeves, halt level, intents and outcomes, research preview |
 | Tests | `.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider` | 947 passed on 2026-11-20, including 13 in `tests/test_competition.py` |
 
-The research preview, built from hypothetical fills, is in [reports/competition/backtest_preview.json](reports/competition/backtest_preview.json):
+The research preview, built from hypothetical fills, is in [reports/competition/backtest_preview.json](reports/competition/backtest_preview.json). It was computed with B3 at 32% of NAV; the capped live size of about 40% scales B3's gains, losses and cost sensitivity by roughly 1.25×.
 
 - 2021–2025: +7.54%, max drawdown −1.47%, halt never hit.
 - 2024–25: +0.04%.
@@ -54,18 +54,18 @@ PLAN and EXECUTE keep separate state: `private/competition/plan/` and `private/c
 
 ## 4. Running a session (America/New_York)
 
-Remaining challenge sessions: Mon 23, Tue 24, Wed 25 and Fri 27 November. Friday 27 November closes at 13:00, so B3 decides at 10:00–12:00 and flattens at 12:55. Start before 09:30 on one machine only:
+Remaining challenge sessions: Fri 20 (if ready before 09:30 ET), Mon 23, Tue 24, Wed 25 and Fri 27 November. Friday 27 November closes at 13:00, so B3 decides at 10:00–12:00 and flattens at 12:55. Start before 09:30 on one machine only:
 
 ```bash
 .venv/Scripts/python.exe scripts/run_competition.py loop --execute
 ```
 
-The loop does the following:
+The loop does the following (if the live state has no H plan for the previous close, it builds one before the open):
 
 | Time | Action |
 |---|---|
 | 09:30:10 | **H open:** sells planned exits, then buys planned entries (10% of the H sleeve per ETF, 30% in total) |
-| 10:00–15:00, hourly, about 15 s after each bar closes | **B3:** goes long 40% of the B3 sleeve (32% of NAV) if the bar closes above the noise band and VWAP; otherwise sells what B3 owns |
+| 10:00–15:00, hourly, about 15 s after each bar closes | **B3:** goes long its whole sleeve (80% of NAV, capped at $40,000 of SPY across both sleeves) if the bar closes above the noise band and VWAP; otherwise sells what B3 owns |
 | 15:55 (12:55 on half-days) | **B3 flatten** |
 | Every 30 s | **Risk check** from broker NAV, computed as cash + quantity × quote. Breaching the 3.5% halt or the 1.25% daily lock closes everything owned. |
 | About 16:15 | **H plan** for the next open, from today's close |

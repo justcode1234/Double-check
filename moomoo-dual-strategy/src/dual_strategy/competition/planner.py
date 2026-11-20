@@ -172,8 +172,9 @@ def plan_b3(state: dict, account: Account, session: str, decision, cfg: dict, no
     if why:
         return [], f"entry blocked: {why}"
     factor = 0.5 if state["reduced"] else 1.0
+    held_value = account.positions.get(sym, 0) * price                    # SPY the H sleeve may already own
     budget = min(cfg["allocation"]["b3"] * c["position_fraction_of_sleeve"] * account.nav * factor,
-                 cfg["risk"]["name_cap_usd"], max(0.0, account.cash - 0.99), max(0.0, account.nav - account.gross))
+                 cfg["risk"]["name_cap_usd"] - held_value, max(0.0, account.cash - 0.99), max(0.0, account.nav - account.gross))
     limit = _limit(price, "BUY", cfg)
     qty = math.floor(budget / max(limit, decision.metrics.get("open_0930", limit)))
     if qty <= 0:
@@ -207,7 +208,8 @@ def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: di
         if not price or price <= 0:
             continue
         limit = _limit(price, "BUY", cfg)
-        budget = min(c["per_name_fraction_of_sleeve"] * sleeve * factor, cfg["risk"]["name_cap_usd"], room, cash)
+        held_value = account.positions.get(s, 0) * price                  # e.g. SPY owned by B3: cap is per symbol
+        budget = min(c["per_name_fraction_of_sleeve"] * sleeve * factor, cfg["risk"]["name_cap_usd"] - held_value, room, cash)
         qty = math.floor(budget / limit)
         if qty <= 0:
             continue

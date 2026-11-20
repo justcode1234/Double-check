@@ -236,6 +236,11 @@ class Runner:
                 log(loop="session over" if bounds else "no session today")
                 return
             opened, closed = bounds
+            prior = [s for s in sessions_until(now.date()) if s < now.date()][-1]
+            plan = self.state.get("h_plan") or {}
+            if f"plan-h-prior-{now.date()}" not in done and plan.get("asof") != prior.isoformat():
+                self.plan_h(prior)                       # first live day (or a missed evening): build the open's plan now
+                done.add(f"plan-h-prior-{now.date()}")
             if now < opened:
                 time.sleep(min(30, (opened - now).total_seconds() + 1))
                 continue

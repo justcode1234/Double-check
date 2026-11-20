@@ -24,7 +24,8 @@ b3:
   lookback_sessions: 14          # prior sessions with a bar at the same clock time (half-days are skipped)
   band_width: 1.0
   decision_times: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00"]   # completed 5-minute bar ending here
-  position_fraction_of_sleeve: 0.40   # long notional = 40% of the B3 sleeve (= 32% of account NAV at 80%)
+  position_fraction_of_sleeve: 1.0    # user decision 2026-11-20: B3 long = 100% of its sleeve = 80% of account NAV,
+                                      # but never above risk.name_cap_usd for SPY across both sleeves (see below)
   flatten_minutes_before_close: 5     # 15:55 ET; 12:55 ET on 13:00 half-days
 
 h_etf:

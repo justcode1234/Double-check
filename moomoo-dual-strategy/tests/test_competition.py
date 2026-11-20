@@ -74,7 +74,8 @@ def acct(nav=100_000.0, positions=None, quotes=None):
     positions = positions or {}
     quotes = {"US.SPY": 500.0, **(quotes or {})}
     cash = nav - sum(q * quotes[s] for s, q in positions.items())
-    return planner.Account(datetime.now(timezone.utc), cash, positions, quotes, {s: 1.0 for s in quotes})
+    return planner.Account(datetime.now(timezone.utc), cash, positions, quotes, {s: 1.0 for s in quotes},
+                           {'b3': 80000, 'h_etf': 20000})
 
 
 def test_risk_ladder_halt_is_permanent_and_lock_is_daily():
@@ -114,6 +115,44 @@ def test_b3_sizing_from_config_with_cap_and_half_size():
     st["reduced"] = True
     half = planner.plan_b3(st, acct(), "2026-11-20", Decision(1), CFG, datetime.now(NY))[0][0].qty
     assert half == int(min(frac * 100_000 * 0.5, cap) // i.limit_price)
+
+
+@pytest.mark.parametrize('reduced,expected', [(False, 55), (True, 27)])
+def test_b3_sizes_only_from_its_own_capital(reduced, expected):
+    st = planner.new_state()
+    planner.mark_risk(st, acct(), '2026-11-20', CFG)
+    st['reduced'] = reduced
+    a = acct(nav=150000)
+    a.sleeve_capital = {'b3': 28000, 'h_etf': 122000}
+    orders, why = planner.plan_b3(st, a, '2026-11-20', Decision(1), CFG, datetime.now(NY))
+    assert why == 'entry' and orders[0].qty == expected
+    assert orders[0].qty * orders[0].limit_price <= 40000
+
+
+def test_h_limits_depend_on_h_capital_not_account_nav():
+    st = planner.new_state()
+    planner.mark_risk(st, acct(), '2026-11-20', CFG)
+    symbols = ['US.XLF', 'US.XLV', 'US.XLP', 'US.XLK']
+    a = acct(nav=150000, quotes={s: 100 for s in symbols})
+    a.sleeve_capital = {'b3': 125000, 'h_etf': 25000}
+    orders, why = planner.plan_h_open(st, a, '2026-11-20', {'exits': {}, 'entries': symbols}, CFG, datetime.now(NY))
+    assert why == 'planned'
+    assert [i.qty for i in orders] == [24, 24, 24, 2]
+    assert all(i.qty * i.limit_price <= 2500 for i in orders)
+    assert sum(i.qty * i.limit_price for i in orders) <= 7500
+
+
+@pytest.mark.parametrize('capital', [None, 0, -1, float('nan'), float('inf')])
+def test_unverified_capital_blocks_buys_but_not_exits(capital):
+    st = planner.new_state()
+    planner.mark_risk(st, acct(), '2026-11-20', CFG)
+    a = acct(positions={'US.XLV': 2}, quotes={'US.XLV': 100, 'US.XLP': 100})
+    a.sleeve_capital = {'b3': capital, 'h_etf': capital}
+    st['sleeves']['h_etf'] = {'US.XLV': 2}
+    b, why = planner.plan_b3(st, a, '2026-11-20', Decision(1), CFG, datetime.now(NY))
+    assert b == [] and 'capital' in why
+    h, why = planner.plan_h_open(st, a, '2026-11-20', {'exits': {'US.XLV': 'rsi_recovery'}, 'entries': ['US.XLP']}, CFG, datetime.now(NY))
+    assert [(i.side, i.qty) for i in h] == [('SELL', 2)] and 'capital' in why
 
 
 def test_b3_exit_allowed_but_entry_blocked_when_halted():
@@ -310,7 +349,7 @@ def audit_records(runner, kind):
 
 def restore_account(data):
     return planner.Account(datetime.fromisoformat(data["at"]), data["cash"], data["positions"],
-                           data["quotes"], data["quote_age_seconds"])
+                           data["quotes"], data["quote_age_seconds"], data["sleeve_capital"])
 
 
 def test_audit_store_retains_distinct_full_precision_snapshots(tmp_path):
@@ -400,6 +439,28 @@ def test_h_audit_retains_full_panel_after_next_plan(status_runner):
     assert result.metrics["US.SPY"]["rsi2"] != round(result.metrics["US.SPY"]["rsi2"], 4)
 
 
+@pytest.mark.parametrize('mark,capital,per_etf,aggregate', [(110, 21000, 2100, 6300), (90, 19000, 1900, 5700)])
+def test_runner_attributes_capital_from_receipts_not_shared_cash(status_runner, mark, capital, per_etf, aggregate):
+    from dataclasses import asdict
+    runner, _ = status_runner
+    runner.state.update(initial_nav=100000, high_water=100000)
+    runner.state['sleeves']['h_etf'] = {'US.XLV': 100}
+    link = {'audit_id': '2026-11-19/h-buy', 'intent_id': 'h-buy'}
+    runner.store.append('2026-11-19', {'event': 'intent', **link, 'mode': 'EXECUTE', 'sleeve': 'h_etf', 'symbol': 'US.XLV', 'side': 'BUY', 'qty': 100})
+    runner.store.append('2026-11-19', {'event': 'acknowledged', **link, 'order_id': 'TEST'})
+    runner.store.append('2026-11-19', {'event': 'outcome', **link, 'order_id': 'TEST', 'status': 'FILLED', 'qty': 100, 'filled': 100, 'avg_price': 100})
+    account = acct(nav=120000, positions={'US.XLV': 100}, quotes={'US.XLV': mark})
+    before = runner.store.outbox('2026-11-19')
+    performance = runner.attribute_capital(account)
+    assert account.sleeve_capital == {'b3': 80000, 'h_etf': capital}
+    from dual_strategy.competition.store import sleeve_performance
+    assert performance == sleeve_performance(runner.store, runner.state, asdict(account), runner.cfg)
+    assert performance['sleeves']['b3']['limits']['target_before_cap'] == 80000
+    assert performance['sleeves']['h_etf']['limits']['per_etf_budget'] == per_etf
+    assert performance['sleeves']['h_etf']['limits']['aggregate_limit'] == aggregate
+    assert runner.store.outbox('2026-11-19') == before
+
+
 def test_h_open_audit_links_signal_account_intent_and_fill(status_runner, monkeypatch):
     from dual_strategy.execution.moomoo_cli import HISTORY, PLACE
     runner, _ = status_runner
@@ -430,6 +491,9 @@ def test_h_open_audit_links_signal_account_intent_and_fill(status_runner, monkey
     saved, = audit_records(runner, "h_open")
     provenance, = audit_records(runner, "provenance")
     assert saved["signal_audit_id"] == signal_id
+    assert saved['account']['sleeve_capital'] == {'b3': 78000, 'h_etf': 19500}
+    assert saved['capital']['sleeves']['h_etf']['initial_capital'] == 19500
+    assert saved['capital']['sleeves']['h_etf']['limits']['per_etf_budget'] == 1950
     intents, reason = planner.plan_h_open(saved["state"], restore_account(saved["account"]), saved["session"],
                                           saved["plan"], provenance["config"], datetime.fromisoformat(saved["now"]))
     assert [i.to_dict() for i in intents] == saved["intents"] and reason == saved["reason"]
@@ -599,6 +663,64 @@ def test_order_error_budget_stops_sending_after_three(status_runner):
     assert len(placed) == 3 and runner.state["order_errors_today"] == 3
     assert runner.state["halted"]["kind"] == "order_error"
     assert "order_refused" in [r["event"] for r in runner.store.outbox("2026-11-20")]
+
+
+@pytest.mark.parametrize('recorded', ['h_open', 'h_open_skipped', 'h_open_started', 'runner_error', 'PLAN', 'prior_day', 'none'])
+def test_restarted_loop_does_not_replay_h_open_but_keeps_risk_checks(status_runner, monkeypatch, recorded):
+    runner, _ = status_runner
+    now = datetime(2026, 11, 20, 11, 45, tzinfo=NY)
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return now.astimezone(tz) if tz else now.replace(tzinfo=None)
+
+    monkeypatch.setitem(runner.loop.__globals__, 'datetime', Clock)
+    runner.state['h_plan'] = {'asof': '2026-11-19', 'entries': [], 'exits': {}, 'blocked': None}
+    if recorded == 'runner_error':
+        runner.store.append('2026-11-20', {'event': 'runner_error', 'step': 'h-open', 'error': 'timeout'})
+    elif recorded != 'none':
+        runner.store.audit('2026-11-19' if recorded == 'prior_day' else '2026-11-20', {
+            'kind': 'h_open' if recorded in ('PLAN', 'prior_day') else recorded,
+            'mode': 'PLAN' if recorded == 'PLAN' else 'EXECUTE'})
+    sent, risks = [], []
+    monkeypatch.setattr(runner, 'send', lambda intents, session, audit_id: sent.append(intents))
+
+    def risk(symbols=()):
+        risks.append(list(symbols))
+        return acct()
+
+    monkeypatch.setattr(runner, 'risk', risk)
+
+    class LoopStopped(BaseException):
+        pass
+
+    def stop(seconds):
+        raise LoopStopped()
+
+    monkeypatch.setattr(runner.loop.__globals__['time'], 'sleep', stop)
+    with pytest.raises(LoopStopped):
+        runner.loop()
+    assert len(sent) == (1 if recorded in ('PLAN', 'prior_day', 'none') else 0)
+    assert len(risks) == (2 if recorded in ('PLAN', 'prior_day', 'none') else 1)
+
+
+def test_h_open_attempt_is_persisted_before_account_read(status_runner, monkeypatch):
+    runner, _ = status_runner
+    runner.state['h_plan'] = {'asof': '2026-11-19', 'entries': ['US.SPY'], 'exits': {}, 'blocked': None}
+    monkeypatch.setattr(runner, 'session', lambda: '2026-11-20')
+    calls = []
+
+    def failed_read(symbols):
+        calls.append(symbols)
+        raise RuntimeError('read interrupted')
+
+    monkeypatch.setattr(runner, 'risk', failed_read)
+    with pytest.raises(RuntimeError, match='read interrupted'):
+        runner.h_open()
+    runner.h_open()
+    assert calls == [['US.SPY']]
+    assert runner.store.outbox('2026-11-20') == []
 
 
 def test_loop_step_failure_is_recorded_not_fatal(status_runner):

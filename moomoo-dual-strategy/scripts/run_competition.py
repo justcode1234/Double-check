@@ -34,7 +34,7 @@ sys.path.insert(0, str(PROJECT / "src"))
 from dual_strategy.competition import planner  # noqa: E402
 from dual_strategy.competition.market import Market, MarketDataError  # noqa: E402
 from dual_strategy.competition.signals import b3_decision, b3_decision_times, h_plan  # noqa: E402
-from dual_strategy.competition.store import Store, load_config  # noqa: E402
+from dual_strategy.competition.store import Store, load_config, sleeve_performance  # noqa: E402
 from dual_strategy.data.calendar import NY, session_bounds  # noqa: E402
 from dual_strategy.execution.moomoo_paper import ExecutionBlocked
 
@@ -106,6 +106,11 @@ class Runner:
                 acct.quotes[s], at = self.quote(s)
                 acct.quote_age_seconds[s] = (datetime.now(timezone.utc) - at).total_seconds()
         return acct
+
+    def attribute_capital(self, acct):
+        performance = sleeve_performance(self.store, self.state, asdict(acct), self.cfg)
+        acct.sleeve_capital = {s: p["capital"] for s, p in performance["sleeves"].items()}
+        return performance
 
     def session(self, now=None) -> str:
         return (now or datetime.now(timezone.utc)).astimezone(NY).date().isoformat()
@@ -209,15 +214,24 @@ class Runner:
     def h_open(self):
         plan = self.state.get("h_plan")
         session = self.session()
+        if self.broker:
+            for path in (self.store.dir / "audit" / session).glob("*.json"):
+                record = json.loads(path.read_text(encoding="utf-8"))
+                if record.get("mode") == "EXECUTE" and record.get("kind") in ("h_open", "h_open_skipped", "h_open_started"):
+                    return log(h_open="already attempted", session=session)
+            if any(r.get("event") == "runner_error" and r.get("step") == "h-open" for r in self.store.outbox(session)):
+                return log(h_open="already attempted", session=session)
+            self.audit(session, "h_open_started")
         prior = [s for s in sessions_until(date.fromisoformat(session)) if s < date.fromisoformat(session)][-1]
         if not plan or plan.get("blocked") or plan["asof"] != prior.isoformat():
             self.audit(session, "h_open_skipped", plan=plan, reason="no unblocked plan from the previous close")
             return log(h_open="skipped", why="no unblocked plan from the previous close", plan_asof=plan and plan.get("asof"))
         acct = self.risk(plan["entries"] + list(plan["exits"]))
+        capital = self.attribute_capital(acct)
         now = datetime.now(NY)
         intents, why = planner.plan_h_open(self.state, acct, session, plan, self.cfg, now)
         audit_id = self.audit(session, "h_open", plan=plan, signal_audit_id=self.state.get("h_plan_audit_id"),
-                              state=self.state, account=asdict(acct), now=now, reason=why,
+                              state=self.state, account=asdict(acct), capital=capital, now=now, reason=why,
                               intents=[i.to_dict() for i in intents])
         log(h_open=why, intents=len(intents))
         self.send(intents, session, audit_id)
@@ -255,13 +269,14 @@ class Runner:
         decision = b3_decision(today_bars, prior, float(prev_close), dividend, tick, bounds[0],
                                self.cfg["b3"]["lookback_sessions"], self.cfg["b3"]["band_width"])
         acct = self.risk([sym])
+        capital = self.attribute_capital(acct)
         intents, why = planner.plan_b3(self.state, acct, today.isoformat(), decision, self.cfg, now)
         audit_id = self.audit(today.isoformat(), "b3", inputs={
             "today": [asdict(b) for b in today_bars],
             "prior": {d.isoformat(): [asdict(b) for b in rows] for d, rows in prior.items()},
             "prev_close": float(prev_close), "dividend_today": dividend, "at": tick, "session_open": bounds[0],
             "lookback": self.cfg["b3"]["lookback_sessions"], "width": self.cfg["b3"]["band_width"]},
-            decision=asdict(decision), state=self.state, account=asdict(acct), now=now, reason=why,
+            decision=asdict(decision), state=self.state, account=asdict(acct), capital=capital, now=now, reason=why,
             intents=[i.to_dict() for i in intents])
         log(b3={"at": key, "target": decision.target, "reason": decision.reason,
                 "metrics": {k: round(v, 5) for k, v in decision.metrics.items() if isinstance(v, float)}}, plan=why)
@@ -285,7 +300,8 @@ class Runner:
         log(mode="EXECUTE" if self.broker else "PLAN", execution_enabled=self.cfg["execution_enabled"],
             nav=acct.nav if acct else None, broker_positions=acct.positions if acct else None,
             attribution_errors=planner.attribution_errors(s, acct) if acct else [],
-            allocation=self.cfg["allocation"], initial_nav=s["initial_nav"], high_water=s["high_water"],
+            allocation=self.cfg["allocation"], capital=self.attribute_capital(acct) if acct else None,
+            initial_nav=s["initial_nav"], high_water=s["high_water"],
             halt_level=None if s["high_water"] is None else round(s["high_water"] * (1 - self.cfg["risk"]["halt_drawdown_fraction"]), 2),
             halted=s["halted"], locked_day=s["locked_day"], half_size=s["reduced"], sleeves=s["sleeves"],
             h_plan={k: v for k, v in (s.get("h_plan") or {}).items() if k != "metrics"},

@@ -13,7 +13,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from dual_strategy.competition.signals import b3_decision_times
-from dual_strategy.competition.store import Store, load_config
+from dual_strategy.competition.store import Store, load_config, sleeve_performance
 from dual_strategy.data.calendar import NY, session_bounds
 from dual_strategy.reporting.service import redacted
 
@@ -253,118 +253,6 @@ def _startup_health(project: Path, process: dict, now: datetime) -> dict:
         return {**empty, "status": "unverified"}
 
 
-def _sleeve_performance(store: Store, state: dict | None, account: dict | None) -> dict:
-    sleeves = {s: {"status": "not_recorded", "realized_gross": None, "unrealized_gross": None,
-                   "gross_pnl": None, "fees": None, "net_pnl": None, "fill_count": 0,
-                   "positions": {}, "receipts": []} for s in ("b3", "h_etf")}
-    result = {"asof": (account or {}).get("at"), "sleeves": sleeves,
-              "account_pnl": None, "unallocated_account_change": None, "cost_method": "weighted_average"}
-    if state is None:
-        return result
-    groups = {}
-    try:
-        for path in sorted((store.dir / "outbox").glob("????-??-??.jsonl")):
-            for row in store.outbox(path.stem):
-                if row.get("event") not in ("intent", "acknowledged", "outcome", "order_refused"):
-                    continue
-                key = (row.get("audit_id"), row.get("intent_id"))
-                groups.setdefault(key, []).append(row)
-    except (OSError, ValueError):
-        for sleeve in sleeves.values():
-            sleeve["status"] = "incomplete"
-        return result
-    incomplete, seen_orders = set(), {}
-    realized = {s: 0.0 for s in sleeves}
-    for (audit_id, intent_id), rows in groups.items():
-        intents = [r for r in rows if r["event"] == "intent" and r.get("mode") == "EXECUTE"]
-        if not intents:
-            if any(r["event"] in ("acknowledged", "outcome") for r in rows):
-                incomplete.update(sleeves)
-            continue
-        intent = intents[0]
-        s = intent.get("sleeve")
-        if s not in sleeves:
-            incomplete.update(sleeves)
-            continue
-        acks = [r for r in rows if r["event"] == "acknowledged"]
-        outcomes = [r for r in rows if r["event"] == "outcome"]
-        if not acks and not outcomes and any(r["event"] == "order_refused" for r in rows):
-            continue
-        if len(intents) != 1 or len(acks) != 1 or len(outcomes) != 1:
-            incomplete.add(s)
-            continue
-        outcome = outcomes[0]
-        q, price = outcome.get("filled"), outcome.get("avg_price")
-        if (not acks[0].get("order_id") or acks[0]["order_id"] != outcome.get("order_id")
-                or outcome.get("status") not in ("FILLED", "CANCELLED", "REJECTED")
-                or type(q) is not int or type(intent.get("qty")) is not int or not 0 <= q <= intent["qty"]
-                or outcome.get("qty") != intent["qty"]
-                or (outcome["status"] == "FILLED" and q != intent["qty"])
-                or intent.get("side") not in ("BUY", "SELL") or not isinstance(intent.get("symbol"), str)):
-            incomplete.add(s)
-            continue
-        order_id = acks[0]["order_id"]
-        if order_id in seen_orders:
-            incomplete.update((s, seen_orders[order_id]))
-            continue
-        seen_orders[order_id] = s
-        if q == 0:
-            continue
-        if type(price) not in (int, float) or not math.isfinite(price) or price <= 0:
-            incomplete.add(s)
-            continue
-        sleeve, symbol = sleeves[s], intent["symbol"]
-        book = sleeve["positions"].setdefault(symbol, {"qty": 0, "cost_basis": 0.0})
-        if intent["side"] == "BUY":
-            book["qty"] += q
-            book["cost_basis"] += q * price
-        elif q <= book["qty"]:
-            basis = book["cost_basis"] * q / book["qty"]
-            realized[s] += q * price - basis
-            book["qty"] -= q
-            book["cost_basis"] -= basis
-            if not book["qty"]:
-                sleeve["positions"].pop(symbol)
-        else:
-            incomplete.add(s)
-            continue
-        sleeve["fill_count"] += 1
-        sleeve["receipts"].append({"audit_id": audit_id, "intent_id": intent_id, "symbol": symbol,
-            "side": intent["side"], "filled": q, "avg_price": price, "notional": q * price,
-            "recorded_at": outcome.get("logged_at")})
-    quotes, broker = (account or {}).get("quotes", {}), (account or {}).get("positions", {})
-    owned = {}
-    for book in state["sleeves"].values():
-        for symbol, q in book.items():
-            owned[symbol] = owned.get(symbol, 0) + q
-    for s, sleeve in sleeves.items():
-        positions = sleeve["positions"]
-        if {symbol: p["qty"] for symbol, p in positions.items()} != state["sleeves"].get(s, {}):
-            incomplete.add(s)
-        unrealized = 0.0
-        for symbol, position in positions.items():
-            price = quotes.get(symbol)
-            if (type(price) not in (int, float) or not math.isfinite(price) or price <= 0
-                    or owned.get(symbol) != broker.get(symbol)):
-                incomplete.add(s)
-                continue
-            position["mark_price"] = price
-            position["unrealized_gross"] = position["qty"] * price - position["cost_basis"]
-            unrealized += position["unrealized_gross"]
-        sleeve["status"] = "incomplete" if s in incomplete else "available"
-        if s not in incomplete:
-            sleeve.update(realized_gross=realized[s], unrealized_gross=unrealized, gross_pnl=realized[s] + unrealized)
-            if not sleeve["fill_count"]:
-                sleeve.update(fees=0.0, net_pnl=0.0)
-    initial, cash = state.get("initial_nav"), (account or {}).get("cash")
-    if (type(initial) in (int, float) and initial > 0 and type(cash) in (int, float)
-            and all(type(quotes.get(s)) in (int, float) and math.isfinite(quotes[s]) and quotes[s] > 0 for s in broker)):
-        result["account_pnl"] = cash + sum(q * quotes[s] for s, q in broker.items()) - initial
-        if not incomplete and owned == broker:
-            result["unallocated_account_change"] = result["account_pnl"] - sum(s["gross_pnl"] for s in sleeves.values())
-    return result
-
-
 def competition_payload(project: Path, now: datetime | None = None) -> dict:
     now = now or datetime.now(timezone.utc)
     cfg = load_config(project)
@@ -392,6 +280,6 @@ def competition_payload(project: Path, now: datetime | None = None) -> dict:
         "outbox_source": "LIVE runner" if source == "live" else "PLAN runner (nothing sent)",
         "outbox_session": session, "outbox": rows[-200:], "orders": orders, "order_counts": counts,
         "step_errors": dict(Counter(r.get("step", "unknown") for r in rows if r.get("event") == "runner_error")),
-        "performance": _sleeve_performance(stores["live"], states["live"], observations["account_snapshot"]),
+        "performance": sleeve_performance(stores["live"], states["live"], observations["account_snapshot"], cfg),
         **observations, "preview": preview,
     })

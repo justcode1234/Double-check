@@ -23,6 +23,7 @@ class Account:
     positions: dict[str, int]
     quotes: dict[str, float]
     quote_age_seconds: dict[str, float] = field(default_factory=dict)
+    sleeve_capital: dict[str, float | None] = field(default_factory=dict)
 
     @property
     def nav(self) -> float:
@@ -158,9 +159,24 @@ def plan_flatten(state: dict, account: Account, session: str, reason: str, cfg: 
     return out
 
 
+def capital_limits(sleeve: str, capital: float | None, cfg: dict, reduced: bool) -> dict:
+    capital = capital if type(capital) in (int, float) and math.isfinite(capital) else None
+    limits = {"allocation_budget": capital, "target_before_cap": None, "per_etf_budget": None, "aggregate_limit": None}
+    if capital is None:
+        return limits
+    available = max(0.0, capital)
+    factor = 0.5 if reduced else 1.0
+    if sleeve == "b3":
+        limits["target_before_cap"] = available * cfg["b3"]["position_fraction_of_sleeve"] * factor
+    else:
+        limits["per_etf_budget"] = available * cfg["h_etf"]["per_name_fraction_of_sleeve"] * factor
+        limits["aggregate_limit"] = available * cfg["h_etf"]["aggregate_fraction_of_sleeve"]
+    return limits
+
+
 def plan_b3(state: dict, account: Account, session: str, decision, cfg: dict, now: datetime) -> tuple[list[Intent], str]:
     """Decision -> at most one SPY order for the B3 sleeve."""
-    c, sym = cfg["b3"], cfg["b3"]["symbol"]
+    sym = cfg["b3"]["symbol"]
     held = state["sleeves"]["b3"].get(sym, 0)
     tag = decision.at.strftime("%H%M")
     if decision.target is None:
@@ -177,9 +193,11 @@ def plan_b3(state: dict, account: Account, session: str, decision, cfg: dict, no
     why = entry_block(state, account, session, cfg)
     if why:
         return [], f"entry blocked: {why}"
-    factor = 0.5 if state["reduced"] else 1.0
+    limits = capital_limits("b3", account.sleeve_capital.get("b3"), cfg, state["reduced"])
+    if limits["allocation_budget"] is None or limits["allocation_budget"] <= 0:
+        return [], "entry blocked: unverified or depleted B3 capital"
     held_value = account.positions.get(sym, 0) * price                    # SPY the H sleeve may already own
-    budget = min(cfg["allocation"]["b3"] * c["position_fraction_of_sleeve"] * account.nav * factor,
+    budget = min(limits["target_before_cap"],
                  cfg["risk"]["name_cap_usd"] - held_value, max(0.0, account.cash - 0.99), max(0.0, account.nav - account.gross))
     limit = _limit(price, "BUY", cfg)
     qty = math.floor(budget / max(limit, decision.metrics.get("open_0930", limit)))
@@ -190,7 +208,6 @@ def plan_b3(state: dict, account: Account, session: str, decision, cfg: dict, no
 
 def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: dict, now: datetime) -> tuple[list[Intent], str]:
     """Next-open orders from the last close's H plan: exits first, then entries within the H sleeve limits."""
-    c = cfg["h_etf"]
     out = []
     held = state["sleeves"]["h_etf"]
     for s, why in sorted(plan.get("exits", {}).items()):
@@ -203,11 +220,12 @@ def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: di
     why = entry_block(state, account, session, cfg)
     if why:
         return out, f"entries blocked: {why}"
-    factor = 0.5 if state["reduced"] else 1.0
-    sleeve = cfg["allocation"]["h_etf"] * account.nav
+    limits = capital_limits("h_etf", account.sleeve_capital.get("h_etf"), cfg, state["reduced"])
+    if limits["allocation_budget"] is None or limits["allocation_budget"] <= 0:
+        return out, "entries blocked: unverified or depleted H capital"
     exiting = {i.symbol for i in out}
     gross = sum(q * account.quotes.get(s, 0.0) for s, q in held.items() if s not in exiting)
-    room = c["aggregate_fraction_of_sleeve"] * sleeve - gross
+    room = limits["aggregate_limit"] - gross
     cash = min(account.cash - 0.99, account.nav - account.gross)          # no leverage
     for s in entries:
         price = account.quotes.get(s)
@@ -215,7 +233,7 @@ def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: di
             continue
         limit = _limit(price, "BUY", cfg)
         held_value = account.positions.get(s, 0) * price                  # e.g. SPY owned by B3: cap is per symbol
-        budget = min(c["per_name_fraction_of_sleeve"] * sleeve * factor, cfg["risk"]["name_cap_usd"] - held_value, room, cash)
+        budget = min(limits["per_etf_budget"], cfg["risk"]["name_cap_usd"] - held_value, room, cash)
         qty = math.floor(budget / limit)
         if qty <= 0:
             continue

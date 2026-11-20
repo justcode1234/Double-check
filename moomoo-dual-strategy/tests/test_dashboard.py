@@ -698,8 +698,8 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   live.outbox = [{event:'runner_error',step:'risk',logged_at:live.generated_at,error:'<img src=x onerror=alert(1)>'}];
   live.step_errors = {risk:2};
   live.performance={asof:live.generated_at,account_pnl:19.19,unallocated_account_change:-1.98,sleeves:{
-    b3:{status:'available',gross_pnl:0,realized_gross:0,unrealized_gross:0,fill_count:0,fees:0,net_pnl:0},
-    h_etf:{status:'available',gross_pnl:21.17,realized_gross:0,unrealized_gross:21.17,fill_count:2,fees:null,net_pnl:null}}};
+    b3:{status:'available',gross_pnl:0,realized_gross:0,unrealized_gross:0,fill_count:0,fees:0,net_pnl:0,initial_capital:80000,capital:80000,limits:{allocation_budget:80000,target_before_cap:80000,per_etf_budget:null,aggregate_limit:null}},
+    h_etf:{status:'available',gross_pnl:21.17,realized_gross:0,unrealized_gross:21.17,fill_count:2,fees:null,net_pnl:null,initial_capital:20000,capital:20021.17,limits:{allocation_budget:20021.17,target_before_cap:null,per_etf_budget:2002.117,aggregate_limit:6006.351}}}};
   await load({data:live});
   const pnl=card=>nodes(card,'div').find(n=>n.className.split(' ').includes('nav-value')).textContent;
   assert.equal(pnl(get('sleeves').children[0]),'$0.00');
@@ -707,6 +707,20 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   assert.match(text('sleeves'),/Strategy P&L · before fees/);
   assert.match(text('sleeves'),/Fees not attributed/);
   assert.match(text('attribution-note'),/not split 80\/20/);
+  live.live.nav_estimate=110000;
+  live.performance.sleeves.b3={...live.performance.sleeves.b3,initial_capital:80000,capital:80000,limits:{allocation_budget:80000,target_before_cap:80000,per_etf_budget:null,aggregate_limit:null}};
+  live.performance.sleeves.h_etf={...live.performance.sleeves.h_etf,initial_capital:20000,capital:20021.17,limits:{allocation_budget:20021.17,target_before_cap:null,per_etf_budget:2002.117,aggregate_limit:6006.351}};
+  await load({data:live});
+  const cardText=card=>card.textContent;
+  assert.ok(cardText(get('sleeves').children[0]).includes('$80,000.00'));
+  assert.ok(!cardText(get('sleeves').children[0]).includes('$88,000.00'));
+  for (const value of ['$20,021.17','$2,002.12','$6,006.35']) assert.ok(cardText(get('sleeves').children[1]).includes(value),value);
+  assert.match(text('sleeves'),/initial capital/i);
+  assert.doesNotMatch(text('rules-list'),/of current account NAV/);
+  live.live.nav_estimate=100000;
+  live.performance.sleeves.h_etf.capital=20000;
+  live.performance.sleeves.h_etf.limits={allocation_budget:20000,target_before_cap:null,per_etf_budget:2000,aggregate_limit:6000};
+  await load({data:live});
   assert.match(text('runner-summary'), /Running/);
   assert.match(text('mark-summary'), /Stale/);
   assert.match(text('health-alert'), /risk × 2/);
@@ -737,7 +751,16 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   for (const [status,label] of [['stopped',/Stopped/],['unknown',/unverified/],['multiple',/Multiple/]]) {
     live.runtime.process.status=status;await load({data:live});assert.match(text('runner-summary'),label);
   }
-  assert.match(text('sleeves'), /not strategy profit/);
+  assert.match(text('sleeves'), /initial capital \+ own gross P&L/);
+  const unknownCapital=structuredClone(live);
+  unknownCapital.performance.sleeves.h_etf={...unknownCapital.performance.sleeves.h_etf,status:'incomplete',gross_pnl:null,capital:null,limits:{allocation_budget:null,target_before_cap:null,per_etf_budget:null,aggregate_limit:null}};
+  await load({data:unknownCapital});
+  assert.match(text('sleeves'),/Capital unverified; new entries blocked/);
+  assert.equal(nodes(get('sleeves').children[1],'progress').length,0);
+  const unknownLimits=nodes(get('sleeves').children[1],'dl').find(n=>n.className.includes('capital-metrics'));
+  assert.equal(nodes(unknownLimits,'dd').filter(n=>n.textContent.startsWith('—')).length,3);
+  assert.ok(get('sleeves').children[0].textContent.includes('$80,000.00'));
+  await load({data:live});
   live.access={status:'sign_in_required',at:live.generated_at};
   live.startup={status:'blocked',session:'2026-11-23',at:live.generated_at,reason:'read_only_preflight_failed_twice'};
   await load({data:live});

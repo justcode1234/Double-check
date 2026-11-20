@@ -667,6 +667,13 @@ def test_competition_profit_belongs_to_h_not_shared_nav_allocation(competition_r
     assert h['realized_gross'] == 0
     assert h['unrealized_gross'] == pytest.approx(21.17)
     assert h['gross_pnl'] == pytest.approx(21.17)
+    assert p['sleeves']['b3']['initial_capital'] == 80000
+    assert p['sleeves']['b3']['capital'] == 80000
+    assert p['sleeves']['b3']['limits']['target_before_cap'] == 80000
+    assert h['initial_capital'] == 20000
+    assert h['capital'] == pytest.approx(20021.17)
+    assert h['limits']['per_etf_budget'] == pytest.approx(2002.117)
+    assert h['limits']['aggregate_limit'] == pytest.approx(6006.351)
     assert h['fees'] is None and h['net_pnl'] is None
     assert h['fill_count'] == 2
     assert h['positions']['US.XLV']['cost_basis'] == pytest.approx(1968.45)
@@ -693,6 +700,8 @@ def test_competition_same_symbol_sleeves_and_realized_profit_stay_separate(compe
     assert b['positions']['US.SPY']['cost_basis'] == pytest.approx(1725)
     assert h['gross_pnl'] == pytest.approx(50)
     assert h['positions']['US.SPY']['cost_basis'] == 200
+    assert b['capital'] == 80225 and b['limits']['target_before_cap'] == 80225
+    assert h['capital'] == 20050 and h['limits']['aggregate_limit'] == 6015
 
 
 @pytest.mark.parametrize('problem', ['missing_fill', 'missing_ack', 'wrong_ack', 'duplicate_outcome', 'missing_quote', 'wrong_ownership', 'ambiguous_order'])
@@ -714,6 +723,9 @@ def test_competition_incomplete_profit_evidence_is_not_guessed(competition_repor
     p = report.competition_payload(tmp_path, datetime(2026, 11, 23, 15, tzinfo=timezone.utc))['performance']
     assert p['sleeves']['h_etf']['status'] == 'incomplete'
     assert p['sleeves']['h_etf']['gross_pnl'] is None
+    assert p['sleeves']['h_etf']['capital'] is None
+    assert p['sleeves']['h_etf']['limits']['per_etf_budget'] is None
+    assert p['sleeves']['h_etf']['limits']['aggregate_limit'] is None
     assert p['sleeves']['b3']['gross_pnl'] == 0
     assert p['unallocated_account_change'] is None
 
@@ -739,6 +751,25 @@ def test_competition_ambiguous_broker_receipts_cannot_certify_profit(competition
     assert p['unallocated_account_change'] is None
 
 
+@pytest.mark.parametrize('content', ['{', '[]', 'null', '{"event":"intent","audit_id":[],"intent_id":"x"}'])
+def test_malformed_receipt_cannot_certify_sizing_capital(competition_report, tmp_path, content):
+    from dataclasses import asdict
+    from dual_strategy.competition import planner
+    report, store = competition_report
+    _record_sleeve_fill(store, '2026-11-20', 'buy', 'h_etf', 'US.XLV', 'BUY', 2, 100)
+    _mark_sleeves(store, {'b3': {}, 'h_etf': {'US.XLV': 2}}, {'US.XLV': 100}, cash=99800)
+    with (store.dir / 'outbox/2026-11-20.jsonl').open('a') as f:
+        f.write(content + '\n')
+    from dual_strategy.competition.store import sleeve_performance, load_config
+    cfg = load_config(tmp_path)
+    a = planner.Account(datetime(2026, 11, 23, 15, tzinfo=timezone.utc), 99800, {'US.XLV': 2}, {'US.XLV': 100, 'US.XLP': 100})
+    p = sleeve_performance(store, store.load(), asdict(a), cfg)
+    assert all(s['capital'] is None and s['status'] == 'incomplete' for s in p['sleeves'].values())
+    a.sleeve_capital = {s: v['capital'] for s, v in p['sleeves'].items()}
+    intents, why = planner.plan_h_open(store.load(), a, '2026-11-23', {'entries': ['US.XLP'], 'exits': {'US.XLV': 'exit'}}, cfg, a.at)
+    assert [(i.side, i.qty) for i in intents] == [('SELL', 2)] and 'capital' in why
+
+
 def test_competition_closed_trade_keeps_profit_and_plan_never_contributes(competition_report, tmp_path):
     report, store = competition_report
     _record_sleeve_fill(store, '2026-11-20', 'b-buy', 'b3', 'US.SPY', 'BUY', 5, 100)
@@ -749,5 +780,8 @@ def test_competition_closed_trade_keeps_profit_and_plan_never_contributes(compet
     assert p['sleeves']['b3']['gross_pnl'] == 15
     assert p['sleeves']['b3']['unrealized_gross'] == 0
     assert p['sleeves']['h_etf']['gross_pnl'] == 0
+    assert p['sleeves']['b3']['capital'] == 80015
+    assert p['sleeves']['h_etf']['capital'] == 20000
+    assert p['sleeves']['h_etf']['limits']['aggregate_limit'] == 6000
     assert p['account_pnl'] == pytest.approx(13.02)
     assert p['unallocated_account_change'] == pytest.approx(-1.98)

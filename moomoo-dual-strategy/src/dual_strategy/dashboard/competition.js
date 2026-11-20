@@ -100,9 +100,9 @@
     const specs = [{ id: "b3", letter: "B3", title: "SPY Noise-Area", css: "strategy-a", description: "Hourly momentum · long-only · intraday" },
       { id: "h_etf", letter: "H", title: "ETF RSI-2 panel", css: "strategy-b", description: "Next-open mean reversion · holds up to 3 sessions" }];
     for (const s of specs) {
-      const alloc = data.config.allocation[s.id], nav = state?.nav_estimate;
+      const alloc = data.config.allocation[s.id];
       const performance = data.performance.sleeves[s.id];
-      const budget = finite(nav) ? alloc * nav : null;
+      const budget = performance.limits?.allocation_budget;
       const held = state?.sleeves?.[s.id];
       const quotes = data.account_snapshot?.quotes || {};
       const names = Object.keys(held || {});
@@ -110,7 +110,7 @@
       const card = el("article", `portfolio-card ${s.css}`), head = el("div", "portfolio-header"), title = el("div", "portfolio-title"), text = el("div");
       text.append(el("h3", "", s.title), el("p", "strategy-description", s.description));
       title.append(el("span", "strategy-letter", s.letter), text);
-      head.append(title, el("span", "badge neutral", `${share(alloc)} allocation`));
+      head.append(title, el("span", "badge neutral", `${share(alloc)} initial split`));
       card.append(head, el("p", "nav-label", "Strategy P&L · before fees"), el("div", "nav-value", money(performance.gross_pnl)),
         el("p", "sleeve-weight", performance.status === "available" ? `${performance.fill_count} confirmed fill outcomes since start · only this strategy's trades. ${performance.fill_count ? `Marked ${et(data.performance.asof, true)} ET.` : "No trading profit or loss recorded."}` : "P&L unavailable: receipt history, ownership or price evidence is incomplete."));
       const profit = el("dl", "metrics");
@@ -124,14 +124,14 @@
         card.append(meter);
       }
       const limits = el("dl", "metrics capital-metrics");
-      metric(limits, "Allocation budget", money(budget), `${share(alloc)} of total NAV; not strategy profit`);
+      metric(limits, "Allocation budget", money(budget), finite(budget) ? `${money(performance.initial_capital)} initial capital + own gross P&L; unattributed fees excluded` : "Capital unverified; new entries blocked");
       metric(limits, "Marked holdings", money(exposure), names.length ? `Quotes at ${et(data.account_snapshot?.at)} ET` : held ? "No sleeve-owned shares recorded" : "Holdings not verified");
       if (s.id === "b3") {
         metric(limits, "Per-symbol cap", money(data.config.risk.name_cap_usd), "SPY total across B3 + H");
-        metric(limits, "Target before cap", budget === null ? "—" : money(budget * data.config.b3.position_fraction_of_sleeve * (state.reduced ? 0.5 : 1)), "Only when entry conditions pass");
+        metric(limits, "Target before cap", money(performance.limits?.target_before_cap), "Only when entry conditions pass");
       } else {
-        metric(limits, "Per ETF budget", budget === null ? "—" : money(budget * data.config.h_etf.per_name_fraction_of_sleeve * (state.reduced ? 0.5 : 1)), `${share(data.config.h_etf.per_name_fraction_of_sleeve)} of H allocation`);
-        metric(limits, "Aggregate limit", budget === null ? "—" : money(budget * data.config.h_etf.aggregate_fraction_of_sleeve), `${share(data.config.h_etf.aggregate_fraction_of_sleeve)} of H allocation`);
+        metric(limits, "Per ETF budget", money(performance.limits?.per_etf_budget), `${share(data.config.h_etf.per_name_fraction_of_sleeve)} of H capital${state?.reduced ? " · half sizing" : ""}`);
+        metric(limits, "Aggregate limit", money(performance.limits?.aggregate_limit), `${share(data.config.h_etf.aggregate_fraction_of_sleeve)} of H capital`);
       }
       card.append(limits);
       const positions = el("div", "metric-group"); positions.append(el("h4", "", "Recorded sleeve ownership"));
@@ -270,7 +270,7 @@
 
   function renderRules(data) {
     const c = data.config, r = c.risk;
-    const rules = [`B3 ${share(c.allocation.b3)} / H ${share(c.allocation.h_etf)} of current account NAV. Allocation is a sizing budget, not ring-fenced cash.`,
+    const rules = [`Starting capital is split once: B3 ${share(c.allocation.b3)} / H ${share(c.allocation.h_etf)}. Each budget then changes only with its own confirmed gross P&L. Unattributed fees and cash adjustments are not shared between strategies.`,
       `B3 targets ${share(c.b3.position_fraction_of_sleeve)} of its allocation, capped at ${money(r.name_cap_usd)} of SPY across both strategies.`,
       `H uses ${share(c.h_etf.per_name_fraction_of_sleeve)} of its allocation per ETF, ${share(c.h_etf.aggregate_fraction_of_sleeve)} aggregate. Unused money stays in shared cash.`,
       `A ${share(r.halt_drawdown_fraction)} high-water drawdown triggers exits and a persistent halt. A ${share(r.daily_loss_fraction)} day-start loss locks the day.`,

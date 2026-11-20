@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# Ledger and broker evidence must keep exact bytes (hash-checked); never convert line endings.
+moomoo-dual-strategy/private/** -text

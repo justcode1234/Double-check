@@ -21,6 +21,7 @@ from dual_strategy.execution.moomoo_cli import (ACCOUNT_LIST, CANCEL, CASH_INFO,
                                                 CliTransport)
 from dual_strategy.execution.moomoo_paper import ExecutionBlocked
 
+READS = frozenset({ACCOUNT_LIST, CASH_INFO, POSITION_LIST, HISTORY})
 STATUS = {1: "WORKING", 2: "WORKING", 3: "PARTIAL", 4: "FILLED", 5: "CANCELLED", 6: "REJECTED", 7: "CANCELLED"}
 
 
@@ -45,13 +46,30 @@ class CompetitionBroker:
         self.acc_id = acct["account_id"]
         self.cfg = cfg
         self.transport = transport or CliTransport(frozenset({self.acc_id}), frozenset())
-        listed = [a for a in self.transport(ACCOUNT_LIST, {})["data"]["accounts"] if a.get("account_id") == self.acc_id]
+        self._last = 0.0
+        listed = [a for a in self.call(ACCOUNT_LIST, {})["data"]["accounts"] if a.get("account_id") == self.acc_id]
         if len(listed) != 1 or listed[0].get("account_type") != 2:
             raise ExecutionBlocked("competition account not uniquely listed as account_type 2 by the broker")
 
+    def call(self, tool, args, min_interval=1.0):
+        """Paced broker call. Read-only tools are retried twice (safe to repeat); PLACE and CANCEL are never
+        auto-retried: their failure is ambiguous and must be reconciled from order history first."""
+        attempts = 3 if tool in READS else 1
+        for k in range(attempts):
+            wait = getattr(self, "_last", 0.0) + min_interval - time.monotonic()
+            if wait > 0:
+                time.sleep(wait)
+            self._last = time.monotonic()
+            try:
+                return self.transport(tool, args)
+            except ExecutionBlocked:
+                if k == attempts - 1:
+                    raise
+                time.sleep(3 * (k + 1))
+
     def account(self, quote) -> Account:
-        cash = float(self.transport(CASH_INFO, {"acc_id": self.acc_id, "market": 100})["data"]["balance"])
-        rows = self.transport(POSITION_LIST, {"acc_id": self.acc_id, "market": 100})["data"]["positions"]
+        cash = float(self.call(CASH_INFO, {"acc_id": self.acc_id, "market": 100})["data"]["balance"])
+        rows = self.call(POSITION_LIST, {"acc_id": self.acc_id, "market": 100})["data"]["positions"]
         positions = {}
         for r in rows:
             q = int(float(r.get("qty", r.get("quantity", 0))))
@@ -74,7 +92,7 @@ class CompetitionBroker:
         args = {"acc_id": self.acc_id, "market": 100, "order_type": 1, "order_side": 1 if intent.side == "BUY" else 2,
                 "symbol": intent.symbol, "qty": intent.qty, "price": f"{intent.limit_price:.2f}",
                 "text": intent.intent_id[:60]}
-        return self.transport(PLACE, args)["data"]["order_id"]
+        return self.call(PLACE, args)["data"]["order_id"]
 
     def wait(self, order_id: str, placed_at: datetime, seconds: float) -> dict:
         """Poll order history until FILLED/CANCELLED/REJECTED; cancel at the deadline and reconcile the remainder."""
@@ -85,7 +103,7 @@ class CompetitionBroker:
             if row and row["status"] in ("FILLED", "CANCELLED", "REJECTED"):
                 return row
             if time.monotonic() >= deadline and not cancelled:
-                self.transport(CANCEL, {"acc_id": self.acc_id, "market": 100, "order_id": order_id})
+                self.call(CANCEL, {"acc_id": self.acc_id, "market": 100, "order_id": order_id})
                 cancelled = True
                 deadline = time.monotonic() + 20
             elif time.monotonic() >= deadline and cancelled:
@@ -95,7 +113,7 @@ class CompetitionBroker:
     def _find(self, order_id, placed_at):
         begin = int((placed_at - timedelta(minutes=2)).timestamp() * 1e6)
         end = int((datetime.now(timezone.utc) + timedelta(minutes=2)).timestamp() * 1e6)
-        rows = self.transport(HISTORY, {"acc_id": self.acc_id, "market": 100, "time_begin": begin, "time_end": end})["data"]["orders"]
+        rows = self.call(HISTORY, {"acc_id": self.acc_id, "market": 100, "time_begin": begin, "time_end": end})["data"]["orders"]
         for r in rows:
             if str(r.get("order_id")) == str(order_id):
                 return {"order_id": str(order_id), "status": STATUS.get(r.get("status"), "UNKNOWN"),

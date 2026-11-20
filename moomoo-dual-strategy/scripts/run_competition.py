@@ -141,6 +141,10 @@ class Runner:
                 continue
             placed = datetime.now(timezone.utc)
             oid = None
+            if self.state.get("order_errors_today", 0) >= 3:
+                self.store.append(session, {"event": "order_refused", **link, "reason": "3 order errors today"})
+                self.store.save(self.state)
+                raise ExecutionBlocked("order error budget (3/day) exhausted; human reconciliation required")
             try:
                 oid = self.broker.place(i)
                 self.state["orders_today"] += 1
@@ -150,7 +154,9 @@ class Runner:
                     self.store.append(session, {"event": "outcome", **link, **result})
                     raise ExecutionBlocked("broker rejected order; human reconciliation required")
             except Exception as exc:                     # ambiguous: block entries until reconciled by a human
-                self.state["halted"] = self.state["halted"] or {"at": placed.isoformat(), "reason": f"order error: {exc}"}
+                self.state["order_errors_today"] = self.state.get("order_errors_today", 0) + 1
+                self.state["halted"] = self.state["halted"] or {"kind": "order_error", "at": placed.isoformat(),
+                                                                "reason": f"order error: {exc}"}
                 self.store.append(session, {"event": "order_error", **link, "order_id": oid, "error": str(exc)})
                 self.store.save(self.state)
                 raise
@@ -286,6 +292,21 @@ class Runner:
             last_intents=self.store.outbox(self.store.latest_session() or "")[-6:])
 
     # ------------------------------------------------------------------ loop
+    def guarded(self, name, fn, *args):
+        """Run one loop step. Any failure (data, broker, order) is logged and recorded, never fatal to the loop:
+        the runner must keep marking risk and must still flatten B3 before the close."""
+        try:
+            fn(*args)
+            return True
+        except Exception as exc:                         # noqa: BLE001 - supervision must survive every step failure
+            session = self.session()
+            log(step=name, error=f"{type(exc).__name__}: {exc}")
+            try:
+                self.store.append(session, {"event": "runner_error", "step": name, "error": f"{type(exc).__name__}: {exc}"})
+            except Exception:                            # noqa: BLE001
+                pass
+            return False
+
     def loop(self):
         done = set()
         while True:
@@ -293,7 +314,7 @@ class Runner:
             bounds = session_bounds(now.date())
             if not bounds or now >= bounds[1] + timedelta(minutes=20):
                 if bounds and f"plan-h-{now.date()}" not in done:
-                    self.plan_h(now.date())
+                    self.guarded("plan-h", self.plan_h, now.date())
                     done.add(f"plan-h-{now.date()}")
                 log(loop="session over" if bounds else "no session today")
                 return
@@ -301,26 +322,26 @@ class Runner:
             prior = [s for s in sessions_until(now.date()) if s < now.date()][-1]
             plan = self.state.get("h_plan") or {}
             if f"plan-h-prior-{now.date()}" not in done and plan.get("asof") != prior.isoformat():
-                self.plan_h(prior)                       # first live day (or a missed evening): build the open's plan now
+                self.guarded("plan-h-prior", self.plan_h, prior)   # first live day or a missed evening
                 done.add(f"plan-h-prior-{now.date()}")
             if now < opened:
                 time.sleep(min(30, (opened - now).total_seconds() + 1))
                 continue
             if f"h-open-{now.date()}" not in done and now >= opened + timedelta(seconds=10):
-                self.h_open()
+                self.guarded("h-open", self.h_open)
                 done.add(f"h-open-{now.date()}")
             for t in b3_decision_times(opened, closed, self.cfg["b3"]["decision_times"]):
                 if f"b3-{t}" not in done and t + timedelta(seconds=15) <= now < t + timedelta(minutes=4):
-                    self.b3(t.strftime("%H:%M"))
+                    self.guarded("b3", self.b3, t.strftime("%H:%M"))
                     done.add(f"b3-{t}")
             flat = closed - timedelta(minutes=self.cfg["b3"]["flatten_minutes_before_close"])
             if f"flat-{now.date()}" not in done and flat <= now < closed:
-                self.flatten("b3", "b3_scheduled_flatten")
-                done.add(f"flat-{now.date()}")
+                if self.guarded("b3-flatten", self.flatten, "b3", "b3_scheduled_flatten") or now >= closed - timedelta(minutes=1):
+                    done.add(f"flat-{now.date()}")           # a failed flatten is retried on the next pass until 15:59
             if now < closed:
-                self.risk()
+                self.guarded("risk", self.risk)
             if closed + timedelta(minutes=15) <= now and f"plan-h-{now.date()}" not in done:
-                self.plan_h(now.date())
+                self.guarded("plan-h", self.plan_h, now.date())
                 done.add(f"plan-h-{now.date()}")
             time.sleep(30)
 

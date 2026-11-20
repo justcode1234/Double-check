@@ -562,3 +562,75 @@ def test_spy_cap_is_per_symbol_across_sleeves_and_b3_is_80pct():
     a = acct(positions={"US.SPY": 79})
     out, _ = planner.plan_h_open(st, a, "2026-11-20", {"exits": {}, "entries": ["US.SPY"]}, CFG, datetime.now(NY))
     assert out == [] or out[0].qty * out[0].limit_price + 79 * 500 <= CFG["risk"]["name_cap_usd"] + 1e-6
+
+
+def test_order_error_halt_blocks_entries_without_forced_exit_loop():
+    st = planner.new_state()
+    a = acct(positions={"US.SPY": 10})
+    st["sleeves"]["b3"]["US.SPY"] = 10
+    planner.mark_risk(st, a, "2026-11-20", CFG)
+    st["halted"] = {"kind": "order_error", "reason": "order error: rejected"}
+    assert planner.mark_risk(st, a, "2026-11-20", CFG) is None
+    assert "drawdown_halt" in planner.entry_block(st, a, "2026-11-20", CFG)
+    st["halted"] = {"kind": "drawdown", "reason": "dd"}
+    assert planner.mark_risk(st, a, "2026-11-20", CFG) == "drawdown_halt"
+    st["halted"] = {"reason": "legacy record without kind"}
+    assert planner.mark_risk(st, a, "2026-11-20", CFG) == "drawdown_halt"
+
+
+def test_flatten_never_sells_more_than_broker_shows():
+    st = planner.new_state()
+    st["sleeves"]["b3"]["US.SPY"] = 50
+    out = planner.plan_flatten(st, acct(positions={"US.SPY": 30}), "2026-11-20", "x", CFG, datetime.now(NY))
+    assert [(i.symbol, i.qty) for i in out] == [("US.SPY", 30)]
+    assert planner.plan_flatten(st, acct(), "2026-11-20", "x", CFG, datetime.now(NY)) == []
+
+
+def test_order_error_budget_stops_sending_after_three(status_runner):
+    runner, _ = status_runner
+    placed = []
+    runner.broker.place = lambda intent: placed.append(intent) or (_ for _ in ()).throw(ExecutionBlocked("cli down"))
+    intent = planner.Intent("x", "t", "b3", "US.SPY", "SELL", 1, 500.0, 500.0, "r", True)
+    for _ in range(3):
+        with pytest.raises(ExecutionBlocked):
+            runner.send([intent], "2026-11-20")
+    with pytest.raises(ExecutionBlocked, match="budget"):
+        runner.send([intent], "2026-11-20")
+    assert len(placed) == 3 and runner.state["order_errors_today"] == 3
+    assert runner.state["halted"]["kind"] == "order_error"
+    assert "order_refused" in [r["event"] for r in runner.store.outbox("2026-11-20")]
+
+
+def test_loop_step_failure_is_recorded_not_fatal(status_runner):
+    runner, _ = status_runner
+
+    def boom():
+        raise RuntimeError("quote feed timeout")
+    assert runner.guarded("risk", boom) is False
+    assert runner.guarded("ok", lambda: None) is True
+    errors = [r for r in runner.store.outbox(runner.session()) if r["event"] == "runner_error"]
+    assert errors and errors[0]["step"] == "risk" and "timeout" in errors[0]["error"]
+
+
+def test_broker_retries_reads_but_never_order_placement(tmp_path, monkeypatch):
+    import dual_strategy.competition.broker as broker_mod
+    monkeypatch.setattr(broker_mod.time, "sleep", lambda s: None)
+    b = CompetitionBroker.__new__(CompetitionBroker)
+    b.acc_id, b._last = "T", 0.0
+    calls = {"funds": 0, "place": 0}
+
+    def flaky(tool, args):
+        if tool.endswith("cash_info"):
+            calls["funds"] += 1
+            if calls["funds"] < 3:
+                raise ExecutionBlocked("Moomoo CLI command failed; reconcile before retry")
+            return {"data": {"balance": "1"}}
+        if tool.endswith("input_order"):
+            calls["place"] += 1
+            raise ExecutionBlocked("Moomoo CLI command failed; reconcile before retry")
+        return {"data": {"positions": []}}
+    b.transport = flaky
+    assert b.call(broker_mod.CASH_INFO, {})["data"]["balance"] == "1" and calls["funds"] == 3
+    with pytest.raises(ExecutionBlocked):
+        b.place(planner.Intent("i", "t", "b3", "US.SPY", "BUY", 1, 1.0, 1.0, "r", False))
+    assert calls["place"] == 1

@@ -76,6 +76,7 @@ def mark_risk(state: dict, account: Account, session: str, cfg: dict) -> str | N
         _event(state, account.at, "initialized", nav=nav)
     if state["day"] != session:
         state["day"], state["day_start_nav"], state["orders_today"], state["b3_done"] = session, nav, 0, []
+        state["order_errors_today"] = 0
         _event(state, account.at, "session_start", nav=nav)
     state["high_water"] = max(state["high_water"], nav)
     state["last_nav"], state["last_mark_at"] = nav, account.at.isoformat()
@@ -85,7 +86,7 @@ def mark_risk(state: dict, account: Account, session: str, cfg: dict) -> str | N
     if state["reduced"] != was:
         _event(state, account.at, "half_size_on" if state["reduced"] else "half_size_off", nav=nav, high_water=hw)
     if state["halted"] is None and nav <= hw * (1 - r["halt_drawdown_fraction"]):
-        state["halted"] = {"at": account.at.isoformat(), "nav": nav, "high_water": hw,
+        state["halted"] = {"kind": "drawdown", "at": account.at.isoformat(), "nav": nav, "high_water": hw,
                            "reason": f"NAV {nav:.2f} <= {100 * (1 - r['halt_drawdown_fraction']):.1f}% of high-water {hw:.2f}"}
         _event(state, account.at, "drawdown_halt", nav=nav, high_water=hw)
         return "drawdown_halt"
@@ -94,7 +95,11 @@ def mark_risk(state: dict, account: Account, session: str, cfg: dict) -> str | N
         _event(state, account.at, "daily_loss_lock", nav=nav, day_start=state["day_start_nav"])
         return "daily_loss_lock"
     if state["halted"] is not None:
-        return "drawdown_halt" if any(account.positions.values()) else None
+        # Only the drawdown halt keeps forcing exits. An order-error halt blocks entries and waits for a human:
+        # re-selling every 30 s on possibly wrong ownership after an ambiguous order could compound the error.
+        if state["halted"].get("kind", "drawdown") == "drawdown" and any(account.positions.values()):
+            return "drawdown_halt"
+        return None
     if state["locked_day"] == session:
         return "daily_loss_lock" if any(account.positions.values()) else None
     return None
@@ -146,6 +151,7 @@ def plan_flatten(state: dict, account: Account, session: str, reason: str, cfg: 
     out = []
     for sleeve in sleeves:
         for s, q in sorted(state["sleeves"][sleeve].items()):
+            q = min(q, account.positions.get(s, 0))           # never sell more than the broker shows
             if q > 0 and s in account.quotes:
                 out.append(_intent(now, session, sleeve, s, "SELL", q, account.quotes[s], reason, cfg, True,
                                    f"flat{now.strftime('%H%M')}"))

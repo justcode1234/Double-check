@@ -92,9 +92,17 @@ def verify_journal(ledger: Ledger, digest: str) -> None:
             raise ValueError('Runtime projection differs from immutable decision-journal state')
 
 
+def in_private_dir(parts: tuple[str, ...]) -> bool:
+    """True if any directory component is named 'private'. macOS resolves /var, /tmp and /etc (including every pytest
+    tmp_path) to /private/...; that system prefix is not a project private/ directory, so it is skipped."""
+    if len(parts) > 2 and parts[0] == '/' and parts[1] == 'private' and parts[2] in ('var', 'tmp', 'etc'):
+        parts = parts[2:]
+    return 'private' in parts
+
+
 def open_journal(path: Path, digest: str, *, create: bool = False) -> Ledger:
     path = path.resolve()
-    if 'private' in path.parts or path.suffix not in {'.sqlite', '.sqlite3', '.db'}:
+    if in_private_dir(path.parts) or path.suffix not in {'.sqlite', '.sqlite3', '.db'}:
         raise ValueError('Use an explicit non-private SQLite decision-journal path')
     if path.exists():
         checked = Ledger(path, read_only=True)

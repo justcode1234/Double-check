@@ -218,3 +218,15 @@ def test_store_is_atomic_and_append_only(tmp_path):
     s.append("2026-11-20", {"event": "intent", "id": 1})
     s.append("2026-11-20", {"event": "outcome", "id": 1})
     assert s.load()["high_water"] == 1.0 and [r["event"] for r in s.outbox("2026-11-20")] == ["intent", "outcome"]
+
+
+def test_dashboard_payload_and_store_reads_create_nothing(tmp_path):
+    import shutil
+    from dual_strategy.competition.report import competition_payload
+    (tmp_path / "config").mkdir()
+    shutil.copy(PROJECT / "config" / "competition.yaml", tmp_path / "config" / "competition.yaml")
+    payload = competition_payload(tmp_path)
+    assert payload["live"] is None and payload["plan"] is None and payload["outbox"] == []
+    s = Store(tmp_path, {"state_dir": "private/competition/plan"})
+    s.load(), s.outbox("2026-11-20"), s.latest_session()
+    assert not (tmp_path / "private").exists()

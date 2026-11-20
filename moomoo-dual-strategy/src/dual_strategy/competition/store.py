@@ -22,10 +22,8 @@ def load_config(project: Path) -> dict:
 
 class Store:
     def __init__(self, project: Path, cfg: dict):
-        self.dir = project / cfg["state_dir"]
-        self.dir.mkdir(parents=True, exist_ok=True)
-        (self.dir / "outbox").mkdir(exist_ok=True)
-        self.path = self.dir / "state.json"
+        self.dir = project / cfg["state_dir"]                 # an absolute state_dir is used as given
+        self.path = self.dir / "state.json"                   # directories are created on first write only
 
     def load(self) -> dict:
         if not self.path.exists():
@@ -33,12 +31,14 @@ class Store:
         return json.loads(self.path.read_text(encoding="utf-8"))
 
     def save(self, state: dict) -> None:
+        self.dir.mkdir(parents=True, exist_ok=True)
         tmp = self.path.with_suffix(".tmp")
         tmp.write_text(json.dumps(state, indent=1, default=str), encoding="utf-8")
         os.replace(tmp, self.path)
 
     def append(self, session: str, record: dict) -> None:
         record = {"logged_at": datetime.now(timezone.utc).isoformat(), **record}
+        (self.dir / "outbox").mkdir(parents=True, exist_ok=True)
         with (self.dir / "outbox" / f"{session}.jsonl").open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(record, default=str) + "\n")
 

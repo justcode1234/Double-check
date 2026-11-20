@@ -400,3 +400,14 @@ def test_dashboard_control_path_preserves_journal_version_and_restart(journal, m
     assert journal.events() == after
     reopened = open_journal(Path(journal.path), DIGEST)
     reopened.close()
+
+
+def test_private_guard_ignores_macos_system_prefix_only():
+    from pathlib import PurePosixPath, PureWindowsPath
+    from dual_strategy.forward import in_private_dir
+    assert not in_private_dir(PurePosixPath('/private/var/folders/ab/T/pytest-1/decisions.sqlite3').parts)
+    assert not in_private_dir(PurePosixPath('/private/tmp/decisions.sqlite3').parts)
+    assert in_private_dir(PurePosixPath('/private/var/folders/x/project/private/ledger.sqlite3').parts)
+    assert in_private_dir(PurePosixPath('/Users/me/moomoo-dual-strategy/private/ledger.sqlite3').parts)
+    assert in_private_dir(PurePosixPath('/private/home/ledger.sqlite3').parts)
+    assert in_private_dir(PureWindowsPath(r'C:\proj\private\ledger.sqlite3').parts)

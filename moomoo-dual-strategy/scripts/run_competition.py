@@ -55,11 +55,19 @@ def last_completed_session(now: datetime) -> date:
 
 
 class Runner:
-    def __init__(self, execute: bool, nav: float):
+    def __init__(self, execute: bool, nav: float, ephemeral: bool = False):
         self.cfg = load_config(PROJECT)
         self.execute = execute
         mode = "live" if execute else "plan"
-        self.cfg = {**self.cfg, "state_dir": f"{self.cfg['state_dir']}/{mode}"}
+        if ephemeral:
+            if execute:
+                raise SystemExit("--ephemeral is PLAN-only: live state must persist")
+            import tempfile
+            state_dir = tempfile.mkdtemp(prefix="competition-plan-")     # outside the repo; private/ is untouched
+            log(ephemeral_state_dir=state_dir)
+        else:
+            state_dir = f"{self.cfg['state_dir']}/{mode}"
+        self.cfg = {**self.cfg, "state_dir": state_dir}
         self.store = Store(PROJECT, self.cfg)
         self.state = self.store.load()
         self.market = Market()
@@ -255,13 +263,14 @@ def main():
     ap.add_argument("command", choices=["status", "plan-h", "h-open", "b3", "flatten", "loop"])
     ap.add_argument("--execute", action="store_true", help="send orders (also needs config + private account file)")
     ap.add_argument("--nav", type=float, default=100_000.0, help="PLAN mode virtual account NAV")
+    ap.add_argument("--ephemeral", action="store_true", help="PLAN-only: keep state in a temp dir (writes nothing under private/)")
     ap.add_argument("--asof", type=date.fromisoformat)
     ap.add_argument("--at")
     ap.add_argument("--day", type=date.fromisoformat, help="PLAN-only: replay B3 on a completed past session")
     ap.add_argument("--sleeve", default="all", choices=["b3", "h_etf", "all"])
     ap.add_argument("--reason", default="manual_flatten")
     a = ap.parse_args()
-    r = Runner(a.execute, a.nav)
+    r = Runner(a.execute, a.nav, a.ephemeral)
     {"status": r.status, "plan-h": lambda: r.plan_h(a.asof), "h-open": r.h_open, "b3": lambda: r.b3(a.at, a.day),
      "flatten": lambda: r.flatten(a.sleeve, a.reason), "loop": r.loop}[a.command]()
 

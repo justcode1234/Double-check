@@ -3,195 +3,318 @@
 (() => {
   const REFRESH_MS = 5000;
   const SVG_NS = "http://www.w3.org/2000/svg";
-  const byId = (id) => document.getElementById(id);
-  const finite = (v) => typeof v === "number" && Number.isFinite(v);
-  const money = (v) => finite(v) ? `${v < 0 ? "−" : ""}$${Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—";
-  const share = (v) => `${+(v * 100).toFixed(2)}%`;
-  const pct = (v) => finite(v) ? `${v > 0 ? "+" : ""}${v.toFixed(2)}%` : "—";
-  const el = (tag, cls = "", text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
-  const SLEEVES = [
-    { id: "b3", letter: "B3", title: "SPY Noise-Area", css: "strategy-a", text: "Hourly decision 10:00–15:00 ET on the completed 5-minute bar · long-only · flat by 15:55" },
-    { id: "h_etf", letter: "H", title: "ETF RSI-2 panel", css: "strategy-b", text: "Next-open entries after RSI-2 ≤ 10 above the 100-day trend · exit RSI-2 ≥ 70 or 3 sessions" },
-  ];
+  const byId = id => document.getElementById(id);
+  const finite = v => typeof v === "number" && Number.isFinite(v);
+  const money = v => finite(v) ? v.toLocaleString("en-US", { style: "currency", currency: "USD" }) : "—";
+  const pct = v => finite(v) ? `${v > 0 ? "+" : ""}${v.toFixed(2)}%` : "—";
+  const share = v => `${+(v * 100).toFixed(2)}%`;
+  const human = value => String(value || "—").replaceAll("_", " ");
+  const et = (value, seconds = false) => value && Number.isFinite(Date.parse(value)) ? new Date(value).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour12: false, hour: "2-digit", minute: "2-digit", ...(seconds ? { second: "2-digit" } : {}) }) : "—";
+  const el = (tag, cls = "", text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
+  const set = (id, text) => { byId(id).textContent = text; };
+  const expanded = new Set();
+  let latest = null, pending = false, lastSuccess = 0;
 
   function metric(dl, label, value, note) {
     const box = el("div", "metric");
-    box.append(el("dt", "", label));
     const dd = el("dd", value === "—" ? "unavailable" : "", value);
     if (note) dd.append(el("small", "", note));
-    box.append(dd);
+    box.append(el("dt", "", label), dd);
     dl.append(box);
   }
 
+  function renderStatus(data) {
+    const r = data.runtime, st = data.live, process = r.process.status;
+    set("exchange-clock", et(data.generated_at, true));
+    set("mode-badge", data.config.execution_enabled ? "Paper execution enabled" : "Execution disabled");
+    byId("mode-badge").className = `badge ${data.config.execution_enabled ? "good" : "warning"}`;
+    const titles = { stopped: "Stopped · no matching loop", unknown: "Runner status unverified", multiple: "Multiple loops detected" };
+    set("runner-summary", process === "running" ? (r.market_phase === "preopen" ? "Waiting for market open" : "Running · process detected") : titles[process] || "Runner status unverified");
+    set("runner-note", process === "running" ? "One matching Python loop on this Mac. Process liveness is not proof of fresh data or order acceptance." : "This page will not start, stop or restart trading. Verify the runner before relying on execution.");
+    set("market-badge", { preopen: "Pre-market", open: "Regular session", closed: "Market closed" }[r.market_phase]);
+    byId("market-badge").className = `badge ${r.market_phase === "open" ? "good" : "neutral"}`;
+    const marks = { recent: "Recent risk mark", stale: "Stale risk mark", not_recorded: "No risk mark yet", clock_mismatch: "Mark clock mismatch" };
+    set("mark-summary", marks[r.mark_status] || "Unverified");
+    set("mark-note", r.mark_at ? `${et(r.mark_at, true)} ET · ${Math.round(r.mark_age_seconds)}s old at refresh. Not a streaming-feed check.` : "The runner records account values after the open; no NAV is assumed.");
+    set("next-summary", r.next_action ? `${et(r.next_action.at, true)} ET · ${r.next_action.label}` : "No more scheduled actions today");
+    let risk = st ? "No stored halt" : "No live state", note = "Risk thresholds are evaluated by the runner, not this page.";
+    if (st?.halted) {
+      risk = st.halted.kind === "order_error" ? "Order-error halt" : "Drawdown halt";
+      note = st.halted.kind === "order_error" ? "Entries blocked; this halt alone does not force liquidation. User review required." : "The runner requests exits; flat status must be confirmed from holdings and outcomes.";
+    } else if (st?.locked_today) { risk = "Daily loss lock"; note = "Entries locked for this session."; }
+    else if (st?.reduced) { risk = "Reduced sizing"; note = "New position sizing factor is ½; the per-symbol cap still applies."; }
+    set("risk-summary", risk); set("risk-note", note);
+    byId("risk-summary").className = st?.halted ? "negative" : "";
+    const timeline = byId("session-timeline");
+    timeline.replaceChildren(...r.schedule.map(s => {
+      const item = el("li", s.at === r.next_action?.at ? "up-next" : Date.parse(s.at) <= Date.parse(data.generated_at) ? "elapsed" : "");
+      const time = el("time", "", et(s.at)); time.dateTime = s.at;
+      item.append(time, el("span", "", s.label));
+      return item;
+    }));
+    const warnings = [...data.evidence_warnings];
+    if (process === "multiple") warnings.push("More than one loop is detected. Trading needs immediate user review.");
+    if (process === "stopped" && r.market_phase === "open") warnings.push("No running loop detected during the session; scheduled decisions may be missed.");
+    if (["stale", "clock_mismatch"].includes(r.mark_status) && r.market_phase === "open") warnings.push("Account values are not current. A running process does not prove successful risk checks.");
+    if (r.mark_status === "not_recorded" && r.market_phase === "open") warnings.push("No account risk observation has been recorded for this running session.");
+    if (st?.halted) warnings.push(note);
+    if ((st?.order_errors_today || 0) >= 3 && st?.day === data.outbox_session) warnings.push("3 order errors: the daily order budget is exhausted; no further orders can be sent.");
+    const repeated = Object.entries(data.step_errors).filter(([, count]) => count > 1);
+    if (repeated.length) warnings.push(`Repeated step failures today: ${repeated.map(([step, count]) => `${step} × ${count}`).join(", ")}. See the event audit; counts are not proof the fault is still active.`);
+    byId("health-alert").hidden = !warnings.length;
+    set("health-alert", warnings.join(" "));
+    byId("account-panel").classList.toggle("account-stale", ["stale", "clock_mismatch"].includes(r.mark_status));
+    set("nav-summary", finite(st?.nav_estimate) ? money(st.nav_estimate) : "Awaiting first risk mark");
+    set("nav-note", finite(st?.nav_estimate) && st?.day_start_nav && st.day === data.outbox_session ? `${pct(100 * (st.nav_estimate / st.day_start_nav - 1))} since day start · last observed` : "No starting balance assumed");
+    set("high-water-summary", money(st?.high_water));
+    set("halt-summary", `${money(st?.halt_level)} halt level · ${pct(st?.drawdown_pct)} drawdown`);
+    set("cash-summary", money(data.account_snapshot?.cash));
+    set("cash-note", data.account_snapshot ? `Observed ${et(data.account_snapshot.at, true)} ET · shared, not separate accounts` : "Awaiting archived broker observation");
+    const c = data.order_counts;
+    set("orders-summary", `${c.acknowledged} ack / ${c.filled} filled`);
+    set("orders-count-note", `${c.partial} partial · ${c.rejected} rejected · ${c.errors} errors · local receipts`);
+  }
+
+  function renderAttention(data) {
+    const access = data.access, startup = data.startup;
+    const accessLabels = {sign_in_required: "Sign-in required", check_required: "Check sign-in and connection", recent_success: "Recent successful account read", unverified: "Not independently verified"};
+    const startupLabels = {blocked: "Startup blocked", unverified: "Startup status unavailable", checking: "Preflight in progress", launched: "Runner launch recorded", completed: "Last scheduled run completed", not_recorded: "No startup attempt recorded"};
+    set("access-summary", accessLabels[access.status]);
+    set("access-note", `${access.at ? `Evidence ${new Date(access.at).toLocaleString("en-US", {timeZone: "America/New_York"})} ET. ` : ""}Passive runner evidence, not an independent login check. Generic failures cannot confirm expired credentials.`);
+    set("startup-summary", startupLabels[startup.status]);
+    set("startup-note", `${startup.session ? `Session ${startup.session}. ` : ""}Recorded startup only; not proof that launchd is installed, awake or ready for its next run.`);
+    const messages = [];
+    if (access.status === "sign_in_required") messages.push(["Sign-in required", "The runner recorded an explicit authentication rejection with no later successful account read. On this Mac, run moomoo auth login and complete browser sign-in. Check for a fresh risk mark afterward; any safety halt still needs separate review."]);
+    else if (access.status === "check_required") messages.push(["Check sign-in and connection", "The runner recorded a failed step with no later successful account read. Inspect the private runner log and check Moomoo sign-in, network and data availability. Expired authentication is not confirmed."]);
+    if (startup.status === "blocked") messages.push(["Startup blocked", `${startup.session ? `The ${startup.session} startup record needs review. ` : "The native scheduler reported a failure. "}Inspect the private scheduler log and reconcile account/order history before authorizing recovery. Signing in does not clear a startup block. Do not restart an active runner, delete attempt records or clear safety halts automatically.`]);
+    else if (startup.status === "unverified") messages.push(["Startup status unavailable", "The scheduler evidence is unreadable, incomplete or cannot be verified. Check the native startup job and private logs; automatic startup is not confirmed. Do not restart an active runner."]);
+    const alert = byId("attention-alert");
+    const sections = messages.map(([title, text]) => { const section = el("section"); section.append(el("h3", "", title), el("p", "", text)); return section; });
+    if (alert.textContent !== sections.map(section => section.textContent).join("")) alert.replaceChildren(...sections);
+    alert.hidden = !messages.length;
+  }
+
   function renderSleeves(data) {
-    const host = byId("sleeves");
+    const host = byId("sleeves"), state = data.live;
     host.replaceChildren();
-    const state = data.live || data.plan || {};
-    const alloc = data.config.allocation;
-    SLEEVES.forEach((s) => {
-      const card = el("article", `portfolio-card ${s.css}`);
-      const head = el("div", "portfolio-header");
-      const title = el("div", "portfolio-title");
-      title.append(el("span", "strategy-letter", s.letter));
-      const t = el("div");
-      t.append(el("h3", "", s.title), el("p", "strategy-description", s.text));
-      title.append(t);
-      head.append(title, el("span", "badge neutral", `${Math.round(alloc[s.id] * 100)}% of account`));
-      card.append(head);
-      const nav = state.nav_estimate;
-      card.append(el("p", "sleeve-weight", finite(nav) ? `Sleeve budget ${money(nav * alloc[s.id])} of account NAV ${money(nav)}` : "Sleeve budget = allocation × account NAV at each decision"));
-      const held = (state.sleeves || {})[s.id] || {};
-      const group = el("div", "metric-group");
-      group.append(el("h4", "", "Holdings (owned by this sleeve)"));
-      const dl = el("dl", "metrics");
-      const names = Object.keys(held);
-      if (!names.length) metric(dl, "Position", "Flat");
-      names.forEach((sym) => metric(dl, sym.replace("US.", ""), `${held[sym]} sh`, s.id === "h_etf" && state.h_entry_session?.[sym] ? `since ${state.h_entry_session[sym]}` : ""));
-      group.append(dl);
-      card.append(group);
-      if (s.id === "h_etf") {
-        const plan = state.h_plan;
-        const g = el("div", "metric-group");
-        g.append(el("h4", "", plan ? `Plan for the open after ${plan.asof}` : "Next-open plan"));
-        if (!plan) g.append(el("p", "footnote", "Run plan-h after the close to build it."));
-        else if (plan.blocked) g.append(el("p", "footnote negative", `Blocked: ${plan.blocked}`));
-        else {
-          const ul = el("ul", "plan-list");
-          Object.entries(plan.exits || {}).forEach(([sym, why]) => ul.append(el("li", "", `SELL ${sym.replace("US.", "")} · ${why.replaceAll("_", " ")}`)));
-          (plan.entries || []).forEach((sym) => ul.append(el("li", "", `BUY ${sym.replace("US.", "")} · RSI-2 ${finite(plan.metrics?.[sym]?.rsi2) ? plan.metrics[sym].rsi2.toFixed(1) : "?"}`)));
-          if (!ul.children.length) ul.append(el("li", "", "No exits or entries"));
-          g.append(ul, el("p", "footnote", `Universe: ${(plan.universe || []).map((x) => x.replace("US.", "")).join(", ")}`));
-        }
-        card.append(g);
+    const specs = [{ id: "b3", letter: "B3", title: "SPY Noise-Area", css: "strategy-a", description: "Hourly momentum · long-only · intraday" },
+      { id: "h_etf", letter: "H", title: "ETF RSI-2 panel", css: "strategy-b", description: "Next-open mean reversion · holds up to 3 sessions" }];
+    for (const s of specs) {
+      const alloc = data.config.allocation[s.id], nav = state?.nav_estimate;
+      const performance = data.performance.sleeves[s.id];
+      const budget = finite(nav) ? alloc * nav : null;
+      const held = state?.sleeves?.[s.id];
+      const quotes = data.account_snapshot?.quotes || {};
+      const names = Object.keys(held || {});
+      const exposure = held && names.every(sym => finite(quotes[sym])) ? names.reduce((sum, sym) => sum + held[sym] * quotes[sym], 0) : null;
+      const card = el("article", `portfolio-card ${s.css}`), head = el("div", "portfolio-header"), title = el("div", "portfolio-title"), text = el("div");
+      text.append(el("h3", "", s.title), el("p", "strategy-description", s.description));
+      title.append(el("span", "strategy-letter", s.letter), text);
+      head.append(title, el("span", "badge neutral", `${share(alloc)} allocation`));
+      card.append(head, el("p", "nav-label", "Strategy P&L · before fees"), el("div", "nav-value", money(performance.gross_pnl)),
+        el("p", "sleeve-weight", performance.status === "available" ? `${performance.fill_count} confirmed fill outcomes since start · only this strategy's trades. ${performance.fill_count ? `Marked ${et(data.performance.asof, true)} ET.` : "No trading profit or loss recorded."}` : "P&L unavailable: receipt history, ownership or price evidence is incomplete."));
+      const profit = el("dl", "metrics");
+      metric(profit, "Realized · gross", money(performance.realized_gross), "Closed shares; average-cost basis");
+      metric(profit, "Unrealized · gross", money(performance.unrealized_gross), "Open shares at archived quotes");
+      metric(profit, "Net after fees", money(performance.net_pnl), performance.fees === null ? "Fees not attributed; net P&L unknown" : "No fills, no trading fees");
+      card.append(profit, el("h4", "context-label", "Capital limits · not performance"));
+      if (budget > 0 && finite(exposure)) {
+        const meter = el("progress", "allocation-meter"); meter.max = budget; meter.value = Math.min(exposure, budget);
+        meter.setAttribute("aria-label", `${s.letter} marked holdings ${money(exposure)} of ${money(budget)} allocation`);
+        card.append(meter);
       }
+      const limits = el("dl", "metrics capital-metrics");
+      metric(limits, "Allocation budget", money(budget), `${share(alloc)} of total NAV; not strategy profit`);
+      metric(limits, "Marked holdings", money(exposure), names.length ? `Quotes at ${et(data.account_snapshot?.at)} ET` : held ? "No sleeve-owned shares recorded" : "Holdings not verified");
+      if (s.id === "b3") {
+        metric(limits, "Per-symbol cap", money(data.config.risk.name_cap_usd), "SPY total across B3 + H");
+        metric(limits, "Target before cap", budget === null ? "—" : money(budget * data.config.b3.position_fraction_of_sleeve * (state.reduced ? 0.5 : 1)), "Only when entry conditions pass");
+      } else {
+        metric(limits, "Per ETF budget", budget === null ? "—" : money(budget * data.config.h_etf.per_name_fraction_of_sleeve * (state.reduced ? 0.5 : 1)), `${share(data.config.h_etf.per_name_fraction_of_sleeve)} of H allocation`);
+        metric(limits, "Aggregate limit", budget === null ? "—" : money(budget * data.config.h_etf.aggregate_fraction_of_sleeve), `${share(data.config.h_etf.aggregate_fraction_of_sleeve)} of H allocation`);
+      }
+      card.append(limits);
+      const positions = el("div", "metric-group"); positions.append(el("h4", "", "Recorded sleeve ownership"));
+      positions.append(el("p", "strategy-description", held ? names.length ? names.map(sym => `${sym.replace("US.", "")} · ${held[sym]} shares${state.h_entry_session?.[sym] ? ` · since ${state.h_entry_session[sym]}` : ""}`).join(" / ") : "Flat · no recorded holdings" : "Unknown · no live ownership state"));
+      card.append(positions);
+      const signal = el("div", "metric-group");
+      if (s.id === "h_etf") {
+        const plan = state?.h_plan;
+        signal.append(el("h4", "", plan ? `Signal plan · close ${plan.asof}` : "Next-open signal plan"));
+        if (!plan) signal.append(el("p", "footnote", "No live H plan recorded. No entries assumed."));
+        else if (plan.blocked) signal.append(el("p", "negative", "Plan blocked; inspect the private runner log."));
+        else {
+          const list = el("ul", "plan-list");
+          for (const [symbol, why] of Object.entries(plan.exits || {})) list.append(el("li", "", `SELL ${symbol.replace("US.", "")} · ${human(why)}`));
+          for (const symbol of plan.entries || []) {
+            const rsi = plan.metrics?.[symbol]?.rsi2;
+            list.append(el("li", "", `BUY ${symbol.replace("US.", "")}${finite(rsi) ? ` · RSI-2 ${rsi.toFixed(2)}` : ""}`));
+          }
+          if (!list.children.length) list.append(el("li", "", "No planned entries or exits"));
+          signal.append(list, el("p", "footnote", "Signals are not orders. The runner checks current risk, cash, quotes and caps before submitting."));
+        }
+      } else {
+        const d = data.b3_decision;
+        signal.append(el("h4", "", d ? `Latest decision · ${et(d.at)} ET` : "Latest B3 decision"));
+        if (!d) signal.append(el("p", "strategy-description", "No B3 decision recorded today. First scheduled check is 10:00 ET."));
+        else {
+          signal.append(el("p", "strategy-description", `${d.target === 1 ? "LONG signal" : d.target === 0 ? "FLAT signal" : "BLOCKED"} · ${human(d.reason)}`));
+          const metrics = el("dl", "metrics");
+          for (const [key, label] of [["close", "Bar close"], ["upper", "Upper noise band"], ["vwap", "Cumulative VWAP"]]) metric(metrics, label, money(d.metrics?.[key]));
+          signal.append(metrics, el("p", "footnote", `Sizing decision: ${human(d.plan_reason)}. Full-precision inputs retained in private audit snapshots.`));
+        }
+      }
+      card.append(signal);
       host.append(card);
-    });
-  }
-
-  function renderRisk(data) {
-    const st = data.live || data.plan;
-    const label = data.live ? "LIVE" : "PLAN";
-    byId("mode-badge").textContent = data.config.execution_enabled ? (data.live ? "Execution enabled" : "Enabled · no live state yet") : "Execution disabled · PLAN";
-    byId("mode-badge").className = `badge ${data.config.execution_enabled ? "danger" : "warning"}`;
-    if (!st || st.high_water == null) {
-      byId("nav-summary").textContent = "No runner state yet";
-      byId("halt-summary").textContent = "Set at first broker mark";
-      byId("risk-summary").textContent = "Not running";
-      return;
     }
-    byId("nav-summary").textContent = `${label} · ${money(st.nav_estimate)} · high-water ${money(st.high_water)}`;
-    byId("halt-summary").textContent = `${money(st.halt_level)} · ${finite(st.drawdown_pct) ? st.drawdown_pct.toFixed(2) : "—"}% from high-water`;
-    const flags = [];
-    if (st.halted) flags.push(`HALTED ${st.halted.at || ""}`);
-    if (st.locked_today) flags.push("Daily loss lock");
-    if (st.reduced) flags.push("Half size");
-    byId("risk-summary").textContent = flags.length ? flags.join(" · ") : "Normal";
-    byId("risk-summary").className = st.halted ? "negative" : "";
+    const p = data.performance;
+    set("attribution-note", `Since-start P&L follows each strategy's own confirmed fills and marked holdings; it is not split 80/20. Account change: ${money(p.account_pnl)}. Unallocated account adjustment: ${money(p.unallocated_account_change)} (fees or other cash flows, not assigned to either strategy). Per-fill evidence is included in the status JSON.`);
   }
 
-  function renderOrders(data) {
-    const body = byId("orders-body");
-    body.replaceChildren();
-    const rows = data.outbox || [];
-    byId("orders-note").textContent = rows.length ? `${data.outbox_source} · session ${data.outbox_session}` : "No intents recorded yet.";
-    const outcome = {};
-    rows.filter((r) => r.event === "outcome").forEach((r) => { outcome[r.intent_id] = r; });
-    const errs = {};
-    rows.filter((r) => r.event === "order_error").forEach((r) => { errs[r.intent_id] = r.error; });
-    const intents = rows.filter((r) => r.event === "intent").reverse();
-    if (!intents.length) { const tr = el("tr"); const td = el("td", "empty-state", "No intents yet."); td.colSpan = 5; tr.append(td); body.append(tr); return; }
-    intents.forEach((i) => {
+  function matches(row) {
+    const strategy = byId("strategy-filter").value;
+    const query = byId("event-search").value.trim().toLowerCase();
+    return (strategy === "all" || row.sleeve === strategy) && (!query || JSON.stringify(row).toLowerCase().includes(query));
+  }
+
+  function emptyRow(body, columns, text) {
+    const tr = el("tr"), td = el("td", "empty-state", text); td.colSpan = columns; tr.append(td); body.append(tr);
+  }
+
+  function renderAudit(data) {
+    const body = byId("orders-body"); body.replaceChildren();
+    const orders = data.orders.filter(matches).slice().reverse();
+    set("filter-count", `${orders.length} of ${data.orders.length} recorded intents`);
+    set("orders-note", `${data.outbox_source} · ${data.outbox_session} ET. Unconfirmed intents may not have reached the broker.`);
+    if (!orders.length) emptyRow(body, 6, data.orders.length ? "No matching orders. Try another strategy or search." : "No order intents recorded today. A saved signal plan is not an order.");
+    for (const order of orders) {
       const tr = el("tr");
-      const o = outcome[i.intent_id];
-      const status = errs[i.intent_id] ? `ERROR ${errs[i.intent_id]}` : o ? `${o.status} ${o.filled}/${o.qty} @ ${finite(o.avg_price) ? o.avg_price.toFixed(2) : "—"}` : (i.mode === "PLAN" ? "PLANNED · not sent" : "Sent · awaiting");
-      const cls = errs[i.intent_id] ? "failed" : o?.status === "FILLED" ? "filled" : "planned";
-      tr.append(el("td", "", (i.created_at || "").slice(11, 19)), el("td", "", i.sleeve), el("td", "", `${i.side} ${i.qty} ${i.symbol.replace("US.", "")} LMT ${i.limit_price.toFixed(2)}`),
-        el("td", "", i.reason.replaceAll("_", " ")), el("td", `status-cell ${cls}`, status));
+      const status = order.status || "UNCONFIRMED";
+      const cls = status === "FILLED" ? "filled" : ["ERROR", "REJECTED", "REFUSED"].includes(status) ? "failed" : "planned";
+      const symbol = el("td", "", `${order.sleeve === "h_etf" ? "H" : "B3"} · ${String(order.symbol || "—").replace("US.", "")}`);
+      const intent = el("td", "", `${order.side || "—"} ${order.qty ?? "—"} shares`); intent.append(el("small", "", `Limit ${money(order.limit_price)}`));
+      const fill = el("td", "", finite(order.filled) ? `${order.filled} / ${order.qty ?? "—"}` : "Not confirmed");
+      fill.append(el("small", "", order.filled > 0 && finite(order.avg_price) ? `@ ${order.avg_price.toFixed(4)}` : "No confirmed fill price"));
+      const evidence = el("td"), details = el("details"), key = `${order.audit_id}/${order.intent_id}`;
+      details.open = expanded.has(key);
+      details.addEventListener("toggle", () => { if (details.open) expanded.add(key); else expanded.delete(key); });
+      details.append(el("summary", "", human(order.reason)), el("pre", "", JSON.stringify({ reference_price: order.reference_price, limit_price: order.limit_price, filled: order.filled, avg_price: order.avg_price, has_error: order.has_error, audit_id: order.audit_id, intent_id: order.intent_id, created_at: order.created_at }, null, 2)));
+      evidence.append(details);
+      tr.append(el("td", "", et(order.created_at || order.logged_at, true)), symbol, intent, el("td", `status-cell ${cls}`, status), fill, evidence);
       body.append(tr);
-    });
+    }
+    const audit = byId("audit-body"); audit.replaceChildren();
+    const rows = data.outbox.filter(matches).slice().reverse();
+    if (!rows.length) emptyRow(audit, 3, "No matching events in the latest 200 records.");
+    for (const row of rows) {
+      const tr = el("tr"), detail = el("td"), expansion = el("details");
+      const key = `event/${row.logged_at}/${row.event}/${row.intent_id || row.step || ""}`;
+      expansion.open = expanded.has(key);
+      expansion.addEventListener("toggle", () => { if (expansion.open) expanded.add(key); else expanded.delete(key); });
+      expansion.append(el("summary", "", row.sleeve ? `${human(row.sleeve)} · ${human(row.status || row.reason || row.event)}` : human(row.step || row.event)), el("pre", "", JSON.stringify(row, null, 2)));
+      detail.append(expansion);
+      tr.append(el("td", "", et(row.logged_at, true)), el("td", "", `${human(row.event)}${row.step ? ` / ${row.step}` : ""}`), detail);
+      audit.append(tr);
+    }
+    const errors = Object.entries(data.step_errors);
+    set("errors-note", errors.length ? `Step failures recorded today: ${errors.map(([step, count]) => `${step} × ${count}`).join(" · ")}. Private error text is not exported.` : "No step failures recorded today. This is not an independent connectivity check.");
   }
 
-  function chart(points) {
-    const host = byId("preview-chart");
-    host.replaceChildren();
-    if (!points.length) return;
-    const w = 900, h = 220, pad = 34;
-    const vals = points.map((p) => p.nav);
-    const lo = Math.min(100000, ...vals), hi = Math.max(...vals);
-    const x = (i) => pad + (i / (points.length - 1)) * (w - pad - 8);
-    const y = (v) => h - 20 - ((v - lo) / (hi - lo || 1)) * (h - 40);
+  function plot(id, points, field, label, historical = false) {
+    const host = byId(id); host.replaceChildren();
+    const values = points.filter(p => finite(p[field]) && Number.isFinite(Date.parse(p.at)));
+    if (!values.length) { host.append(el("p", "empty-state", "No observed marks yet. The chart starts with the first recorded risk check.")); return; }
     const svg = document.createElementNS(SVG_NS, "svg");
-    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", `80/20 account NAV from ${points[0].date} to ${points[points.length - 1].date}`);
-    const path = document.createElementNS(SVG_NS, "path");
-    path.setAttribute("class", "line");
-    path.setAttribute("d", points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.nav).toFixed(1)}`).join(""));
-    const base = document.createElementNS(SVG_NS, "line");
-    base.setAttribute("class", "start");
-    base.setAttribute("x1", pad); base.setAttribute("x2", w - 8); base.setAttribute("y1", y(100000)); base.setAttribute("y2", y(100000));
-    const label = (tx, xx, yy) => { const t = document.createElementNS(SVG_NS, "text"); t.setAttribute("x", xx); t.setAttribute("y", yy); t.textContent = tx; return t; };
-    svg.append(base, path, label(`$${Math.round(hi).toLocaleString()}`, 2, y(hi) + 4), label("$100,000", 2, y(100000) + 4),
-      label(points[0].date, pad, h - 4), label(points[points.length - 1].date, w - 80, h - 4));
+    const node = (tag, attrs, text) => { const n = document.createElementNS(SVG_NS, tag); Object.entries(attrs).forEach(([key, value]) => n.setAttribute(key, value)); if (text !== undefined) n.textContent = text; return n; };
+    const w = 590, h = 210, left = 75, right = 22, top = 20, bottom = 30;
+    const min = Math.min(...values.map(p => p[field])), max = Math.max(...values.map(p => p[field]));
+    const range = max - min || Math.max(Math.abs(max) * .001, .01);
+    const lo = min - range * .12, hi = max + range * .12;
+    const first = Date.parse(values[0].at), last = Date.parse(values.at(-1).at);
+    const x = p => values.length === 1 ? w / 2 : left + (Date.parse(p.at) - first) / (last - first || 1) * (w - left - right);
+    const y = p => h - bottom - (p[field] - lo) / (hi - lo) * (h - top - bottom);
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}: ${values.length} recorded marks, latest ${field === "nav" ? money(values.at(-1)[field]) : pct(values.at(-1)[field])}`);
+    for (const value of [min, max]) {
+      const yy = y({[field]: value});
+      svg.append(node("line", { x1: left, y1: yy, x2: w - right, y2: yy, class: "chart-gridline" }), node("text", { x: 5, y: yy + 4, class: "chart-axis" }, field === "nav" ? money(value) : pct(value)));
+      if (min === max) break;
+    }
+    const path = values.map((p, i) => `${!i || (!historical && Date.parse(p.at) - Date.parse(values[i - 1].at) > 120000) ? "M" : "L"}${x(p).toFixed(2)},${y(p).toFixed(2)}`).join(" ");
+    svg.append(node("path", { d: path, class: "chart-line" }));
+    values.forEach(p => svg.append(node("circle", { cx: x(p), cy: y(p), r: values.length === 1 ? 4 : 2, class: "chart-dot" })));
+    const axisLabel = point => historical ? point.at.slice(0, 10) : `${et(point.at)} ET`;
+    svg.append(node("text", { x: left, y: h - 7, class: "chart-axis" }, axisLabel(values[0])), node("text", { x: w - 85, y: h - 7, class: "chart-axis" }, axisLabel(values.at(-1))));
     host.append(svg);
   }
 
-  function renderPreview(data) {
-    const p = data.preview;
-    if (!p) { byId("preview-note").textContent = "No preview: run scripts/competition_preview.py."; return; }
-    const long = p.windows.long;
-    byId("preview-note").textContent = `${p.method}. Source: ${p.source}. Hypothetical research fills, not broker results.`;
-    chart(long.equity || []);
-    const body = byId("preview-body");
-    body.replaceChildren();
-    const names = { long: "2021–2025 (1,243 sessions)", "2021_22": "2021–22 restarted", "2023": "2023 restarted", "2024_25": "2024–25 restarted (after selection)" };
-    ["long", "2021_22", "2023", "2024_25"].forEach((k) => {
-      const v = p.windows[k];
-      if (!v) return;
-      const tr = el("tr");
-      tr.append(el("td", "", names[k]), el("td", v.net_return_pct < 0 ? "negative" : "", pct(v.net_return_pct)), el("td", "", pct(v.max_drawdown_pct)),
-        el("td", "", v.halted_on || "never"), el("td", "", pct(v.b3_return_pct)), el("td", "", pct(v.h_return_pct)));
-      body.append(tr);
-    });
-    const c = p.cost_stress_return_pct?.long || {};
-    const b = p.remaining_challenge_sessions_bootstrap?.long?.["5"];
-    byId("preview-costs").textContent = `Cost sensitivity 2021–2025 (per-side slippage): 0 bp ${pct(c["0bp"])}, 1 bp ${pct(c["1bp"])}, 3 bp ${pct(c["3bp"])}, 5 bp ${pct(c["5bp"])}, 10 bp ${pct(c["10bp"])}.` +
-      (b ? ` Next 5 sessions (bootstrap): median ${pct(b.median_pct)}, 5th–95th ${pct(b.p5_pct)} to ${pct(b.p95_pct)}, loss probability ${b.loss_probability_pct}%.` : "");
+  function renderCharts(data) {
+    plot("equity-chart", data.equity, "nav", "Account NAV");
+    plot("drawdown-chart", data.equity, "drawdown_pct", "Account drawdown");
+    set("chart-count", `${data.equity.length} observed marks`);
+    set("chart-note", `${data.outbox_session} ET · EXECUTE risk snapshots only. Gaps over 2 minutes are not connected. Marks are account-level; no independent B3/H profit history is assumed.`);
+  }
+
+  function renderResearch(data) {
+    const preview = data.preview, body = byId("preview-body"); body.replaceChildren();
+    if (!preview) { set("preview-note", "No research preview available. This does not affect the trading runner."); byId("preview-chart").replaceChildren(); set("preview-costs", ""); return; }
+    set("preview-note", `${preview.method}. Hypothetical research fills, not current broker results. Historical sizing may differ from current capped exposure.`);
+    const points = (preview.windows.long.equity || []).map(p => ({ at: `${p.date}T16:00:00-05:00`, nav: p.nav }));
+    plot("preview-chart", points, "nav", "Historical research NAV", true);
+    for (const [key, label] of [["long", "2021–2025"], ["2021_22", "2021–22 restarted"], ["2023", "2023 restarted"], ["2024_25", "2024–25 after selection"]]) {
+      const v = preview.windows[key]; if (!v) continue;
+      const tr = el("tr"); tr.append(el("td", "", label), el("td", v.net_return_pct < 0 ? "negative" : "", pct(v.net_return_pct)), el("td", "", pct(v.max_drawdown_pct)), el("td", "", v.halted_on || "Never")); body.append(tr);
+    }
+    const costs = preview.cost_stress_return_pct?.long || {};
+    set("preview-costs", `2021–2025 cost sensitivity: 0 bp ${pct(costs["0bp"])}, 5 bp ${pct(costs["5bp"])}, 10 bp ${pct(costs["10bp"])}. Short samples and backtests do not establish alpha.`);
   }
 
   function renderRules(data) {
     const c = data.config, r = c.risk;
-    const items = [
-      `Split: B3 ${share(c.allocation.b3)} / H ${share(c.allocation.h_etf)} of account NAV, recomputed at every decision.`,
-      `B3: long ${share(c.b3.position_fraction_of_sleeve)} of its sleeve when the completed bar closes above max(open, prior close) × (1 + 14-session noise) and above VWAP; flat otherwise; flat by ${c.b3.flatten_minutes_before_close} min before the close.`,
-      `H: ${share(c.h_etf.per_name_fraction_of_sleeve)} of its sleeve per ETF, ${share(c.h_etf.aggregate_fraction_of_sleeve)} aggregate, from SPY/QQQ/IWM/DIA + top ${c.h_etf.top_sectors} sector SPDRs.`,
-      `Account halt at ${share(r.halt_drawdown_fraction)} below the high-water NAV: close everything and block entries until a human clears the halt.`,
-      `Daily lock at ${share(r.daily_loss_fraction)} below the day-start NAV; half size below ${share(r.reduce_drawdown_fraction)} drawdown.`,
-      `Marketable LIMIT orders at quote ± ${r.limit_offset_bps} bp, cancelled and reconciled after ${r.order_wait_seconds}s; long-only; ≤ $${r.name_cap_usd.toLocaleString()} per name.`,
-    ];
-    const ul = byId("rules-list");
-    ul.replaceChildren(...items.map((t) => el("li", "", t)));
+    const rules = [`B3 ${share(c.allocation.b3)} / H ${share(c.allocation.h_etf)} of current account NAV. Allocation is a sizing budget, not ring-fenced cash.`,
+      `B3 targets ${share(c.b3.position_fraction_of_sleeve)} of its allocation, capped at ${money(r.name_cap_usd)} of SPY across both strategies.`,
+      `H uses ${share(c.h_etf.per_name_fraction_of_sleeve)} of its allocation per ETF, ${share(c.h_etf.aggregate_fraction_of_sleeve)} aggregate. Unused money stays in shared cash.`,
+      `A ${share(r.halt_drawdown_fraction)} high-water drawdown triggers exits and a persistent halt. A ${share(r.daily_loss_fraction)} day-start loss locks the day.`,
+      `An order-error halt blocks entries without itself forcing liquidation. After 3 order errors in a day no further orders can be sent. Only the user can authorize clearing a halt.`,
+      `New positions use half sizing below ${share(r.reduce_drawdown_fraction)} drawdown, still subject to caps. LIMIT orders use quote ± ${r.limit_offset_bps} bp; unfilled orders are cancelled and reconciled after ${r.order_wait_seconds}s.`];
+    byId("rules-list").replaceChildren(...rules.map(text => el("li", "", text)));
+  }
+
+  function showFailure(message) {
+    byId("data-alert").hidden = false;
+    set("data-alert", `${message}. Displayed values may be old; this page never changes trading.`);
+    byId("live-data").classList.add("is-stale");
+    set("refresh-status", "Status unavailable · retrying every 5s");
   }
 
   async function refresh() {
-    const status = byId("refresh-status");
+    if (pending) return;
+    pending = true;
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 6000);
     try {
-      const res = await fetch("/api/competition", { cache: "no-store" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const response = await fetch("/api/competition", { cache: "no-store", signal: controller.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!["sign_in_required", "check_required", "recent_success", "unverified"].includes(data.access?.status) || !["blocked", "unverified", "checking", "launched", "completed", "not_recorded"].includes(data.startup?.status) || !data.performance?.sleeves?.b3 || !data.performance?.sleeves?.h_etf || !data.runtime?.process || !data.config?.risk || !data.order_counts || !Array.isArray(data.orders) || !Array.isArray(data.equity) || !Array.isArray(data.outbox) || !Number.isFinite(Date.parse(data.generated_at))) throw new Error("Incomplete dashboard response");
+      if (latest && Date.parse(data.generated_at) < Date.parse(latest.generated_at)) throw new Error("Out-of-order dashboard response");
+      const snapshotAge = Date.now() - Date.parse(data.generated_at);
+      if (snapshotAge > 15000 || snapshotAge < -5000) throw new Error("Dashboard snapshot is stale or its clock is mismatched");
+      renderStatus(data); renderAttention(data); renderSleeves(data); renderAudit(data); renderCharts(data); renderResearch(data); renderRules(data);
+      latest = data; lastSuccess = Date.now();
       byId("data-alert").hidden = true;
-      renderRisk(data); renderSleeves(data); renderOrders(data); renderPreview(data); renderRules(data);
-      byId("live-data").setAttribute("aria-busy", "false");
       byId("live-data").classList.remove("is-stale");
-      status.textContent = `Updated ${new Date().toLocaleTimeString()} · refreshes every 5s`;
-    } catch (err) {
-      byId("data-alert").hidden = false;
-      byId("data-alert").textContent = `Competition state unavailable (${err.message}). Nothing is assumed; the runner, not this page, controls orders.`;
-      byId("live-data").classList.add("is-stale");
-    }
+      byId("live-data").setAttribute("aria-busy", "false");
+      set("refresh-status", `Updated ${et(data.generated_at, true)} ET · refreshes every 5s`);
+    } catch (err) { showFailure(err.name === "AbortError" ? "Dashboard request timed out" : err.message); }
+    finally { clearTimeout(timer); pending = false; }
   }
 
   byId("refresh-button").addEventListener("click", refresh);
+  byId("strategy-filter").addEventListener("change", () => { if (latest) renderAudit(latest); });
+  byId("event-search").addEventListener("input", () => { if (latest) renderAudit(latest); });
+  setInterval(() => {
+    set("exchange-clock", et(new Date().toISOString(), true));
+    if (lastSuccess && Date.now() - lastSuccess > 15000) showFailure("Dashboard refresh is stale");
+  }, 1000);
   refresh();
   setInterval(refresh, REFRESH_MS);
 })();

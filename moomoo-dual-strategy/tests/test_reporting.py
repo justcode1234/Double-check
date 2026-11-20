@@ -390,3 +390,364 @@ def test_shadow_marker_never_hides_existing_trading_labels(report_ledger, tmp_pa
                                            'fee': '0.99', 'source': source},
                              REPORT_DIGEST, f'fill:{index}', REPORT_AT.isoformat())
     assert _report(report_ledger, tmp_path)['portfolios'][0]['label'] == label
+
+
+@pytest.fixture
+def competition_report(tmp_path, monkeypatch):
+    import shutil
+    import subprocess
+    from types import SimpleNamespace
+    from dual_strategy.competition import report
+    from dual_strategy.competition.planner import new_state
+    from dual_strategy.competition.store import Store
+
+    (tmp_path / 'config').mkdir()
+    shutil.copy(Path(__file__).resolve().parents[1] / 'config/competition.yaml', tmp_path / 'config/competition.yaml')
+    store = Store(tmp_path, {'state_dir': 'private/competition/live'})
+    state = new_state()
+    state['h_plan'] = {'asof': '2026-11-19', 'entries': ['US.XLV', 'US.XLP'], 'exits': {}, 'blocked': None}
+    store.save(state)
+
+    def processes(args, **kwargs):
+        assert args == ['ps', '-axo', 'pid=,stat=,args=']
+        return SimpleNamespace(returncode=0, stdout=f'42 S /usr/bin/python {tmp_path}/scripts/run_competition.py loop --execute\n')
+
+    monkeypatch.setattr(report, 'subprocess', SimpleNamespace(run=processes, TimeoutExpired=subprocess.TimeoutExpired), raising=False)
+    return report, store
+
+
+def test_competition_preopen_preserves_plan_without_inventing_nav(competition_report, tmp_path):
+    report, store = competition_report
+    before = {str(p): p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    data = report.competition_payload(tmp_path, now=datetime(2026, 11, 20, 13, tzinfo=timezone.utc))
+    assert data['live']['h_plan']['entries'] == ['US.XLV', 'US.XLP']
+    assert data['live']['nav_estimate'] is None and data['live']['high_water'] is None
+    assert data['runtime']['process']['status'] == 'running'
+    assert data['runtime']['market_phase'] == 'preopen'
+    assert data['runtime']['mark_status'] == 'not_recorded'
+    assert data['runtime']['next_action']['label'] == 'H open orders'
+    assert data['runtime']['next_action']['at'] == '2026-11-20T09:30:10-05:00'
+    assert {str(p): p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()} == before
+
+
+@pytest.mark.parametrize('age,expected', [(30, 'recent'), (121, 'stale'), (-5, 'clock_mismatch')])
+def test_competition_process_does_not_certify_fresh_marks(competition_report, tmp_path, age, expected):
+    report, store = competition_report
+    now = datetime(2026, 11, 20, 15, tzinfo=timezone.utc)
+    state = store.load()
+    state.update(initial_nav=100000, high_water=101000, last_nav=100500,
+                 last_mark_at=(now - timedelta(seconds=age)).isoformat())
+    store.save(state)
+    data = report.competition_payload(tmp_path, now=now)
+    assert data['runtime']['process']['status'] == 'running'
+    assert data['runtime']['mark_status'] == expected
+    assert data['runtime']['mark_age_seconds'] == age
+    assert data['live']['nav_estimate'] == 100500
+
+
+def test_competition_half_day_schedule_and_order_error_halt(competition_report, tmp_path):
+    report, store = competition_report
+    state = store.load()
+    state.update(halted={'kind': 'order_error', 'reason': 'broker rejected order'}, order_errors_today=3)
+    store.save(state)
+    data = report.competition_payload(tmp_path, now=datetime(2026, 11, 27, 17, 56, tzinfo=timezone.utc))
+    assert data['runtime']['session_close'] == '2026-11-27T13:00:00-05:00'
+    flatten, = [s for s in data['runtime']['schedule'] if s['label'] == 'B3 flatten']
+    assert flatten['at'] == '2026-11-27T12:55:00-05:00'
+    assert data['live']['halted']['kind'] == 'order_error'
+    assert data['live']['order_errors_today'] == 3
+    assert data['runtime']['next_action']['label'] == 'Market close'
+
+
+def test_competition_orders_require_ack_and_keep_early_intents(competition_report, tmp_path):
+    report, store = competition_report
+    day = '2026-11-20'
+    store.append(day, {'event': 'intent', 'intent_id': 'first', 'audit_id': 'a', 'symbol': 'US.XLV', 'sleeve': 'h_etf', 'qty': 11})
+    store.append(day, {'event': 'acknowledged', 'intent_id': 'first', 'audit_id': 'a', 'order_id': 'private-order'})
+    for _ in range(45):
+        store.append(day, {'event': 'runner_error', 'step': 'risk', 'error': 'secret connection detail'})
+    store.append(day, {'event': 'outcome', 'intent_id': 'first', 'audit_id': 'a', 'order_id': 'private-order', 'status': 'FILLED', 'filled': 11, 'qty': 11, 'avg_price': 177.123456789})
+    store.append(day, {'event': 'intent', 'intent_id': 'unsent', 'audit_id': 'b', 'symbol': 'US.XLP', 'qty': 22})
+    store.append(day, {'event': 'order_refused', 'intent_id': 'unsent', 'audit_id': 'b', 'reason': '3 order errors today'})
+    data = report.competition_payload(tmp_path, now=datetime(2026, 11, 20, 15, tzinfo=timezone.utc))
+    assert data['order_counts'] == {'acknowledged': 1, 'filled': 1, 'partial': 0, 'rejected': 0, 'cancelled': 0, 'errors': 0, 'refused': 1}
+    first, second = data['orders']
+    assert first['status'] == 'FILLED' and first['avg_price'] == 177.123456789
+    assert second['status'] == 'REFUSED' and second['filled'] is None
+    assert data['step_errors'] == {'risk': 45}
+    assert 'private-order' not in json.dumps(data) and 'secret connection detail' not in json.dumps(data)
+    tomorrow = report.competition_payload(tmp_path, now=datetime(2026, 11, 23, 13, tzinfo=timezone.utc))
+    assert tomorrow['orders'] == [] and tomorrow['order_counts']['acknowledged'] == 0
+
+
+def test_competition_charts_only_execute_risk_marks_and_report_incomplete_audit(competition_report, tmp_path):
+    report, store = competition_report
+    for mode, nav, at in [('EXECUTE', 100000, '14:30:00'), ('PLAN', 999999, '14:31:00'), ('EXECUTE', 99000, '14:32:00')]:
+        store.audit('2026-11-20', {'kind': 'risk', 'mode': mode, 'account': {'cash': nav, 'positions': {}, 'quotes': {}, 'at': f'2026-11-20T{at}+00:00'},
+                                 'state_after': {'last_nav': nav, 'high_water': 100000, 'last_mark_at': f'2026-11-20T{at}+00:00'}})
+    (store.dir / 'audit/2026-11-20/incomplete.json').write_text('{')
+    data = report.competition_payload(tmp_path, now=datetime(2026, 11, 20, 15, tzinfo=timezone.utc))
+    assert [(p['nav'], p['drawdown_pct']) for p in data['equity']] == [(100000, 0), (99000, -1)]
+    assert data['evidence_warnings'] and '999999' not in json.dumps(data['equity'])
+    assert data['account_snapshot']['cash'] == 99000
+
+
+@pytest.mark.parametrize('rows,status', [('', 'stopped'), ('matching', 'running'), ('duplicate', 'multiple'), ('other', 'stopped'), ('zombie', 'stopped')])
+def test_competition_detects_only_this_projects_python_loop(competition_report, tmp_path, monkeypatch, rows, status):
+    from types import SimpleNamespace
+    report, _ = competition_report
+    command = f'/usr/bin/python {tmp_path}/scripts/run_competition.py loop --execute'
+    listing = {'': '', 'matching': f'42 S {command}', 'duplicate': f'42 S {command}\n43 S {command}',
+               'other': '77 S /usr/bin/python /other/scripts/run_competition.py loop --execute', 'zombie': f'42 Z {command}'}[rows]
+    monkeypatch.setattr(report.subprocess, 'run', lambda *a, **kw: SimpleNamespace(returncode=0, stdout=listing))
+    data = report.competition_payload(tmp_path, now=datetime(2026, 11, 20, 13, tzinfo=timezone.utc))
+    assert data['runtime']['process']['status'] == status
+
+
+def test_competition_process_probe_failure_is_unknown_not_stopped(competition_report, tmp_path, monkeypatch):
+    report, _ = competition_report
+    def unavailable(*args, **kwargs):
+        raise OSError('ps unavailable')
+    monkeypatch.setattr(report.subprocess, 'run', unavailable)
+    assert report.competition_payload(tmp_path)['runtime']['process']['status'] == 'unknown'
+
+
+@pytest.mark.parametrize('error,expected', [
+    ('CLI quote failed: [AUTH_EXPIRED] expired private-secret', 'sign_in_required'),
+    ('CLI history-kline failed: [AUTH_INVALID] invalid private-secret', 'sign_in_required'),
+    ('CLI quote failed: {"error":{"code":"AUTH_EXPIRED"}}', 'sign_in_required'),
+    ('ExecutionBlocked: Moomoo CLI command failed; reconcile before retry', 'check_required'),
+    ('CLI quote failed: [PERMISSION_DENIED] private-secret', 'check_required'),
+    ('CLI quote failed: [TIMEOUT] private-secret', 'check_required'),
+    ('ValueError: missing daily bar', 'check_required'),
+])
+def test_competition_access_classifies_evidence_without_auth_probes(competition_report, tmp_path, error, expected):
+    report, store = competition_report
+    now = datetime(2026, 11, 20, 15, tzinfo=timezone.utc)
+    store.append('2026-11-20', {'event': 'runner_error', 'step': 'risk', 'error': error,
+                              'logged_at': '2026-11-20T14:59:00+00:00'})
+    before = {str(p): p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    data = report.competition_payload(tmp_path, now)
+    assert data['access']['status'] == expected
+    assert data['access']['at'] == '2026-11-20T14:59:00+00:00'
+    assert 'private-secret' not in json.dumps(data)
+    assert {str(p): p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()} == before
+
+
+def test_competition_access_audit_error_survives_generic_failure_and_recovers(competition_report, tmp_path):
+    report, store = competition_report
+    now = datetime(2026, 11, 23, 15, tzinfo=timezone.utc)
+    store.audit('2026-11-20', {'kind': 'b3_blocked', 'mode': 'EXECUTE',
+        'logged_at': '2026-11-20T15:00:00+00:00', 'error': 'CLI quote failed: [AUTH_EXPIRED] private-secret'})
+    store.append('2026-11-23', {'event': 'runner_error', 'step': 'risk',
+        'logged_at': '2026-11-23T14:58:00+00:00', 'error': 'Moomoo CLI command failed; reconcile before retry'})
+    assert report.competition_payload(tmp_path, now)['access']['status'] == 'sign_in_required'
+    state = store.load()
+    state.update(last_nav=100000, high_water=100000, last_mark_at='2026-11-23T14:59:30+00:00')
+    store.save(state)
+    data = report.competition_payload(tmp_path, now)
+    assert data['access']['status'] == 'recent_success'
+    assert data['access']['at'] == state['last_mark_at']
+    assert report.competition_payload(tmp_path, now + timedelta(minutes=3))['access']['status'] == 'unverified'
+    assert 'private-secret' not in json.dumps(data)
+
+
+def test_competition_access_plan_only_and_future_evidence_never_certify_auth(competition_report, tmp_path):
+    report, store = competition_report
+    store.audit('2026-11-20', {'kind': 'b3_blocked', 'mode': 'PLAN',
+        'logged_at': '2026-11-20T14:00:00+00:00', 'error': '[AUTH_EXPIRED]'})
+    now = datetime(2026, 11, 20, 15, tzinfo=timezone.utc)
+    assert report.competition_payload(tmp_path, now)['access']['status'] == 'unverified'
+    state = store.load()
+    state['last_mark_at'] = '2026-11-20T16:00:00+00:00'
+    store.save(state)
+    assert report.competition_payload(tmp_path, now)['access']['status'] == 'unverified'
+
+
+@pytest.mark.parametrize('status,process,age,expected', [
+    ('blocked', 'running', 60, 'blocked'), ('unexpected_exit', 'stopped', 60, 'blocked'),
+    ('preflight_started', 'stopped', 60, 'checking'), ('preflight_started', 'stopped', 1200, 'blocked'),
+    ('launched', 'running', 60, 'launched'), ('launched', 'stopped', 60, 'blocked'),
+    ('launched', 'unknown', 60, 'unverified'), ('completed', 'stopped', 60, 'completed'),
+])
+def test_competition_startup_record_states(competition_report, tmp_path, monkeypatch, status, process, age, expected):
+    report, _ = competition_report
+    monkeypatch.setattr(report, '_process', lambda project: {'status': process, 'count': None})
+    now = datetime(2026, 11, 23, 15, tzinfo=timezone.utc)
+    directory = tmp_path / 'private/competition/scheduler'
+    directory.mkdir()
+    record = {'status': status, 'at': (now - timedelta(seconds=age)).isoformat(), 'session': '2026-11-23',
+              'reason': 'read_only_preflight_failed_twice', 'account_id': 'private-secret', 'pid': 999}
+    (directory / '2026-11-23.json').write_text(json.dumps(record))
+    before = {str(p): p.read_bytes() for p in directory.iterdir()}
+    data = report.competition_payload(tmp_path, now)
+    assert data['startup']['status'] == expected
+    assert data['startup']['session'] == '2026-11-23'
+    assert 'private-secret' not in json.dumps(data) and '999' not in json.dumps(data['startup'])
+    assert {str(p): p.read_bytes() for p in directory.iterdir()} == before
+    assert data['access']['status'] != 'sign_in_required'
+
+
+def test_competition_prior_startup_block_is_not_hidden_by_later_completion(competition_report, tmp_path):
+    report, _ = competition_report
+    directory = tmp_path / 'private/competition/scheduler'
+    directory.mkdir()
+    first = directory / '2026-11-23.json'
+    first.write_text(json.dumps({'status': 'blocked', 'session': '2026-11-23', 'at': '2026-11-23T14:05:00Z',
+                                 'reason': 'persistent_safety_block'}))
+    (directory / '2026-11-24.json').write_text(json.dumps({'status': 'completed', 'session': '2026-11-24',
+                                                        'at': '2026-11-24T14:05:00Z'}))
+    now = datetime(2026, 11, 25, 14, tzinfo=timezone.utc)
+    data = report.competition_payload(tmp_path, now)
+    assert data['startup']['status'] == 'blocked' and data['startup']['session'] == '2026-11-23'
+    first.write_text(json.dumps({'status': 'completed', 'session': '2026-11-23', 'at': '2026-11-23T14:05:00Z'}))
+    assert report.competition_payload(tmp_path, now)['startup']['status'] == 'completed'
+
+
+@pytest.mark.parametrize('content', ['{', '[]', '{"status":"alien"}',
+    '{"status":"completed","session":"2026-11-23","at":"2026-11-24T14:00:00Z"}'])
+def test_competition_malformed_startup_is_unverified_not_healthy(competition_report, tmp_path, content):
+    report, _ = competition_report
+    directory = tmp_path / 'private/competition/scheduler'
+    directory.mkdir()
+    (directory / '2026-11-23.json').write_text(content)
+    data = report.competition_payload(tmp_path, datetime(2026, 11, 23, 15, tzinfo=timezone.utc))
+    assert data['startup']['status'] == 'unverified'
+
+
+def test_competition_startup_absence_and_native_failure_before_daily_record(competition_report, tmp_path):
+    report, _ = competition_report
+    now = datetime(2026, 11, 20, 15, tzinfo=timezone.utc)
+    assert report.competition_payload(tmp_path, now)['startup']['status'] == 'not_recorded'
+    directory = tmp_path / 'private/competition/scheduler'
+    directory.mkdir()
+    log = directory / 'launchd.log'
+    log.write_text('{"status":"blocked","reason":"process_probe_failed","error":"private-secret"}\n')
+    data = report.competition_payload(tmp_path, now)
+    assert data['startup']['status'] == 'blocked'
+    assert 'private-secret' not in json.dumps(data)
+    log.write_text('{"status":"outside_start_window"}\n')
+    assert report.competition_payload(tmp_path, now)['startup']['status'] == 'not_recorded'
+
+
+def _record_sleeve_fill(store, day, key, sleeve, symbol, side, qty, price, status='FILLED', requested=None):
+    link = {'intent_id': key, 'audit_id': day + '/' + key}
+    store.append(day, {'event': 'intent', **link, 'mode': 'EXECUTE', 'sleeve': sleeve,
+                      'symbol': symbol, 'side': side, 'qty': requested or qty})
+    store.append(day, {'event': 'acknowledged', **link, 'order_id': 'private-' + key})
+    store.append(day, {'event': 'outcome', **link, 'order_id': 'private-' + key,
+                      'status': status, 'qty': requested or qty, 'filled': qty, 'avg_price': price})
+
+
+def _mark_sleeves(store, sleeves, quotes, cash=96000):
+    state = store.load()
+    state.update(initial_nav=100000, high_water=100100, last_nav=100020,
+                 last_mark_at='2026-11-23T14:59:30+00:00', sleeves=sleeves)
+    store.save(state)
+    positions = {}
+    for book in sleeves.values():
+        for symbol, qty in book.items():
+            positions[symbol] = positions.get(symbol, 0) + qty
+    store.audit('2026-11-23', {'kind': 'risk', 'mode': 'EXECUTE',
+        'account': {'at': state['last_mark_at'], 'cash': cash, 'positions': positions, 'quotes': quotes},
+        'state_after': state})
+
+
+def test_competition_profit_belongs_to_h_not_shared_nav_allocation(competition_report, tmp_path):
+    report, store = competition_report
+    _record_sleeve_fill(store, '2026-11-20', 'xlv-buy', 'h_etf', 'US.XLV', 'BUY', 11, 178.95)
+    _record_sleeve_fill(store, '2026-11-20', 'xlp-buy', 'h_etf', 'US.XLP', 'BUY', 21, 91.02)
+    _mark_sleeves(store, {'b3': {}, 'h_etf': {'US.XLV': 11, 'US.XLP': 21}},
+                  {'US.XLV': 179.29, 'US.XLP': 91.85}, cash=96118.15)
+    before = {str(p): p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    p = report.competition_payload(tmp_path, datetime(2026, 11, 23, 15, tzinfo=timezone.utc))['performance']
+    assert p['sleeves']['b3']['gross_pnl'] == 0
+    assert p['sleeves']['b3']['fill_count'] == 0
+    h = p['sleeves']['h_etf']
+    assert h['realized_gross'] == 0
+    assert h['unrealized_gross'] == pytest.approx(21.17)
+    assert h['gross_pnl'] == pytest.approx(21.17)
+    assert h['fees'] is None and h['net_pnl'] is None
+    assert h['fill_count'] == 2
+    assert h['positions']['US.XLV']['cost_basis'] == pytest.approx(1968.45)
+    assert h['positions']['US.XLP']['unrealized_gross'] == pytest.approx(17.43)
+    assert p['account_pnl'] == pytest.approx(19.19)
+    assert p['unallocated_account_change'] == pytest.approx(-1.98)
+    assert len(h['receipts']) == 2 and h['receipts'][0]['audit_id'] == '2026-11-20/xlv-buy'
+    assert 'private-xlv-buy' not in json.dumps(p)
+    assert {str(p): p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()} == before
+
+
+def test_competition_same_symbol_sleeves_and_realized_profit_stay_separate(competition_report, tmp_path):
+    report, store = competition_report
+    _record_sleeve_fill(store, '2026-11-20', 'h-spy', 'h_etf', 'US.SPY', 'BUY', 2, 100)
+    _record_sleeve_fill(store, '2026-11-20', 'b-spy', 'b3', 'US.SPY', 'BUY', 10, 110)
+    _record_sleeve_fill(store, '2026-11-20', 'b-add', 'b3', 'US.SPY', 'BUY', 10, 120)
+    _record_sleeve_fill(store, '2026-11-23', 'b-exit', 'b3', 'US.SPY', 'SELL', 5, 130, 'CANCELLED', requested=20)
+    _mark_sleeves(store, {'b3': {'US.SPY': 15}, 'h_etf': {'US.SPY': 2}}, {'US.SPY': 125})
+    p = report.competition_payload(tmp_path, datetime(2026, 11, 23, 15, tzinfo=timezone.utc))['performance']
+    b, h = p['sleeves']['b3'], p['sleeves']['h_etf']
+    assert b['realized_gross'] == pytest.approx(75)
+    assert b['unrealized_gross'] == pytest.approx(150)
+    assert b['gross_pnl'] == pytest.approx(225)
+    assert b['positions']['US.SPY']['cost_basis'] == pytest.approx(1725)
+    assert h['gross_pnl'] == pytest.approx(50)
+    assert h['positions']['US.SPY']['cost_basis'] == 200
+
+
+@pytest.mark.parametrize('problem', ['missing_fill', 'missing_ack', 'wrong_ack', 'duplicate_outcome', 'missing_quote', 'wrong_ownership', 'ambiguous_order'])
+def test_competition_incomplete_profit_evidence_is_not_guessed(competition_report, tmp_path, problem):
+    report, store = competition_report
+    if problem != 'missing_fill':
+        _record_sleeve_fill(store, '2026-11-20', 'h-buy', 'h_etf', 'US.XLV', 'BUY', 11, 100)
+        path = store.dir / 'outbox/2026-11-20.jsonl'
+        rows = store.outbox('2026-11-20')
+        if problem == 'missing_ack': rows = [r for r in rows if r['event'] != 'acknowledged']
+        if problem == 'wrong_ack': rows[1]['order_id'] = 'different'
+        if problem == 'duplicate_outcome': rows.append(rows[-1])
+        if problem == 'ambiguous_order':
+            rows.append({'event': 'intent', 'mode': 'EXECUTE', 'sleeve': 'h_etf', 'symbol': 'US.XLV',
+                         'side': 'BUY', 'qty': 1, 'intent_id': 'uncertain', 'audit_id': 'unknown'})
+        path.write_text(''.join(json.dumps(r) + '\n' for r in rows))
+    _mark_sleeves(store, {'b3': {}, 'h_etf': {'US.XLV': 12 if problem == 'wrong_ownership' else 11}},
+                  {} if problem == 'missing_quote' else {'US.XLV': 105})
+    p = report.competition_payload(tmp_path, datetime(2026, 11, 23, 15, tzinfo=timezone.utc))['performance']
+    assert p['sleeves']['h_etf']['status'] == 'incomplete'
+    assert p['sleeves']['h_etf']['gross_pnl'] is None
+    assert p['sleeves']['b3']['gross_pnl'] == 0
+    assert p['unallocated_account_change'] is None
+
+
+@pytest.mark.parametrize('problem', ['orphan_ack', 'reused_order_id'])
+def test_competition_ambiguous_broker_receipts_cannot_certify_profit(competition_report, tmp_path, problem):
+    report, store = competition_report
+    _record_sleeve_fill(store, '2026-11-20', 'h-buy', 'h_etf', 'US.XLV', 'BUY', 11, 100)
+    if problem == 'orphan_ack':
+        store.append('2026-11-20', {'event': 'acknowledged', 'audit_id': 'unknown',
+                                  'intent_id': 'missing', 'order_id': 'unknown-order'})
+        books = {'b3': {}, 'h_etf': {'US.XLV': 11}}
+    else:
+        _record_sleeve_fill(store, '2026-11-20', 'b-buy', 'b3', 'US.SPY', 'BUY', 1, 100)
+        rows = store.outbox('2026-11-20')
+        for row in rows:
+            if row.get('order_id') == 'private-b-buy': row['order_id'] = 'private-h-buy'
+        (store.dir / 'outbox/2026-11-20.jsonl').write_text(''.join(json.dumps(r) + '\n' for r in rows))
+        books = {'b3': {'US.SPY': 1}, 'h_etf': {'US.XLV': 11}}
+    _mark_sleeves(store, books, {'US.XLV': 105, 'US.SPY': 105})
+    p = report.competition_payload(tmp_path, datetime(2026, 11, 23, 15, tzinfo=timezone.utc))['performance']
+    assert all(s['status'] == 'incomplete' and s['gross_pnl'] is None for s in p['sleeves'].values())
+    assert p['unallocated_account_change'] is None
+
+
+def test_competition_closed_trade_keeps_profit_and_plan_never_contributes(competition_report, tmp_path):
+    report, store = competition_report
+    _record_sleeve_fill(store, '2026-11-20', 'b-buy', 'b3', 'US.SPY', 'BUY', 5, 100)
+    _record_sleeve_fill(store, '2026-11-20', 'b-sell', 'b3', 'US.SPY', 'SELL', 5, 103)
+    store.append('2026-11-23', {'event': 'intent', 'mode': 'PLAN', 'sleeve': 'h_etf', 'symbol': 'US.XLV', 'qty': 999})
+    _mark_sleeves(store, {'b3': {}, 'h_etf': {}}, {}, cash=100013.02)
+    p = report.competition_payload(tmp_path, datetime(2026, 11, 23, 15, tzinfo=timezone.utc))['performance']
+    assert p['sleeves']['b3']['gross_pnl'] == 15
+    assert p['sleeves']['b3']['unrealized_gross'] == 0
+    assert p['sleeves']['h_etf']['gross_pnl'] == 0
+    assert p['account_pnl'] == pytest.approx(13.02)
+    assert p['unallocated_account_change'] == pytest.approx(-1.98)

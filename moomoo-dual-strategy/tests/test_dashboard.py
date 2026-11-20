@@ -447,7 +447,8 @@ class Element {
       const values = new Set(this.className.split(' ').filter(Boolean));
       if (on) values.add(name); else values.delete(name);
       this.className = [...values].join(' ');
-    }, contains: name => this.className.split(' ').includes(name) };
+    }, contains: name => this.className.split(' ').includes(name),
+       add: name => this.classList.toggle(name, true), remove: name => this.classList.toggle(name, false) };
   }
 }
 for (const id of input.ids) ids.set(id, new Element('div'));
@@ -667,3 +668,157 @@ def test_backtest_scoreboard_served_read_only_or_404(project, endpoint):
     assert status == 200 and json.loads(body) == payload
     assert_safe_headers(headers, 'application/json')
     assert request(endpoint, '/api/backtest', method='POST')[0] == 405
+
+
+COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
+(async () => {
+  vm.runInNewContext(fs.readFileSync(input.app, 'utf8'), context);
+  await settle();
+  assert.equal(stale(), false, text('data-alert'));
+  assert.match(text('runner-summary'), /Waiting for market open/);
+  assert.match(text('nav-summary'), /Awaiting first/);
+  assert.match(text('sleeves'), /XLV/);
+  assert.match(text('sleeves'), /XLP/);
+  assert.equal(nodes(get('equity-chart'), 'svg').length, 0);
+  assert.notEqual(text('exchange-clock'), '');
+  const researchPath = nodes(get('preview-chart'), 'path')[0];
+  assert.ok(researchPath.attributes.d.includes('L'), 'Daily research samples must remain connected');
+  assert.match(text('preview-chart'), /2021-01-04/);
+
+  const live = fresh();
+  live.runtime.market_phase = 'open';
+  live.runtime.mark_status = 'stale'; live.runtime.mark_age_seconds = 300;
+  Object.assign(live.live, {nav_estimate:100000, high_water:100000, day:live.outbox_session, day_start_nav:100000});
+  live.account_snapshot = {at:live.generated_at,cash:96000,quotes:{'US.XLV':177}};
+  live.live.sleeves.h_etf = {'US.XLV':11};
+  live.b3_decision = {at:live.generated_at,target:1,reason:'long',metrics:{close:502,upper:501,vwap:500},plan_reason:'entry'};
+  live.orders = [{created_at:live.generated_at,intent_id:'one',audit_id:'a',sleeve:'h_etf',symbol:'US.XLV',side:'BUY',qty:11,limit_price:177.5,reference_price:177.4,reason:'h_entry',status:'FILLED',filled:11,avg_price:177.123456789},
+    {created_at:live.generated_at,intent_id:'two',audit_id:'b',sleeve:'b3',symbol:'US.SPY',side:'BUY',qty:50,status:'UNCONFIRMED',filled:null,avg_price:null}];
+  live.equity = [{at:'2026-11-20T14:30:00Z',nav:100000,drawdown_pct:0},{at:'2026-11-20T14:31:00Z',nav:100200,drawdown_pct:-.1},{at:'2026-11-20T14:40:00Z',nav:100300,drawdown_pct:0}];
+  live.outbox = [{event:'runner_error',step:'risk',logged_at:live.generated_at,error:'<img src=x onerror=alert(1)>'}];
+  live.step_errors = {risk:2};
+  live.performance={asof:live.generated_at,account_pnl:19.19,unallocated_account_change:-1.98,sleeves:{
+    b3:{status:'available',gross_pnl:0,realized_gross:0,unrealized_gross:0,fill_count:0,fees:0,net_pnl:0},
+    h_etf:{status:'available',gross_pnl:21.17,realized_gross:0,unrealized_gross:21.17,fill_count:2,fees:null,net_pnl:null}}};
+  await load({data:live});
+  const pnl=card=>nodes(card,'div').find(n=>n.className.split(' ').includes('nav-value')).textContent;
+  assert.equal(pnl(get('sleeves').children[0]),'$0.00');
+  assert.equal(pnl(get('sleeves').children[1]),'$21.17');
+  assert.match(text('sleeves'),/Strategy P&L · before fees/);
+  assert.match(text('sleeves'),/Fees not attributed/);
+  assert.match(text('attribution-note'),/not split 80\/20/);
+  assert.match(text('runner-summary'), /Running/);
+  assert.match(text('mark-summary'), /Stale/);
+  assert.match(text('health-alert'), /risk × 2/);
+  for (const value of ['$80,000.00', '$20,000.00', '$2,000.00', '$6,000.00', '$1,947.00', 'LONG signal', '$502.00']) assert.ok(text('sleeves').includes(value), value);
+  assert.match(text('orders-body'), /177.1235/);
+  assert.match(text('orders-body'), /177.123456789/);
+  assert.match(text('orders-body'), /UNCONFIRMED/);
+  assert.ok(!text('orders-body').includes('Sent'));
+  assert.equal(nodes(get('audit-body'), 'img').length, 0);
+  assert.match(text('audit-body'), /<img/);
+  const path = nodes(get('equity-chart'), 'path')[0].attributes.d;
+  assert.equal((path.match(/M/g)||[]).length,2);
+  assert.equal((path.match(/L/g)||[]).length,1);
+  get('strategy-filter').value='b3';get('strategy-filter').listeners.change();
+  assert.match(text('orders-body'), /SPY/);assert.ok(!text('orders-body').includes('XLV'));
+  get('strategy-filter').value='all';get('strategy-filter').listeners.change();
+  get('event-search').value='no-match';get('event-search').listeners.input();
+  assert.match(text('orders-body'), /No matching/);
+  get('event-search').value='';get('event-search').listeners.input();
+  let details=nodes(get('orders-body'),'details')[0];details.open=true;details.listeners.toggle();
+  let eventDetails=nodes(get('audit-body'),'details')[0];eventDetails.open=true;eventDetails.listeners.toggle?.();
+  await load({data:live});
+  assert.equal(nodes(get('orders-body'),'details')[0].open,true);
+  assert.equal(nodes(get('audit-body'),'details')[0].open,true);
+  live.live.halted={kind:'order_error'};live.live.order_errors_today=3;
+  await load({data:live});
+  assert.match(text('risk-summary'), /Order-error halt/);assert.match(text('health-alert'), /3 order errors/);
+  for (const [status,label] of [['stopped',/Stopped/],['unknown',/unverified/],['multiple',/Multiple/]]) {
+    live.runtime.process.status=status;await load({data:live});assert.match(text('runner-summary'),label);
+  }
+  assert.match(text('sleeves'), /not strategy profit/);
+  live.access={status:'sign_in_required',at:live.generated_at};
+  live.startup={status:'blocked',session:'2026-11-23',at:live.generated_at,reason:'read_only_preflight_failed_twice'};
+  await load({data:live});
+  assert.equal(get('attention-alert').hidden,false);
+  assert.match(text('attention-alert'), /Sign-in required/);
+  assert.match(text('attention-alert'), /moomoo auth login/);
+  assert.match(text('attention-alert'), /Startup blocked/);
+  assert.match(text('attention-alert'), /Do not restart/);
+  assert.match(text('health-alert'), /3 order errors/);
+  live.access={status:'check_required',at:live.generated_at};
+  live.startup={status:'unverified',session:null,at:null};
+  await load({data:live});
+  assert.doesNotMatch(text('attention-alert'), /Sign-in required/);
+  assert.match(text('attention-alert'), /Check sign-in and connection/);
+  assert.match(text('attention-alert'), /Startup status unavailable/);
+  live.access={status:'recent_success',at:live.generated_at};
+  live.startup={status:'checking',session:'2026-11-23',at:live.generated_at};
+  await load({data:live});
+  assert.equal(get('attention-alert').hidden,true);
+  assert.match(text('access-summary'), /Recent successful account read/);
+  assert.match(text('startup-summary'), /Preflight in progress/);
+  live.access={status:'unverified',at:null};
+  live.startup={status:'not_recorded',session:null,at:null};
+  await load({data:live});
+  assert.match(text('access-summary'), /Not independently verified/);
+  assert.match(text('startup-summary'), /No startup attempt recorded/);
+  assert.equal(get('attention-alert').hidden,true);
+  live.access={status:'sign_in_required',at:live.generated_at};
+  live.startup={status:'blocked',session:'<img src=x onerror=alert(1)>',at:live.generated_at,reason:'<script>'};
+  await load({data:live});
+  assert.equal(nodes(get('attention-alert'),'img').length,0);
+  assert.equal(nodes(get('attention-alert'),'script').length,0);
+  const card=get('sleeves').children[0];
+  for (const failed of [{status:503},{badJSON:true},{data:{generated_at:'bad'}}]) {
+    await load(failed);assert.equal(stale(),true);assert.equal(get('sleeves').children[0],card);
+  }
+  await load({data:fresh()});assert.equal(stale(),false);
+  queue.push({hang:true});const pending=get('refresh-button').listeners.click();await settle();
+  const count=requests.length;await intervals.find(t=>t.ms===5000).fn();assert.equal(requests.length,count);
+  [...timeouts.values()].find(t=>t.ms===6000).fn();await pending;
+  assert.match(text('data-alert'),/timed out/);
+  await load({data:fresh()});
+  clock+=16000;intervals.find(t=>t.ms===1000).fn();assert.equal(stale(),true);
+  await load({data:input.status});assert.equal(stale(),true,'Old cached snapshots are not fresh observations');
+  assert.match(text('data-alert'),/snapshot is stale/);
+  await load({data:fresh()});assert.equal(stale(),false);
+  const old=fresh();old.generated_at=new Date(clock-1000).toISOString();await load({data:old});
+  assert.match(text('data-alert'),/Out-of-order/);
+  const absent=fresh();absent.plan={nav_estimate:999999,sleeves:{b3:{'US.SPY':999}}};absent.live=null;absent.preview=null;
+  await load({data:absent});assert.match(text('nav-summary'),/Awaiting first/);assert.ok(!text('sleeves').includes('999999'));
+  assert.equal(get('preview-body').children.length,0);assert.equal(text('preview-costs'),'');
+  for (const request of requests) { assert.equal(request.url,'/api/competition');assert.ok(!request.options.method||request.options.method==='GET'); }
+  console.log('Competition DOM behaviors passed');
+})().catch(error => { console.error(error); process.exitCode = 1; });
+'''
+
+
+def test_competition_dom_status_fills_research_and_failures(tmp_path, monkeypatch):
+    from dual_strategy.competition import report
+    from dual_strategy.competition.planner import new_state
+    from dual_strategy.competition.store import Store, load_config
+
+    node = shutil.which('node')
+    assert node is not None, 'Node is required for the competition DOM regression test'
+    (tmp_path / 'config').mkdir()
+    shutil.copyfile(Path(__file__).resolve().parents[1] / 'config' / 'competition.yaml', tmp_path / 'config' / 'competition.yaml')
+    cfg = load_config(tmp_path)
+    store = Store(tmp_path, {**cfg, 'state_dir': 'private/competition/live'})
+    state = new_state()
+    state['h_plan'] = {'asof': '2026-11-19', 'entries': ['US.XLV', 'US.XLP'], 'exits': {}}
+    store.save(state)
+    monkeypatch.setattr(report, '_process', lambda project: {'status': 'running', 'count': 1})
+    status = report.competition_payload(tmp_path, datetime.fromisoformat('2026-11-20T13:00:00+00:00'))
+    status['preview'] = {'method': 'Hypothetical', 'windows': {'long': {'equity': [
+        {'date': '2021-01-04', 'nav': 100000}, {'date': '2021-01-05', 'nav': 100100}],
+        'net_return_pct': .1, 'max_drawdown_pct': 0, 'halted_on': None}}}
+    parser = AssetParser()
+    parser.feed((ASSETS / 'competition.html').read_text(encoding='utf-8'))
+    payload = {'app': str(ASSETS / 'competition.js'), 'status': status,
+               'ids': [attrs['id'] for _, attrs in parser.tags if 'id' in attrs]}
+    result = subprocess.run([node, '-e', COMPETITION_DOM], input=json.dumps(payload), text=True,
+                            encoding='utf-8', capture_output=True, timeout=20)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert 'Competition DOM behaviors passed' in result.stdout

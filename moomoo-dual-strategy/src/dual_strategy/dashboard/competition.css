@@ -1,12 +1,76 @@
-.chart-grid.one { grid-template-columns: 1fr; }
-.sleeve-weight { color: var(--muted); font-size: 11px; margin: 0 0 14px; }
-.plan-list { margin: 6px 0 0; padding-left: 18px; color: var(--text); font-size: 12px; }
-.plan-list li { margin: 2px 0; }
+.competition-page { --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+.competition-page .page-heading { padding-bottom: 26px; }
+.competition-page h1 { font-weight: 550; }
+.competition-page .download-link { font-size: 12px; }
+.session-panel { margin-bottom: 22px; border-top: 3px solid var(--blue); }
+.session-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 22px; }
+.session-heading h2 { font-size: clamp(21px, 2.2vw, 29px); letter-spacing: -.035em; margin-bottom: 4px; }
+.session-heading .section-note { margin: 6px 0 18px; }
+.session-clock { text-align: right; flex-shrink: 0; }
+.session-clock time { font: 20px var(--font-data); display: block; margin: 8px 0; }
+.session-facts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; border-top: 1px solid var(--border); padding-top: 18px; }
+.operational-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border-top: 1px solid var(--border); padding-top: 18px; margin-top: 18px; }
+.operational-facts strong { display: block; font-size: 13px; font-weight: 500; }
+.operational-facts .footnote { margin: 4px 0 0; }
+.attention-alert { border-left: 3px solid var(--amber); }
+.attention-alert h3 { font-size: 16px; margin: 0 0 6px; }
+.attention-alert p { margin: 0; }
+.attention-alert > section + section { margin-top: 16px; }
+.session-facts strong { font-weight: 500; font-size: 13px; }
+.session-facts .footnote { margin: 4px 0 0; }
+.session-timeline { display: flex; gap: 0; list-style: none; margin: 24px 0 0; padding: 16px 0 0; border-top: 1px solid var(--border); overflow-x: auto; }
+.session-timeline li { min-width: 96px; flex: 1; border-left: 2px solid var(--border); padding: 0 12px; color: var(--muted); font-size: 10px; }
+.session-timeline time { display: block; font: 12px var(--font-data); margin-bottom: 5px; }
+.session-timeline .up-next { border-color: var(--teal); color: var(--text); }
+.session-timeline .elapsed { opacity: .65; }
+.account-strip { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1.25fr; margin-bottom: 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.account-strip > div { padding: 20px; min-width: 0; }
+.account-strip > div + div { border-left: 1px solid var(--border); }
+.account-strip strong { display: block; font-size: clamp(17px, 1.6vw, 23px); font-weight: 550; font-variant-numeric: tabular-nums; letter-spacing: -.025em; }
+.metric-note { display: block; color: var(--muted); font-size: 10px; margin-top: 7px; }
+.account-stale strong { color: var(--muted); }
+.competition-page .portfolio-card .nav-value { font-size: clamp(27px, 3vw, 38px); }
+.sleeve-weight { color: var(--muted); font-size: 11px; margin-bottom: 12px; }
+.allocation-meter { width: 100%; height: 6px; appearance: none; border: 0; background: var(--border); border-radius: 3px; }
+.allocation-meter::-webkit-progress-bar { background: var(--border); border-radius: 3px; }
+.allocation-meter::-webkit-progress-value { background: var(--accent); border-radius: 3px; }
+.allocation-meter::-moz-progress-bar { background: var(--accent); border-radius: 3px; }
+.plan-list { margin: 8px 0 0; padding-left: 18px; font-size: 12px; }
+.plan-list li { padding: 3px 0; }
+.competition-page .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.competition-page .capital-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#attribution-note { margin: -8px 0 24px; }
+.competition-page .status-list { grid-template-columns: 1fr 1fr; }
 .status-cell.filled { color: var(--teal); }
 .status-cell.planned { color: var(--amber); }
 .status-cell.failed { color: var(--red); }
-#preview-chart svg { width: 100%; height: auto; display: block; }
-#preview-chart .axis { stroke: var(--border); stroke-width: 1; }
-#preview-chart .line { fill: none; stroke: var(--blue); stroke-width: 1.6; }
-#preview-chart .start { stroke: var(--amber); stroke-dasharray: 4 4; stroke-width: 1; }
+.competition-page #orders-body td { font-family: inherit; font-size: 11px; }
+#orders-body small { display: block; color: var(--muted); margin-top: 4px; }
+#orders-body details { min-width: 140px; }
+#orders-body pre { max-width: 280px; }
+.competition-page .chart-host { min-height: 190px; }
+.chart-grid.one { grid-template-columns: 1fr; }
+.research-disclosure { margin-bottom: 18px; }
+.research-disclosure > summary { font-size: 13px; font-weight: 550; color: var(--text); }
+.research-disclosure[open] > summary { margin-bottom: 24px; }
+#preview-chart .line { fill: none; stroke: var(--blue); stroke-width: 2; }
 #preview-chart text { fill: var(--muted); font-size: 10px; }
+@media (max-width: 1050px) {
+  .account-strip { grid-template-columns: 1fr 1fr; }
+  .account-strip > div:nth-child(3) { border-left: 0; }
+  .account-strip > div:nth-child(n+3) { border-top: 1px solid var(--border); }
+}
+@media (max-width: 760px) {
+  .competition-page .topbar { flex-wrap: wrap; padding: 15px 0; gap: 14px; }
+  .competition-page .topbar-right { width: 100%; gap: 16px; justify-content: space-between; }
+  .competition-page .read-only { display: inline; font-size: 11px; }
+  .session-heading { flex-direction: column; gap: 0; }
+  .session-clock { text-align: left; margin-bottom: 16px; }
+  .session-clock time { display: inline-block; margin-right: 16px; font-size: 17px; }
+  .session-facts, .operational-facts { grid-template-columns: 1fr; gap: 14px; }
+  .session-panel { padding: 18px; }
+  .account-strip > div { padding: 15px; }
+  .account-strip strong { font-size: 18px; }
+  .competition-page .portfolio-header { flex-wrap: wrap; }
+  .competition-page .topbar-right .badge { max-width: none; }
+}

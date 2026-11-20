@@ -9,7 +9,11 @@ from urllib.parse import urlsplit
 from dual_strategy.portfolio.ledger import Ledger, STRATEGIES
 from dual_strategy.reporting.service import START_BLOCKERS, csv_export, redacted, report_status
 
-ASSETS = {'/': ('index.html', 'text/html'), '/app.js': ('app.js', 'text/javascript'), '/style.css': ('style.css', 'text/css')}
+ASSETS = {'/': ('index.html', 'text/html'), '/app.js': ('app.js', 'text/javascript'), '/style.css': ('style.css', 'text/css'),
+          '/backtest': ('backtest.html', 'text/html'), '/backtest.js': ('backtest.js', 'text/javascript'),
+          '/backtest.css': ('backtest.css', 'text/css'), '/competition': ('competition.html', 'text/html'),
+          '/competition.js': ('competition.js', 'text/javascript'), '/competition.css': ('competition.css', 'text/css')}
+BACKTEST_SCOREBOARD = Path('reports') / 'backtest_v3' / 'scoreboard.json'
 
 
 def create_server(project: Path, db_path: Path, port: int = 8876):
@@ -50,6 +54,20 @@ def create_server(project: Path, db_path: Path, port: int = 8876):
                 if self.headers.get('Sec-Fetch-Site', 'same-origin') not in ('same-origin', 'none'):
                     return self.send(403, '{"error":"Same-origin controls required"}')
                 return self.send(200, json.dumps({'csrf_token': control_token}))
+            if path == '/api/competition':
+                try:
+                    from dual_strategy.competition.report import competition_payload
+                    return self.send(200, json.dumps(competition_payload(project), allow_nan=False, default=str))
+                except (OSError, ValueError, KeyError):
+                    return self.send(503, '{"error":"Competition state unreadable; the runner, not this page, controls orders"}')
+            if path == '/api/backtest':
+                board = project / BACKTEST_SCOREBOARD
+                if not board.exists():
+                    return self.send(404, '{"error":"No backtest scoreboard; run python -m dual_strategy.research.run"}')
+                try:
+                    return self.send(200, board.read_text(encoding='utf-8'))
+                except OSError:
+                    return self.send(503, '{"error":"Backtest scoreboard unreadable"}')
             if path not in ('/api/status', '/export/status.json', '/export/audit.csv', '/export/equity.csv'):
                 return self.send(404, '{"error":"Not found"}')
             try:

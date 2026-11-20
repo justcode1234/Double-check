@@ -177,7 +177,9 @@ def test_csv_exports_golden_and_redacted(endpoint):
         assert marker not in body
 
 
-@pytest.mark.parametrize(('url', 'filename', 'mime'), [('/', 'index.html', 'text/html'), ('/app.js', 'app.js', 'text/javascript'), ('/style.css', 'style.css', 'text/css')])
+@pytest.mark.parametrize(('url', 'filename', 'mime'), [('/', 'index.html', 'text/html'), ('/app.js', 'app.js', 'text/javascript'), ('/style.css', 'style.css', 'text/css'),
+                                                     ('/backtest', 'backtest.html', 'text/html'), ('/backtest.js', 'backtest.js', 'text/javascript'),
+                                                     ('/backtest.css', 'backtest.css', 'text/css')])
 def test_only_local_assets_are_served(endpoint, url, filename, mime):
     status, headers, body = request(endpoint, url)
     assert status == 200
@@ -651,3 +653,17 @@ def test_dashboard_dom_refresh_charts_filters_and_failures(project, initial_fail
                             encoding='utf-8', capture_output=True, timeout=20)
     assert result.returncode == 0, result.stdout + result.stderr
     assert 'Dashboard DOM behaviors passed' in result.stdout
+
+
+def test_backtest_scoreboard_served_read_only_or_404(project, endpoint):
+    root, _ = project
+    status, _, body = request(endpoint, '/api/backtest')
+    assert status == 404 and 'research.run' in json.loads(body)['error']
+    board = root / 'reports' / 'backtest_v3'
+    board.mkdir(parents=True)
+    payload = {'label': 'SIMULATED', 'variants': [], 'equity_oos': {'dates': [], 'series': {}}}
+    (board / 'scoreboard.json').write_text(json.dumps(payload), encoding='utf-8')
+    status, headers, body = request(endpoint, '/api/backtest')
+    assert status == 200 and json.loads(body) == payload
+    assert_safe_headers(headers, 'application/json')
+    assert request(endpoint, '/api/backtest', method='POST')[0] == 405

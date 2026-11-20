@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Offline historical backtest of strategies A (stock ORB), B (SPY Noise-Area) and C (SPY VWAP reversion).">
+  <title>Strategy Backtest</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/backtest.css">
+  <script src="/backtest.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to backtest</a>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Back to the live research monitor"><span class="brand-mark" aria-hidden="true">DS</span><span>DUAL STRATEGY<span class="brand-sub">BACKTEST</span></span></a>
+      <div class="topbar-right"><a class="read-only" href="/">← Live monitor</a><span class="badge warning">SIMULATED · offline history</span></div>
+    </header>
+    <main id="main">
+      <section class="page-heading" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">A · B · C — INDEPENDENT $50,000 PORTFOLIOS</p>
+          <h1 id="page-title">Which strategy actually works?</h1>
+          <p class="subtitle" id="bt-subtitle">Loading backtest…</p>
+        </div>
+      </section>
+      <div id="bt-alert" class="data-alert" role="alert" hidden></div>
+      <div id="bt-content" aria-busy="true">
+        <section class="panel bt-answer" aria-labelledby="answer-title">
+          <p class="eyebrow">THE ANSWER · OUT-OF-SAMPLE, NET OF COSTS</p>
+          <h2 id="answer-title">Ranking</h2>
+          <p id="bt-answer" class="bt-lede">—</p>
+          <p id="bt-answer-sub" class="bt-lede-sub" hidden></p>
+          <div id="bt-cards" class="bt-cards"></div>
+        </section>
+
+        <section class="panel chart-panel" aria-labelledby="equity-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">UNTOUCHED HOLDOUT</p><h2 id="equity-title">Equity, out-of-sample (start = 100)</h2></div>
+            <div class="bt-controls">
+              <div class="bt-segmented" role="radiogroup" aria-label="Rule set">
+                <button type="button" role="radio" aria-checked="true" data-set="competition">Competition rules</button>
+                <button type="button" role="radio" aria-checked="false" data-set="paper">Published-paper rules</button>
+              </div>
+              <label class="bt-check"><input type="checkbox" id="show-spy"> SPY buy &amp; hold</label>
+            </div>
+          </div>
+          <div id="equity-legend" class="legend bt-legend" aria-label="Chart series"></div>
+          <div id="equity-chart" class="bt-chart" tabindex="0" aria-label="Out-of-sample equity chart. Use left and right arrow keys to move the readout."></div>
+          <p id="equity-note" class="footnote"></p>
+        </section>
+
+        <section class="panel chart-panel" aria-labelledby="slip-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">WHY THE EARLIER REPORT SAID “EVERYTHING FAILS”</p><h2 id="slip-title">Out-of-sample net return vs. slippage per side</h2></div>
+          </div>
+          <div id="slip-legend" class="legend bt-legend" aria-label="Chart series"></div>
+          <div id="slip-chart" class="bt-chart" tabindex="0" aria-label="Slippage sensitivity chart. Use left and right arrow keys to move the readout."></div>
+          <p id="slip-note" class="footnote"></p>
+        </section>
+
+        <section class="panel bt-section" aria-labelledby="variants-title">
+          <p class="eyebrow">EVERY HEADLINE VARIANT · OUT-OF-SAMPLE</p>
+          <h2 id="variants-title">Side-by-side results</h2>
+          <div class="table-scroll" role="region" aria-label="Variant results table" tabindex="0"><table id="variants-table" class="bt-table"></table></div>
+          <p class="footnote">Sharpe uses daily net returns, annualised (√252). CI = 95% day-block bootstrap (5-day blocks). p = bootstrap share of Sharpe ≤ 0. “vs SPY×exp” = return minus SPY scaled to the variant’s average exposure.</p>
+        </section>
+
+        <div class="bt-two">
+          <section class="panel bt-section" aria-labelledby="years-title">
+            <p class="eyebrow">NO HIDDEN LOSING YEARS</p>
+            <h2 id="years-title">Net return by year</h2>
+            <div class="table-scroll" role="region" aria-label="Net return by year" tabindex="0"><table id="years-table" class="bt-table"></table></div>
+            <p class="footnote">2021–22 development (C parameters chosen here only), 2023 validation, 2024→ untouched out-of-sample.</p>
+          </section>
+          <section class="panel bt-section" aria-labelledby="corr-title">
+            <p class="eyebrow">DIVERSIFICATION</p>
+            <h2 id="corr-title">Daily-return correlation (OOS)</h2>
+            <div class="table-scroll" role="region" aria-label="Correlation table" tabindex="0"><table id="corr-table" class="bt-table"></table></div>
+            <p id="corr-note" class="footnote"></p>
+          </section>
+        </div>
+
+        <section class="panel bt-section" aria-labelledby="gates-title">
+          <p class="eyebrow">RELEASE GATES · PASS / FAIL / EXPLORATORY</p>
+          <h2 id="gates-title">Why each verdict</h2>
+          <div id="gates"></div>
+        </section>
+
+        <section class="panel bt-section" aria-labelledby="notes-title">
+          <p class="eyebrow">READ BEFORE TRUSTING ANY NUMBER</p>
+          <h2 id="notes-title">Method &amp; limits</h2>
+          <ul id="notes" class="bt-notes"></ul>
+        </section>
+      </div>
+    </main>
+    <footer><span>DUAL STRATEGY <span class="footer-divider">/</span> Offline backtest</span><span>Hypothetical fills on historical bars. Not broker orders, not paper fills, not a promise.</span></footer>
+  </div>
+</body>
+</html>

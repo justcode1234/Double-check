@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Competition portfolio: B3 SPY Noise-Area 80% and H ETF RSI-2 panel 20% with a 3.5% account drawdown halt.">
+  <title>Competition B3 + H</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/competition.css">
+  <script src="/competition.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to competition monitor</a>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Dual Strategy home"><span class="brand-mark" aria-hidden="true">DS</span><span>DUAL STRATEGY<span class="brand-sub">COMPETITION MONITOR</span></span></a>
+      <div class="topbar-right"><a class="read-only" href="/">Practice ledgers →</a><a class="read-only" href="/backtest">Backtest →</a><span class="badge warning" id="mode-badge">Loading</span></div>
+    </header>
+    <main id="main">
+      <section class="page-heading" aria-labelledby="page-title">
+        <div><p class="eyebrow">MOOMOO × QODER CHALLENGE / ONE ACCOUNT, TWO SLEEVES</p><h1 id="page-title">B3 80% · H ETF 20%</h1><p class="subtitle">SPY Noise-Area hourly momentum plus the liquid-ETF RSI-2 reversal panel. Account halt at 3.5% below the high-water NAV.</p></div>
+        <div class="refresh-block"><button id="refresh-button" type="button">Refresh now <span aria-hidden="true">↻</span></button><p id="refresh-status" role="status" aria-live="polite">Waiting for state · refreshes every 5s</p></div>
+      </section>
+      <div id="data-alert" class="data-alert" role="alert" hidden></div>
+      <div id="live-data" aria-busy="true">
+        <section class="context-strip" aria-label="Account risk state">
+          <div><span class="context-label">ACCOUNT NAV · HIGH-WATER</span><strong id="nav-summary">No runner state yet</strong></div>
+          <div><span class="context-label">3.5% HALT LEVEL</span><strong id="halt-summary">Not set</strong></div>
+          <div><span class="context-label">RISK STATE</span><strong id="risk-summary">Unknown</strong></div>
+        </section>
+        <section id="sleeves" class="portfolio-grid" aria-label="Strategy sleeves"><p class="empty-state">Loading sleeves.</p></section>
+        <section class="panel chart-panel" aria-labelledby="orders-title">
+          <div class="section-heading"><div><p class="eyebrow">DETERMINISTIC RUNNER OUTPUT</p><h2 id="orders-title">Order intents and broker outcomes</h2></div><p id="orders-note" class="section-note"></p></div>
+          <div class="table-scroll" role="region" aria-label="Order intents" tabindex="0"><table><thead><tr><th scope="col">Time · ET</th><th scope="col">Sleeve</th><th scope="col">Order</th><th scope="col">Reason</th><th scope="col">Status</th></tr></thead><tbody id="orders-body"><tr><td colspan="5" class="empty-state">No intents yet.</td></tr></tbody></table></div>
+        </section>
+        <section class="panel chart-panel" aria-labelledby="preview-title">
+          <div class="section-heading"><div><p class="eyebrow">RESEARCH BACKTEST · NOT FILLS</p><h2 id="preview-title">What this mix did, 2021–2025</h2></div><div class="legend"><span class="legend-item">80/20 account, 3.5% halt</span></div></div>
+          <p class="section-note" id="preview-note">Loading backtest preview.</p>
+          <div class="chart-grid one"><figure><figcaption>Account NAV, USD 100,000 start <span>USD</span></figcaption><div id="preview-chart" class="chart-host"></div></figure></div>
+          <div class="table-scroll" role="region" aria-label="Backtest windows" tabindex="0"><table><thead><tr><th scope="col">Window</th><th scope="col">80/20 net</th><th scope="col">Max drawdown</th><th scope="col">Halted</th><th scope="col">B3 alone</th><th scope="col">H alone</th></tr></thead><tbody id="preview-body"></tbody></table></div>
+          <p class="footnote" id="preview-costs"></p>
+        </section>
+        <section class="panel" aria-labelledby="rules-title"><p class="eyebrow">FROZEN RULES</p><h2 id="rules-title">What the runner will do</h2><ul id="rules-list" class="blocker-list"></ul></section>
+      </div>
+    </main>
+    <footer><span>DUAL STRATEGY <span class="footer-divider">/</span> Competition monitor (read-only)</span><span>The runner trades; this page never sends orders. Halt clears only by a human edit of private state.</span></footer>
+  </div>
+</body>
+</html>

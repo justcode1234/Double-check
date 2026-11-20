@@ -1,0 +1,51 @@
+# Two-strategy competition portfolio: B3 (SPY Noise-Area, hourly, long-only) 80% + H (ETF RSI-2 reversal panel) 20%.
+# Parameters are the frozen research settings (Codex A-J freeze, verified by Claude's independent replay).
+# Every number below is applied by deterministic Python (src/dual_strategy/competition); agents never size or override.
+
+name: moomoo-qoder-challenge
+timezone: America/New_York
+calendar: XNYS
+
+# --- execution gate ------------------------------------------------------------------------------------------------
+# PLAN writes order intents only. Orders are posted ONLY when all three hold:
+#   execution_enabled: true here, a private account file (below) confirming the competition account,
+#   and `scripts/run_competition.py --execute`. Changing this is the user's decision, not an agent's.
+execution_enabled: false
+account_file: private/competition/account.json      # gitignored; see QODER_COMPETITION.md for the format
+state_dir: private/competition                      # persistent NAV/high-water/halt state + outbox (gitignored)
+
+# --- capital split of the competition account NAV (re-evaluated at every decision) ----------------------------------
+allocation:
+  b3: 0.80
+  h_etf: 0.20
+
+b3:
+  symbol: US.SPY
+  lookback_sessions: 14          # prior sessions with a bar at the same clock time (half-days are skipped)
+  band_width: 1.0
+  decision_times: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00"]   # completed 5-minute bar ending here
+  position_fraction_of_sleeve: 0.40   # long notional = 40% of the B3 sleeve (= 32% of account NAV at 80%)
+  flatten_minutes_before_close: 5     # 15:55 ET; 12:55 ET on 13:00 half-days
+
+h_etf:
+  core: [US.SPY, US.QQQ, US.IWM, US.DIA]
+  sectors: [US.XLB, US.XLC, US.XLE, US.XLF, US.XLI, US.XLK, US.XLP, US.XLRE, US.XLU, US.XLV, US.XLY]
+  top_sectors: 5                 # by 20-session median dollar volume at the signal close
+  dollar_volume_sessions: 20
+  rsi_entry_max: 10              # RSI(2) on adjusted closes
+  rsi_exit_min: 70
+  max_hold_sessions: 3           # entry session counts as 1; exit at the next open
+  trend_sma_sessions: 100        # adjusted close must be above its 100-session mean
+  per_name_fraction_of_sleeve: 0.10
+  aggregate_fraction_of_sleeve: 0.30
+
+risk:                            # account level (both sleeves)
+  halt_drawdown_fraction: 0.035  # NAV <= 96.5% of high-water: flatten everything, block entries until a human clears
+  daily_loss_fraction: 0.0125    # NAV <= 98.75% of day-start NAV: flatten everything, no entries for the rest of the day
+  reduce_drawdown_fraction: 0.02 # NAV <= 98% of high-water: new positions at half size (until back above 98.5%)
+  name_cap_usd: 40000            # handbook purchase cap per stock/ETF
+  max_orders_per_day: 200
+  limit_offset_bps: 5            # marketable LIMIT: buy at quote x (1 + 5 bp), sell at quote x (1 - 5 bp)
+  order_wait_seconds: 30         # cancel and reconcile anything not filled by then
+  max_quote_age_seconds: 15
+  long_only: true

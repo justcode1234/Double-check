@@ -1,0 +1,12 @@
+.chart-grid.one { grid-template-columns: 1fr; }
+.sleeve-weight { color: var(--muted); font-size: 11px; margin: 0 0 14px; }
+.plan-list { margin: 6px 0 0; padding-left: 18px; color: var(--text); font-size: 12px; }
+.plan-list li { margin: 2px 0; }
+.status-cell.filled { color: var(--teal); }
+.status-cell.planned { color: var(--amber); }
+.status-cell.failed { color: var(--red); }
+#preview-chart svg { width: 100%; height: auto; display: block; }
+#preview-chart .axis { stroke: var(--border); stroke-width: 1; }
+#preview-chart .line { fill: none; stroke: var(--blue); stroke-width: 1.6; }
+#preview-chart .start { stroke: var(--amber); stroke-dasharray: 4 4; stroke-width: 1; }
+#preview-chart text { fill: var(--muted); font-size: 10px; }

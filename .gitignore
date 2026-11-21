@@ -14,3 +14,5 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+!moomoo-dual-strategy/data-cache/regime_extra/
+!moomoo-dual-strategy/data-cache/challenge_public_etfs/

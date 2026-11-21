@@ -424,3 +424,15 @@ def test_parity_with_rstrats_on_the_last_week(monkeypatch):
     inc = parity["incremental_parity"](days)
     assert noise["mismatch_days"] == vwap["candidate_mismatches"] == orb["candidate_mismatches"] == inc["mismatches"] == 0
     assert (vwap["pnl_live"], orb["pnl_live"]) == (248.32, -50.06) and inc["slot_checks"] > 1000
+
+
+def test_daily_report_after_the_close(runner, tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "risk", lambda symbols=(): runner.account(symbols))
+    runner.state["initial_nav"] = 100_000.0
+    runner.state["sleeves"]["h_etf"] = {}
+    calls = []
+    monkeypatch.setattr("subprocess.run", lambda *a, **k: calls.append(a))
+    runner.daily_report(SESSION)
+    rep = __import__("json").loads((runner.store.dir / "reports" / f"{SESSION}.json").read_text())
+    assert rep["session"] == SESSION and rep["mode"] == "EXECUTE" and set(rep["sleeves"]) == set(planner.SLEEVES)
+    assert all(v["capital"] == 20_000.0 for v in rep["sleeves"].values()) and rep["halted"] is None

@@ -616,6 +616,38 @@ class Runner:
                 day["positions"].pop(key, None)
         self.store.save(self.state)
 
+    def daily_report(self, session: str):
+        """After the close: NAV, high-water, halt/lock and each sleeve's capital and P&L, written to
+        <state_dir>/reports/<session>.json and announced with a macOS notification (best effort). No Claude needed."""
+        acct = self.account() if self.broker else None
+        perf = sleeve_performance(self.store, self.state, asdict(acct) if acct else None, self.cfg)
+        s = self.state
+        rows = self.store.outbox(session)
+        report = {"session": session, "generated_at": datetime.now(timezone.utc).isoformat(),
+                  "mode": "EXECUTE" if self.broker else "PLAN", "nav": acct.nav if acct else s.get("last_nav"),
+                  "day_start_nav": s.get("day_start_nav"), "high_water": s.get("high_water"), "halted": s.get("halted"),
+                  "locked_day": s.get("locked_day"), "account_pnl_since_start": perf.get("account_pnl"),
+                  "orders_filled": sum(1 for r in rows if r.get("event") == "outcome" and (r.get("filled") or 0) > 0),
+                  "order_errors": s.get("order_errors_today", 0),
+                  "runner_errors": sum(1 for r in rows if r.get("event") == "runner_error"),
+                  "sleeves": {k: {"capital": v["capital"], "gross_pnl": v["gross_pnl"], "realized": v["realized_gross"],
+                                  "unrealized": v["unrealized_gross"], "status": v["status"],
+                                  "positions": {sym: q["qty"] for sym, q in v["positions"].items()}}
+                              for k, v in perf["sleeves"].items()}}
+        path = self.store.dir / "reports" / f"{session}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(report, indent=1, default=str), encoding="utf-8")
+        log(daily_report=report)
+        try:
+            import subprocess
+            nav = report["nav"]
+            text = f"NAV {nav:,.2f}" if isinstance(nav, (int, float)) else "NAV unknown"
+            text += " · halted" if report["halted"] else ""
+            subprocess.run(["/usr/bin/osascript", "-e", f'display notification "{text}" with title "Competition {session} closed"'],
+                           timeout=10, capture_output=True)
+        except Exception:                                    # noqa: BLE001 - a notification never affects trading
+            pass
+
     def is_flat(self, sleeves: tuple) -> bool:
         return not any(q for sl in sleeves for q in self.state["sleeves"].get(sl, {}).values())
 
@@ -716,6 +748,8 @@ class Runner:
                 if bounds and f"plan-h-{now.date()}" not in done:
                     self.guarded("plan-h", self.plan_h, now.date())
                     done.add(f"plan-h-{now.date()}")
+                if bounds:
+                    self.guarded("daily-report", self.daily_report, now.date().isoformat())
                 log(loop="session over" if bounds else "no session today")
                 return
             opened, closed = bounds

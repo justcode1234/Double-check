@@ -5,7 +5,7 @@ Three independent locks must all be open before an order can be sent:
   2. private/competition/account.json exists with confirmed_competition_account: true, account_type 2, market_id 100
      (written by the user/Qoder from the Moomoo app; never committed, never guessed)
   3. the runner was started with --execute
-Orders are LIMIT, long-only, U.S. only, through the same authenticated CLI transport as the practice runner, with an
+Orders are LIMIT, U.S. only (shorts only for risk.short_sleeves, marked opens_short), through the same authenticated CLI transport as the practice runner, with an
 allowlist of exactly one account. Every acknowledgement and fill is reconciled from broker order history.
 """
 
@@ -34,6 +34,46 @@ def load_account(project: Path, cfg: dict) -> dict:
             and acct.get("market_id") == 100 and isinstance(acct.get("account_id"), str) and acct["account_id"]):
         raise ExecutionBlocked("account file must confirm the competition account (account_type 2, market_id 100)")
     return acct
+
+
+def parse_positions(rows: list[dict], funds: dict, expected: dict[str, int] | None = None) -> dict[str, int]:
+    """Signed positions. The sim position rows carry no side field: a short is a negative qty or a negative market
+    value. Cross-checked against the funds call: shorts in the rows <=> short_mv > 0, else fail closed. If the rows
+    show shorts unsigned, rows are read as short only where the runner's own books expect exactly that short and the
+    funds short_mv equals those rows' value within 2%; anything else fails closed."""
+    positions, prices = {}, {}
+    for r in rows:
+        q = int(float(r.get("qty", r.get("quantity", 0))))
+        mv = r.get("mv", r.get("market_val"))
+        try:
+            mv = float(mv) if mv not in (None, "") else None
+        except (TypeError, ValueError):
+            mv = None
+        if q > 0 and mv is not None and mv < 0:
+            q = -q                                          # short reported as a positive qty with negative value
+        if q:
+            positions[r["symbol"]] = positions.get(r["symbol"], 0) + q
+            try:
+                prices[r["symbol"]] = float(r.get("cur_price") or 0)
+            except (TypeError, ValueError):
+                prices[r["symbol"]] = 0.0
+    short_mv = funds.get("short_mv")
+    try:
+        short_mv = abs(float(short_mv)) if short_mv not in (None, "") else None
+    except (TypeError, ValueError):
+        short_mv = None
+    has_short = any(q < 0 for q in positions.values())
+    if short_mv is not None and short_mv > 0.005 and not has_short and expected:
+        unsigned = [s for s, q in expected.items() if q < 0 and positions.get(s) == -q]
+        value = sum(positions[s] * prices.get(s, 0.0) for s in unsigned)
+        if unsigned and value > 0 and abs(value - short_mv) <= 0.02 * short_mv:
+            for s in unsigned:
+                positions[s] = -positions[s]
+            has_short = True
+    if short_mv is not None and (short_mv > 0.005) != has_short:
+        raise ExecutionBlocked(f"short positions ambiguous: rows {'show' if has_short else 'show no'} shorts, "
+                               f"funds short_mv {short_mv}; reconcile before trading")
+    return positions
 
 
 class CompetitionBroker:
@@ -67,26 +107,29 @@ class CompetitionBroker:
                     raise
                 time.sleep(3 * (k + 1))
 
-    def account(self, quote) -> Account:
-        cash = float(self.call(CASH_INFO, {"acc_id": self.acc_id, "market": 100})["data"]["balance"])
+    def account(self, quote, expected: dict[str, int] | None = None) -> Account:
+        funds = self.call(CASH_INFO, {"acc_id": self.acc_id, "market": 100})["data"]
+        cash = float(funds["balance"])
         rows = self.call(POSITION_LIST, {"acc_id": self.acc_id, "market": 100})["data"]["positions"]
-        positions = {}
-        for r in rows:
-            q = int(float(r.get("qty", r.get("quantity", 0))))
-            if q < 0:
-                raise ExecutionBlocked(f"short position {r['symbol']} found; long-only portfolio")
-            if q:
-                positions[r["symbol"]] = q
+        positions = parse_positions(rows, funds, expected)
         quotes, ages = {}, {}
         now = datetime.now(timezone.utc)
         for s in positions:
             px, at = quote(s)
             quotes[s], ages[s] = px, (now - at).total_seconds()
-        return Account(now, cash, positions, quotes, ages)
+        total = funds.get("total_asset")
+        return Account(now, cash, positions, quotes, ages,
+                       broker_total=float(total) if total not in (None, "") else None)
 
     def place(self, intent: Intent) -> str:
+        cfg = getattr(self, "cfg", None) or {}
+        r = cfg.get("risk", {})                          # no config = long-only
         if intent.side == "SELL" and not intent.close_only:
-            raise ExecutionBlocked("sells must be close-only (no shorts)")
+            if not (getattr(intent, "opens_short", False) and r.get("long_only") is False
+                    and intent.sleeve in r.get("short_sleeves", ()) and cfg.get(intent.sleeve, {}).get("shorts")):
+                raise ExecutionBlocked(f"sell must be close-only: {intent.sleeve} may not open shorts")
+        if intent.side == "BUY" and getattr(intent, "opens_short", False):
+            raise ExecutionBlocked("a BUY cannot open a short")
         if intent.order_type != "LIMIT" or not intent.symbol.startswith("US."):
             raise ExecutionBlocked("only U.S. LIMIT orders")
         args = {"acc_id": self.acc_id, "market": 100, "order_type": 1, "order_side": 1 if intent.side == "BUY" else 2,

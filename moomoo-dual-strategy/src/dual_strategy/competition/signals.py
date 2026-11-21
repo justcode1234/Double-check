@@ -149,6 +149,9 @@ def h_plan(daily: dict[str, pd.DataFrame], asof: date, held: dict[str, date], se
         dv = (f.close * f.volume).iloc[-cfg["dollar_volume_sessions"]:]
         metrics[s] = {"rsi2": r, "adjusted": adj[-1], "sma": sma, "above_trend": adj[-1] > sma,
                       "median_dollar_volume": float(dv.median()) if len(dv) == cfg["dollar_volume_sessions"] else math.nan}
+    late = sorted(s for s, entry in held.items() if entry > asof)
+    if late:                              # a plan dated before a holding was bought cannot judge its exit
+        return HPlan(asof, [], [], {}, metrics, blocked=f"held positions entered after {asof}: {late}")
     if any(s in missing for s in core) or any(s in missing for s in held):
         return HPlan(asof, [], [], {}, metrics, blocked=f"missing daily data: {missing}")
     ranked = sorted((s for s in sectors if s in metrics and math.isfinite(metrics[s]["median_dollar_volume"])),

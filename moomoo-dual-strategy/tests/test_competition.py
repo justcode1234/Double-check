@@ -75,7 +75,7 @@ def acct(nav=100_000.0, positions=None, quotes=None):
     quotes = {"US.SPY": 500.0, **(quotes or {})}
     cash = nav - sum(q * quotes[s] for s, q in positions.items())
     return planner.Account(datetime.now(timezone.utc), cash, positions, quotes, {s: 1.0 for s in quotes},
-                           {'b3': 80000, 'h_etf': 20000})
+                           {s: CFG["allocation"][s] * 100_000 for s in planner.SLEEVES})
 
 
 def test_risk_ladder_halt_is_permanent_and_lock_is_daily():
@@ -215,6 +215,46 @@ def test_h_plan_rsi_trend_universe_and_max_hold():
     assert rsi2([1, 2, 3])[2] == 100.0
 
 
+def test_h_plan_dated_before_an_entry_is_blocked_not_a_max_hold_exit():
+    days = pd.bdate_range("2026-03-02", periods=130).date.tolist()
+    cfg = {**CFG["h_etf"], "core": ["A"], "sectors": ["S1"], "top_sectors": 1}
+    up = [100 + 0.5 * k for k in range(130)]
+    daily = {s: pd.DataFrame({"close": up, "volume": 1e6, "adjusted": up}, index=days) for s in ("A", "S1")}
+    p = h_plan(daily, days[-2], {"S1": days[-1]}, days[:-1], cfg)   # bought on days[-1], plan as of days[-2]
+    assert p.exits == {} and p.entries == [] and "entered after" in p.blocked
+
+
+@pytest.mark.parametrize("now, stored_asof, want", [
+    (datetime(2026, 11, 20, 16, 16, tzinfo=NY), "2026-11-20", []),                     # evening plan kept
+    (datetime(2026, 11, 23, 9, 5, tzinfo=NY), "2026-11-19", [date(2026, 11, 20)]),     # stale plan rebuilt
+    (datetime(2026, 11, 23, 9, 5, tzinfo=NY), "2026-11-20", []),                       # current plan kept
+])
+def test_loop_never_replaces_a_newer_h_plan_with_the_prior_close(status_runner, monkeypatch, now, stored_asof, want):
+    runner, _ = status_runner
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return now.astimezone(tz) if tz else now.replace(tzinfo=None)
+
+    monkeypatch.setitem(runner.loop.__globals__, 'datetime', Clock)
+    runner.state['h_plan'] = {'asof': stored_asof, 'entries': [], 'exits': {}, 'blocked': None}
+    planned = []
+    monkeypatch.setattr(runner, 'plan_h', lambda asof=None: planned.append(asof))
+    monkeypatch.setattr(runner, 'risk', lambda symbols=(): acct())
+
+    class LoopStopped(BaseException):
+        pass
+
+    def stop(seconds):
+        raise LoopStopped()
+
+    monkeypatch.setattr(runner.loop.__globals__['time'], 'sleep', stop)
+    with pytest.raises(LoopStopped):
+        runner.loop()
+    assert [d for d in planned if d != now.date()] == want     # the evening re-plan of today itself is fine
+
+
 def test_broker_refuses_unless_all_three_locks_open(tmp_path):
     cfg = {**CFG, "account_file": "private/competition/account.json"}
     with pytest.raises(ExecutionBlocked):
@@ -335,7 +375,7 @@ def test_runner_halts_on_rejection_before_sending_another_intent(status_runner):
     assert len(submissions) == 1
     saved = runner.store.load()
     assert saved["halted"] is not None and "rejected" in saved["halted"]["reason"]
-    assert saved["orders_today"] == 1 and saved["sleeves"] == {"b3": {}, "h_etf": {}}
+    assert saved["orders_today"] == 1 and all(not book for book in saved["sleeves"].values())
     records = runner.store.outbox("2026-11-20")
     assert [r["event"] for r in records] == ["intent", "acknowledged", "outcome", "order_error"]
     assert records[2]["status"] == "REJECTED" and records[2]["filled"] == 0
@@ -395,7 +435,7 @@ def test_b3_audit_replays_signal_and_sizing_without_market_access(status_runner,
     provenance, = audit_records(runner, "provenance")
     assert saved["provenance_id"] == provenance["audit_id"]
     cfg = provenance["config"]
-    assert cfg["risk"]["name_cap_usd"] == 40000 and cfg["allocation"]["b3"] == 0.8
+    assert cfg["risk"]["name_cap_usd"] == 40000 and cfg["allocation"]["b3"] == 0.2
     assert "account_file" not in cfg and "state_dir" not in cfg
     source = provenance["sources"]["src/dual_strategy/competition/signals.py"]
     assert hashlib.sha256(source["text"].encode()).hexdigest() == source["sha256"]
@@ -403,7 +443,7 @@ def test_b3_audit_replays_signal_and_sizing_without_market_access(status_runner,
     intents, reason = planner.plan_b3(saved["state"], restore_account(saved["account"]), saved["session"],
                                       decision, cfg, datetime.fromisoformat(saved["now"]))
     assert [i.to_dict() for i in intents] == saved["intents"]
-    assert reason == saved["reason"] == "entry" and intents[0].qty == 79
+    assert reason == saved["reason"] == "entry" and intents[0].qty == 39          # $20,000 B3 sleeve at $500.25
     assert runner.store.outbox(day.isoformat())[0]["audit_id"] == saved["audit_id"]
 
 
@@ -452,10 +492,10 @@ def test_runner_attributes_capital_from_receipts_not_shared_cash(status_runner, 
     account = acct(nav=120000, positions={'US.XLV': 100}, quotes={'US.XLV': mark})
     before = runner.store.outbox('2026-11-19')
     performance = runner.attribute_capital(account)
-    assert account.sleeve_capital == {'b3': 80000, 'h_etf': capital}
+    assert account.sleeve_capital == {'b3': 20000, 'h_etf': capital, 'noise': 20000, 'vwap': 20000, 'orb': 20000}
     from dual_strategy.competition.store import sleeve_performance
     assert performance == sleeve_performance(runner.store, runner.state, asdict(account), runner.cfg)
-    assert performance['sleeves']['b3']['limits']['target_before_cap'] == 80000
+    assert performance['sleeves']['b3']['limits']['target_before_cap'] == 20000
     assert performance['sleeves']['h_etf']['limits']['per_etf_budget'] == per_etf
     assert performance['sleeves']['h_etf']['limits']['aggregate_limit'] == aggregate
     assert runner.store.outbox('2026-11-19') == before
@@ -491,7 +531,7 @@ def test_h_open_audit_links_signal_account_intent_and_fill(status_runner, monkey
     saved, = audit_records(runner, "h_open")
     provenance, = audit_records(runner, "provenance")
     assert saved["signal_audit_id"] == signal_id
-    assert saved['account']['sleeve_capital'] == {'b3': 78000, 'h_etf': 19500}
+    assert saved['account']['sleeve_capital'] == {s: 19500 for s in planner.SLEEVES}
     assert saved['capital']['sleeves']['h_etf']['initial_capital'] == 19500
     assert saved['capital']['sleeves']['h_etf']['limits']['per_etf_budget'] == 1950
     intents, reason = planner.plan_h_open(saved["state"], restore_account(saved["account"]), saved["session"],
@@ -588,9 +628,10 @@ def test_missing_audit_write_prevents_order_submission(status_runner, monkeypatc
     assert submissions == [] and runner.store.outbox("2026-11-20") == []
 
 
-def test_config_ships_disabled_and_split_80_20():
-    assert CFG["execution_enabled"] is False
-    assert CFG["allocation"] == {"b3": 0.80, "h_etf": 0.20}
+def test_config_five_sleeves_at_20pct_each():
+    # execution_enabled is the user's decision (true on the competition Mac since 2026-11-20), not asserted here
+    assert CFG["allocation"] == {"b3": 0.20, "h_etf": 0.20, "noise": 0.20, "vwap": 0.20, "orb": 0.20}
+    assert set(CFG["allocation"]) == set(planner.SLEEVES)
     assert CFG["risk"]["halt_drawdown_fraction"] == 0.035
 
 
@@ -616,12 +657,12 @@ def test_dashboard_payload_and_store_reads_create_nothing(tmp_path):
     assert not (tmp_path / "private").exists()
 
 
-def test_spy_cap_is_per_symbol_across_sleeves_and_b3_is_80pct():
-    assert CFG["allocation"]["b3"] * CFG["b3"]["position_fraction_of_sleeve"] == pytest.approx(0.80)
+def test_spy_cap_is_per_symbol_across_sleeves_and_b3_is_20k():
+    assert CFG["allocation"]["b3"] * CFG["b3"]["position_fraction_of_sleeve"] == pytest.approx(0.20)
     st = planner.new_state()
     planner.mark_risk(st, acct(), "2026-11-20", CFG)
     i = planner.plan_b3(st, acct(), "2026-11-20", Decision(1), CFG, datetime.now(NY))[0][0]
-    assert i.qty * i.limit_price <= CFG["risk"]["name_cap_usd"] and i.qty == int(40_000 // i.limit_price)
+    assert i.qty == int(20_000 // i.limit_price)                       # B3 now trades $20,000 of SPY
     st["sleeves"]["b3"]["US.SPY"] = 79
     a = acct(positions={"US.SPY": 79})
     out, _ = planner.plan_h_open(st, a, "2026-11-20", {"exits": {}, "entries": ["US.SPY"]}, CFG, datetime.now(NY))

@@ -15,7 +15,7 @@ from uuid import uuid4
 
 import yaml
 
-from dual_strategy.competition.planner import capital_limits, new_state
+from dual_strategy.competition.planner import SHORTABLE, SLEEVES, capital_limits, new_state
 
 
 def load_config(project: Path) -> dict:
@@ -76,7 +76,7 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
                    "gross_pnl": None, "fees": None, "net_pnl": None, "fill_count": 0,
                    "initial_capital": initial * cfg["allocation"][s] if initialized else None,
                    "capital": None, "limits": capital_limits(s, None, cfg, reduced),
-                   "positions": {}, "receipts": []} for s in ("b3", "h_etf")}
+                   "positions": {}, "receipts": []} for s in SLEEVES}
     result = {"asof": (account or {}).get("at"), "sleeves": sleeves,
               "account_pnl": None, "unallocated_account_change": None, "cost_method": "weighted_average",
               "capital_basis": "initial_allocation_plus_own_gross_pnl"}
@@ -141,19 +141,27 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
             continue
         sleeve, symbol = sleeves[s], intent["symbol"]
         book = sleeve["positions"].setdefault(symbol, {"qty": 0, "cost_basis": 0.0})
-        if intent["side"] == "BUY":
-            book["qty"] += q
-            book["cost_basis"] += q * price
-        elif q <= book["qty"]:
-            basis = book["cost_basis"] * q / book["qty"]
-            realized[s] += q * price - basis
-            book["qty"] -= q
-            book["cost_basis"] -= basis
-            if not book["qty"]:
-                sleeve["positions"].pop(symbol)
+        dq, held = (q if intent["side"] == "BUY" else -q), book["qty"]      # signed average cost; shorts negative
+        if held == 0 or (held > 0) == (dq > 0):
+            if dq < 0 and s not in SHORTABLE:
+                incomplete.add(s)
+                continue
+            book["qty"], book["cost_basis"] = held + dq, book["cost_basis"] + dq * price
         else:
-            incomplete.add(s)
-            continue
+            closed = min(abs(dq), abs(held))
+            avg = book["cost_basis"] / held
+            realized[s] += closed * (price - avg) * (1 if held > 0 else -1)
+            book["qty"] = held + (closed if dq > 0 else -closed)
+            book["cost_basis"] = avg * book["qty"]
+            rest = abs(dq) - closed
+            if rest:
+                if dq < 0 and s not in SHORTABLE:
+                    incomplete.add(s)
+                    continue
+                book["qty"] = rest if dq > 0 else -rest
+                book["cost_basis"] = book["qty"] * price
+        if not book["qty"]:
+            sleeve["positions"].pop(symbol)
         sleeve["fill_count"] += 1
         sleeve["receipts"].append({"audit_id": audit_id, "intent_id": intent_id, "symbol": symbol,
             "side": intent["side"], "filled": q, "avg_price": price, "notional": q * price,

@@ -706,7 +706,7 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   assert.equal(pnl(get('sleeves').children[1]),'$21.17');
   assert.match(text('sleeves'),/Strategy P&L · before fees/);
   assert.match(text('sleeves'),/Fees not attributed/);
-  assert.match(text('attribution-note'),/not split 80\/20/);
+  assert.match(text('attribution-note'),/not split by the allocation weights/);
   live.live.nav_estimate=110000;
   live.performance.sleeves.b3={...live.performance.sleeves.b3,initial_capital:80000,capital:80000,limits:{allocation_budget:80000,target_before_cap:80000,per_etf_budget:null,aggregate_limit:null}};
   live.performance.sleeves.h_etf={...live.performance.sleeves.h_etf,initial_capital:20000,capital:20021.17,limits:{allocation_budget:20021.17,target_before_cap:null,per_etf_budget:2002.117,aggregate_limit:6006.351}};

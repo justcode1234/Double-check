@@ -1,4 +1,6 @@
-# Two-strategy competition portfolio: B3 (SPY Noise-Area, hourly, long-only) 80% + H (ETF RSI-2 reversal panel) 20%.
+# Five-strategy competition portfolio (user decision 2026-11-21), $20,000 each of the starting NAV:
+#   B3 (SPY Noise-Area, hourly, long-only), H (ETF RSI-2 reversal panel), Noise-area momentum (noise),
+#   VWAP trend continuation (vwap) and ORB breakout/breakdown (orb). Spec: QODER_FIVE_STRATEGIES.md (commit eca98ae).
 # Parameters are the frozen research settings (Codex A-J freeze, verified by Claude's independent replay).
 # Every number below is applied by deterministic Python (src/dual_strategy/competition); agents never size or override.
 
@@ -10,22 +12,72 @@ calendar: XNYS
 # PLAN writes order intents only. Orders are posted ONLY when all three hold:
 #   execution_enabled: true here, a private account file (below) confirming the competition account,
 #   and `scripts/run_competition.py --execute`. Changing this is the user's decision, not an agent's.
-execution_enabled: false
+execution_enabled: true
 account_file: private/competition/account.json      # gitignored; see QODER_COMPETITION.md for the format
 state_dir: private/competition                      # persistent NAV/high-water/halt state + outbox (gitignored)
 
 # --- capital split of the competition account NAV (re-evaluated at every decision) ----------------------------------
-allocation:
-  b3: 0.80
+allocation:                      # of the starting NAV; each sleeve's capital then moves only with its own P&L
+  b3: 0.20
   h_etf: 0.20
+  noise: 0.20
+  vwap: 0.20
+  orb: 0.20
+
+# --- Noise-area momentum (reports/claude_regime/rstrats.py s10_noise; settings picked on 2021-24) -------------------
+noise:
+  symbol: US.SPY
+  decision_times: ["10:30", "11:30", "13:30", "14:30"]   # completed 5-minute bar ending here ("report" times)
+  lookback_sessions: 14
+  band_width: 1.0
+  position_fraction_of_sleeve: 1.0   # 100% of the $20,000 sleeve per entry (the reference's 40% of $100k, halved)
+  flatten_minutes_before_close: 5    # 15:55 ET (12:55 on 13:00 half-days)
+  shorts: true
+  no_entries_before: {"2026-11-25": "10:30"}   # PCE/GDP before the open (user decision 2026-11-21)
+  no_entries_after: {"2026-11-27": "12:00"}    # 13:00 half-day
+
+# --- VWAP trend continuation (rstrats.py s2_vwap) -------------------------------------------------------------------
+vwap:
+  symbols: [US.SPY, US.QQQ]
+  first_setup_slot: 7            # slot 0 = 09:30-09:35; slot 7 ends 10:10. Setups through the slot ending 15:35
+  pullback_atr: 0.10
+  stop_atr: 0.25
+  target_r: 3.0
+  need_struct: true
+  flatten_slots_before_close: 3  # 15:45 ET (12:45 on 13:00 half-days)
+  max_trades_per_symbol: 3
+  max_open: 2
+  risk_fraction_of_nav: 0.0015
+  volume_fraction: 0.01          # at most 1% of the setup bar's volume (research capacity rule)
+  shorts: true
+  no_entries_before: {"2026-11-25": "10:30"}
+  no_entries_after: {"2026-11-27": "12:00"}
+
+# --- ORB breakout/breakdown, ETFs only (rstrats.py s1_orb, universe etf) --------------------------------------------
+orb:
+  symbols: [US.SPY, US.QQQ, US.IWM]
+  range_minutes: 15              # opening range = first three 5-minute bars
+  max_range_atr: 1.25            # skip the symbol if the range is wider than 1.25 x ATR14
+  rvol: 2.0                      # skip unless first-15-minute volume >= 2.0 x the prior-20-session average
+  dir: both
+  stop_atr: 0.35                 # stop distance = min(entry - breakout bar low, 0.35 x ATR14)
+  target_r: 2.0                  # half out at 2R, rest: breakeven stop + 5-minute trail
+  max_open: 3
+  risk_fraction_of_nav: 0.0015
+  max_notional: 10000            # the reference's 10% of $100k per trade
+  volume_fraction: 0.01
+  flatten_slots_before_close: 1  # 15:55 ET (12:55 on half-days)
+  shorts: true
+  no_entries_before: {"2026-11-25": "10:30"}
+  no_entries_after: {"2026-11-27": "12:00"}
 
 b3:
   symbol: US.SPY
   lookback_sessions: 14          # prior sessions with a bar at the same clock time (half-days are skipped)
   band_width: 1.0
   decision_times: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00"]   # completed 5-minute bar ending here
-  position_fraction_of_sleeve: 1.0    # user decision 2026-11-20: B3 long = 100% of its sleeve = 80% of account NAV,
-                                      # but never above risk.name_cap_usd for SPY across both sleeves (see below)
+  position_fraction_of_sleeve: 1.0    # B3 long = 100% of its sleeve = $20,000 of SPY (five sleeves, 2026-11-21),
+                                      # never above the remaining risk.name_cap_usd for SPY across all sleeves
   flatten_minutes_before_close: 5     # 15:55 ET; 12:55 ET on 13:00 half-days
 
 h_etf:
@@ -40,13 +92,16 @@ h_etf:
   per_name_fraction_of_sleeve: 0.10
   aggregate_fraction_of_sleeve: 0.30
 
-risk:                            # account level (both sleeves)
+risk:                            # account level (all five sleeves)
   halt_drawdown_fraction: 0.035  # NAV <= 96.5% of high-water: flatten everything, block entries until a human clears
   daily_loss_fraction: 0.0125    # NAV <= 98.75% of day-start NAV: flatten everything, no entries for the rest of the day
   reduce_drawdown_fraction: 0.02 # NAV <= 98% of high-water: new positions at half size (until back above 98.5%)
-  name_cap_usd: 40000            # handbook purchase cap per stock/ETF
+  name_cap_usd: 40000            # handbook cap per stock/ETF: the SUM over all sleeves, longs and shorts by absolute value
   max_orders_per_day: 200
   limit_offset_bps: 5            # marketable LIMIT: buy at quote x (1 + 5 bp), sell at quote x (1 - 5 bp)
   order_wait_seconds: 30         # cancel and reconcile anything not filled by then
   max_quote_age_seconds: 15
-  long_only: true
+  long_only: false               # shorts verified allowed on the competition account (read-only max_sell_short, 2026-11-21)
+  short_sleeves: [noise, vwap, orb]   # the ONLY sleeves that may open shorts; shorts never carried overnight
+  nav_check_fraction: 0.01       # runner NAV vs broker total_asset: a larger gap blocks entries and never halts
+  monitor_seconds: 10            # VWAP/ORB stop, target and trigger polling

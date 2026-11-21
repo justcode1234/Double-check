@@ -94,81 +94,118 @@
     alert.hidden = !messages.length;
   }
 
+  const SLEEVE_SPECS = [
+    { id: "b3", letter: "B3", title: "SPY Noise-Area", css: "strategy-a", description: "Hourly momentum · long-only · intraday" },
+    { id: "h_etf", letter: "H", title: "ETF RSI-2 panel", css: "strategy-b", description: "Next-open mean reversion · holds up to 3 sessions" },
+    { id: "noise", letter: "NA", title: "Noise-area momentum", css: "strategy-c", description: "SPY · 10:30/11:30/13:30/14:30 · long, short or flat · flat 15:55" },
+    { id: "vwap", letter: "VW", title: "VWAP trend continuation", css: "strategy-d", description: "SPY/QQQ · 5-minute pullback triggers · long & short · flat 15:45" },
+    { id: "orb", letter: "OR", title: "ORB breakout/breakdown", css: "strategy-e", description: "SPY/QQQ/IWM · 15-minute range · half at 2R, trail the rest · flat 15:55" }];
+  const LETTER = Object.fromEntries(SLEEVE_SPECS.map(s => [s.id, s.letter]));
+  const shares = (q) => `${q < 0 ? "SHORT " : ""}${Math.abs(q)} sh`;
+
   function renderSleeves(data) {
     const host = byId("sleeves"), state = data.live;
     host.replaceChildren();
-    const specs = [{ id: "b3", letter: "B3", title: "SPY Noise-Area", css: "strategy-a", description: "Hourly momentum · long-only · intraday" },
-      { id: "h_etf", letter: "H", title: "ETF RSI-2 panel", css: "strategy-b", description: "Next-open mean reversion · holds up to 3 sessions" }];
-    for (const s of specs) {
-      const alloc = data.config.allocation[s.id];
+    const day = state?.intraday && state.intraday.session === data.outbox_session ? state.intraday : null;
+    for (const s of SLEEVE_SPECS) {
       const performance = data.performance.sleeves[s.id];
+      if (!performance) continue;
       const budget = performance.limits?.allocation_budget;
-      const held = state?.sleeves?.[s.id];
+      const held = state?.sleeves?.[s.id] || (state ? {} : null);
       const quotes = data.account_snapshot?.quotes || {};
-      const names = Object.keys(held || {});
-      const exposure = held && names.every(sym => finite(quotes[sym])) ? names.reduce((sum, sym) => sum + held[sym] * quotes[sym], 0) : null;
+      const names = Object.keys(held || {}).filter(sym => held[sym]);
+      const exposure = held && names.every(sym => finite(quotes[sym])) ? names.reduce((sum, sym) => sum + Math.abs(held[sym]) * quotes[sym], 0) : null;
       const card = el("article", `portfolio-card ${s.css}`), head = el("div", "portfolio-header"), title = el("div", "portfolio-title"), text = el("div");
       text.append(el("h3", "", s.title), el("p", "strategy-description", s.description));
       title.append(el("span", "strategy-letter", s.letter), text);
-      head.append(title, el("span", "badge neutral", `${share(alloc)} initial split`));
+      head.append(title, el("span", "badge neutral", `${money(performance.initial_capital)} allocation`));
       card.append(head, el("p", "nav-label", "Strategy P&L · before fees"), el("div", "nav-value", money(performance.gross_pnl)),
-        el("p", "sleeve-weight", performance.status === "available" ? `${performance.fill_count} confirmed fill outcomes since start · only this strategy's trades. ${performance.fill_count ? `Marked ${et(data.performance.asof, true)} ET.` : "No trading profit or loss recorded."}` : "P&L unavailable: receipt history, ownership or price evidence is incomplete."));
+        el("p", "sleeve-weight", performance.status === "available" ? `${performance.fill_count} confirmed fill outcomes · only this strategy's trades.` : "P&L unavailable: receipt history, ownership or price evidence is incomplete."));
       const profit = el("dl", "metrics");
-      metric(profit, "Realized · gross", money(performance.realized_gross), "Closed shares; average-cost basis");
-      metric(profit, "Unrealized · gross", money(performance.unrealized_gross), "Open shares at archived quotes");
+      metric(profit, "Current capital", money(performance.capital), "Allocation + own gross P&L");
+      metric(profit, "Realized · gross", money(performance.realized_gross), "Closed shares; average cost");
+      metric(profit, "Unrealized · gross", money(performance.unrealized_gross), "Open longs and shorts at archived quotes");
       metric(profit, "Net after fees", money(performance.net_pnl), performance.fees === null ? "Fees not attributed; net P&L unknown" : "No fills, no trading fees");
-      card.append(profit, el("h4", "context-label", "Capital limits · not performance"));
+      card.append(profit);
       if (budget > 0 && finite(exposure)) {
         const meter = el("progress", "allocation-meter"); meter.max = budget; meter.value = Math.min(exposure, budget);
-        meter.setAttribute("aria-label", `${s.letter} marked holdings ${money(exposure)} of ${money(budget)} allocation`);
+        meter.setAttribute("aria-label", `${s.letter} gross holdings ${money(exposure)} of ${money(budget)} capital`);
         card.append(meter);
       }
-      const limits = el("dl", "metrics capital-metrics");
+      card.append(el("h4", "context-label", "Capital limits · not performance"));
+      const limits = el("dl", "metrics capital-metrics"), lim = performance.limits || {}, half = state?.reduced ? " · half sizing" : "";
       metric(limits, "Allocation budget", money(budget), finite(budget) ? `${money(performance.initial_capital)} initial capital + own gross P&L; unattributed fees excluded` : "Capital unverified; new entries blocked");
-      metric(limits, "Marked holdings", money(exposure), names.length ? `Quotes at ${et(data.account_snapshot?.at)} ET` : held ? "No sleeve-owned shares recorded" : "Holdings not verified");
-      if (s.id === "b3") {
-        metric(limits, "Per-symbol cap", money(data.config.risk.name_cap_usd), "SPY total across B3 + H");
-        metric(limits, "Target before cap", money(performance.limits?.target_before_cap), "Only when entry conditions pass");
-      } else {
-        metric(limits, "Per ETF budget", money(performance.limits?.per_etf_budget), `${share(data.config.h_etf.per_name_fraction_of_sleeve)} of H capital${state?.reduced ? " · half sizing" : ""}`);
-        metric(limits, "Aggregate limit", money(performance.limits?.aggregate_limit), `${share(data.config.h_etf.aggregate_fraction_of_sleeve)} of H capital`);
+      metric(limits, "Marked holdings · gross", money(exposure), names.length ? `Quotes at ${et(data.account_snapshot?.at)} ET` : held ? "No sleeve-owned shares recorded" : "Holdings not verified");
+      if (s.id === "b3") metric(limits, "Target before cap", money(lim.target_before_cap), `SPY cap ${money(data.config.risk.name_cap_usd)} counts every sleeve`);
+      if (s.id === "h_etf") {
+        metric(limits, "Per ETF budget", money(lim.per_etf_budget), `${share(data.config.h_etf.per_name_fraction_of_sleeve)} of H capital${half}`);
+        metric(limits, "Aggregate limit", money(lim.aggregate_limit), `${share(data.config.h_etf.aggregate_fraction_of_sleeve)} of H capital`);
       }
+      if (s.id === "noise") metric(limits, "Target before cap", money(lim.target_before_cap), `${share(data.config.noise.position_fraction_of_sleeve)} of Noise-area capital per entry${half}`);
+      if (s.id === "vwap" || s.id === "orb") metric(limits, "Per-trade notional", money(lim.per_trade_notional), `Risk ${share(data.config[s.id].risk_fraction_of_nav)} of NAV per trade${half}`);
       card.append(limits);
-      const positions = el("div", "metric-group"); positions.append(el("h4", "", "Recorded sleeve ownership"));
-      positions.append(el("p", "strategy-description", held ? names.length ? names.map(sym => `${sym.replace("US.", "")} · ${held[sym]} shares${state.h_entry_session?.[sym] ? ` · since ${state.h_entry_session[sym]}` : ""}`).join(" / ") : "Flat · no recorded holdings" : "Unknown · no live ownership state"));
+      const positions = el("div", "metric-group"); positions.append(el("h4", "", "Holdings · longs and shorts"));
+      positions.append(el("p", "strategy-description", held ? names.length ? names.map(sym => `${sym.replace("US.", "")} · ${shares(held[sym])}${state.h_entry_session?.[sym] && s.id === "h_etf" ? ` · since ${state.h_entry_session[sym]}` : ""}`).join(" / ") : "Flat · no recorded holdings" : "Unknown · no live ownership state"));
       card.append(positions);
+      const open = Object.entries(day?.positions || {}).filter(([k]) => k.startsWith(`${s.id}|`));
+      const armed = s.id === "vwap" ? Object.entries(day?.armed || {}) : [];
+      if (open.length || armed.length) {
+        const g = el("div", "metric-group"), list = el("ul", "plan-list"); g.append(el("h4", "", "Open stops, targets and trails"));
+        for (const [k, p] of open) list.append(el("li", "", `${k.split("|")[1].replace("US.", "")} ${p.side > 0 ? "long" : "short"} · ${p.half_done ? `half taken · breakeven stop ${money(p.stop)} · 5-minute trail` : `stop ${money(p.stop)} · target ${money(p.target)}`}`));
+        for (const [sym, a] of armed) list.append(el("li", "", `${sym.replace("US.", "")} ${a.side > 0 ? "buy" : "sell short"} trigger ${money(a.trigger)} until ${et(a.valid_until)} ET · stop ${money(a.stop)}`));
+        g.append(list); card.append(g);
+      }
       const signal = el("div", "metric-group");
       if (s.id === "h_etf") {
         const plan = state?.h_plan;
         signal.append(el("h4", "", plan ? `Signal plan · close ${plan.asof}` : "Next-open signal plan"));
-        if (!plan) signal.append(el("p", "footnote", "No live H plan recorded. No entries assumed."));
-        else if (plan.blocked) signal.append(el("p", "negative", "Plan blocked; inspect the private runner log."));
+        if (!plan) signal.append(el("p", "footnote", "No live plan recorded. No entries assumed."));
+        else if (plan.blocked) signal.append(el("p", "negative", `Plan blocked: ${plan.blocked}`));
         else {
           const list = el("ul", "plan-list");
           for (const [symbol, why] of Object.entries(plan.exits || {})) list.append(el("li", "", `SELL ${symbol.replace("US.", "")} · ${human(why)}`));
-          for (const symbol of plan.entries || []) {
-            const rsi = plan.metrics?.[symbol]?.rsi2;
-            list.append(el("li", "", `BUY ${symbol.replace("US.", "")}${finite(rsi) ? ` · RSI-2 ${rsi.toFixed(2)}` : ""}`));
-          }
+          for (const symbol of plan.entries || []) list.append(el("li", "", `BUY ${symbol.replace("US.", "")}${finite(plan.metrics?.[symbol]?.rsi2) ? ` · RSI-2 ${plan.metrics[symbol].rsi2.toFixed(2)}` : ""}`));
           if (!list.children.length) list.append(el("li", "", "No planned entries or exits"));
-          signal.append(list, el("p", "footnote", "Signals are not orders. The runner checks current risk, cash, quotes and caps before submitting."));
+          signal.append(list, el("p", "footnote", "Signals are not orders. The runner checks risk, cash, quotes and caps first."));
         }
-      } else {
+      }
+      if (s.id === "b3") {
         const d = data.b3_decision;
         signal.append(el("h4", "", d ? `Latest decision · ${et(d.at)} ET` : "Latest B3 decision"));
-        if (!d) signal.append(el("p", "strategy-description", "No B3 decision recorded today. First scheduled check is 10:00 ET."));
-        else {
-          signal.append(el("p", "strategy-description", `${d.target === 1 ? "LONG signal" : d.target === 0 ? "FLAT signal" : "BLOCKED"} · ${human(d.reason)}`));
+        signal.append(el("p", "strategy-description", !d ? "No B3 decision recorded today. First scheduled check is 10:00 ET." :
+          `${d.target === 1 ? "LONG signal" : d.target === 0 ? "FLAT signal" : "BLOCKED"} · ${human(d.reason)}`));
+        if (d) {
           const metrics = el("dl", "metrics");
           for (const [key, label] of [["close", "Bar close"], ["upper", "Upper noise band"], ["vwap", "Cumulative VWAP"]]) metric(metrics, label, money(d.metrics?.[key]));
           signal.append(metrics, el("p", "footnote", `Sizing decision: ${human(d.plan_reason)}. Full-precision inputs retained in private audit snapshots.`));
         }
+      } else {
+        const decisions = (day?.decisions || []).filter(x => x.sleeve === s.id).slice(-4).reverse();
+        if (decisions.length) {
+          const list = el("ul", "plan-list");
+          for (const x of decisions) list.append(el("li", "", `${et(x.at)} ET · ${(x.symbol || "").replace(/US\./g, "")} · ${human(x.action)}${x.why ? ` · ${human(x.why)}` : x.reason ? ` · ${human(x.reason)}` : ""}`));
+          signal.append(el("h4", "", "Today's decisions"), list);
+        } else if (s.id !== "h_etf") signal.append(el("h4", "", "Today's decisions"), el("p", "footnote", "No decision recorded today."));
       }
       card.append(signal);
       host.append(card);
     }
     const p = data.performance;
-    set("attribution-note", `Since-start P&L follows each strategy's own confirmed fills and marked holdings; it is not split 80/20. Account change: ${money(p.account_pnl)}. Unallocated account adjustment: ${money(p.unallocated_account_change)} (fees or other cash flows, not assigned to either strategy). Per-fill evidence is included in the status JSON.`);
+    set("attribution-note", `Each strategy's P&L follows only its own confirmed fills and marked holdings, shorts included; it is not split by the allocation weights. Account change: ${money(p.account_pnl)}. Unallocated account adjustment: ${money(p.unallocated_account_change)} (fees or other cash flows, not assigned to any strategy).`);
+  }
+
+  function renderResearch(data) {
+    const body = byId("regime-body"); if (!body) return;
+    body.replaceChildren();
+    const rows = data.regime_research || [];
+    if (!rows.length) { emptyRow(body, 6, "No regime research summary available."); return; }
+    for (const r of rows) {
+      const tr = el("tr");
+      tr.append(el("td", "", r.strategy), el("td", "", `${money(r.train_2021_24_week)}/wk`),
+        el("td", "", `${money(r.test_2025_26_week)}/wk`), el("td", "", `${money(r.vix30_week)}/wk`), el("td", "", money(r.last_week)),
+        el("td", "", finite(r.trades_per_week) ? r.trades_per_week.toFixed(2) : "—"));
+      body.append(tr);
+    }
   }
 
   function matches(row) {
@@ -191,7 +228,7 @@
       const tr = el("tr");
       const status = order.status || "UNCONFIRMED";
       const cls = status === "FILLED" ? "filled" : ["ERROR", "REJECTED", "REFUSED"].includes(status) ? "failed" : "planned";
-      const symbol = el("td", "", `${order.sleeve === "h_etf" ? "H" : "B3"} · ${String(order.symbol || "—").replace("US.", "")}`);
+      const symbol = el("td", "", `${LETTER[order.sleeve] || "?"} · ${String(order.symbol || "—").replace("US.", "")}`);
       const intent = el("td", "", `${order.side || "—"} ${order.qty ?? "—"} shares`); intent.append(el("small", "", `Limit ${money(order.limit_price)}`));
       const fill = el("td", "", finite(order.filled) ? `${order.filled} / ${order.qty ?? "—"}` : "Not confirmed");
       fill.append(el("small", "", order.filled > 0 && finite(order.avg_price) ? `@ ${order.avg_price.toFixed(4)}` : "No confirmed fill price"));
@@ -270,8 +307,9 @@
 
   function renderRules(data) {
     const c = data.config, r = c.risk;
-    const rules = [`Starting capital is split once: B3 ${share(c.allocation.b3)} / H ${share(c.allocation.h_etf)}. Each budget then changes only with its own confirmed gross P&L. Unattributed fees and cash adjustments are not shared between strategies.`,
-      `B3 targets ${share(c.b3.position_fraction_of_sleeve)} of its allocation, capped at ${money(r.name_cap_usd)} of SPY across both strategies.`,
+    const rules = [`Starting capital is split once into five sleeves: ${SLEEVE_SPECS.map(s => `${s.letter} ${share(c.allocation[s.id])}`).join(" / ")}. Each budget then changes only with its own confirmed gross P&L. Unattributed fees and cash adjustments are not shared between strategies.`,
+      `B3 targets ${share(c.b3.position_fraction_of_sleeve)} of its allocation. The ${money(r.name_cap_usd)} per-symbol cap counts every sleeve, longs and shorts by absolute value.`,
+      `Noise-area trades ${share(c.noise.position_fraction_of_sleeve)} of its capital in SPY on a target change. VWAP risks ${share(c.vwap.risk_fraction_of_nav)} of NAV per trade (target ${c.vwap.target_r}R); ORB risks ${share(c.orb.risk_fraction_of_nav)}, at most ${money(c.orb.max_notional)} per trade. Only these three may short; shorts reserve their full notional and are never held overnight.`,
       `H uses ${share(c.h_etf.per_name_fraction_of_sleeve)} of its allocation per ETF, ${share(c.h_etf.aggregate_fraction_of_sleeve)} aggregate. Unused money stays in shared cash.`,
       `A ${share(r.halt_drawdown_fraction)} high-water drawdown triggers exits and a persistent halt. A ${share(r.daily_loss_fraction)} day-start loss locks the day.`,
       `An order-error halt blocks entries without itself forcing liquidation. After 3 order errors in a day no further orders can be sent. Only the user can authorize clearing a halt.`,
@@ -298,7 +336,7 @@
       if (latest && Date.parse(data.generated_at) < Date.parse(latest.generated_at)) throw new Error("Out-of-order dashboard response");
       const snapshotAge = Date.now() - Date.parse(data.generated_at);
       if (snapshotAge > 15000 || snapshotAge < -5000) throw new Error("Dashboard snapshot is stale or its clock is mismatched");
-      renderStatus(data); renderAttention(data); renderSleeves(data); renderAudit(data); renderCharts(data); renderResearch(data); renderRules(data);
+      renderStatus(data); renderAttention(data); renderSleeves(data); renderResearch(data); renderAudit(data); renderCharts(data); renderResearch(data); renderRules(data);
       latest = data; lastSuccess = Date.now();
       byId("data-alert").hidden = true;
       byId("live-data").classList.remove("is-stale");

@@ -667,9 +667,9 @@ def test_competition_profit_belongs_to_h_not_shared_nav_allocation(competition_r
     assert h['realized_gross'] == 0
     assert h['unrealized_gross'] == pytest.approx(21.17)
     assert h['gross_pnl'] == pytest.approx(21.17)
-    assert p['sleeves']['b3']['initial_capital'] == 80000
-    assert p['sleeves']['b3']['capital'] == 80000
-    assert p['sleeves']['b3']['limits']['target_before_cap'] == 80000
+    assert p['sleeves']['b3']['initial_capital'] == 20000          # five sleeves at $20,000 (2026-11-21)
+    assert p['sleeves']['b3']['capital'] == 20000
+    assert p['sleeves']['b3']['limits']['target_before_cap'] == 20000
     assert h['initial_capital'] == 20000
     assert h['capital'] == pytest.approx(20021.17)
     assert h['limits']['per_etf_budget'] == pytest.approx(2002.117)
@@ -700,7 +700,7 @@ def test_competition_same_symbol_sleeves_and_realized_profit_stay_separate(compe
     assert b['positions']['US.SPY']['cost_basis'] == pytest.approx(1725)
     assert h['gross_pnl'] == pytest.approx(50)
     assert h['positions']['US.SPY']['cost_basis'] == 200
-    assert b['capital'] == 80225 and b['limits']['target_before_cap'] == 80225
+    assert b['capital'] == 20225 and b['limits']['target_before_cap'] == 20225
     assert h['capital'] == 20050 and h['limits']['aggregate_limit'] == 6015
 
 
@@ -747,7 +747,9 @@ def test_competition_ambiguous_broker_receipts_cannot_certify_profit(competition
         books = {'b3': {'US.SPY': 1}, 'h_etf': {'US.XLV': 11}}
     _mark_sleeves(store, books, {'US.XLV': 105, 'US.SPY': 105})
     p = report.competition_payload(tmp_path, datetime(2026, 11, 23, 15, tzinfo=timezone.utc))['performance']
-    assert all(s['status'] == 'incomplete' and s['gross_pnl'] is None for s in p['sleeves'].values())
+    involved = p['sleeves'] if problem == 'orphan_ack' else {k: p['sleeves'][k] for k in ('b3', 'h_etf')}
+    assert all(s['status'] == 'incomplete' and s['gross_pnl'] is None for s in involved.values())
+    assert all(s['gross_pnl'] == 0 for k, s in p['sleeves'].items() if k not in involved)   # no receipts: certain $0
     assert p['unallocated_account_change'] is None
 
 
@@ -780,7 +782,7 @@ def test_competition_closed_trade_keeps_profit_and_plan_never_contributes(compet
     assert p['sleeves']['b3']['gross_pnl'] == 15
     assert p['sleeves']['b3']['unrealized_gross'] == 0
     assert p['sleeves']['h_etf']['gross_pnl'] == 0
-    assert p['sleeves']['b3']['capital'] == 80015
+    assert p['sleeves']['b3']['capital'] == 20015
     assert p['sleeves']['h_etf']['capital'] == 20000
     assert p['sleeves']['h_etf']['limits']['aggregate_limit'] == 6000
     assert p['account_pnl'] == pytest.approx(13.02)

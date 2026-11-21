@@ -82,8 +82,8 @@ def local_preflight(root, session):
         raise Blocked('persisted_capital_invalid')
     if state['halted'] is not None or state['locked_day'] == session or state.get('order_errors_today', 0):
         raise Blocked('persistent_safety_block')
-    if state['sleeves']['b3']:
-        raise Blocked('prior_b3_position_not_flat')
+    if any(state['sleeves'].get(s) for s in ('b3', 'noise', 'vwap', 'orb')):
+        raise Blocked('prior_intraday_position_not_flat')     # B3, Noise-area, VWAP and ORB never hold overnight
     if (state['day'] >= session
             or datetime.fromisoformat(state['last_mark_at']).astimezone(NY).date().isoformat() >= session
             or (live / 'outbox' / f'{session}.jsonl').exists()):

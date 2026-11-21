@@ -18,7 +18,29 @@ from dual_strategy.data.calendar import NY, session_bounds
 from dual_strategy.reporting.service import redacted
 
 SAFE_KEYS = ("initial_nav", "high_water", "last_nav", "last_mark_at", "day", "day_start_nav", "halted", "locked_day",
-             "reduced", "orders_today", "order_errors_today", "sleeves", "h_entry_session", "h_plan", "h_plan_audit_id")
+             "reduced", "orders_today", "order_errors_today", "sleeves", "h_entry_session", "h_plan", "h_plan_audit_id",
+             "intraday", "nav_mismatch")
+REGIME_ROWS = {"10 Noise-area momentum": "noise", "2 VWAP trend continuation": "vwap", "1 ORB breakout/breakdown": "orb"}
+
+
+def _regime_research(project: Path) -> list[dict]:
+    """summary.csv rows for Noise-area, VWAP and ORB: hypothetical fills, $100,000 book, weekly P&L (named, not numbered)."""
+    import csv
+    path = project / "reports" / "claude_regime" / "results" / "summary.csv"
+    if not path.exists():
+        return []
+    out = []
+    with path.open(encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            if row["strategy"] in REGIME_ROWS:
+                f = lambda k: float(row[k]) if row.get(k) not in (None, "") else None
+                out.append({"sleeve": REGIME_ROWS[row["strategy"]], "strategy": row["strategy"].split(" ", 1)[1],
+                            "settings": row["picked_params"],
+                            "train_2021_24_week": f("picked_train_week"), "test_2025_26_week": f("picked_test_week"),
+                            "test_winning_weeks_pct": f("picked_test_pos_weeks_pct"), "test_worst_week": f("picked_test_worst_week"),
+                            "vix30_week": f("picked_vix30_week"), "last_week": f("picked_last_week"),
+                            "trades_per_week": f("picked_trades_per_week")})
+    return out
 
 
 def _summary(state: dict | None, cfg: dict, now: datetime) -> dict | None:
@@ -273,13 +295,15 @@ def competition_payload(project: Path, now: datetime | None = None) -> dict:
     runtime = _runtime(project, states["live"], cfg, now)
     return _clean({
         "generated_at": now.isoformat(),
-        "config": {k: cfg[k] for k in ("allocation", "b3", "h_etf", "risk", "execution_enabled")},
+        "config": {k: cfg[k] for k in ("allocation", "b3", "h_etf", "noise", "vwap", "orb", "risk", "execution_enabled")},
         "live": _summary(states["live"], cfg, now), "plan": _summary(states["plan"], cfg, now),
         "runtime": runtime, "access": _access_health(stores["live"], states["live"], now),
         "startup": _startup_health(project, runtime["process"], now),
         "outbox_source": "LIVE runner" if source == "live" else "PLAN runner (nothing sent)",
         "outbox_session": session, "outbox": rows[-200:], "orders": orders, "order_counts": counts,
         "step_errors": dict(Counter(r.get("step", "unknown") for r in rows if r.get("event") == "runner_error")),
+        "step_skips": dict(Counter(r.get("step", "unknown") for r in rows if r.get("event") == "step_skipped")),
+        "regime_research": _regime_research(project),
         "performance": sleeve_performance(stores["live"], states["live"], observations["account_snapshot"], cfg),
         **observations, "preview": preview,
     })

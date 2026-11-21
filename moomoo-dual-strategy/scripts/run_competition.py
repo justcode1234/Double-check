@@ -1,4 +1,4 @@
-"""Competition runner: B3 (SPY Noise-Area, 80%) + H (ETF RSI-2 panel, 20%) with a 3.5% account drawdown halt.
+"""Competition runner: five sleeves at $20,000 each (B3, H, Noise-area, VWAP, ORB) with a 3.5% account halt.
 
 The TOOL decides, sizes, gates and (only with --execute) sends orders; an agent may launch, monitor or stop it but
 never places or edits orders by hand. Default is PLAN: intents are written to private/competition/plan/outbox and
@@ -8,8 +8,12 @@ nothing is sent. Commands (America/New_York times):
   plan-h [--asof DATE]        H plan from DATE's completed close (default: last completed session) for the next open
   h-open                      next-open H exits/entries from the stored plan            (run 09:30:10 ET)
   b3 [--at HH:MM]             B3 decision at a completed 5-minute bar (default: latest decision tick today)
-  flatten [--sleeve b3|h_etf|all] [--reason TEXT]   close-only sells of what the sleeve owns
-  loop                        all of the above on the XNYS clock until the session ends
+  flatten [--sleeve b3|h_etf|noise|vwap|orb|all] [--reason TEXT]   close-only exits (short covers first)
+  noise --at HH:MM            Noise-area decision at a completed bar (10:30, 11:30, 13:30, 14:30)
+  replay-intraday --day DATE  PLAN-only: Noise-area/VWAP/ORB research replay of a completed session (hypothetical P&L)
+  loop                        all of the above on the XNYS clock until the session ends: every completed 5-minute slot
+                              ORB then VWAP; Noise-area at its four times; ~10 s stop/target/trigger monitor; 15:45 VWAP
+                              flatten; 15:55 ORB/Noise-area/B3 flatten; ~16:15 H plan
 
 Add --execute to send orders. That also requires execution_enabled: true in config/competition.yaml and the private
 competition account file; otherwise the runner refuses before contacting any account.
@@ -20,6 +24,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import sys
 import time
 from copy import deepcopy
@@ -34,6 +39,7 @@ sys.path.insert(0, str(PROJECT / "src"))
 from dual_strategy.competition import planner  # noqa: E402
 from dual_strategy.competition.market import Market, MarketDataError  # noqa: E402
 from dual_strategy.competition.signals import b3_decision, b3_decision_times, h_plan  # noqa: E402
+from dual_strategy.competition import intraday as I  # noqa: E402
 from dual_strategy.competition.store import Store, load_config, sleeve_performance  # noqa: E402
 from dual_strategy.data.calendar import NY, session_bounds  # noqa: E402
 from dual_strategy.execution.moomoo_paper import ExecutionBlocked
@@ -89,11 +95,15 @@ class Runner:
 
     def account(self, extra: list[str] = ()) -> planner.Account:
         if self.broker:
-            acct = self.broker.account(self.quote)
+            expected = {}
+            for book in self.state["sleeves"].values():
+                for s, q in book.items():
+                    expected[s] = expected.get(s, 0) + q
+            acct = self.broker.account(self.quote, expected)
         else:                                            # PLAN: a virtual account holding exactly the sleeves' shares
             held = {}
             for sleeve in planner.SLEEVES:
-                for s, q in self.state["sleeves"][sleeve].items():
+                for s, q in self.state["sleeves"].get(sleeve, {}).items():
                     held[s] = held.get(s, 0) + q
             quotes, ages = {}, {}
             for s in held:
@@ -137,12 +147,14 @@ class Runner:
 
     def send(self, intents, session, audit_id=None):
         audit_id = audit_id or self.audit(session, "orders", state=self.state, intents=[i.to_dict() for i in intents])
+        results = []
         for i in intents:
             link = {"intent_id": i.intent_id, "audit_id": audit_id}
             self.store.append(session, {"event": "intent", **i.to_dict(), "audit_id": audit_id,
                                         "mode": "EXECUTE" if self.broker else "PLAN"})
             if not self.broker:
                 log(intent=i.to_dict(), sent=False)
+                results.append((i, None))
                 continue
             placed = datetime.now(timezone.utc)
             oid = None
@@ -168,7 +180,9 @@ class Runner:
             planner.apply_fill(self.state, i, result["filled"], session)
             self.store.append(session, {"event": "outcome", **link, **result})
             log(intent=i.intent_id, outcome=result)
+            results.append((i, result))
         self.store.save(self.state)
+        return results
 
     # ------------------------------------------------------------------ risk
     def risk(self, symbols=()):
@@ -287,12 +301,379 @@ class Runner:
 
     def flatten(self, sleeve: str, reason: str):
         sleeves = planner.SLEEVES if sleeve == "all" else (sleeve,)
-        acct = self.account([s for sl in sleeves for s in self.state["sleeves"][sl]])
+        acct = self.account([s for sl in sleeves for s in self.state["sleeves"].get(sl, {})])
         session, now = self.session(), datetime.now(NY)
         intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now, sleeves)
         audit_id = self.audit(session, "flatten", state=self.state, account=asdict(acct), now=now,
                               sleeves=sleeves, reason=reason, intents=[i.to_dict() for i in intents])
         self.send(intents, session, audit_id)
+
+    # ------------------------------------------------------------------ Noise-area / VWAP / ORB
+    def _day(self, today: date):
+        bounds = session_bounds(today)
+        if not bounds:
+            return None
+        return bounds[0], bounds[1], I.expected_slots(*bounds)
+
+    def _intraday(self, session: str) -> dict:
+        """Per-session runner memory for the intraday sleeves (reset at each new session; never holds shares)."""
+        cur = self.state.get("intraday")
+        if not cur or cur.get("session") != session:
+            cur = {"session": session, "armed": {}, "positions": {}, "orb_done": [], "orb_base": {}, "vwap_trades": {},
+                   "noise_done": [], "decisions": [], "last_slot": None}
+            self.state["intraday"] = cur
+        return cur
+
+    def _decide(self, day: dict, sleeve: str, **row):
+        day["decisions"] = (day.get("decisions") or [])[-299:] + [{"at": datetime.now(NY).isoformat(), "sleeve": sleeve, **row}]
+
+    def _atr(self, symbol: str, today: date) -> float:
+        cache = self.__dict__.setdefault("_atr_cache", {})
+        if (symbol, today) not in cache:
+            d = self.market.daily(symbol, today - timedelta(days=45), today - timedelta(days=1), 0)
+            cache[(symbol, today)] = I.atr14(d, today)
+        return cache[(symbol, today)]
+
+    def _orb_base(self, symbol: str, today: date, k: int) -> list:
+        """First-range volume of the 20 prior sessions (None where a first-range bar is missing)."""
+        days = [s for s in sessions_until(today) if s < today][-20:]
+        out = {d: None for d in days}
+        for c in range(0, len(days), 4):                                  # CLI caps 370 bars: 4 sessions per call
+            chunk = days[c:c + 4]
+            rows = self.market.five_minute(symbol, chunk[0], chunk[-1])
+            for d in chunk:
+                opened = session_bounds(d)[0]
+                a = I.day_arrays([b for b in rows if b.end.date() == d], opened)
+                v = I.first_range_volume(a["volume"], k)
+                out[d] = v if math.isfinite(v) else None
+        return [out[d] for d in days]
+
+    def _arrays(self, symbol: str, today: date, opened: datetime, now: datetime):
+        bars = [b for b in self.market.five_minute_today(symbol, today) if b.end <= now]
+        a = I.day_arrays(bars, opened)
+        return a, I.cum_vwap(a["volume"], a["turnover"], a["close"]), bars
+
+    def bar_step(self, at: datetime | None = None):
+        """Every completed 5-minute slot: bar-based exits (stop / target / ORB half and trail), then ORB (from the bar
+        ending 09:50), then VWAP (from 10:10). The 10-second quote monitor normally acts first; these checks back it
+        up when a wick between polls touched a level, and the ORB trail is defined on completed bars."""
+        now = at or datetime.now(NY)
+        today = now.date()
+        ctx = self._day(today)
+        if not ctx:
+            return
+        opened, closed, n = ctx
+        k = I.last_completed_slot(opened, now, n)
+        session = today.isoformat()
+        day = self._intraday(session)
+        if k < 2 or day.get("last_slot") == k:
+            return
+        day["last_slot"] = k
+        acct = None
+        arrays = {sym: self._arrays(sym, today, opened, now)
+                  for sym in sorted(set(self.cfg["orb"]["symbols"]) | set(self.cfg["vwap"]["symbols"]))}
+        self.audit(session, "bar_step", slot=k, at=now, bars={s: [asdict(b) for b in v[2]] for s, v in arrays.items()})
+        # --- bar-based exits for positions opened on earlier slots
+        for key, pos in list(day["positions"].items()):
+            sleeve, sym = key.split("|")
+            if sym not in arrays or pos.get("entry_slot", 99) > k:
+                continue
+            a = arrays[sym][0]
+            side, lo, hi, cl = pos["side"], a["low"][k], a["high"][k], a["close"][k]
+            touched = lambda level: (lo <= level) if side > 0 else (hi >= level)
+            reached = lambda level: (hi >= level) if side > 0 else (lo <= level)
+            action = None
+            if touched(pos["stop"]):
+                action = ("all", f"{sleeve}_{'breakeven' if pos.get('half_done') else 'stop'}_bar")
+            elif sleeve == "orb" and not pos.get("half_done") and reached(pos["target"]):
+                action = ("half", "orb_target_half_bar")
+            elif sleeve == "vwap" and reached(pos["target"]):
+                action = ("all", "vwap_target_bar")
+            if action:
+                acct = acct or self.risk(list(arrays))
+                self._close(sleeve, sym, action[1], acct, session, day, half=action[0] == "half")
+                acct = None
+            pos = day["positions"].get(key)
+            if pos and sleeve == "orb" and pos.get("half_done") and k > pos["entry_slot"] and k + 1 < n - 1 and k >= 1:
+                broke = (cl < a["low"][k - 1]) if side > 0 else (cl > a["high"][k - 1])
+                if broke:
+                    acct = acct or self.risk(list(arrays))
+                    self._close(sleeve, sym, "orb_trail", acct, session, day)
+                    acct = None
+        # --- ORB breakout/breakdown
+        c = self.cfg["orb"]
+        kr = c["range_minutes"] // 5
+        for sym in c["symbols"]:
+            if sym in day["orb_done"] or k < kr:
+                continue
+            a, vw, _ = arrays[sym]
+            try:
+                atr = self._atr(sym, today)
+                if sym not in day["orb_base"]:
+                    day["orb_base"][sym] = self._orb_base(sym, today, kr)
+            except MarketDataError as exc:
+                self._decide(day, "orb", symbol=sym, slot=k, action="blocked", why=f"data: {exc}")
+                continue
+            base = [x if x is not None else math.nan for x in day["orb_base"][sym]]
+            rvol = I.orb_rvol(I.first_range_volume(a["volume"], kr), base)
+            trade, pending, skip = I.orb_scan(a, vw, atr, rvol, n, c, k, 100_000.0, float(c["max_notional"]))
+            if skip:
+                day["orb_done"].append(sym)
+                self._decide(day, "orb", symbol=sym, slot=k, action="skip", why=skip, rvol=rvol, atr=atr)
+                continue
+            if pending is None:
+                continue
+            day["orb_done"].append(sym)                               # one ORB decision per symbol per day
+            acct = acct or self.risk(list(arrays))
+            self.attribute_capital(acct)
+            if len([p for p in day["positions"] if p.startswith("orb|")]) >= c["max_open"]:
+                self._decide(day, "orb", symbol=sym, slot=k, action="skip", why="max open")
+                continue
+            ref = acct.quotes.get(sym) or self.quote(sym)[0]
+            acct.quotes.setdefault(sym, ref)
+            cap = min(acct.sleeve_capital.get("orb") or 0.0, float(c["max_notional"]))
+            t = I.orb_entry(pending, ref, c, atr, acct.nav, cap)
+            if t is None:
+                self._decide(day, "orb", symbol=sym, slot=k, action="skip", why="size zero")
+                continue
+            side = pending["side"]
+            intents, why = planner.plan_entry(self.state, acct, session, "orb", sym, side, t["qty"], ref,
+                                              f"orb_{'long' if side > 0 else 'short'}", self.cfg, now, f"e{k + 1}")
+            self._decide(day, "orb", symbol=sym, slot=k, action=why, side=side, stop=t["stop"], target=t["target"],
+                         rvol=rvol, atr=atr)
+            self._enter(intents, "orb", sym, side, t, k + 1, session, day, acct, pending=pending)
+            acct = None if intents else acct
+        # --- VWAP trend continuation (arm a stop trigger for the next slot)
+        c2 = self.cfg["vwap"]
+        for sym in c2["symbols"]:
+            a, vw, _ = arrays[sym]
+            try:
+                atr = self._atr(sym, today)
+            except MarketDataError as exc:
+                self._decide(day, "vwap", symbol=sym, slot=k, action="blocked", why=f"ATR data: {exc}")
+                continue
+            cands, pending = I.s2_scan(a, vw, atr, n, c2, k, 100_000.0, 20_000.0)
+            day["armed"].pop(sym, None)                              # a trigger is valid for one slot only
+            if pending is None:
+                continue
+            if f"vwap|{sym}" in day["positions"] or day["vwap_trades"].get(sym, 0) >= c2["max_trades_per_symbol"]:
+                continue
+            day["armed"][sym] = {**pending, "atr": atr, "valid_from": I.slot_start(opened, k + 1).isoformat(),
+                                 "valid_until": I.slot_start(opened, k + 2).isoformat(), "first_quote": None}
+            self._decide(day, "vwap", symbol=sym, slot=k, action="armed", side=pending["side"], trigger=pending["trigger"],
+                         stop=pending["stop"])
+        self.store.save(self.state)
+
+    def noise(self, at: str):
+        """Noise-area decision at a completed bar (10:30, 11:30, 13:30, 14:30): act only when the target changes."""
+        now = datetime.now(NY)
+        today = now.date()
+        bounds = session_bounds(today)
+        if not bounds:
+            return log(noise="no session today")
+        c = self.cfg["noise"]
+        sym = c["symbol"]
+        h, m = (int(x) for x in at.split(":"))
+        tick = bounds[0].replace(hour=h, minute=m)
+        session = today.isoformat()
+        day = self._intraday(session)
+        if tick.isoformat() in day["noise_done"]:
+            return log(noise="already processed", at=tick.isoformat())
+        day["noise_done"].append(tick.isoformat())
+        self.store.save(self.state)
+        prev_day = [s for s in sessions_until(today) if s < today][-1]
+        try:
+            prior, today_bars = self.market.b3_inputs(sym, today, c["lookback_sessions"])
+            prev_close = float(self.market.daily(sym, prev_day - timedelta(days=7), prev_day, 0).close.loc[prev_day])
+        except (MarketDataError, KeyError) as exc:
+            self.audit(session, "noise_blocked", at=tick, error=str(exc))
+            self._decide(day, "noise", symbol=sym, at=tick.isoformat(), action="blocked", why=str(exc))
+            return log(noise="blocked", why=str(exc))
+        d = I.noise_decision(today_bars, prior, prev_close, tick, bounds[0], c)
+        acct = self.risk([sym])
+        capital = self.attribute_capital(acct)
+        intents, why = ([], f"blocked: {d['reason']}") if d["target"] is None else planner.plan_target(
+            self.state, acct, session, "noise", sym, d["target"], d["metrics"]["open_0930"], acct.quotes.get(sym),
+            f"noise_{({1: 'long', -1: 'short', 0: 'flat'})[d['target']]}", self.cfg, now, tick.strftime("%H%M"))
+        audit_id = self.audit(session, "noise", inputs={
+            "today": [asdict(b) for b in today_bars], "prior": {x.isoformat(): [asdict(b) for b in r] for x, r in prior.items()},
+            "prev_close": prev_close, "at": tick, "session_open": bounds[0], "config": c}, decision=d, state=self.state,
+            account=asdict(acct), capital=capital, now=now, reason=why, intents=[i.to_dict() for i in intents])
+        self._decide(day, "noise", symbol=sym, at=tick.isoformat(), action=why, target=d["target"], reason=d["reason"],
+                     metrics={k: round(v, 4) for k, v in d["metrics"].items() if isinstance(v, float)})
+        log(noise={"at": tick.isoformat(), "target": d["target"], "reason": d["reason"]}, plan=why)
+        self.send(intents, session, audit_id)
+
+    def _enter(self, intents, sleeve, sym, side, t, entry_slot, session, day, acct, **extra):
+        audit_id = self.audit(session, f"{sleeve}_entry", state=self.state, account=asdict(acct), trade=t, extra=extra,
+                              intents=[i.to_dict() for i in intents])
+        if not intents:
+            return
+        results = self.send(intents, session, audit_id)
+        res = results[0][1] if results else None
+        filled = res["filled"] if res else 0
+        if filled > 0 or not self.broker:
+            day["positions"][f"{sleeve}|{sym}"] = {"side": side, "stop": t["stop"], "target": t["target"],
+                                                   "entry_ref": t["entry"], "entry_slot": entry_slot,
+                                                   "qty0": filled or intents[0].qty, "half_done": False,
+                                                   "fill": res["avg_price"] if res else None, "planned_only": not self.broker}
+        if sleeve == "vwap":
+            day["vwap_trades"][sym] = day["vwap_trades"].get(sym, 0) + 1
+        self.store.save(self.state)
+
+    def _close(self, sleeve, sym, reason, acct, session, day, half=False):
+        now = datetime.now(NY)
+        pos = day["positions"].get(f"{sleeve}|{sym}")
+        qty = None
+        if half and pos:                                           # ORB: half at the target (round(qty x 0.5))
+            held = self.state["sleeves"].get(sleeve, {}).get(sym, 0)
+            q = min(abs(held), int(round(pos["qty0"] * 0.5)))
+            qty = q if held > 0 else -q
+        intents = planner.plan_close(self.state, acct, session, sleeve, sym, reason, self.cfg, now,
+                                     f"x{now.strftime('%H%M%S')}", qty=qty)
+        audit_id = self.audit(session, f"{sleeve}_exit", state=self.state, account=asdict(acct), reason=reason,
+                              position=pos, intents=[i.to_dict() for i in intents])
+        self.send(intents, session, audit_id)
+        if half and pos and (self.state["sleeves"].get(sleeve, {}).get(sym) or not self.broker):
+            pos["half_done"], pos["stop"] = True, pos["entry_ref"]  # remainder: breakeven stop + trail
+        elif not self.state["sleeves"].get(sleeve, {}).get(sym) or not self.broker:
+            day["positions"].pop(f"{sleeve}|{sym}", None)
+        self._decide(day, sleeve, symbol=sym, action="exit_half" if half else "exit", why=reason)
+        self.store.save(self.state)
+
+    def monitor(self):
+        """~10 s: VWAP triggers armed for the current slot; stops and targets of open VWAP/ORB positions (quotes)."""
+        now = datetime.now(NY)
+        session = now.date().isoformat()
+        day = self._intraday(session)
+        watch = set(day["armed"]) | {k.split("|")[1] for k in day["positions"]}
+        if not watch:
+            return
+        quotes = {sym: self.quote(sym)[0] for sym in sorted(watch)}       # market data only; broker read on action
+        for key, pos in list(day["positions"].items()):
+            sleeve, sym = key.split("|")
+            px = quotes.get(sym)
+            if not px:
+                continue
+            side = pos["side"]
+            if (px <= pos["stop"]) if side > 0 else (px >= pos["stop"]):
+                acct = self.risk(sorted(watch))
+                self._close(sleeve, sym, f"{sleeve}_{'breakeven' if pos.get('half_done') else 'stop'}", acct, session, day)
+            elif not pos.get("half_done") and ((px >= pos["target"]) if side > 0 else (px <= pos["target"])):
+                acct = self.risk(sorted(watch))
+                self._close(sleeve, sym, f"{sleeve}_target{'_half' if sleeve == 'orb' else ''}", acct, session, day,
+                            half=sleeve == "orb")
+        c2 = self.cfg["vwap"]
+        for sym, arm in list(day["armed"].items()):
+            start, end = datetime.fromisoformat(arm["valid_from"]), datetime.fromisoformat(arm["valid_until"])
+            if now >= end:
+                day["armed"].pop(sym, None)
+                self._decide(day, "vwap", symbol=sym, action="expired", trigger=arm["trigger"])
+                continue
+            px = quotes.get(sym)
+            if now < start or not px:
+                continue
+            if arm["first_quote"] is None:
+                arm["first_quote"] = px                          # proxy for the slot's open (spec: max(open, trigger))
+            side = arm["side"]
+            if not ((px >= arm["trigger"]) if side > 0 else (px <= arm["trigger"])):
+                continue
+            day["armed"].pop(sym, None)
+            acct = self.risk(sorted(watch))
+            px = acct.quotes.get(sym) or px
+            if len([p for p in day["positions"] if p.startswith("vwap|")]) >= c2["max_open"]:
+                self._decide(day, "vwap", symbol=sym, action="skip", why="max open")
+                continue
+            self.attribute_capital(acct)
+            t = I.s2_entry(arm, arm["first_quote"], c2, arm["atr"], acct.nav, acct.sleeve_capital.get("vwap") or 0.0)
+            if t is None:
+                self._decide(day, "vwap", symbol=sym, action="skip", why="size zero")
+                continue
+            intents, why = planner.plan_entry(self.state, acct, session, "vwap", sym, side, t["qty"], px,
+                                              f"vwap_{'long' if side > 0 else 'short'}", self.cfg, now, f"e{arm['entry_j']}")
+            self._decide(day, "vwap", symbol=sym, slot=arm["entry_j"], action=why, side=side, stop=t["stop"], target=t["target"])
+            self._enter(intents, "vwap", sym, side, t, arm["entry_j"], session, day, acct, armed=arm)
+        self.store.save(self.state)
+
+    def flatten_sleeves(self, sleeves: tuple, reason: str):
+        """Scheduled close-only exit of whole sleeves (covers first). The loop retries until nothing is left."""
+        held = [s for sl in sleeves for s, q in self.state["sleeves"].get(sl, {}).items() if q]
+        session = self.session()
+        day = self._intraday(session)
+        if "vwap" in sleeves:
+            day["armed"] = {}                                   # no VWAP trigger survives its flatten time
+        if not held:
+            return
+        acct = self.risk(held)
+        now = datetime.now(NY)
+        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now, sleeves)
+        audit_id = self.audit(session, "flatten", state=self.state, account=asdict(acct), now=now, sleeves=sleeves,
+                              reason=reason, intents=[i.to_dict() for i in intents])
+        self.send(intents, session, audit_id)
+        for key in list(day["positions"]):
+            sl, sym = key.split("|")
+            if sl in sleeves and not self.state["sleeves"].get(sl, {}).get(sym):
+                day["positions"].pop(key, None)
+        self.store.save(self.state)
+
+    def is_flat(self, sleeves: tuple) -> bool:
+        return not any(q for sl in sleeves for q in self.state["sleeves"].get(sl, {}).values())
+
+    def replay_intraday(self, day: date):
+        """PLAN-only research replay of one completed session from Moomoo bars: VWAP, ORB and Noise-area trades and
+        HYPOTHETICAL P&L under the research cost model on a fixed $100,000 book at the reference sizes (Noise-area 40%,
+        VWAP/ORB risk sizing). Never a broker result."""
+        if self.broker:
+            return log(replay="refused", why="replays are PLAN-only")
+        opened, closed, n = self._day(day)
+        out = {"day": day.isoformat(), "vwap": [], "orb": [], "noise": [], "basis": "hypothetical, research cost model, $100k book"}
+        bars = {}
+        for sym in sorted(set(self.cfg["orb"]["symbols"]) | set(self.cfg["vwap"]["symbols"])):
+            rows = [b for b in self.market.five_minute(sym, day, day) if b.end.date() == day]
+            a = I.day_arrays(rows, opened)
+            bars[sym] = (a, I.cum_vwap(a["volume"], a["turnover"], a["close"]))
+        kept = []
+        for sym in self.cfg["vwap"]["symbols"]:
+            a, vw = bars[sym]
+            cands, _ = I.s2_scan(a, vw, self._atr(sym, day), n, self.cfg["vwap"], I.SLOTS - 1, 100_000.0, 20_000.0)
+            kept += [{**c, "symbol": sym} for c in cands]
+        for c in I.concurrency(kept, self.cfg["vwap"]["max_open"]):
+            out["vwap"].append({"symbol": c["symbol"], "side": c["side"], "qty": c["qty"], "entry": c["entry"],
+                                "fills": c["fills"], "pnl": round(I.replay_pnl(c["side"], c["qty"], c["entry"], c["fills"]), 2)})
+        co = self.cfg["orb"]
+        kr = co["range_minutes"] // 5
+        for sym in co["symbols"]:
+            a, vw = bars[sym]
+            base = [x if x is not None else math.nan for x in self._orb_base(sym, day, kr)]
+            rvol = I.orb_rvol(I.first_range_volume(a["volume"], kr), base)
+            t, _, skip = I.orb_scan(a, vw, self._atr(sym, day), rvol, n, co, I.SLOTS - 1, 100_000.0, float(co["max_notional"]))
+            if t:
+                out["orb"].append({"symbol": sym, "side": t["side"], "qty": t["qty"], "entry": t["entry"], "fills": t["fills"],
+                                   "pnl": round(I.replay_pnl(t["side"], t["qty"], t["entry"], t["fills"]), 2)})
+        cn = {**self.cfg["noise"]}
+        prior, today_bars = self.market.b3_inputs(cn["symbol"], day, cn["lookback_sessions"], replay=True)
+        prev_day = [s for s in sessions_until(day) if s < day][-1]
+        prev_close = float(self.market.daily(cn["symbol"], prev_day - timedelta(days=7), prev_day, 0).close.loc[prev_day])
+        a = I.day_arrays(today_bars, opened)
+        pos, entry, qty = 0, None, 0
+        for tick in I.noise_decision_times(opened, closed, cn["decision_times"]):
+            d = I.noise_decision(today_bars, prior, prev_close, tick, opened, cn)
+            j = I.last_completed_slot(opened, tick, n)
+            if d["target"] is None or d["target"] == pos or not math.isfinite(a["open"][j + 1]):
+                continue
+            px = float(a["open"][j + 1])
+            if pos:
+                out["noise"].append({"side": pos, "qty": qty, "entry": entry, "exit": px,
+                                     "pnl": round(I.replay_pnl(pos, qty, entry, px), 2)})
+            pos = d["target"]
+            if pos:
+                entry, qty = px, I.noise_qty(0.40 * 100_000, px, a["open"][0])     # reference "alloc 0.4"
+        if pos:
+            px = float(a["open"][n - 1])
+            out["noise"].append({"side": pos, "qty": qty, "entry": entry, "exit": px, "pnl": round(I.replay_pnl(pos, qty, entry, px), 2)})
+        out["pnl"] = {k: round(sum(x["pnl"] for x in out[k]), 2) for k in ("noise", "vwap", "orb")}
+        log(replay=out)
+        return out
 
     def status(self):
         s = self.state
@@ -310,21 +691,24 @@ class Runner:
     # ------------------------------------------------------------------ loop
     def guarded(self, name, fn, *args):
         """Run one loop step. Any failure (data, broker, order) is logged and recorded, never fatal to the loop:
-        the runner must keep marking risk and must still flatten B3 before the close."""
+        the runner must keep marking risk and must still flatten every intraday sleeve before the close.
+        A market-data failure only skips the step (entries were never planned from missing data): it is recorded as
+        step_skipped. Everything else (broker, order, state) is a runner_error that needs human review."""
         try:
             fn(*args)
             return True
         except Exception as exc:                         # noqa: BLE001 - supervision must survive every step failure
             session = self.session()
-            log(step=name, error=f"{type(exc).__name__}: {exc}")
+            event = "step_skipped" if isinstance(exc, MarketDataError) else "runner_error"
+            log(step=name, error=f"{type(exc).__name__}: {exc}", event=event)
             try:
-                self.store.append(session, {"event": "runner_error", "step": name, "error": f"{type(exc).__name__}: {exc}"})
+                self.store.append(session, {"event": event, "step": name, "error": f"{type(exc).__name__}: {exc}"})
             except Exception:                            # noqa: BLE001
                 pass
             return False
 
     def loop(self):
-        done = set()
+        done, last_risk, last_monitor = set(), -1e9, -1e9
         while True:
             now = datetime.now(NY)
             bounds = session_bounds(now.date())
@@ -337,8 +721,10 @@ class Runner:
             opened, closed = bounds
             prior = [s for s in sessions_until(now.date()) if s < now.date()][-1]
             plan = self.state.get("h_plan") or {}
-            if f"plan-h-prior-{now.date()}" not in done and plan.get("asof") != prior.isoformat():
-                self.guarded("plan-h-prior", self.plan_h, prior)   # first live day or a missed evening
+            # Rebuild only a plan OLDER than the prior close (first live day or a missed evening). Today's own
+            # evening plan is newer than `prior` and must never be overwritten by a stale one.
+            if f"plan-h-prior-{now.date()}" not in done and (plan.get("asof") or "") < prior.isoformat():
+                self.guarded("plan-h-prior", self.plan_h, prior)
                 done.add(f"plan-h-prior-{now.date()}")
             if now < opened:
                 time.sleep(min(30, (opened - now).total_seconds() + 1))
@@ -350,33 +736,55 @@ class Runner:
                 if f"b3-{t}" not in done and t + timedelta(seconds=15) <= now < t + timedelta(minutes=4):
                     self.guarded("b3", self.b3, t.strftime("%H:%M"))
                     done.add(f"b3-{t}")
+            n = I.expected_slots(opened, closed)
+            seen = now - timedelta(seconds=15)                        # a slot is used ~15 s after it closes
+            if opened + timedelta(minutes=5) <= seen < closed:
+                slot = I.last_completed_slot(opened, seen, n)
+                if f"bar-{now.date()}-{slot}" not in done:
+                    self.guarded("bar", self.bar_step, seen)            # ORB, then VWAP
+            for t in I.noise_decision_times(opened, closed, self.cfg["noise"]["decision_times"]):
+                if f"noise-{t}" not in done and t + timedelta(seconds=15) <= now < t + timedelta(minutes=4):
+                    self.guarded("noise", self.noise, t.strftime("%H:%M"))
+                    done.add(f"noise-{t}")
+                    done.add(f"bar-{now.date()}-{slot}")
+            if now < closed and time.monotonic() - last_monitor >= self.cfg["risk"].get("monitor_seconds", 10):
+                self.guarded("monitor", self.monitor)
+                last_monitor = time.monotonic()
+            for name, at in (("vwap", closed - timedelta(minutes=5 * self.cfg["vwap"]["flatten_slots_before_close"])),
+                             ("orb", closed - timedelta(minutes=5 * self.cfg["orb"]["flatten_slots_before_close"])),
+                             ("noise", closed - timedelta(minutes=self.cfg["noise"]["flatten_minutes_before_close"]))):
+                if f"flat-{name}-{now.date()}" not in done and at <= now < closed:
+                    self.guarded(f"{name}-flatten", self.flatten_sleeves, (name,), f"{name}_scheduled_flatten")
+                    if self.is_flat((name,)) or now >= closed - timedelta(minutes=1):
+                        done.add(f"flat-{name}-{now.date()}")           # retried every pass until 1 minute before the close
             flat = closed - timedelta(minutes=self.cfg["b3"]["flatten_minutes_before_close"])
             if f"flat-{now.date()}" not in done and flat <= now < closed:
                 if self.guarded("b3-flatten", self.flatten, "b3", "b3_scheduled_flatten") or now >= closed - timedelta(minutes=1):
                     done.add(f"flat-{now.date()}")           # a failed flatten is retried on the next pass until 15:59
-            if now < closed:
+            if now < closed and time.monotonic() - last_risk >= 30:
                 self.guarded("risk", self.risk)
+                last_risk = time.monotonic()
             if closed + timedelta(minutes=15) <= now and f"plan-h-{now.date()}" not in done:
                 self.guarded("plan-h", self.plan_h, now.date())
                 done.add(f"plan-h-{now.date()}")
-            time.sleep(30)
-
+            time.sleep(5)
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["status", "plan-h", "h-open", "b3", "flatten", "loop"])
+    ap.add_argument("command", choices=["status", "plan-h", "h-open", "b3", "noise", "flatten", "loop", "replay-intraday"])
     ap.add_argument("--execute", action="store_true", help="send orders (also needs config + private account file)")
     ap.add_argument("--nav", type=float, default=100_000.0, help="PLAN mode virtual account NAV")
     ap.add_argument("--ephemeral", action="store_true", help="PLAN-only: keep state in a temp dir (writes nothing under private/)")
     ap.add_argument("--asof", type=date.fromisoformat)
     ap.add_argument("--at")
     ap.add_argument("--day", type=date.fromisoformat, help="PLAN-only: replay B3 on a completed past session")
-    ap.add_argument("--sleeve", default="all", choices=["b3", "h_etf", "all"])
+    ap.add_argument("--sleeve", default="all", choices=["b3", "h_etf", "noise", "vwap", "orb", "all"])
     ap.add_argument("--reason", default="manual_flatten")
     a = ap.parse_args()
     r = Runner(a.execute, a.nav, a.ephemeral)
     {"status": r.status, "plan-h": lambda: r.plan_h(a.asof), "h-open": r.h_open, "b3": lambda: r.b3(a.at, a.day),
-     "flatten": lambda: r.flatten(a.sleeve, a.reason), "loop": r.loop}[a.command]()
+     "flatten": lambda: r.flatten(a.sleeve, a.reason), "loop": r.loop,
+     "replay-intraday": lambda: r.replay_intraday(a.day), "noise": lambda: r.noise(a.at)}[a.command]()
 
 
 if __name__ == "__main__":

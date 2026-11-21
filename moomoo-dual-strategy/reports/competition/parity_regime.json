@@ -1,0 +1,43 @@
+{
+ "window": [
+  "2021-01-04",
+  "2026-11-20"
+ ],
+ "reference": "reports/claude_regime/rstrats.py",
+ "noise": {
+  "sessions": 1479,
+  "reference_trades": 808,
+  "reference_trade_days": 726,
+  "live_trade_days": 726,
+  "mismatch_days": 0,
+  "first_mismatches": [],
+  "live_blocked_decisions": 1
+ },
+ "vwap": {
+  "sessions": 1479,
+  "reference_candidates": 2838,
+  "candidate_mismatches": 0,
+  "first_mismatches": [],
+  "reference_trades": 2838,
+  "pnl_reference": 118.15,
+  "pnl_live": 118.15,
+  "pnl_mismatch_count": 0,
+  "pnl_mismatch_days": []
+ },
+ "orb": {
+  "sessions": 1479,
+  "reference_candidates": 108,
+  "candidate_mismatches": 0,
+  "first_mismatches": [],
+  "reference_trades": 146,
+  "pnl_reference": 601.61,
+  "pnl_live": 601.61,
+  "pnl_mismatch_count": 0,
+  "pnl_mismatch_days": []
+ },
+ "vwap_orb_incremental": {
+  "slot_checks": 575010,
+  "mismatches": 0,
+  "first_mismatches": []
+ }
+}

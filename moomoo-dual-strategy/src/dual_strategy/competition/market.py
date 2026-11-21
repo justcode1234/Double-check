@@ -130,9 +130,10 @@ class Market:
             f.index = [datetime.strptime(str(int(x)), "%Y%m%d").date() for x in f["date"]]
         else:
             f.index = [datetime.fromtimestamp(t / 1000, timezone.utc).astimezone(NY).date() for t in f["time_key"]]
-        f = f.rename(columns={"close_price": "close", "open_price": "open"})
+        f = f.rename(columns={"close_price": "close", "open_price": "open", "high_price": "high", "low_price": "low"})
         f = f[[start <= d <= end for d in f.index]]
-        return f[["open", "close", "volume"]].astype(float).sort_index()
+        cols = ["open", "close", "volume"] + [c for c in ("high", "low") if c in f]
+        return f[cols].astype(float).sort_index()
 
     def h_panel(self, symbols: list[str], asof: date, sessions: int = 160) -> dict[str, pd.DataFrame]:
         start = asof - timedelta(days=int(sessions * 1.6))

@@ -13,7 +13,7 @@ calendar: XNYS
 #   execution_enabled: true here, a private account file (below) confirming the competition account,
 #   and `scripts/run_competition.py --execute`. Changing this is the user's decision, not an agent's.
 execution_enabled: true
-account_file: private/competition/account.json      # gitignored; see QODER_COMPETITION.md for the format
+account_file: private/competition/account.json      # gitignored; see QODER_COMPETITION.md in HISTORY.md for the format
 state_dir: private/competition                      # persistent NAV/high-water/halt state + outbox (gitignored)
 
 # --- capital split of the competition account NAV (re-evaluated at every decision) ----------------------------------

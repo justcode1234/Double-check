@@ -57,7 +57,7 @@ def prepare_project_python():
                                stderr=subprocess.STDOUT, check=True, creationflags=flags,
                                timeout=max(0, deadline - time.monotonic()))
         except (OSError, subprocess.SubprocessError) as exc:
-            raise RuntimeError(f"Python environment setup failed. See {log_path} and SETUP_AND_RUN.md.") from exc
+            raise RuntimeError(f"Python environment setup failed. See {log_path} and the repository README.md.") from exc
     return python
 
 
@@ -220,7 +220,7 @@ def enable_systemd_units(units, target, purpose):
     command = [systemctl, "--user"]
     available = subprocess.run([*command, "show-environment"], capture_output=True, timeout=10)
     if available.returncode:
-        raise RuntimeError("The systemd user manager is unavailable. See SETUP_AND_RUN.md.")
+        raise RuntimeError("The systemd user manager is unavailable. See the repository README.md.")
     root = systemd_user_directory()
     for name, content in units.items():
         path = root / name

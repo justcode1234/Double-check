@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 import shutil
+import socket
 import sqlite3
 import subprocess
 import threading
@@ -80,6 +81,16 @@ def running_server(project, db):
         server.server_close()
         thread.join(timeout=3)
         assert not thread.is_alive(), 'Test server did not shut down'
+
+
+def test_dashboard_starts_without_reverse_dns(project, monkeypatch):
+    def unexpected_lookup(*args):
+        pytest.fail('Binding the loopback dashboard should not perform a DNS lookup')
+
+    monkeypatch.setattr(socket, 'getfqdn', unexpected_lookup)
+    with running_server(*project) as port:
+        status, _, _ = request(port, '/api/launcher')
+        assert status == 200
 
 
 def request(port, path, method='GET', host=None, body=None, headers=None):

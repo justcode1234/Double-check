@@ -6,6 +6,7 @@ import sqlite3
 import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from socketserver import TCPServer
 from urllib.parse import urlsplit
 
 from dual_strategy.portfolio.ledger import Ledger, STRATEGIES
@@ -16,6 +17,13 @@ ASSETS = {'/': ('index.html', 'text/html'), '/practice': ('index.html', 'text/ht
           '/backtest.css': ('backtest.css', 'text/css'), '/competition': ('competition.html', 'text/html'),
           '/competition.js': ('competition.js', 'text/javascript'), '/competition.css': ('competition.css', 'text/css')}
 BACKTEST_SCOREBOARD = Path('reports') / 'backtest_v3' / 'scoreboard.json'
+
+
+class LoopbackDashboardServer(ThreadingHTTPServer):
+    def server_bind(self):
+        # HTTPServer.server_bind resolves the host name, which can delay a local-only launch.
+        TCPServer.server_bind(self)
+        self.server_name, self.server_port = self.server_address
 
 
 def create_server(project: Path, db_path: Path, port: int = 8876, competition_home: bool = False,
@@ -137,7 +145,7 @@ def create_server(project: Path, db_path: Path, port: int = 8876, competition_ho
         do_DELETE = do_PUT
         do_PATCH = do_PUT
 
-    server = ThreadingHTTPServer(('127.0.0.1', port), Handler, bind_and_activate=False)
+    server = LoopbackDashboardServer(('127.0.0.1', port), Handler, bind_and_activate=False)
     try:
         if hasattr(socket, 'SO_EXCLUSIVEADDRUSE'):
             server.allow_reuse_address = False

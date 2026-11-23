@@ -12,10 +12,10 @@ For a console-free Windows launch, run `python start.py --install-shortcut` once
 
 ## Linux migration
 
-Clone the competition branch and create a fresh environment. Python 3.12 also works with the locked dependencies on Linux.
+Clone `main` and create a fresh environment. Python 3.12 also works with the locked dependencies on Linux.
 
 ```bash
-git clone --depth 1 --branch competition-b3-h https://github.com/justcode1234/Moo-Moo.git
+git clone --depth 1 --branch main https://github.com/justcode1234/Moo-Moo.git
 cd Moo-Moo/moomoo-dual-strategy
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock

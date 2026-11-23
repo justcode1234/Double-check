@@ -1,6 +1,6 @@
 # Build spec: five-strategy competition runner, $20,000 each
 
-You're working in the `moomoo-dual-strategy` folder on branch `competition-b3-h`. Read [QODER_COMPETITION.md](QODER_COMPETITION.md) and [AGENTS.md](AGENTS.md) first. All existing rules still apply:
+Read [QODER_COMPETITION.md](QODER_COMPETITION.md) and [AGENTS.md](AGENTS.md) in the `moomoo-dual-strategy` folder before working on `main`. All existing rules still apply:
 
 - The deterministic runner decides, sizes and sends orders. You build, test, launch and monitor it.
 - Never place or edit orders by hand.

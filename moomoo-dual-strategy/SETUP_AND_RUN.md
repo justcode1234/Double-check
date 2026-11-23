@@ -4,9 +4,34 @@
 
 Run `python start.py` from the workspace root. It uses the Python environment inside this project, opens the competition dashboard in your browser, and returns control to the terminal. A second launch opens the dashboard again using the same background service.
 
-On the authorized Mac, the launcher also registers the existing paper scheduler for the signed-off startup window. That scheduler still requires the confirmed competition account, persisted state, and broker reconciliation. On Windows, the launcher opens the dashboard and quote-only voting feed. The two-vote signals do not place orders. Dashboard startup logs are in `private/launcher/dashboard.log`.
+On the authorized Mac, the launcher also registers the existing paper scheduler for the signed-off startup window. On Windows and a fresh Linux checkout, the launcher opens the dashboard and quote-only voting feed. The two-vote sleeve publishes signals only. Startup logs are in `private/launcher/`.
 
-Use `python start.py --dashboard-only` to open the dashboard without registering the Mac scheduler.
+Use `python start.py --dashboard-only` to launch just the dashboard. Use `--no-browser` on a headless machine. The dashboard listens on loopback, so use SSH forwarding when viewing it from another machine.
+
+For a console-free Windows launch, run `python start.py --install-shortcut` once. Open **Moo Moo Dashboard** from the desktop afterward. The shortcut uses the project’s `pythonw.exe`, and errors are recorded in `private/launcher/launcher.log`.
+
+## Linux migration
+
+Clone the competition branch and create a fresh environment. Python 3.12 also works with the locked dependencies on Linux.
+
+```bash
+git clone --depth 1 --branch competition-b3-h https://github.com/justcode1234/Moo-Moo.git
+cd Moo-Moo/moomoo-dual-strategy
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.lock
+.venv/bin/python -m pip install --no-deps -e .
+cd ..
+moomoo-dual-strategy/.venv/bin/python start.py --dashboard-only
+```
+
+Install the [official Moomoo CLI for Linux](https://github.com/MoomooOpen/moomoo-cli#install) and complete `moomoo auth login` as the Linux user that will run the service. A fresh checkout can serve the dashboard before sign-in. For paper execution, make the machine switch outside the trading session.
+
+1. Disable scheduling on the old host and verify the trading loop has finished. Only one host may run the competition account.
+2. Back up `private/` before pulling this branch into an existing checkout because older revisions tracked some local files. Privately copy `moomoo-dual-strategy/private/competition/account.json`, `live/`, and any existing `scheduler/YYYY-MM-DD.json` decisions from the old host. Preserve the state, outbox, audit history, and halts. Use owner-only permissions. The shallow clone above excludes the older revisions, and the Linux user creates their own OAuth session.
+3. From `moomoo-dual-strategy/`, run `.venv/bin/python scripts/run_competition.py status --execute` as a read-only check. Verify the broker holdings match the saved sleeves and review any unresolved orders or halts before arming the timer.
+4. From the repository root, run `moomoo-dual-strategy/.venv/bin/python start.py --enable-paper --no-browser`. This registers the `moomoo-competition-start.timer` user timer and reuses the scheduler’s authorized session dates, startup window, and broker reconciliation. Keep the Linux machine powered on and awake, with its systemd user manager running.
+
+Inspect the timer with `systemctl --user list-timers moomoo-competition-start.timer`. Review startup with `journalctl --user -u moomoo-competition-start.service`. Disable future launches with `systemctl --user disable --now moomoo-competition-start.timer` and verify any active run has finished before switching hosts again.
 
 ## Practice research
 

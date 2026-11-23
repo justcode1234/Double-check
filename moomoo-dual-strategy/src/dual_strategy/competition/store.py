@@ -46,8 +46,8 @@ class Store:
             fh.flush()
             os.fsync(fh.fileno())
 
-    def audit(self, session: str, record: dict) -> str:
-        audit_id = f"{session}/{uuid4().hex}"
+    def audit(self, session: str, record: dict, *, fixed_name: str | None = None) -> str:
+        audit_id = f"{session}/{fixed_name or uuid4().hex}"
         path = self.dir / "audit" / f"{audit_id}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         record = {**record, "audit_id": audit_id, "logged_at": datetime.now(timezone.utc).isoformat()}
@@ -72,9 +72,11 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
     initial = (state or {}).get("initial_nav")
     initialized = type(initial) in (int, float) and math.isfinite(initial) and initial > 0
     reduced = (state or {}).get("reduced", False)
+    initial_allocations = {s: cfg.get(s, {}).get("initial_allocation_usd", initial * cfg["allocation"][s])
+                           for s in SLEEVES} if initialized else {}
     sleeves = {s: {"status": "not_recorded", "realized_gross": None, "unrealized_gross": None,
                    "gross_pnl": None, "fees": None, "net_pnl": None, "fill_count": 0,
-                   "initial_capital": initial * cfg["allocation"][s] if initialized else None,
+                   "initial_capital": initial_allocations.get(s),
                    "capital": None, "limits": capital_limits(s, None, cfg, reduced),
                    "positions": {}, "receipts": []} for s in SLEEVES}
     result = {"asof": (account or {}).get("at"), "sleeves": sleeves,

@@ -142,8 +142,11 @@ class Runner:
                 "config": {k: v for k, v in self.cfg.items() if k not in ("account_file", "state_dir")},
                 "sources": sources, "environment": {"python": sys.version,
                     "packages": {name: version(name) for name in ("pandas", "numpy", "exchange-calendars", "PyYAML")}}})
-        return self.store.audit(session, {"kind": kind, "session": session,
-            "mode": "EXECUTE" if self.broker else "PLAN", "provenance_id": self._provenance_id, **data})
+        record = {"kind": kind, "session": session, "mode": "EXECUTE" if self.broker else "PLAN",
+                  "provenance_id": self._provenance_id, **data}
+        if kind == "h_open_started":
+            return self.store.audit(session, record, fixed_name=kind)
+        return self.store.audit(session, record)
 
     def send(self, intents, session, audit_id=None):
         audit_id = audit_id or self.audit(session, "orders", state=self.state, intents=[i.to_dict() for i in intents])
@@ -152,9 +155,9 @@ class Runner:
             link = {"intent_id": i.intent_id, "audit_id": audit_id}
             if self.cfg["risk"].get("legacy_exit_only"):
                 reason = None
-                if not i.close_only:
+                if not i.close_only and planner.entries_disabled(self.cfg, i.sleeve):
                     reason = "legacy strategies are exit-only"
-                elif self.broker:
+                elif i.close_only and self.broker:
                     account = self.account([i.symbol])
                     held = self.state["sleeves"].get(i.sleeve, {}).get(i.symbol, 0)
                     net = account.positions.get(i.symbol, 0)
@@ -184,6 +187,14 @@ class Runner:
                 if result["status"] == "REJECTED":
                     self.store.append(session, {"event": "outcome", **link, **result})
                     raise ExecutionBlocked("broker rejected order; human reconciliation required")
+                filled = result.get("filled")
+                price = result.get("avg_price")
+                if (result.get("order_id") != oid or result.get("qty") != i.qty
+                        or result.get("status") not in ("FILLED", "CANCELLED")
+                        or type(filled) is not int or not 0 <= filled <= i.qty
+                        or (result["status"] == "FILLED" and filled != i.qty)
+                        or (filled and (type(price) not in (int, float) or not math.isfinite(price) or price <= 0))):
+                    raise ExecutionBlocked("invalid terminal fill; reconcile before sending another order")
             except Exception as exc:                     # ambiguous: block entries until reconciled by a human
                 self.state["order_errors_today"] = self.state.get("order_errors_today", 0) + 1
                 self.state["halted"] = self.state["halted"] or {"kind": "order_error", "at": placed.isoformat(),
@@ -193,6 +204,7 @@ class Runner:
                 raise
             planner.apply_fill(self.state, i, result["filled"], session)
             self.store.append(session, {"event": "outcome", **link, **result})
+            self.store.save(self.state)
             log(intent=i.intent_id, outcome=result)
             results.append((i, result))
         self.store.save(self.state)
@@ -249,16 +261,31 @@ class Runner:
                     return log(h_open="already attempted", session=session)
             if any(r.get("event") == "runner_error" and r.get("step") == "h-open" for r in self.store.outbox(session)):
                 return log(h_open="already attempted", session=session)
-            self.audit(session, "h_open_started")
+            try:
+                self.audit(session, "h_open_started")
+            except FileExistsError:
+                return log(h_open="already attempted", session=session)
         prior = [s for s in sessions_until(date.fromisoformat(session)) if s < date.fromisoformat(session)][-1]
         if not plan or plan.get("blocked") or plan["asof"] != prior.isoformat():
             self.audit(session, "h_open_skipped", plan=plan, reason="no unblocked plan from the previous close")
             return log(h_open="skipped", why="no unblocked plan from the previous close", plan_asof=plan and plan.get("asof"))
-        acct = self.risk(plan["entries"] + list(plan["exits"]))
+        if not self.broker or not plan["entries"]:
+            acct = self.risk(plan["entries"] + list(plan["exits"]))
+            return self._send_h_open(session, plan, acct, "h_open")
+        if plan["exits"]:
+            # Terminal order receipts and a subsequent broker read decide how much capacity was freed.
+            exits = {**plan, "entries": []}
+            self._send_h_open(session, exits, self.risk(list(exits["exits"])), "h_open_exits")
+        for index, symbol in enumerate(dict.fromkeys(plan["entries"])):
+            entry = {**plan, "exits": {}, "entries": [symbol]}
+            kind = "h_open" if index == 0 else "h_open_entry"
+            self._send_h_open(session, entry, self.risk([symbol]), kind)
+
+    def _send_h_open(self, session, plan, acct, kind):
         capital = self.attribute_capital(acct)
         now = datetime.now(NY)
         intents, why = planner.plan_h_open(self.state, acct, session, plan, self.cfg, now)
-        audit_id = self.audit(session, "h_open", plan=plan, signal_audit_id=self.state.get("h_plan_audit_id"),
+        audit_id = self.audit(session, kind, plan=plan, signal_audit_id=self.state.get("h_plan_audit_id"),
                               state=self.state, account=asdict(acct), capital=capital, now=now, reason=why,
                               intents=[i.to_dict() for i in intents])
         log(h_open=why, intents=len(intents))
@@ -632,7 +659,7 @@ class Runner:
 
     def daily_report(self, session: str):
         """After the close: NAV, high-water, halt/lock and each sleeve's capital and P&L, written to
-        <state_dir>/reports/<session>.json and announced with a macOS notification (best effort). No Claude needed."""
+        <state_dir>/reports/<session>.json and optionally announced by the desktop."""
         acct = self.account() if self.broker else None
         perf = sleeve_performance(self.store, self.state, asdict(acct) if acct else None, self.cfg)
         s = self.state
@@ -653,12 +680,17 @@ class Runner:
         path.write_text(json.dumps(report, indent=1, default=str), encoding="utf-8")
         log(daily_report=report)
         try:
+            import shutil
             import subprocess
             nav = report["nav"]
             text = f"NAV {nav:,.2f}" if isinstance(nav, (int, float)) else "NAV unknown"
             text += " · halted" if report["halted"] else ""
-            subprocess.run(["/usr/bin/osascript", "-e", f'display notification "{text}" with title "Competition {session} closed"'],
-                           timeout=10, capture_output=True)
+            title = f"Competition {session} closed"
+            if sys.platform == "darwin":
+                subprocess.run(["/usr/bin/osascript", "-e", f'display notification "{text}" with title "{title}"'],
+                               timeout=10, capture_output=True)
+            elif sys.platform.startswith("linux") and (notify := shutil.which("notify-send")):
+                subprocess.run([notify, title, text], timeout=10, capture_output=True)
         except Exception:                                    # noqa: BLE001 - a notification never affects trading
             pass
 

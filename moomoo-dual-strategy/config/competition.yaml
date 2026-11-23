@@ -81,6 +81,7 @@ b3:
   flatten_minutes_before_close: 5     # 15:55 ET; 12:55 ET on 13:00 half-days
 
 h_etf:
+  initial_allocation_usd: 20000  # fixed starting sleeve allocation; use its own P&L thereafter
   core: [US.SPY, US.QQQ, US.IWM, US.DIA]
   sectors: [US.XLB, US.XLC, US.XLE, US.XLF, US.XLI, US.XLK, US.XLP, US.XLRE, US.XLU, US.XLV, US.XLY]
   top_sectors: 5                 # by 20-session median dollar volume at the signal close
@@ -92,8 +93,15 @@ h_etf:
   per_name_fraction_of_sleeve: 0.10
   aggregate_fraction_of_sleeve: 0.30
 
+two_vote:                        # sizing for replay; live dashboard publishes signals only
+  required_votes: 2
+  entry_usd: 10000
+  max_lots_per_symbol: 4
+  bank_realized_gains: true
+
 risk:                            # account level (all five sleeves)
-  legacy_exit_only: true         # keep existing exit rules for old holdings and block all new entries
+  legacy_exit_only: true         # older deployments stay exit-only
+  entry_sleeves: [h_etf]         # restore normal entries for the $20k H allocation
   halt_drawdown_fraction: 0.035  # NAV <= 96.5% of high-water: flatten everything, block entries until a human clears
   daily_loss_fraction: 0.0125    # NAV <= 98.75% of day-start NAV: flatten everything, no entries for the rest of the day
   reduce_drawdown_fraction: 0.02 # NAV <= 98% of high-water: new positions at half size (until back above 98.5%)

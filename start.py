@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -21,6 +22,7 @@ PROJECT = ROOT / "moomoo-dual-strategy"
 RUNTIME = PROJECT / "private" / "launcher"
 PORTS = range(8876, 8886)
 STARTUP_LABEL = "com.portbrain.moomoo-competition-start"
+SYSTEMD_UNIT = "moomoo-competition-start"
 
 
 def project_python():
@@ -122,17 +124,98 @@ def dashboard():
     raise RuntimeError("No local dashboard port is available")
 
 
-def arm_paper_scheduler():
+def install_windows_shortcut():
+    if os.name != "nt":
+        raise RuntimeError("The desktop shortcut is only available on Windows.")
+    pythonw = project_python().with_name("pythonw.exe")
+    if not pythonw.is_file():
+        raise RuntimeError("pythonw.exe is missing from the project environment.")
+    script = """
+$ErrorActionPreference = 'Stop'
+$desktop = [Environment]::GetFolderPath('DesktopDirectory')
+if (!$desktop) { throw 'Could not find the Windows desktop folder.' }
+$path = Join-Path $desktop 'Moo Moo Dashboard.lnk'
+$shell = New-Object -ComObject WScript.Shell
+$link = $shell.CreateShortcut($path)
+$arguments = '"' + $env:MOOMOO_START_SCRIPT + '"'
+if ((Test-Path -LiteralPath $path) -and
+    ($link.TargetPath -ne $env:MOOMOO_START_PYTHONW -or $link.Arguments -ne $arguments)) {
+    throw 'A different Moo Moo Dashboard shortcut already exists.'
+}
+$link.TargetPath = $env:MOOMOO_START_PYTHONW
+$link.Arguments = $arguments
+$link.WorkingDirectory = $env:MOOMOO_START_ROOT
+$link.Save()
+"""
+    subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+                   check=True, timeout=15, creationflags=subprocess.CREATE_NO_WINDOW,
+                   env={**os.environ, "MOOMOO_START_PYTHONW": str(pythonw),
+                        "MOOMOO_START_SCRIPT": str(ROOT / "start.py"), "MOOMOO_START_ROOT": str(ROOT)})
+    return "Moo Moo Dashboard shortcut installed on the Windows desktop."
+
+
+def systemd_units(python, scheduler):
+    def argument(path):
+        value = str(path).replace("\\", "\\\\").replace('"', '\\"').replace("%", "%%")
+        return f'"{value}"'
+
+    return {
+        f"{SYSTEMD_UNIT}.service": (
+            "[Unit]\nDescription=Moomoo competition paper scheduler\n\n"
+            "[Service]\nType=exec\nUMask=0077\nEnvironment=PYTHONDONTWRITEBYTECODE=1\n"
+            f"ExecStart=:{argument(python)} {argument(scheduler)} --run\n"
+        ),
+        f"{SYSTEMD_UNIT}.timer": (
+            "[Unit]\nDescription=Check Moomoo competition paper startup window\n\n"
+            "[Timer]\nOnActiveSec=1s\nOnUnitInactiveSec=60s\nAccuracySec=1s\n\n"
+            "[Install]\nWantedBy=timers.target\n"
+        ),
+    }
+
+
+def arm_linux_scheduler():
+    systemctl = shutil.which("systemctl")
+    if not systemctl:
+        raise RuntimeError("Linux paper startup requires a systemd user manager.")
+    command = [systemctl, "--user"]
+    available = subprocess.run([*command, "show-environment"], capture_output=True, timeout=10)
+    if available.returncode:
+        raise RuntimeError("The systemd user manager is unavailable. See SETUP_AND_RUN.md.")
+    root = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "systemd/user"
+    units = systemd_units(project_python(), PROJECT / "scripts/schedule_competition.py")
+    for name, content in units.items():
+        path = root / name
+        if path.exists() and path.read_text(encoding="utf-8") != content:
+            raise RuntimeError(f"A different scheduler unit already exists at {path}.")
+    root.mkdir(parents=True, exist_ok=True)
+    for name, content in units.items():
+        path = root / name
+        if not path.exists():
+            with path.open("x", encoding="utf-8") as file:
+                file.write(content)
+    subprocess.run([*command, "daemon-reload"], check=True, timeout=10)
+    subprocess.run([*command, "enable", "--now", f"{SYSTEMD_UNIT}.timer"], check=True, timeout=15)
+    return "The Linux timer will run the paper scheduler's preflight in its authorized startup window."
+
+
+def arm_paper_scheduler(enable_linux=False):
+    account = PROJECT / "private" / "competition"
+    has_state = (account / "account.json").is_file() and (account / "live" / "state.json").is_file()
+    if sys.platform.startswith("linux"):
+        if not enable_linux:
+            return None
+        if not has_state:
+            raise RuntimeError("Migrate the confirmed competition account and its saved state before enabling paper startup.")
+        return arm_linux_scheduler()
     if sys.platform != "darwin":
-        return "Paper trading startup is handled by the authorized Mac scheduler."
+        return None
     domain = f"gui/{os.getuid()}"
     service = f"{domain}/{STARTUP_LABEL}"
     launchctl = "/bin/launchctl"
     active = subprocess.run([launchctl, "print", service], capture_output=True, timeout=5)
     if active.returncode == 0:
         return None
-    account = PROJECT / "private" / "competition"
-    if not (account / "account.json").is_file() or not (account / "live" / "state.json").is_file():
+    if not has_state:
         return "Paper startup needs the confirmed competition account and its saved state on this Mac."
     scheduler = PROJECT / "scripts" / "schedule_competition.py"
     config = subprocess.run([str(project_python()), str(scheduler), "--plist"], cwd=PROJECT,
@@ -146,30 +229,52 @@ def arm_paper_scheduler():
     return "The paper scheduler will run its preflight in the authorized start window."
 
 
+def report_message(message, *, error=False):
+    stream = sys.stderr if error else sys.stdout
+    if stream is not None:
+        print(message, file=stream, flush=True)
+    elif error:
+        RUNTIME.mkdir(parents=True, exist_ok=True)
+        with (RUNTIME / "launcher.log").open("a", encoding="utf-8") as log:
+            print(message, file=log)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dashboard-only", action="store_true", help="Open the dashboard without arming the scheduler")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--dashboard-only", action="store_true", help="Open the dashboard without arming the scheduler")
+    modes.add_argument("--enable-paper", action="store_true", help="Enable the paper scheduler after migration to Linux")
+    modes.add_argument("--install-shortcut", action="store_true", help="Install the console-free Windows desktop shortcut")
     parser.add_argument("--no-browser", action="store_true", help="Print the dashboard URL without opening a tab")
     args = parser.parse_args(argv)
+    if args.install_shortcut:
+        try:
+            report_message(install_windows_shortcut())
+        except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
+            report_message(f"Shortcut installation failed: {exc}", error=True)
+            return 1
+        return 0
+    if args.enable_paper and not sys.platform.startswith("linux"):
+        parser.error("--enable-paper is for the Linux scheduler")
     try:
         with startup_lock():
             port = dashboard()
     except (OSError, RuntimeError) as exc:
-        print(f"Dashboard startup failed: {exc}", file=sys.stderr, flush=True)
+        report_message(f"Dashboard startup failed: {exc}", error=True)
         return 1
 
     url = f"http://127.0.0.1:{port}/"
-    print(url, flush=True)
+    report_message(url)
     if not args.no_browser:
         webbrowser.open(url, new=2)
     if not args.dashboard_only:
         try:
             with startup_lock():
-                note = arm_paper_scheduler()
+                note = arm_paper_scheduler(enable_linux=args.enable_paper)
             if note:
-                print(note, flush=True)
+                report_message(note)
         except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
-            print(f"Paper scheduler startup failed: {exc}", file=sys.stderr, flush=True)
+            report_message(f"Paper scheduler startup failed: {exc}", error=True)
             return 1
     return 0
 

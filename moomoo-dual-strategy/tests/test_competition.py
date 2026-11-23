@@ -532,9 +532,9 @@ def test_h_open_audit_links_signal_account_intent_and_fill(status_runner, monkey
     saved, = audit_records(runner, "h_open")
     provenance, = audit_records(runner, "provenance")
     assert saved["signal_audit_id"] == signal_id
-    assert saved['account']['sleeve_capital'] == {s: 19500 for s in planner.SLEEVES}
-    assert saved['capital']['sleeves']['h_etf']['initial_capital'] == 19500
-    assert saved['capital']['sleeves']['h_etf']['limits']['per_etf_budget'] == 1950
+    assert saved['account']['sleeve_capital'] == {**{s: 19500 for s in planner.SLEEVES}, 'h_etf': 20000}
+    assert saved['capital']['sleeves']['h_etf']['initial_capital'] == 20000
+    assert saved['capital']['sleeves']['h_etf']['limits']['per_etf_budget'] == 2000
     intents, reason = planner.plan_h_open(saved["state"], restore_account(saved["account"]), saved["session"],
                                           saved["plan"], provenance["config"], datetime.fromisoformat(saved["now"]))
     assert [i.to_dict() for i in intents] == saved["intents"] and reason == saved["reason"]

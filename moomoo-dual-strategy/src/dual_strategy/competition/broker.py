@@ -16,7 +16,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from dual_strategy.competition.planner import Account, Intent
+from dual_strategy.competition.planner import Account, Intent, entries_disabled
 from dual_strategy.execution.moomoo_cli import (ACCOUNT_LIST, CANCEL, CASH_INFO, HISTORY, PLACE, POSITION_LIST,
                                                 CliTransport)
 from dual_strategy.execution.moomoo_paper import ExecutionBlocked
@@ -124,7 +124,7 @@ class CompetitionBroker:
     def place(self, intent: Intent) -> str:
         cfg = getattr(self, "cfg", None) or {}
         r = cfg.get("risk", {})                          # no config = long-only
-        if r.get("legacy_exit_only") and not intent.close_only:
+        if entries_disabled(cfg, intent.sleeve) and not intent.close_only:
             raise ExecutionBlocked("legacy strategies are exit-only")
         if intent.side == "SELL" and not intent.close_only:
             if not (getattr(intent, "opens_short", False) and r.get("long_only") is False

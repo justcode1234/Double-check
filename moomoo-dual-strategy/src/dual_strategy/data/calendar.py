@@ -46,6 +46,19 @@ def session_bounds(day: date | datetime) -> tuple[datetime, datetime] | None:
     )
 
 
+def next_session_open(at: datetime) -> datetime | None:
+    """Return the next regular open within calendar coverage, strictly after at."""
+    day = _covered(at)
+    bounds = session_bounds(day)
+    if bounds and at < bounds[0]:
+        return bounds[0]
+    cal = _calendar()
+    index = cal.sessions.searchsorted(day.isoformat(), side="right")
+    if index == len(cal.sessions):
+        return None
+    return cal.session_open(cal.sessions[index]).to_pydatetime().astimezone(NY)
+
+
 def decision_times(day: date | datetime) -> list[datetime]:
     """Closed half-hour ticks, 10:00 through 15:30, strictly before close."""
     bounds = session_bounds(day)

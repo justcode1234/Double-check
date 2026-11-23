@@ -676,7 +676,8 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   await settle();
   assert.equal(stale(), false, text('data-alert'));
   assert.match(text('runner-summary'), /Waiting for market open/);
-  assert.match(text('nav-summary'), /Awaiting first/);
+  assert.match(text('nav-summary'), /Awaiting account observation/);
+  assert.equal(text('market-countdown'), '01:30:00');
   assert.match(text('sleeves'), /XLV/);
   assert.match(text('sleeves'), /XLP/);
   assert.match(text('vote-cards'), /SPY.*QQQ/);
@@ -809,21 +810,51 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   const old=fresh();old.generated_at=new Date(clock-1000).toISOString();await load({data:old});
   assert.match(text('data-alert'),/Out-of-order/);
   const absent=fresh();absent.plan={nav_estimate:999999,sleeves:{b3:{'US.SPY':999}}};absent.live=null;absent.vote_signals={status:'stale'};
-  await load({data:absent});assert.match(text('nav-summary'),/Awaiting first/);assert.ok(!text('sleeves').includes('999999'));
+  await load({data:absent});assert.match(text('nav-summary'),/Awaiting account observation/);assert.ok(!text('sleeves').includes('999999'));
   assert.match(text('vote-note'),/stale/);
   assert.doesNotMatch(text('vote-cards'), /Short signal/);
+  absent.config.risk.legacy_exit_only = true;
+  absent.broker_observation = {
+    status:'verified', at:absent.generated_at, cash:95000, nav:100000,
+    positions:{'US.XLP':21,'US.XLV':11}, market_values:{'US.XLP':2500,'US.XLV':2500}
+  };
+  await load({data:absent});
+  assert.match(text('access-summary'), /Competition account verified/);
+  assert.match(text('sleeves'), /XLP21 long.*XLV11 long/);
+  assert.match(text('sleeves'), /Sleeve attribution unavailable/);
+  assert.equal(text('nav-summary'), '$100,000.00');
+  assert.equal(text('cash-summary'), '$95,000.00');
+  absent.broker_observation.status='unavailable';
+  await load({data:absent});
+  assert.match(text('sleeves'), /Stale.*XLP21 long.*XLV11 long/);
+  assert.match(text('access-summary'), /Competition broker read unavailable/);
+  absent.config.risk.entry_sleeves = ['h_etf'];
+  await load({data:absent});
+  assert.match(text('sleeves'), /H ETF sleeve.*\$20,000.00 allocation/);
+  assert.match(text('mode-badge'), /H entries enabled/);
+  assert.match(text('vote-budget'), /4 positions per ticker.*\$40,000.00 cap/);
   const exitOnly = fresh();
   exitOnly.config.risk.legacy_exit_only = true;
+  exitOnly.config.risk.entry_sleeves = [];
   exitOnly.live.sleeves.h_etf = {'US.XLV':11, 'US.XLP':9};
   exitOnly.live.h_plan = {asof: '2026-11-19', entries:['US.DIA'], exits:{'US.XLV':'max_hold'}};
   await load({data:exitOnly});
   assert.equal(get('sleeves').children.length, 1);
+  assert.match(text('sleeves'),/Legacy holdings/);
   assert.match(text('sleeves'),/Exit only.*XLV.*Sell at next open/);
   assert.match(text('sleeves'),/XLP/);
   assert.doesNotMatch(text('sleeves'),/DIA/);
   exitOnly.live.sleeves.h_etf = {};
   await load({data:exitOnly});
   assert.match(text('sleeves'),/No legacy positions recorded/);
+  assert.equal(get('sleeves').hidden,false);
+  exitOnly.account_snapshot = {at: exitOnly.generated_at, positions: {}, cash: 100000};
+  exitOnly.runtime.mark_status = 'recent';
+  await load({data:exitOnly});
+  assert.equal(get('sleeves').hidden,true);
+  exitOnly.account_snapshot.at = new Date(clock - 180000).toISOString();
+  await load({data:exitOnly});
+  assert.equal(get('sleeves').hidden,false);
   for (const request of requests) { assert.equal(request.url,'/api/competition');assert.ok(!request.options.method||request.options.method==='GET'); }
   console.log('Competition DOM behaviors passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -54,6 +54,82 @@ def test_position_list_prefixes_symbol():
     assert out['data']['positions'][0]['symbol'] == 'US.SPY'
 
 
+@pytest.mark.parametrize('count', [0, 1, 2])
+def test_dashboard_account_read_requires_unique_competition_account(count):
+    from dual_strategy.competition.observation import COMPETITION_TITLE, read_account
+
+    calls = []
+    accounts = [
+        {'account_id': 'ORDINARY', 'account_title': COMPETITION_TITLE, 'account_type': 1, 'market_id': 100},
+        *({'account_id': f'PAPER-{i}', 'account_title': COMPETITION_TITLE, 'account_type': 2, 'market_id': 100}
+          for i in range(count)),
+    ]
+
+    def factory(allowlist, denylist, **kwargs):
+        def runner(argv):
+            calls.append(argv[1:])
+            if argv[1:4] == ['sim', 'account', 'list']:
+                return json.dumps({'accounts': accounts})
+            if argv[1:4] == ['sim', 'account', 'funds']:
+                return json.dumps({'balance': '900', 'total_asset': '1000', 'short_mv': '0'})
+            if argv[1:3] == ['sim', 'position']:
+                return json.dumps({'positions': [{'symbol': 'XLP', 'qty': '2', 'mv': '100'}]})
+            raise AssertionError('Unexpected command')
+        return CliTransport(allowlist, denylist, cli_path='moomoo', runner=runner)
+
+    if count != 1:
+        with pytest.raises(ExecutionBlocked, match='uniquely identified'):
+            read_account(factory)
+        assert len(calls) == 1
+    else:
+        result = read_account(factory)
+        assert [c[c.index('--account') + 1] for c in calls[1:]] == ['PAPER-0', 'PAPER-0']
+        assert result['positions'] == {'US.XLP': 2}
+        assert result['market_values'] == {'US.XLP': 100}
+        assert (result['cash'], result['nav']) == (900, 1000)
+        assert 'PAPER-0' not in json.dumps(result)
+
+
+def test_dashboard_account_read_rejects_a_false_flat_snapshot():
+    from dual_strategy.competition.observation import COMPETITION_TITLE, read_account
+
+    def factory(allowlist, denylist, **kwargs):
+        responses = {
+            ACCOUNT_LIST: {'accounts': [{'account_id': 'TEST', 'account_title': COMPETITION_TITLE,
+                                         'account_type': 2, 'market_id': 100}]},
+            CASH_INFO: {'balance': '96000', 'total_asset': '100000', 'long_mv': '4000', 'short_mv': '0'},
+            POSITION_LIST: {'positions': []},
+        }
+        return lambda tool, args: {'data': responses[tool]}
+
+    with pytest.raises(ExecutionBlocked, match='disagree'):
+        read_account(factory)
+
+
+def test_dashboard_observer_keeps_the_last_holdings_after_read_failure(monkeypatch):
+    from dual_strategy.competition import observation
+
+    snapshot = {'at': '2026-11-23T10:00:00Z', 'positions': {'US.XLP': 2}, 'cash': 400, 'nav': 600}
+    seen = []
+    observer = observation.AccountObserver()
+
+    def read_account():
+        if seen:
+            raise ExecutionBlocked('broker temporarily unavailable')
+        return snapshot
+
+    class StopAfterTwoPolls:
+        def is_set(self):
+            return len(seen) == 2
+
+        def wait(self, _):
+            seen.append(observer.snapshot)
+
+    monkeypatch.setattr(observation, 'read_account', read_account)
+    observer.run(StopAfterTwoPolls())
+    assert seen == [{**snapshot, 'status': 'verified'}, {**snapshot, 'status': 'unavailable'}]
+
+
 def test_history_passthrough_and_time_filters():
     orders = [{'order_id': 'X', 'symbol': 'SPY', 'market': 2, 'status': 4}]
     t, calls = make_transport({'history': {'data': {'orders': orders}}})

@@ -36,11 +36,15 @@ def default_cli_path() -> str:
         candidate = os.path.join(local, 'MoomooCLI', 'bin', 'moomoo.exe')
         if os.path.exists(candidate):
             return candidate
+    candidate = os.path.join(os.path.expanduser('~'), '.moomoo', 'bin', 'moomoo')
+    if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+        return candidate
     raise ExecutionBlocked('Moomoo CLI not found; install and sign in first')
 
 
 def _subprocess_runner(argv: list[str], timeout: float) -> str:
-    result = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
+    result = subprocess.run(argv, capture_output=True, text=True, timeout=timeout,
+                            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
     if result.returncode != 0:
         raise ExecutionBlocked('Moomoo CLI command failed; reconcile before retry')
     return result.stdout

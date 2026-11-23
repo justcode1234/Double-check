@@ -18,7 +18,8 @@ ASSETS = {'/': ('index.html', 'text/html'), '/practice': ('index.html', 'text/ht
 BACKTEST_SCOREBOARD = Path('reports') / 'backtest_v3' / 'scoreboard.json'
 
 
-def create_server(project: Path, db_path: Path, port: int = 8876, competition_home: bool = False):
+def create_server(project: Path, db_path: Path, port: int = 8876, competition_home: bool = False,
+                  account_observer=None):
     control_token = secrets.token_urlsafe(32)
     project_token = hashlib.sha256(os.fsencode(os.path.normcase(str(project.resolve())))).hexdigest()
 
@@ -65,7 +66,10 @@ def create_server(project: Path, db_path: Path, port: int = 8876, competition_ho
             if path == '/api/competition':
                 try:
                     from dual_strategy.competition.report import competition_payload
-                    return self.send(200, json.dumps(competition_payload(project), allow_nan=False, default=str))
+                    data = competition_payload(project)
+                    if account_observer is not None:
+                        data["broker_observation"] = account_observer.snapshot
+                    return self.send(200, json.dumps(data, allow_nan=False, default=str))
                 except (OSError, ValueError, KeyError):
                     return self.send(503, '{"error":"Competition state unreadable; the runner, not this page, controls orders"}')
             if path == '/api/backtest':

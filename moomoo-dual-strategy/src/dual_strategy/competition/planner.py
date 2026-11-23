@@ -37,7 +37,8 @@ class Account:
         return sum(abs(q) * self.quotes[s] for s, q in self.positions.items() if q)
 
     def missing_quotes(self) -> list[str]:
-        return [s for s, q in self.positions.items() if q and not (s in self.quotes and self.quotes[s] > 0)]
+        return [s for s, q in self.positions.items()
+                if q and not (math.isfinite(self.quotes.get(s, 0)) and self.quotes.get(s, 0) > 0)]
 
 
 @dataclass
@@ -73,8 +74,10 @@ def _event(state, at, kind, **data):
 def mark_risk(state: dict, account: Account, session: str, cfg: dict) -> str | None:
     """Update the account risk state from broker NAV. Returns a flatten reason when everything must be closed now."""
     r = cfg["risk"]
+    if account.missing_quotes():
+        return None
     nav = account.nav
-    if not math.isfinite(nav) or nav <= 0 or account.missing_quotes():
+    if not math.isfinite(nav) or nav <= 0:
         return None                                         # cannot value the account: entries are blocked elsewhere
     bt = account.broker_total
     if type(bt) in (int, float) and math.isfinite(bt) and bt > 0:
@@ -134,9 +137,14 @@ def attribution_errors(state: dict, account: Account) -> list[str]:
     return errors
 
 
-def entry_block(state: dict, account: Account, session: str, cfg: dict) -> str | None:
+def entries_disabled(cfg: dict, sleeve: str | None) -> bool:
+    risk = cfg.get("risk", {})
+    return bool(risk.get("legacy_exit_only") and sleeve not in risk.get("entry_sleeves", ()))
+
+
+def entry_block(state: dict, account: Account, session: str, cfg: dict, sleeve: str | None = None) -> str | None:
     r = cfg["risk"]
-    if r.get("legacy_exit_only"):
+    if entries_disabled(cfg, sleeve):
         return "legacy strategies are exit-only"
     if state["halted"] is not None:
         return "drawdown_halt (human must clear private state)"
@@ -146,7 +154,9 @@ def entry_block(state: dict, account: Account, session: str, cfg: dict) -> str |
         return "order_budget"
     if account.missing_quotes():
         return f"missing quotes {account.missing_quotes()}"
-    stale = [s for s, a in account.quote_age_seconds.items() if a > r["max_quote_age_seconds"]]
+    if not math.isfinite(account.nav) or account.nav <= 0:
+        return "unverified account NAV"
+    stale = [s for s, a in account.quote_age_seconds.items() if not -5 <= a <= r["max_quote_age_seconds"]]
     if stale:
         return f"stale quotes {stale}"
     errs = attribution_errors(state, account)
@@ -250,7 +260,7 @@ def plan_b3(state: dict, account: Account, session: str, decision, cfg: dict, no
         return [], "flat, nothing held"
     if held > 0:
         return [], "long, already held"
-    why = entry_block(state, account, session, cfg)
+    why = entry_block(state, account, session, cfg, "b3")
     if why:
         return [], f"entry blocked: {why}"
     limits = capital_limits("b3", account.sleeve_capital.get("b3"), cfg, state["reduced"])
@@ -273,10 +283,10 @@ def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: di
         q = held.get(s, 0)
         if q > 0 and s in account.quotes:
             out.append(_intent(now, session, "h_etf", s, "SELL", q, account.quotes[s], f"h_{why}", cfg, True, "open"))
-    entries = [s for s in plan.get("entries", []) if held.get(s, 0) == 0]
+    entries = [s for s in dict.fromkeys(plan.get("entries", [])) if held.get(s, 0) == 0]
     if not entries:
         return out, "no entries"
-    why = entry_block(state, account, session, cfg)
+    why = entry_block(state, account, session, cfg, "h_etf")
     if why:
         return out, f"entries blocked: {why}"
     limits = capital_limits("h_etf", account.sleeve_capital.get("h_etf"), cfg, state["reduced"])
@@ -288,10 +298,10 @@ def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: di
     cash = min(account.cash - 0.99, account.nav - account.gross)          # no leverage
     for s in entries:
         price = account.quotes.get(s)
-        if not price or price <= 0:
+        if price is None or not math.isfinite(price) or price <= 0:
             continue
         limit = _limit(price, "BUY", cfg)
-        held_value = exposure(state, s, price)                            # every sleeve counts toward the cap
+        held_value = exposure(state, s, max(price, limit))                # every sleeve counts toward the cap
         budget = min(limits["per_etf_budget"], cfg["risk"]["name_cap_usd"] - held_value, room, cash)
         qty = math.floor(budget / limit)
         if qty <= 0:
@@ -347,7 +357,7 @@ def plan_entry(state: dict, account: Account, session: str, sleeve: str, symbol:
     cash (shorts reserve their full notional). Half size applies to both the risk size and the notional cap."""
     if side < 0 and not shorts_allowed(sleeve, cfg):
         return [], f"entry blocked: {sleeve} may not short"
-    why = entry_block(state, account, session, cfg) or no_entry_reason(sleeve, session, now, cfg)
+    why = entry_block(state, account, session, cfg, sleeve) or no_entry_reason(sleeve, session, now, cfg)
     if why:
         return [], f"entry blocked: {why}"
     if state["sleeves"].get(sleeve, {}).get(symbol):
@@ -393,11 +403,11 @@ def plan_target(state: dict, account: Account, session: str, sleeve: str, symbol
         out += plan_close(state, account, session, sleeve, symbol, f"{reason}_exit", cfg, now, f"{tag}x")
     if target == 0:
         return out, "exit to flat"
-    if cfg["risk"].get("legacy_exit_only"):
+    if entries_disabled(cfg, sleeve):
         return out, "entry blocked: legacy strategies are exit-only"
     if target < 0 and not shorts_allowed(sleeve, cfg):
         return out, f"entry blocked: {sleeve} may not short"
-    why = entry_block(state, account, session, cfg) if not held else None
+    why = entry_block(state, account, session, cfg, sleeve) if not held else None
     why = why or no_entry_reason(sleeve, session, now, cfg)
     if why:
         return out, f"entry blocked: {why}"

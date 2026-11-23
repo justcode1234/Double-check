@@ -1,7 +1,7 @@
 import unittest
 from datetime import date, datetime, time, timedelta, timezone
 
-from dual_strategy.data.calendar import NY, decision_times, flatten_time, prior_sessions, session_bounds
+from dual_strategy.data.calendar import NY, decision_times, flatten_time, next_session_open, prior_sessions, session_bounds
 
 
 class CalendarTests(unittest.TestCase):
@@ -47,6 +47,16 @@ class CalendarTests(unittest.TestCase):
         self.assertEqual(prior_sessions(date(2026, 11, 30), 8), [date(2026, 11, d) for d in (17, 18, 19, 20, 23, 24, 25, 27)])
         self.assertEqual(prior_sessions(date(2026, 11, 26), 2), [date(2026, 11, 24), date(2026, 11, 25)])
         self.assertEqual(prior_sessions(date(2026, 11, 17), 0), [])
+
+    def test_next_open_before_open_after_close_and_on_holiday(self):
+        for at, day in [
+            (datetime(2026, 11, 25, 8, tzinfo=NY), 25),
+            (datetime(2026, 11, 25, 16, tzinfo=NY), 27),
+            (datetime(2026, 11, 26, 10, tzinfo=NY), 27),
+            (datetime(2026, 11, 27, 13, tzinfo=NY), 30),
+        ]:
+            with self.subTest(at=at):
+                self.assertEqual(next_session_open(at), datetime(2026, 11, day, 9, 30, tzinfo=NY))
 
     def test_naive_timestamps_are_rejected_everywhere(self):
         naive = datetime(2026, 11, 17, 10)

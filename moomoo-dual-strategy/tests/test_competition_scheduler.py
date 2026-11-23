@@ -6,6 +6,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 import yaml
@@ -15,11 +16,12 @@ SCRIPT = ROOT / 'scripts' / 'schedule_competition.py'
 
 
 @pytest.fixture
-def scheduler():
+def scheduler(monkeypatch):
     assert SCRIPT.exists(), 'Missing deterministic competition scheduler'
     spec = importlib.util.spec_from_file_location('competition_scheduler', SCRIPT)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    monkeypatch.setattr(module, 'sys', SimpleNamespace(platform='darwin'))
     return module
 
 
@@ -186,6 +188,16 @@ def test_success_launches_once_detached_and_preserves_live_state(scheduler, proj
     assert 'TEST-ONLY-ACCOUNT' not in json.dumps(result)
 
 
+def test_linux_scheduler_launches_the_reconciled_runner_directly(scheduler, project, monkeypatch):
+    monkeypatch.setattr(scheduler, 'sys', SimpleNamespace(platform='linux'))
+    assert scheduler.runner_command(project) == [sys.executable, str(project / 'scripts/run_competition.py'),
+                                                'loop', '--execute']
+    result = scheduler.tick(project)
+    assert result['status'] == 'unexpected_exit'
+    assert (project / 'loop-ran').read_text() == 'started'
+    assert scheduler.tick(project)['status'] == 'attempt_already_recorded'
+
+
 def test_concurrent_scheduler_lock_blocks_launch(scheduler, project):
     import fcntl
     path=project/'private/competition/scheduler'; path.mkdir()
@@ -249,13 +261,17 @@ def test_unresolved_scheduler_failure_blocks_future_sessions(scheduler, project,
 
 def test_one_transient_read_failure_gets_exactly_one_retry(scheduler, project, monkeypatch):
     real = scheduler.preflight
+    real_popen = subprocess.Popen
     calls = []
     def transient(root, state, session):
         calls.append(session)
         if len(calls) == 1:
             raise subprocess.TimeoutExpired('status', 180)
         return real(root, state, session)
+    def spawn(argv, **kwargs):
+        return real_popen(argv[2:] if argv[0] == '/usr/bin/caffeinate' else argv, **kwargs)
     monkeypatch.setattr(scheduler, 'preflight', transient)
+    monkeypatch.setattr(scheduler.subprocess, 'Popen', spawn)
     assert scheduler.tick(project)['status'] == 'unexpected_exit'
     assert calls == ['2026-11-23', '2026-11-23']
     assert (project / 'loop-ran').exists()

@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 import math
 import re
-import shlex
 import subprocess
+import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
@@ -14,7 +14,7 @@ from pathlib import Path
 
 from dual_strategy.competition.signals import b3_decision_times
 from dual_strategy.competition.store import Store, load_config, sleeve_performance
-from dual_strategy.data.calendar import NY, session_bounds
+from dual_strategy.data.calendar import NY, next_session_open, session_bounds
 from dual_strategy.reporting.service import redacted
 
 SAFE_KEYS = ("initial_nav", "high_water", "last_nav", "last_mark_at", "day", "day_start_nav", "halted", "locked_day",
@@ -52,10 +52,34 @@ def _vote_signals(project: Path, cfg: dict, now: datetime) -> dict:
         age = (now - datetime.fromisoformat(report["observed_at"])).total_seconds()
         if not -5 <= age <= 60:
             return {"status": "stale"}
+        status = report["status"]
+        if status not in ("current", "waiting", "preopen", "closed", "unavailable"):
+            return {"status": "unavailable"}
+        if status == "current":
+            bar = datetime.fromisoformat(report["bar_end"])
+            bounds = session_bounds(now)
+            if (not bounds or not bounds[0] < bar <= now < bounds[1] or
+                    (bar - bounds[0]).total_seconds() % 300 != 0 or (now - bar).total_seconds() > 360):
+                return {"status": "stale"}
+            threshold = cfg.get("two_vote", {}).get("required_votes", 2)
+            tickers = report["tickers"]
+            if (type(threshold) is not int or threshold < 1 or report["required_votes"] != threshold
+                    or set(tickers) != {"US.SPY", "US.QQQ"}):
+                return {"status": "unavailable"}
+            for row in tickers.values():
+                votes = row["rules"].values()
+                if not votes or any(type(v) is not int or v not in (-1, 0, 1) for v in votes):
+                    return {"status": "unavailable"}
+                buy, sell = sum(v == 1 for v in votes), sum(v == -1 for v in votes)
+                direction = int(buy >= threshold) - int(sell >= threshold)
+                reported = row["buy"], row["sell"], row["signal"]
+                if (any(type(value) is not int for value in reported) or reported != (buy, sell, direction)
+                        or type(row["entry_window"]) is not bool):
+                    return {"status": "unavailable"}
         return report
     except FileNotFoundError:
         return {"status": "waiting"}
-    except (OSError, ValueError, KeyError, TypeError):
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return {"status": "unavailable"}
 
 
@@ -85,29 +109,44 @@ def _clean(x):
 
 
 def _process(project: Path) -> dict:
+    script = re.escape(str(project.resolve() / "scripts/run_competition.py"))
+    windows = sys.platform == "win32"
+    flags = re.IGNORECASE if windows else 0
+    runner = re.compile(rf'(?:^|\s)"?{script}"?\s+loop\s+.*?(?<!\S)--execute(?:\s|$)', flags)
+    python = re.compile(r'^(?:"[^"]*[\\/]python[^"\\/]*"|(?:\S*[\\/])?python[^\s\\/]*)\s', flags)
+    unknown = {"status": "unknown", "count": None}
     try:
-        result = subprocess.run(["ps", "-axo", "pid=,stat=,args="], capture_output=True, text=True, timeout=2)
+        command = [
+            "powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+            "$ErrorActionPreference='Stop'; "
+            "ConvertTo-Json -Compress -InputObject @(Get-CimInstance Win32_Process "
+            "-Filter \"Name LIKE 'python%'\" | Select-Object ProcessId,ParentProcessId,CommandLine)",
+        ] if windows else ["ps", "-axo", "pid=,stat=,args="]
+        result = subprocess.run(command, capture_output=True, text=True, timeout=3,
+                                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         if result.returncode:
-            return {"status": "unknown", "count": None}
-        count = 0
-        for row in result.stdout.splitlines():
-            parts = row.split(maxsplit=2)
-            if len(parts) != 3 or "Z" in parts[1]:
-                continue
-            args = shlex.split(parts[2])
-            if (args and Path(args[0]).name.lower().startswith("python")
-                    and str(project.resolve() / "scripts/run_competition.py") in args
-                    and "loop" in args and "--execute" in args):
-                count += 1
+            return unknown
+        if windows:
+            rows = json.loads(result.stdout)
+            if any(row["CommandLine"] is None for row in rows):
+                return unknown
+            matches = [row for row in rows if python.match(row["CommandLine"]) and runner.search(row["CommandLine"])]
+            # A Windows venv redirector and its Python child are one execution loop.
+            count = len({row["ProcessId"] for row in matches} - {row["ParentProcessId"] for row in matches})
+        else:
+            rows = [row.split(maxsplit=2) for row in result.stdout.splitlines()]
+            count = sum(len(row) == 3 and "Z" not in row[1] and python.match(row[2]) is not None
+                        and runner.search(row[2]) is not None for row in rows)
         return {"status": "running" if count == 1 else "multiple" if count > 1 else "stopped", "count": count}
-    except (OSError, subprocess.TimeoutExpired, ValueError):
-        return {"status": "unknown", "count": None}
+    except (OSError, subprocess.TimeoutExpired, ValueError, KeyError, TypeError):
+        return unknown
 
 
 def _runtime(project: Path, state: dict | None, cfg: dict, now: datetime) -> dict:
     bounds = session_bounds(now)
     schedule = []
     opened, closed = bounds if bounds else (None, None)
+    next_open = next_session_open(now)
     if bounds:
         schedule = [{"at": opened + timedelta(seconds=10), "label": "H open orders"}]
         schedule += [{"at": t + timedelta(seconds=15), "label": "B3 decision"}
@@ -122,6 +161,7 @@ def _runtime(project: Path, state: dict | None, cfg: dict, now: datetime) -> dic
         age = (now - datetime.fromisoformat(mark)).total_seconds()
         mark_status = "clock_mismatch" if age < 0 else "stale" if age > 120 else "recent"
     return {"process": _process(project), "market_phase": "closed" if not bounds or now >= closed else "preopen" if now < opened else "open",
+            "next_open": next_open.isoformat() if next_open else None,
             "session_open": opened.isoformat() if opened else None, "session_close": closed.isoformat() if closed else None,
             "schedule": [{**s, "at": s["at"].isoformat()} for s in schedule],
             "next_action": {**next_action, "at": next_action["at"].isoformat()} if next_action else None,
@@ -311,7 +351,8 @@ def competition_payload(project: Path, now: datetime | None = None) -> dict:
     runtime = _runtime(project, states["live"], cfg, now)
     return _clean({
         "generated_at": now.isoformat(),
-        "config": {k: cfg[k] for k in ("allocation", "b3", "h_etf", "noise", "vwap", "orb", "risk", "execution_enabled")},
+        "config": {k: cfg[k] for k in ("allocation", "b3", "h_etf", "noise", "vwap", "orb", "two_vote", "risk", "execution_enabled")
+                   if k in cfg},
         "live": _summary(states["live"], cfg, now), "plan": _summary(states["plan"], cfg, now),
         "runtime": runtime, "access": _access_health(stores["live"], states["live"], now),
         "startup": _startup_health(project, runtime["process"], now),

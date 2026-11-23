@@ -10,6 +10,7 @@ import os
 import plistlib
 import shlex
 import subprocess
+import sys
 from datetime import datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -40,10 +41,20 @@ def python_path(root):
 
 
 def environment(root):
-    return {'HOME': str(Path.home()),
-            'PATH': f'{Path.home()}/.moomoo/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin',
+    home = Path.home()
+    return {'HOME': str(home),
+            'PATH': f'{home}/.moomoo/bin:{home}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',
             'PYTHONPATH': str(root / 'src'), 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONUNBUFFERED': '1',
-            'LANG': 'en_US.UTF-8'}
+            'LANG': 'en_US.UTF-8' if sys.platform == 'darwin' else 'C.UTF-8'}
+
+
+def runner_command(root):
+    command = [str(python_path(root)), str(root / 'scripts/run_competition.py'), 'loop', '--execute']
+    if sys.platform == 'darwin':
+        return ['/usr/bin/caffeinate', '-i', *command]
+    if sys.platform.startswith('linux'):
+        return command
+    raise Blocked('unsupported_scheduler_platform')
 
 
 def runner_processes():
@@ -249,8 +260,7 @@ def tick(root):
                 raise Blocked('state_changed_during_preflight')
             logpath = root / 'private/competition' / f'runner-{session}.log'
             with os.fdopen(os.open(logpath, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600), 'a') as log:
-                child = subprocess.Popen(['/usr/bin/caffeinate', '-i', str(python_path(root)),
-                                          str(root / 'scripts/run_competition.py'), 'loop', '--execute'],
+                child = subprocess.Popen(runner_command(root),
                                          cwd=root, env=environment(root), stdin=subprocess.DEVNULL,
                                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True, umask=0o077)
                 result.update(status='launched', pid=child.pid, pgid=os.getpgid(child.pid), launched_at=clock().isoformat())

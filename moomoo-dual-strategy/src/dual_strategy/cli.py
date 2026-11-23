@@ -107,8 +107,12 @@ def main(argv=None):
     elif args.command == 'serve':
         import subprocess
         import sys
+        from threading import Event, Thread
+        from dual_strategy.competition.observation import AccountObserver
         from dual_strategy.competition.store import load_config
-        server = create_server(project, db, args.port, competition_home=args.live_votes)
+        observer = AccountObserver() if args.live_votes else None
+        stop = Event()
+        server = create_server(project, db, args.port, competition_home=args.live_votes, account_observer=observer)
         worker = None
         try:
             if args.live_votes:
@@ -116,11 +120,13 @@ def main(argv=None):
                 worker = subprocess.Popen(
                     [sys.executable, str(project / 'scripts/competition_vote_monitor.py'), '--output', str(output)],
                     cwd=project, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                Thread(target=observer.run, args=(stop,), daemon=True, name='competition-account-observer').start()
             print(f'Local dashboard: http://127.0.0.1:{server.server_port}', flush=True)
             server.serve_forever()
         except KeyboardInterrupt:
             pass
         finally:
+            stop.set()
             if worker is not None:
                 worker.terminate()
                 worker.wait(timeout=10)

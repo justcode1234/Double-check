@@ -14,11 +14,17 @@ from tempfile import NamedTemporaryFile
 
 import pandas as pd
 
-from competition_vote_replay import (
-    CFG, DEFAULT_VOTES, I, SYMBOLS, indicator_rules, last_entry, session_windows, supported_side,
-)
+from dual_strategy.competition import intraday as I
 from dual_strategy.competition.market import Market, MarketDataError
+from dual_strategy.competition.store import load_config
+from dual_strategy.competition.vote_rules import SYMBOLS, indicator_rules, last_entry, session_windows, supported_side
 from dual_strategy.data.calendar import NY, prior_sessions, session_bounds
+from dual_strategy.execution.moomoo_paper import ExecutionBlocked
+
+CFG = load_config(Path(__file__).resolve().parents[1])
+DEFAULT_VOTES = CFG["two_vote"]["required_votes"]
+LOT_USD = CFG["two_vote"]["entry_usd"]
+LOTS_PER_SYMBOL = CFG["two_vote"]["max_lots_per_symbol"]
 
 
 def regular_bars(rows, opened, through):
@@ -76,7 +82,8 @@ class Monitor:
     def observe(self, now):
         day = now.astimezone(NY).date()
         base = {"schema_version": 1, "observed_at": now.isoformat(), "symbols": SYMBOLS,
-                "required_votes": DEFAULT_VOTES, "entry_usd": 10_000, "max_open_positions": len(SYMBOLS)}
+                "required_votes": DEFAULT_VOTES, "entry_usd": LOT_USD,
+                "max_open_positions": len(SYMBOLS) * LOTS_PER_SYMBOL}
         bounds = session_bounds(day)
         if not bounds or now >= bounds[1]:
             return {**base, "status": "closed"}
@@ -131,12 +138,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    monitor = Monitor(Market())
+    monitor = None
     while True:
         now = datetime.now(timezone.utc)
         try:
+            if monitor is None:
+                monitor = Monitor(Market())
             status = monitor.observe(now)
-        except (MarketDataError, subprocess.TimeoutExpired, KeyError, TypeError, ValueError, OSError):
+        except (ExecutionBlocked, MarketDataError, subprocess.TimeoutExpired, KeyError, TypeError, ValueError, OSError):
             status = {"schema_version": 1, "status": "unavailable", "observed_at": now.isoformat()}
         publish(args.output, status)
         time.sleep(10)

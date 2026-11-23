@@ -408,10 +408,13 @@ def competition_report(tmp_path, monkeypatch):
     state['h_plan'] = {'asof': '2026-11-19', 'entries': ['US.XLV', 'US.XLP'], 'exits': {}, 'blocked': None}
     store.save(state)
 
+    script = tmp_path / 'scripts/run_competition.py'
+
     def processes(args, **kwargs):
         assert args == ['ps', '-axo', 'pid=,stat=,args=']
-        return SimpleNamespace(returncode=0, stdout=f'42 S /usr/bin/python {tmp_path}/scripts/run_competition.py loop --execute\n')
+        return SimpleNamespace(returncode=0, stdout=f'42 S /usr/bin/python {script} loop --execute\n')
 
+    monkeypatch.setattr(report, 'sys', SimpleNamespace(platform='darwin'))
     monkeypatch.setattr(report, 'subprocess', SimpleNamespace(run=processes, TimeoutExpired=subprocess.TimeoutExpired), raising=False)
     return report, store
 
@@ -496,7 +499,7 @@ def test_competition_charts_only_execute_risk_marks_and_report_incomplete_audit(
 def test_competition_detects_only_this_projects_python_loop(competition_report, tmp_path, monkeypatch, rows, status):
     from types import SimpleNamespace
     report, _ = competition_report
-    command = f'/usr/bin/python {tmp_path}/scripts/run_competition.py loop --execute'
+    command = f'/usr/bin/python {tmp_path / "scripts/run_competition.py"} loop --execute'
     listing = {'': '', 'matching': f'42 S {command}', 'duplicate': f'42 S {command}\n43 S {command}',
                'other': '77 S /usr/bin/python /other/scripts/run_competition.py loop --execute', 'zombie': f'42 Z {command}'}[rows]
     monkeypatch.setattr(report.subprocess, 'run', lambda *a, **kw: SimpleNamespace(returncode=0, stdout=listing))
@@ -510,6 +513,61 @@ def test_competition_process_probe_failure_is_unknown_not_stopped(competition_re
         raise OSError('ps unavailable')
     monkeypatch.setattr(report.subprocess, 'run', unavailable)
     assert report.competition_payload(tmp_path)['runtime']['process']['status'] == 'unknown'
+
+
+def test_competition_windows_probe_counts_venv_and_child_as_one_runner(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from dual_strategy.competition import report
+
+    command = f'"C:/project with spaces/python.exe" "{tmp_path / "scripts/run_competition.py"}" loop --execute'
+    rows = [
+        {'ProcessId': 10, 'ParentProcessId': 1, 'CommandLine': command},
+        {'ProcessId': 11, 'ParentProcessId': 10, 'CommandLine': command},
+        {'ProcessId': 12, 'ParentProcessId': 1, 'CommandLine': 'python -m dual_strategy.cli serve --live-votes'},
+    ]
+
+    def processes(args, **kwargs):
+        assert args[0] == 'powershell.exe'
+        return SimpleNamespace(returncode=0, stdout=json.dumps(rows))
+
+    monkeypatch.setattr(report, 'sys', SimpleNamespace(platform='win32'))
+    monkeypatch.setattr(report.subprocess, 'run', processes)
+    assert report._process(tmp_path) == {'status': 'running', 'count': 1}
+
+
+@pytest.mark.parametrize('problem,wanted', [
+    (None, 'current'), ('old_report', 'stale'), ('old_bar', 'stale'), ('future_bar', 'stale'),
+    ('off_grid', 'stale'), ('one_symbol', 'unavailable'), ('wrong_count', 'unavailable'),
+    ('ambiguous_direction', 'unavailable'), ('wrong_threshold', 'unavailable'),
+])
+def test_competition_vote_feed_requires_recent_complete_consistent_votes(tmp_path, problem, wanted):
+    from dual_strategy.competition.report import _vote_signals
+
+    now = datetime(2026, 11, 23, 15, 5, 25, tzinfo=timezone.utc)
+    row = {'buy': 2, 'sell': 0, 'signal': 1, 'entry_window': True, 'rules': {'one': 1, 'two': 1}}
+    report = {'schema_version': 1, 'status': 'current', 'observed_at': now.isoformat(),
+              'bar_end': '2026-11-23T15:05:00+00:00', 'required_votes': 2,
+              'tickers': {'US.SPY': row, 'US.QQQ': {**row}}}
+    if problem == 'old_report':
+        report['observed_at'] = (now - timedelta(seconds=61)).isoformat()
+    elif problem == 'old_bar':
+        report['bar_end'] = '2026-11-23T14:55:00+00:00'
+    elif problem == 'future_bar':
+        report['bar_end'] = '2026-11-23T15:10:00+00:00'
+    elif problem == 'off_grid':
+        report['bar_end'] = '2026-11-23T15:04:00+00:00'
+    elif problem == 'one_symbol':
+        del report['tickers']['US.QQQ']
+    elif problem == 'wrong_count':
+        row['buy'] = 99
+    elif problem == 'ambiguous_direction':
+        row['rules'] = {**row['rules'], 'three': -1, 'four': -1}
+        row['sell'] = 2
+    elif problem == 'wrong_threshold':
+        report['required_votes'] = 1
+    path = tmp_path / 'vote_signals.json'
+    path.write_text(json.dumps(report), encoding='utf-8')
+    assert _vote_signals(tmp_path, {'state_dir': '.'}, now)['status'] == wanted
 
 
 @pytest.mark.parametrize('error,expected', [
@@ -764,6 +822,7 @@ def test_malformed_receipt_cannot_certify_sizing_capital(competition_report, tmp
         f.write(content + '\n')
     from dual_strategy.competition.store import sleeve_performance, load_config
     cfg = load_config(tmp_path)
+    cfg['risk']['legacy_exit_only'] = False  # Exercise the capital gate with entries otherwise enabled.
     a = planner.Account(datetime(2026, 11, 23, 15, tzinfo=timezone.utc), 99800, {'US.XLV': 2}, {'US.XLV': 100, 'US.XLP': 100})
     p = sleeve_performance(store, store.load(), asdict(a), cfg)
     assert all(s['capital'] is None and s['status'] == 'incomplete' for s in p['sleeves'].values())

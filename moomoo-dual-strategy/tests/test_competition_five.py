@@ -440,7 +440,7 @@ def test_daily_report_after_the_close(runner, tmp_path, monkeypatch):
 
 
 def test_legacy_exit_only_keeps_existing_h_exit_and_blocks_new_exposure(runner, monkeypatch):
-    runner.cfg = {**runner.cfg, "risk": {**CFG["risk"], "legacy_exit_only": True}}
+    runner.cfg = {**runner.cfg, "risk": {**CFG["risk"], "legacy_exit_only": True, "entry_sleeves": []}}
     runner.state["sleeves"]["h_etf"] = {"US.SPY": 8, "US.QQQ": 6}
     account = acct(positions={"US.SPY": 8, "US.QQQ": 6})
     plan = {"entries": ["US.IWM"], "exits": {"US.SPY": "max_hold"}}
@@ -454,3 +454,163 @@ def test_legacy_exit_only_keeps_existing_h_exit_and_blocks_new_exposure(runner, 
     runner.send(exits, SESSION, "exit")
     assert len(runner.sent) == 1
     assert runner.state["sleeves"]["h_etf"] == {"US.QQQ": 6}
+
+
+def test_h_entries_are_restored_without_enabling_other_legacy_entries(runner):
+    runner.cfg = load_config(PROJECT)
+    runner.state["sleeves"]["h_etf"] = {"US.XLP": 2}
+    account = acct(positions={"US.XLP": 2}, quotes={"US.XLP": 90.0})
+    plan = {"entries": ["US.IWM"], "exits": {}}
+    intents, why = planner.plan_h_open(runner.state, account, SESSION, plan, runner.cfg, NOW)
+    assert why == "planned"
+    buy, = intents
+    assert buy.symbol == "US.IWM" and buy.side == "BUY" and not buy.close_only
+    assert buy.qty * buy.limit_price <= 2000
+    assert planner.entry_block(runner.state, account, SESSION, runner.cfg, "b3") == "legacy strategies are exit-only"
+    runner.send(intents, SESSION, "h-entry")
+    assert runner.state["sleeves"]["h_etf"] == {"US.XLP": 2, "US.IWM": buy.qty}
+
+
+@pytest.mark.parametrize("sold,buys", [(0, []), (10, [("US.IWM", 4)]), (60, [("US.IWM", 9), ("US.QQQ", 4)])])
+def test_h_open_resizes_from_confirmed_exit_and_entry_fills(runner, monkeypatch, sold, buys):
+    monkeypatch.delattr(runner, "audit")
+    runner.cfg = load_config(PROJECT)
+    runner.quotes["US.XLP"] = 100
+    runner.state["sleeves"]["h_etf"] = {"US.XLP": 60}
+    runner.state["h_entry_session"]["US.XLP"] = "2026-11-20"
+    runner.state["h_plan"] = {"asof": "2026-11-20", "entries": ["US.IWM", "US.QQQ"],
+                              "exits": {"US.XLP": "rsi_recovery"}}
+    link = {"intent_id": "previous-buy", "audit_id": "test", "order_id": "prior"}
+    for event, fields in [
+        ("intent", {"mode": "EXECUTE", "sleeve": "h_etf", "symbol": "US.XLP", "side": "BUY", "qty": 60}),
+        ("acknowledged", {}),
+        ("outcome", {"status": "FILLED", "filled": 60, "qty": 60, "avg_price": 100}),
+    ]:
+        runner.store.append("2026-11-20", {"event": event, **link, **fields})
+    runner.fill["US.XLP", "SELL"] = sold
+
+    runner.h_open()
+    assert [(i.symbol, i.side, i.qty) for i in runner.sent][:1] == [("US.XLP", "SELL", 60)]
+    assert [(i.symbol, i.qty) for i in runner.sent if i.side == "BUY"] == buys
+    exposure = sum(q * runner.quotes[s] for s, q in runner.state["sleeves"]["h_etf"].items())
+    assert exposure <= 6000
+    runner.h_open()
+    assert len(runner.sent) == 1 + len(buys)
+
+
+@pytest.mark.parametrize("invalid", [
+    {"order_id": "different"}, {"qty": 4}, {"filled": 3}, {"filled": True}, {"filled": 1},
+    {"avg_price": math.nan}, {"avg_price": 0}, {"status": "WORKING"},
+])
+def test_invalid_terminal_fill_halts_before_retrying_or_opening_again(runner, monkeypatch, invalid):
+    monkeypatch.setattr(runner.broker, "wait", lambda oid, *_: {
+        "order_id": oid, "status": "FILLED", "filled": 2, "qty": 2, "avg_price": 200, **invalid,
+    })
+    intent = planner.Intent("buy", "t", "h_etf", "US.IWM", "BUY", 2, 200, 200, "test", False)
+    with pytest.raises(ExecutionBlocked, match="invalid terminal fill"):
+        runner.send([intent, intent], SESSION)
+    assert len(runner.sent) == 1
+    saved = runner.store.load()
+    assert saved["halted"]["kind"] == "order_error"
+    assert saved["sleeves"]["h_etf"] == {}
+
+
+def test_h_open_atomic_claim_prevents_second_caller_after_a_clear_prescan(runner, monkeypatch):
+    monkeypatch.delattr(runner, "audit")
+    runner.state["h_plan"] = {"asof": "2026-11-20", "entries": ["US.IWM"], "exits": {}}
+    original_audit = runner.store.audit
+
+    def race(session, record, **kwargs):
+        if record["kind"] == "h_open_started":
+            original_audit(session, record, **kwargs)
+        return original_audit(session, record, **kwargs)
+    monkeypatch.setattr(runner.store, "audit", race)
+    monkeypatch.setattr(runner, "risk", lambda *_: pytest.fail("Concurrent claimant did not own the session"))
+    runner.h_open()
+    assert runner.sent == []
+    assert (runner.store.dir / "audit" / SESSION / "h_open_started.json").exists()
+
+
+@pytest.fixture
+def vote_replay(monkeypatch):
+    import sys
+
+    ref = SimpleNamespace(CFG=load_config(PROJECT), I=I, R=SimpleNamespace(MINUTES=[390], DAYS=[NOW.date()]),
+                          RS=None, spy_decision_bars=None)
+    monkeypatch.setitem(sys.modules, "competition_parity_regime", ref)
+    return runpy.run_path(str(PROJECT / "scripts" / "competition_vote_replay.py"))
+
+
+def test_two_vote_replay_caps_each_ticker_across_lots_and_reserves_gains(vote_replay):
+    replay = vote_replay
+    spy, qqq = replay["SYMBOLS"]
+    opens = {s: np.full((1, 78), 100.0) for s in (spy, qqq)}
+    opens[spy][0, 12:], opens[qqq][0, 12:] = 102.0, 102.0
+    opens[spy][0, -1], opens[qqq][0, -1] = 110.0, 90.0
+    pulses = np.zeros(78, dtype=int)
+    pulses[[6, 8, 10, 12, 14]] = 2
+    neutral = np.zeros_like(pulses)
+    cash = replay["VoteCash"]()
+    trades = replay["replay_day"](0, {s: SimpleNamespace(open=a) for s, a in opens.items()},
+                                  {spy: (neutral, pulses), qqq: (pulses, neutral)}, 10000, 2, capital=cash)
+    assert len(trades) == 8
+    for symbol in (spy, qqq):
+        lots = [t for t in trades if t.symbol == symbol]
+        assert [t.entry_slot for t in lots] == [6, 8, 10, 12]
+        assert all(t.shares * t.entry * (1 + I.FR) <= 10000 for t in lots)
+        assert sum(t.shares for t in lots) * 102.0 * (1 + I.FR) <= 40000
+        assert lots[-1].shares < lots[0].shares
+    assert all(t.pnl > 0 for t in trades)
+    assert cash.reserved_profit == pytest.approx(sum(t.pnl for t in trades))
+    assert cash.sizing_capital == 80000
+    cash.settle(-200)
+    assert cash.sizing_capital == 79800
+    assert cash.reserved_profit == pytest.approx(sum(t.pnl for t in trades))
+
+
+def test_two_vote_replay_blocks_bad_quotes_and_conflicting_votes(vote_replay):
+    spy, qqq = vote_replay["SYMBOLS"]
+    rows = np.full((1, 78), 100.0)
+    blobs = {s: SimpleNamespace(open=rows) for s in (spy, qqq)}
+    agree = np.full(78, 2)
+    neutral = np.zeros_like(agree)
+    replay = vote_replay["replay_day"]
+    cash = vote_replay["VoteCash"]()
+    cash.settle(50000)
+    cash.settle(-80000)
+    assert cash.sizing_capital == 0
+    assert replay(0, blobs, {spy: (neutral, agree), qqq: (agree, neutral)}, 10000, 2, capital=cash) == []
+    assert cash.reserved_profit == 50000
+    assert replay(0, blobs, {spy: (agree, agree), qqq: (agree, agree)}, 10000, 2) == []
+    rows[0, 6] = math.nan
+    with pytest.raises(ValueError, match="invalid two-vote fill price"):
+        replay(0, blobs, {spy: (neutral, agree), qqq: (agree, neutral)}, 10000, 2)
+
+
+def test_two_vote_replay_caps_and_reserve_hold_across_200_seeded_paths(vote_replay):
+    rng = np.random.default_rng(5218)
+    for _ in range(200):
+        prices = {s: SimpleNamespace(open=np.exp(rng.normal(0, 0.018, (1, 78)).cumsum(axis=1))
+                                     * rng.uniform(80, 800)) for s in vote_replay["SYMBOLS"]}
+        votes = {s: (rng.integers(0, 5, 78), rng.integers(0, 5, 78)) for s in prices}
+        cash = vote_replay["VoteCash"]()
+        trades = vote_replay["replay_day"](0, prices, votes, 10000, 2, capital=cash)
+        for slot in {t.entry_slot for t in trades}:
+            open_lots = [t for t in trades if t.entry_slot <= slot < t.exit_slot]
+            assert len(open_lots) <= 8
+            gross = 0.0
+            for symbol, bars in prices.items():
+                lots = [t for t in open_lots if t.symbol == symbol]
+                assert len(lots) <= 4 and len({t.side for t in lots}) <= 1
+                price = bars.open[0, slot] * (1 + I.FR)
+                marked = sum(t.shares * price for t in lots)
+                gross += marked
+                for trade in (t for t in lots if t.entry_slot == slot):
+                    assert trade.shares * price <= 10000 + 1e-7
+                    assert marked <= 40000 + 1e-7
+            realized_losses = sum(min(0, t.pnl) for t in trades if t.exit_slot <= slot)
+            assert gross <= 80000 + realized_losses + 1e-7
+        gains = sum(max(0, t.pnl) for t in trades)
+        losses = sum(min(0, t.pnl) for t in trades)
+        assert cash.reserved_profit == pytest.approx(gains)
+        assert cash.sizing_capital == pytest.approx(80000 + losses)

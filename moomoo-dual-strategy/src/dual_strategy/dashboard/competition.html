@@ -32,27 +32,35 @@
           <div><span class="context-label">SHARED CASH</span><strong id="cash-summary">—</strong><span class="metric-note" id="cash-note">From archived broker observation</span></div>
           <div><span class="context-label">TODAY'S RECORDED ORDERS</span><strong id="orders-summary">—</strong><span class="metric-note" id="orders-count-note">Acknowledgements are not fills</span></div>
         </section>
-        <section class="panel vote-panel" aria-labelledby="vote-title">
-          <div class="section-heading">
-            <h2 id="vote-title">Two-vote signals</h2>
-            <span class="badge neutral">SPY &amp; QQQ</span>
+        <section id="paper-sleeves" class="portfolio-grid competition-sleeve-grid" aria-label="Competition sleeves">
+          <article class="portfolio-card strategy-a vote-panel" id="vote-sleeve" aria-labelledby="vote-title">
+            <div class="portfolio-header">
+              <div class="portfolio-title">
+                <span class="strategy-letter" aria-hidden="true">2V</span>
+                <div><h2 id="vote-title">Two-vote sleeve</h2><p class="strategy-description">SPY and QQQ</p></div>
+              </div>
+              <span class="badge neutral">Signals only</span>
+            </div>
+            <p class="section-note" id="vote-note" role="status">Waiting for completed market bars.</p>
+            <p class="strategy-description" id="vote-budget"></p>
+            <div id="vote-cards" class="vote-cards" aria-label="Current votes by ticker"></div>
+            <details class="evidence-details">
+              <summary>Votes by strategy rule</summary>
+              <div class="table-scroll" role="region" aria-label="Current signals by rule" tabindex="0">
+                <table>
+                  <thead><tr><th scope="col">Strategy rule</th><th scope="col">SPY</th><th scope="col">QQQ</th></tr></thead>
+                  <tbody id="vote-rule-rows"></tbody>
+                </table>
+              </div>
+            </details>
+          </article>
+          <div id="sleeves" class="legacy-sleeve-host" aria-label="Legacy holdings">
+            <article class="portfolio-card strategy-b"><h2>Legacy holdings</h2><p class="empty-state">Waiting for holdings evidence.</p></article>
           </div>
-          <p class="section-note" id="vote-note" role="status">Waiting for completed market bars.</p>
-          <div id="vote-cards" class="vote-cards" aria-label="Current votes by ticker"></div>
-          <div class="table-scroll" role="region" aria-label="Current signals by rule" tabindex="0">
-            <table>
-              <thead><tr><th scope="col">Strategy rule</th><th scope="col">SPY</th><th scope="col">QQQ</th></tr></thead>
-              <tbody id="vote-rule-rows"></tbody>
-            </table>
-          </div>
-        </section>
-        <section id="paper-sleeves" aria-labelledby="paper-sleeves-title">
-          <h2 id="paper-sleeves-title" class="paper-sleeves-title">Existing paper strategy holdings</h2>
-          <div id="sleeves" class="portfolio-grid" aria-label="Strategy sleeves"><p class="empty-state">Loading strategy evidence.</p></div>
         </section>
         <p id="attribution-note" class="footnote">Each strategy's results come from its own confirmed fills.</p>
         <section class="session-panel panel" aria-label="Runner status">
-          <div class="session-heading"><div><p class="eyebrow">PAPER RUNNER · LOCAL HOST</p><h2 id="runner-summary">Checking process</h2><p id="runner-note" class="section-note">Process liveness and account-data freshness are separate checks.</p></div><div class="session-clock"><span class="context-label">NEW YORK · EXCHANGE TIME</span><time id="exchange-clock">—</time><span class="badge neutral" id="market-badge">Session unknown</span></div></div>
+          <div class="session-heading"><div><p class="eyebrow">PAPER RUNNER · LOCAL HOST</p><h2 id="runner-summary">Checking process</h2><p id="runner-note" class="section-note">Process liveness and account-data freshness are separate checks.</p></div><div class="session-clock"><span class="context-label">Time to market open</span><span id="market-countdown">—</span><span class="badge neutral" id="market-badge">Session unknown</span></div></div>
           <div class="session-facts"><div><span class="context-label">LAST ACCOUNT OBSERVATION</span><strong id="mark-summary">Not received</strong><p id="mark-note" class="footnote"></p></div><div><span class="context-label">NEXT SCHEDULED ACTION</span><strong id="next-summary">—</strong><p id="next-note" class="footnote">Scheduled does not mean executed.</p></div><div><span class="context-label">RISK STATE</span><strong id="risk-summary">Unknown</strong><p id="risk-note" class="footnote"></p></div></div>
           <div class="operational-facts"><div><span class="context-label">SIGN-IN EVIDENCE</span><strong id="access-summary">Not independently verified</strong><p id="access-note" class="footnote">Passive runner evidence only; this page never refreshes credentials.</p></div><div><span class="context-label">NATIVE STARTUP</span><strong id="startup-summary">Checking recorded startup</strong><p id="startup-note" class="footnote">Startup records are separate from current process health.</p></div></div>
           <ol id="session-timeline" class="session-timeline" aria-label="Today's exchange schedule"></ol>

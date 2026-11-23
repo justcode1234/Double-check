@@ -42,7 +42,8 @@ class Market:
             if self.runner:
                 out = self.runner(argv)
             else:
-                r = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=90)
+                r = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                   timeout=90, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
                 if r.returncode != 0:
                     text = (r.stderr or "") + (r.stdout or "")
                     if "RATE_LIMIT" in text and attempt < 7:

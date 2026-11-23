@@ -9,7 +9,8 @@ symbol and direction until its own exit. The long/short replay mirrors
 those rules to generate bullish votes. All fills use bar opens and the
 existing research cost model. The default exit waits for opposite
 agreement or the scheduled flatten. SPY and QQQ may be open concurrently,
-with one position per ticker and a shared $100,000 exposure budget.
+with multiple lots per ticker and separate per-ticker exposure limits.
+Positive realized net P&L is reserved outside the entry budget.
 """
 
 from __future__ import annotations
@@ -26,118 +27,18 @@ import numpy as np
 import pandas as pd
 
 from competition_parity_regime import CFG, I, R, RS, spy_decision_bars
-from dual_strategy.competition.signals import rsi2
+from dual_strategy.competition.vote_rules import (
+    FIRST_ENTRY, SYMBOLS, indicator_rules, last_entry, session_windows, supported_side,
+)
 
-SYMBOLS = ("US.SPY", "US.QQQ")
-DEFAULT_VOTES = 2
-FIRST_ENTRY = 6  # 10:00 ET
-NORMAL_LAST_ENTRY = 60  # 14:30 ET
+DEFAULT_VOTES = CFG["two_vote"]["required_votes"]
+LOT_USD = CFG["two_vote"]["entry_usd"]
+LOTS_PER_SYMBOL = CFG["two_vote"]["max_lots_per_symbol"]
+SYMBOL_CAP = CFG["risk"]["name_cap_usd"]
+PORTFOLIO_CAP = len(SYMBOLS) * SYMBOL_CAP
+BANK_GAINS = CFG["two_vote"]["bank_realized_gains"]
 EARLIER = ("2025-01-01", "2026-11-06")
 RECENT = ("2026-11-09", "2026-11-20")
-
-
-def below(x, level):
-    delta = x - level
-    return (delta.shift() >= 0) & (delta < 0)
-
-
-def above(x, level):
-    return below(-x, -level)
-
-
-def ema(x, n):
-    return x.ewm(span=n, adjust=False, min_periods=n).mean()
-
-
-def wilder(x, n):
-    values = x.dropna()
-    smoothed = values.iloc[n - 1 :].copy()
-    if not smoothed.empty:
-        smoothed.iloc[0] = values.iloc[:n].mean()
-    return smoothed.ewm(alpha=1 / n, adjust=False).mean().reindex(x.index)
-
-
-def indicator_rules(bars):
-    h, l, c = bars.high, bars.low, bars.close
-    prior = c.shift()
-    tr = pd.concat([h - l, (h - prior).abs(), (l - prior).abs()], axis=1).max(axis=1)
-    up_move, down_move = h.diff(), -l.diff()
-    plus = wilder(up_move.where((up_move > down_move) & (up_move > 0), 0), 14)
-    minus = wilder(down_move.where((down_move > up_move) & (down_move > 0), 0), 14)
-    dm_sum = plus + minus
-    # Both DI values have the same ATR denominator, which cancels in DX.
-    adx = wilder((100 * (plus - minus).abs() / dm_sum).where(dm_sum > 0, 0), 14)
-    center = ema(c, 20)
-    keltner_low = center - 2 * wilder(tr, 10)
-    rsi = pd.Series(rsi2(c.to_list()), index=c.index)
-    macd = ema(c, 12) - ema(c, 26)
-    signal = ema(macd, 9)
-    low14 = l.rolling(14).min()
-    k = 100 * (c - low14) / (h.rolling(14).max() - low14)
-    d = k.rolling(3).mean()
-    atr22 = wilder(tr, 22)
-    chandelier_long = (h.rolling(22).max() - 3 * atr22).shift()
-    chandelier_short = (l.rolling(22).min() + 3 * atr22).shift()
-    return {
-        "Donchian": (below(c, l.rolling(20).min().shift()), c > h.rolling(10).max().shift()),
-        "Keltner": (below(c, keltner_low), c > center),
-        "RSI(2)": ((rsi > 90) & (c < c.rolling(200).mean()), c < c.rolling(5).mean()),
-        "MACD": (below(macd, signal) & (macd < 0), above(macd, signal)),
-        "DMI/ADX": (above(minus, plus) & (adx >= 25), plus > minus),
-        "Stochastic": (below(k, d) & (k.shift() >= 80), k <= 20),
-        "Chandelier": (below(c, chandelier_long), c > chandelier_short),
-    }
-
-
-def last_entry(n):
-    return min(NORMAL_LAST_ENTRY, n - 6)
-
-
-def first_window(entry_mask, exit_mask, n):
-    start, stop = FIRST_ENTRY - 1, last_entry(n)
-    signals = np.flatnonzero(entry_mask[start:stop])
-    if not len(signals):
-        return None
-    entry = start + int(signals[0]) + 1
-    flat = n - 1
-    exits = np.flatnonzero(exit_mask[entry : flat - 1])
-    return entry, entry + int(exits[0]) + 1 if len(exits) else flat
-
-
-def turtle_soup_window(frame, section, n):
-    start, stop = FIRST_ENTRY - 1, last_entry(n)
-    high, low = frame.high.to_numpy(), frame.low.to_numpy()
-    close, opening = frame.close.to_numpy(), frame.open.to_numpy()
-    for j in range(start, min(stop, section.stop - section.start - 1)):
-        k = section.start + j
-        recent_high = high[k - 20 : k]
-        ceiling = recent_high.max()
-        if not (high[k] > ceiling > close[k] and recent_high[-3:].max() < ceiling):
-            continue
-        if opening[k + 1] >= high[k]:
-            continue
-        floor = low[k - 20 : k].min()
-        exit_mask = (close[section] >= high[k]) | (close[section] <= (ceiling + floor) / 2)
-        entry_mask = np.zeros(n, dtype=bool)
-        entry_mask[j] = True
-        return first_window(entry_mask, exit_mask, n)
-    return None
-
-
-def session_windows(frame, section, n, masks, nr7):
-    windows = {}
-    for name, (enter, exit) in masks.items():
-        if window := first_window(enter[section], exit[section], n):
-            windows[name] = window
-    if window := turtle_soup_window(frame, section, n):
-        windows["Turtle Soup"] = window
-    if nr7 and section.stop - section.start >= 3:
-        day = frame.iloc[section]
-        entry = day.close.to_numpy() < day.low.iloc[:3].min()
-        exit = day.close.to_numpy() >= day.high.iloc[:3].max()
-        if window := first_window(entry, exit, n):
-            windows["NR7"] = window
-    return windows
 
 
 def technical_windows(bars, warm_days, score_days, mirror=False):
@@ -212,14 +113,6 @@ def counts(i, bars, shorts, longs, noise):
     return sell, buy
 
 
-def supported_side(sell, buy, required_votes):
-    if sell >= required_votes and buy < required_votes:
-        return -1
-    if buy >= required_votes and sell < required_votes:
-        return 1
-    return 0
-
-
 @dataclass(frozen=True)
 class Trade:
     day: date
@@ -244,37 +137,71 @@ class Position:
     slot: int
 
 
+@dataclass
+class VoteCash:
+    sizing_capital: float = PORTFOLIO_CAP
+    reserved_profit: float = 0.0
+
+    def settle(self, pnl: float) -> None:
+        if BANK_GAINS:
+            self.reserved_profit += max(0.0, pnl)
+            self.sizing_capital += min(0.0, pnl)
+        else:
+            self.sizing_capital += pnl
+
+
 def replay_day(i, prices, votes, budget, required_votes, close_on_lost_support=False,
-               max_positions=len(SYMBOLS)):
+               max_positions=LOTS_PER_SYMBOL * len(SYMBOLS), capital=None):
     n = int(R.MINUTES[i] // 5)
-    positions = {}
+    capital = capital if capital is not None else VoteCash()
+    positions: dict[str, list[Position]] = {}
     trades = []
+    prior_sides = {}
     for j in range(FIRST_ENTRY, n):
         opens = {sym: float(bars.open[i, j]) for sym, bars in prices.items()}
         sides = {sym: supported_side(sell[j], buy[j], required_votes)
                  for sym, (sell, buy) in votes.items()}
+        needed = positions.keys() | {sym for sym, side in sides.items() if side and j <= last_entry(n)}
+        if any(not math.isfinite(opens[sym]) or opens[sym] <= 0 for sym in needed):
+            raise ValueError(f"Missing or invalid two-vote fill price on {R.DAYS[i]}, slot {j}")
         closed = set()
-        for sym, pos in list(positions.items()):
-            exit_signal = sides[sym] == -pos.side or (close_on_lost_support and sides[sym] != pos.side)
+        for sym, lots in list(positions.items()):
+            side = lots[0].side
+            exit_signal = sides[sym] == -side or (close_on_lost_support and sides[sym] != side)
             if j == n - 1 or exit_signal:
-                trades.append(Trade(R.DAYS[i], sym, pos.side, pos.shares, pos.entry, opens[sym], pos.slot, j))
+                for lot in lots:
+                    trade = Trade(R.DAYS[i], sym, side, lot.shares, lot.entry, opens[sym], lot.slot, j)
+                    trades.append(trade)
+                    capital.settle(trade.pnl)
                 del positions[sym]
                 closed.add(sym)
         if j > last_entry(n):
             continue
-        eligible = [sym for sym in SYMBOLS if sides[sym] and sym not in positions and sym not in closed]
+        # Repeated bars from one agreement don't authorize another lot.
+        eligible = [sym for sym in SYMBOLS if sides[sym] and sym not in closed
+                    and len(positions.get(sym, ())) < LOTS_PER_SYMBOL
+                    and (sym not in positions or sides[sym] != prior_sides.get(sym))]
         eligible.sort(key=lambda sym: -int(votes[sym][0 if sides[sym] < 0 else 1][j]))
-        gross = math.fsum(pos.shares * opens[sym] for sym, pos in positions.items())
-        remaining = max(0.0, RS.EQUITY - gross)
+        prior_sides = sides
+        entry_prices = {sym: price * (1 + I.FR) for sym, price in opens.items()}
+        gross_by_symbol = {sym: sum(lot.shares for lot in lots) * entry_prices[sym]
+                           for sym, lots in positions.items()}
+        remaining = min(PORTFOLIO_CAP, capital.sizing_capital) - math.fsum(gross_by_symbol.values())
+        slots = max_positions - sum(map(len, positions.values()))
         for sym in eligible:
-            # A closing position frees a slot for the next bar.
-            if len(positions) + len(closed) >= max_positions:
+            if slots <= 0:
                 break
             entry = opens[sym]
-            shares = int(min(budget, remaining) / entry)
+            sizing_price = entry_prices[sym]
+            symbol_room = SYMBOL_CAP - gross_by_symbol.get(sym, 0.0)
+            room = max(0.0, min(budget, LOT_USD, remaining, symbol_room))
+            shares = math.floor(room / sizing_price)
+            if shares * sizing_price > room:
+                shares -= 1
             if shares:
-                positions[sym] = Position(sides[sym], shares, entry, j)
-                remaining -= shares * entry
+                positions.setdefault(sym, []).append(Position(sides[sym], shares, entry, j))
+                remaining -= shares * sizing_price
+                slots -= 1
     return trades
 
 
@@ -282,10 +209,13 @@ def summarize(trades, dates):
     selected = [t for t in trades if t.day in dates]
     outcomes = [t.pnl for t in selected]
     open_by_bar = {}
+    open_by_symbol_bar = {}
     for t in selected:
         for slot in range(t.entry_slot, t.exit_slot):
             key = (t.day, slot)
             open_by_bar[key] = open_by_bar.get(key, 0) + 1
+            symbol_key = (t.symbol, *key)
+            open_by_symbol_bar[symbol_key] = open_by_symbol_bar.get(symbol_key, 0) + 1
     return {
         "sessions": len(dates),
         "trades": len(outcomes),
@@ -293,22 +223,26 @@ def summarize(trades, dates):
         "short_entries": sum(t.side < 0 for t in selected),
         "active_sessions": len({t.day for t in selected}),
         "peak_open_positions": max(open_by_bar.values(), default=0),
+        "peak_open_by_symbol": {sym: max((count for key, count in open_by_symbol_bar.items() if key[0] == sym),
+                                        default=0) for sym in SYMBOLS},
         "winners": sum(p > 0 for p in outcomes),
         "net_pnl_usd": round(math.fsum(outcomes), 2),
+        "reserved_profit_usd": round(math.fsum(max(p, 0) for p in outcomes), 2) if BANK_GAINS else 0,
     }
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--budget", type=float, default=10_000,
+    parser.add_argument("--budget", type=float, default=LOT_USD,
                         help="Maximum USD notional for a single position (default: 10000)")
     parser.add_argument("--votes", type=int, choices=range(1, 11), default=DEFAULT_VOTES)
-    parser.add_argument("--max-positions", type=int, choices=range(1, len(SYMBOLS) + 1), default=len(SYMBOLS))
+    max_lots = len(SYMBOLS) * LOTS_PER_SYMBOL
+    parser.add_argument("--max-positions", type=int, choices=range(1, max_lots + 1), default=max_lots)
     parser.add_argument("--exit-rule", choices=("opposing-vote", "loss-of-support"), default="opposing-vote")
     parser.add_argument("--output", type=Path, help="Write the replay report to this JSON file")
     args = parser.parse_args()
-    if not math.isfinite(args.budget) or not 0 < args.budget <= CFG["risk"]["name_cap_usd"]:
-        parser.error("Budget must be positive and within the per-symbol cap")
+    if not math.isfinite(args.budget) or not 0 < args.budget <= min(LOT_USD, SYMBOL_CAP):
+        parser.error("Budget must be positive and within the per-lot and per-symbol caps")
 
     days = RS.in_window(EARLIER[0], RECENT[1])
     warm_days = RS.in_window("2024-12-02", RECENT[1])
@@ -319,10 +253,12 @@ def main():
     longs = {sym: technical_windows(bars, warm_days, days, mirror=True) for sym, bars in prices.items()}
     noise = noise_votes(days)
     close_on_lost_support = args.exit_rule == "loss-of-support"
-    out = {"schema_version": 1, "budget_usd": args.budget, "account_budget_usd": RS.EQUITY,
+    out = {"schema_version": 1, "budget_usd": args.budget, "account_budget_usd": PORTFOLIO_CAP,
+           "per_symbol_cap_usd": SYMBOL_CAP, "max_lots_per_symbol": LOTS_PER_SYMBOL, "bank_realized_gains": BANK_GAINS,
            "required_votes": args.votes, "max_open_positions": args.max_positions,
            "symbols": SYMBOLS, "exit_rule": args.exit_rule, "models": {}}
     for balanced in (False, True):
+        capital = VoteCash()
         trades = []
         recent_detail = []
         for i in days:
@@ -333,7 +269,7 @@ def main():
                     noise_vote = np.minimum(noise_vote, 0)
                 vote_counts[sym] = counts(i, bars, shorts[sym][i], longs[sym][i] if balanced else {}, noise_vote)
             filled = replay_day(i, prices, vote_counts, args.budget, args.votes,
-                                close_on_lost_support, args.max_positions)
+                                close_on_lost_support, args.max_positions, capital)
             trades.extend(filled)
             if R.DAYS[i] in recent:
                 recent_detail.append({
@@ -344,6 +280,8 @@ def main():
                     "net_pnl_usd": round(math.fsum(t.pnl for t in filled), 2),
                 })
         out["models"]["long_short" if balanced else "short_only"] = {
+            "ending_sizing_capital_usd": round(capital.sizing_capital, 2),
+            "ending_reserved_profit_usd": round(capital.reserved_profit, 2),
             "earlier": {"from": EARLIER[0], "through": EARLIER[1], **summarize(trades, earlier)},
             "recent": {"from": RECENT[0], "through": RECENT[1], **summarize(trades, recent)},
             "recent_sessions": recent_detail,

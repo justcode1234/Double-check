@@ -2,20 +2,27 @@
 .competition-page .page-heading { padding-bottom: 26px; }
 .competition-page h1 { font-weight: 550; }
 .competition-page .download-link { font-size: 12px; }
-.vote-panel { margin-bottom: 22px; border-top: 3px solid var(--teal); }
-.vote-panel h3 { font-size: 14px; margin: 0 0 12px; }
+.competition-sleeve-grid { align-items: start; }
+.competition-sleeve-grid .portfolio-title h2 { font-size: 18px; margin: 0 0 4px; }
+.legacy-sleeve-host { min-width: 0; }
+.legacy-sleeve-host.classic-sleeves { display: grid; grid-column: 1 / -1; grid-template-columns: inherit; gap: inherit; }
+.legacy-sleeve-host[hidden] { display: none; }
+.vote-panel h3 { font-size: 14px; margin: 0 0 8px; }
 .vote-panel th[scope='row'] { color: var(--text); letter-spacing: 0; text-transform: none; }
-.vote-cards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; margin-bottom: 16px; }
+.vote-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 12px; }
 .vote-ticker-card { padding: 16px; border: 1px solid var(--border); border-radius: 8px; min-width: 0; }
 .vote-signal { margin: 0 0 12px; color: var(--muted); }
 .vote-panel .positive { color: var(--teal); }
-.paper-sleeves-title { font-size: 18px; margin-bottom: 12px; }
+.legacy-position-list { list-style: none; margin: 16px 0 0; padding: 0; }
+.legacy-position-list li { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--border); padding: 12px 0; }
+.legacy-position-list li > div { min-width: 0; }
+.legacy-position-value { text-align: right; }
 .session-panel { margin-bottom: 22px; border-top: 3px solid var(--blue); }
 .session-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 22px; }
 .session-heading h2 { font-size: clamp(21px, 2.2vw, 29px); letter-spacing: -.035em; margin-bottom: 4px; }
 .session-heading .section-note { margin: 6px 0 18px; }
 .session-clock { text-align: right; flex-shrink: 0; }
-.session-clock time { font: 20px var(--font-data); display: block; margin: 8px 0; }
+#market-countdown { font: 20px var(--font-data); display: block; margin: 8px 0; }
 .session-facts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; border-top: 1px solid var(--border); padding-top: 18px; }
 .operational-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border-top: 1px solid var(--border); padding-top: 18px; margin-top: 18px; }
 .operational-facts strong { display: block; font-size: 13px; font-weight: 500; }
@@ -64,13 +71,12 @@
   .account-strip > div:nth-child(n+3) { border-top: 1px solid var(--border); }
 }
 @media (max-width: 760px) {
-  .vote-cards { grid-template-columns: 1fr; }
   .competition-page .topbar { flex-wrap: wrap; padding: 15px 0; gap: 14px; }
   .competition-page .topbar-right { width: 100%; gap: 16px; justify-content: space-between; }
   .competition-page .read-only { display: inline; font-size: 11px; }
   .session-heading { flex-direction: column; gap: 0; }
   .session-clock { text-align: left; margin-bottom: 16px; }
-  .session-clock time { display: inline-block; margin-right: 16px; font-size: 17px; }
+  #market-countdown { display: inline-block; margin-right: 16px; font-size: 17px; }
   .session-facts, .operational-facts { grid-template-columns: 1fr; gap: 14px; }
   .session-panel { padding: 18px; }
   .account-strip > div { padding: 15px; }

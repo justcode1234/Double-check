@@ -597,6 +597,7 @@ def test_competition_access_audit_error_survives_generic_failure_and_recovers(co
     now = datetime(2026, 11, 23, 15, tzinfo=timezone.utc)
     store.audit('2026-11-20', {'kind': 'b3_blocked', 'mode': 'EXECUTE',
         'logged_at': '2026-11-20T15:00:00+00:00', 'error': 'CLI quote failed: [AUTH_EXPIRED] private-secret'})
+    (store.dir / 'audit' / '2026-11-20' / '._transferred.json').write_bytes(b'\x00\x05\x16\x07\xffAppleDouble')
     store.append('2026-11-23', {'event': 'runner_error', 'step': 'risk',
         'logged_at': '2026-11-23T14:58:00+00:00', 'error': 'Moomoo CLI command failed; reconcile before retry'})
     assert report.competition_payload(tmp_path, now)['access']['status'] == 'sign_in_required'

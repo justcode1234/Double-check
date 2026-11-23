@@ -139,20 +139,30 @@ class CliTransport:
                 args += ['--start', str(arguments['time_begin'])]
             if 'time_end' in arguments:
                 args += ['--end', str(arguments['time_end'])]
-            response = self._run(args)
-            orders = response.get('data', {}).get('orders') if isinstance(response.get('data'), dict) else None
-            if not isinstance(orders, list):
-                raise ExecutionBlocked('Unexpected history response shape')
             normalized = []
-            for row in orders:
-                row = dict(row)
-                # WHY: the broker reports an indicative market price in avg_fill_price even
-                # for working orders with zero fills. Zero cumulative fills means there is no
-                # average fill price; normalize to 0 so the semantic invariant holds. Real
-                # fill averages (cum_qty > 0) are preserved untouched.
-                if str(row.get('cum_qty')) == '0':
-                    row['avg_fill_price'] = '0'
-                normalized.append(row)
+            seen_cursors = set()
+            page_args = args
+            while True:
+                response = self._run(page_args)
+                pagination = response.get('pagination', {'has_more': False})
+                if not isinstance(pagination, dict) or type(pagination.get('has_more')) is not bool:
+                    raise ExecutionBlocked('Invalid order history pagination; reconcile before retry')
+                data = response.get('data')
+                orders = data.get('orders') if isinstance(data, dict) else None
+                if data == {} and 'pagination' in response and not pagination['has_more']:
+                    orders = []
+                if not isinstance(orders, list) or any(not isinstance(row, dict) for row in orders):
+                    raise ExecutionBlocked('Unexpected history response shape')
+                for row in orders:
+                    # A zero-fill order can carry an indicative price from the broker.
+                    normalized.append({**row, 'avg_fill_price': '0'} if str(row.get('cum_qty')) == '0' else row)
+                if not pagination['has_more']:
+                    break
+                cursor = pagination.get('next_key')
+                if not isinstance(cursor, str) or not cursor or cursor in seen_cursors:
+                    raise ExecutionBlocked('Invalid order history cursor; reconcile before retry')
+                seen_cursors.add(cursor)
+                page_args = [*args, '--next-key', cursor]
             return {'ret_code': 0, 'data': {'orders': normalized}}
         if tool == PLACE:
             _market(arguments.get('market'))

@@ -114,7 +114,7 @@ def local_preflight(root, session):
 
 def execution_outcomes(root):
     confirmed = {}
-    for path in sorted((root / 'private/competition/live/outbox').glob('*.jsonl')):
+    for path in sorted((root / 'private/competition/live/outbox').glob('????-??-??.jsonl')):
         intents, acknowledgements, outcomes = {}, {}, {}
         for line in path.read_text().splitlines():
             if not line.strip():

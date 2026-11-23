@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import math
 import os
+from collections import defaultdict, deque
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
@@ -16,6 +17,9 @@ from uuid import uuid4
 import yaml
 
 from dual_strategy.competition.planner import SHORTABLE, SLEEVES, capital_limits, new_state
+
+
+OUTBOX_PATTERN = "????-??-??.jsonl"
 
 
 def load_config(project: Path) -> dict:
@@ -50,7 +54,7 @@ class Store:
         audit_id = f"{session}/{fixed_name or uuid4().hex}"
         path = self.dir / "audit" / f"{audit_id}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
-        record = {**record, "audit_id": audit_id, "logged_at": datetime.now(timezone.utc).isoformat()}
+        record = {"logged_at": datetime.now(timezone.utc).isoformat(), **record, "audit_id": audit_id}
         with path.open("x", encoding="utf-8") as fh:
             json.dump(record, fh, default=str)
             fh.flush()
@@ -64,7 +68,7 @@ class Store:
         return [json.loads(line) for line in p.read_text(encoding="utf-8").splitlines() if line.strip()]
 
     def latest_session(self) -> str | None:
-        files = sorted((self.dir / "outbox").glob("*.jsonl"))
+        files = sorted((self.dir / "outbox").glob(OUTBOX_PATTERN))
         return files[-1].stem if files else None
 
 
@@ -79,6 +83,7 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
                    "initial_capital": initial_allocations.get(s),
                    "capital": None, "limits": capital_limits(s, None, cfg, reduced),
                    "positions": {}, "receipts": []} for s in SLEEVES}
+    sleeves["two_vote"].update(open_entry_lots={}, reserved_profit=None)
     result = {"asof": (account or {}).get("at"), "sleeves": sleeves,
               "account_pnl": None, "unallocated_account_change": None, "cost_method": "weighted_average",
               "capital_basis": "initial_allocation_plus_own_gross_pnl"}
@@ -86,7 +91,7 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
         return result
     groups = {}
     try:
-        for path in sorted((store.dir / "outbox").glob("????-??-??.jsonl")):
+        for path in sorted((store.dir / "outbox").glob(OUTBOX_PATTERN)):
             for row in store.outbox(path.stem):
                 if not isinstance(row, dict):
                     raise ValueError("Invalid receipt")
@@ -102,6 +107,8 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
         return result
     incomplete, seen_orders = set(), {}
     realized = {s: 0.0 for s in sleeves}
+    vote_lots = defaultdict(deque)
+    vote_gains = vote_losses = 0.0
     for (audit_id, intent_id), rows in groups.items():
         intents = [r for r in rows if r["event"] == "intent" and r.get("mode") == "EXECUTE"]
         if not intents:
@@ -144,6 +151,24 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
         sleeve, symbol = sleeves[s], intent["symbol"]
         book = sleeve["positions"].setdefault(symbol, {"qty": 0, "cost_basis": 0.0})
         dq, held = (q if intent["side"] == "BUY" else -q), book["qty"]      # signed average cost; shorts negative
+        if s == "two_vote":
+            # Rebuild FIFO entry lots from confirmed fills for the lot cap and the separate profit reserve.
+            lots = vote_lots[symbol]
+            remaining = q
+            if held * dq < 0:
+                while remaining and lots:
+                    shares, entry_price = lots[0]
+                    closed = min(shares, remaining)
+                    pnl = closed * (price - entry_price) * (1 if held > 0 else -1)
+                    vote_gains += max(0.0, pnl)
+                    vote_losses += min(0.0, pnl)
+                    remaining -= closed
+                    if shares == closed:
+                        lots.popleft()
+                    else:
+                        lots[0] = (shares - closed, entry_price)
+            if remaining:
+                lots.append((remaining, price))
         if held == 0 or (held > 0) == (dq > 0):
             if dq < 0 and s not in SHORTABLE:
                 incomplete.add(s)
@@ -192,10 +217,13 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
         sleeve["status"] = "incomplete" if s in incomplete else "available"
         if s not in incomplete:
             sleeve.update(realized_gross=realized[s], unrealized_gross=unrealized, gross_pnl=realized[s] + unrealized)
+            bank_gains = s == "two_vote" and cfg.get("two_vote", {}).get("bank_realized_gains")
+            if s == "two_vote":
+                sleeve.update(open_entry_lots={sym: len(lots) for sym, lots in vote_lots.items() if lots},
+                              reserved_profit=vote_gains if bank_gains else 0.0)
             if initialized:
-                if s == "two_vote" and cfg.get("two_vote", {}).get("bank_realized_gains"):
-                    # the replay's VoteCash rule: realized gains are reserved outside the entry budget
-                    sleeve["capital"] = sleeve["initial_capital"] + min(0.0, realized[s])
+                if bank_gains:
+                    sleeve["capital"] = sleeve["initial_capital"] + vote_losses
                 else:
                     sleeve["capital"] = sleeve["initial_capital"] + sleeve["gross_pnl"]
                 sleeve["limits"] = capital_limits(s, sleeve["capital"], cfg, reduced)

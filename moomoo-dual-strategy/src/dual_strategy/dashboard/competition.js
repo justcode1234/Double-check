@@ -24,7 +24,7 @@
   }
 
 
-  function renderLiveVotes(data) {
+  function renderLiveVotes(data, holdings) {
     const vote = data.vote_signals || {}, current = vote.status === "current";
     const threshold = vote.required_votes || 2;
     const sizing = data.config.two_vote;
@@ -49,6 +49,13 @@
       card.append(el("h3", "", symbol.slice(3)), el("p", "vote-signal", signal));
       metric(metrics, "Buy votes", finite(row?.buy) ? `${row.buy} / ${threshold}` : "—");
       metric(metrics, "Sell votes", finite(row?.sell) ? `${row.sell} / ${threshold}` : "—");
+      const holding = holdings.find(h => h.s?.id === "two_vote" && h.symbol === symbol);
+      if (holding) {
+        const position = `${Math.abs(holding.qty)} ${holding.qty > 0 ? "long" : "short"}`;
+        const cost = data.performance.sleeves.two_vote?.positions?.[symbol]?.cost_basis;
+        metric(metrics, "Paper position", position, holding.fromBroker ? brokerNote(data) : "Recorded in sleeve ledger");
+        metric(metrics, "Position value", money(holding.value), finite(cost) ? `Orig ${money(Math.abs(cost))}` : "");
+      }
       card.append(metrics);
       cards.append(card);
       Object.keys(row?.rules || {}).forEach(name => names.add(name));
@@ -67,19 +74,32 @@
     }
   }
 
-  function renderExitOnlyHoldings(data, host) {
-    const holdings = data.live?.sleeves;
-    const ledgerRows = SLEEVE_SPECS.flatMap(s => Object.entries(holdings?.[s.id] || {})
+  function holdingRows(data) {
+    const broker = data.broker_observation;
+    const ledgerRows = [...SLEEVE_SPECS, TWO_VOTE].flatMap(s => Object.entries(data.live?.sleeves?.[s.id] || {})
       .filter(([, qty]) => Number.isInteger(qty) && qty !== 0)
       .map(([symbol, qty]) => ({ s, symbol, qty })));
+    if (!broker?.at) {
+      return ledgerRows.map(row => {
+        const quote = data.account_snapshot?.quotes?.[row.symbol];
+        return { ...row, value: finite(quote) && quote > 0 ? Math.abs(row.qty) * quote : null };
+      });
+    }
+    return Object.entries(broker.positions).filter(([, qty]) => qty !== 0).flatMap(([symbol, qty]) => {
+      const matches = ledgerRows.filter(row => row.symbol === symbol);
+      const value = broker.market_values[symbol];
+      if (matches.every(row => Math.sign(row.qty) === Math.sign(qty)) && matches.reduce((sum, row) => sum + row.qty, 0) === qty) {
+        return matches.map(row => ({ ...row, value: finite(value) ? value * row.qty / qty : null, fromBroker: true }));
+      }
+      return [{ symbol, qty, value, s: null, fromBroker: true }];
+    });
+  }
+
+  function renderExitOnlyHoldings(data, host, holdingsRows) {
+    const holdings = data.live?.sleeves;
     const independent = data.broker_observation;
     const fromBroker = Boolean(independent?.at);
-    const rows = fromBroker ? Object.entries(independent.positions).filter(([, qty]) => qty !== 0)
-      .map(([symbol, qty]) => {
-        const matches = ledgerRows.filter(row => row.symbol === symbol);
-        const s = matches.length === 1 && matches[0].qty === qty ? matches[0].s : null;
-        return { symbol, qty, s };
-      }) : ledgerRows;
+    const rows = holdingsRows.filter(row => row.s?.id !== "two_vote");
     const broker = data.account_snapshot;
     const age = Date.parse(data.generated_at) - Date.parse(broker?.at);
     const observed = broker?.positions;
@@ -106,17 +126,11 @@
       return;
     }
     if (!rows.length) {
-      card.append(el("p", "empty-state", fromBroker ? "No open positions in the broker snapshot." :
+      card.append(el("p", "empty-state", fromBroker ? "No other open positions in the broker snapshot." :
         "No legacy positions recorded. Awaiting confirmation that the account is flat."));
       return;
     }
-    const marked = ({ symbol, qty }) => {
-      if (fromBroker) return independent.market_values[symbol];
-      const price = broker?.quotes?.[symbol];
-      return finite(price) && price > 0 ? Math.abs(qty) * price : null;
-    };
-    const gross = rows.every(row => finite(marked(row))) ?
-      rows.reduce((sum, row) => sum + marked(row), 0) : null;
+    const gross = rows.every(row => finite(row.value)) ? rows.reduce((sum, row) => sum + row.value, 0) : null;
     const costBySymbol = {};
     for (const sleeve of Object.values(data.performance?.sleeves || {}))
       for (const [sym, p] of Object.entries(sleeve.positions || {}))
@@ -130,7 +144,7 @@
       const item = el("li"), position = el("div"), value = el("div", "legacy-position-value");
       position.append(el("strong", "", symbol.replace(/^US\./, "")),
         el("p", "strategy-description", `${Math.abs(qty)} ${qty > 0 ? "long" : "short"}${s ? ` · ${s.title}` : ""}`));
-      const current = el("strong", "", money(marked(row)));
+      const current = el("strong", "", money(row.value));
       const orig = costBySymbol[symbol];
       if (finite(orig)) current.append(el("small", "orig-cost", `(orig ${money(orig)})`));
       value.append(current,
@@ -265,7 +279,8 @@
     { id: "noise", letter: "NA", title: "Noise-area momentum", css: "strategy-c", description: "SPY · 10:30/11:30/13:30/14:30 · long, short or flat · flat 15:55" },
     { id: "vwap", letter: "VW", title: "VWAP trend continuation", css: "strategy-d", description: "SPY/QQQ · 5-minute pullback triggers · long & short · flat 15:45" },
     { id: "orb", letter: "OR", title: "ORB breakout/breakdown", css: "strategy-e", description: "SPY/QQQ/IWM · 15-minute range · half at 2R, trail the rest · flat 15:55" }];
-  const LETTER = Object.fromEntries(SLEEVE_SPECS.map(s => [s.id, s.letter]));
+  const TWO_VOTE = { id: "two_vote", letter: "2V", title: "Two-vote sleeve" };
+  const LETTER = Object.fromEntries([...SLEEVE_SPECS, TWO_VOTE].map(s => [s.id, s.letter]));
   const shares = (q) => `${q < 0 ? "SHORT " : ""}${Math.abs(q)} sh`;
 
   function sleeveHeader(letter, label, description, badge) {
@@ -278,14 +293,14 @@
     return head;
   }
 
-  function renderSleeves(data) {
+  function renderSleeves(data, rows) {
     const host = byId("sleeves"), state = data.live;
     const exitOnly = data.config.risk.legacy_exit_only;
     host.replaceChildren();
     host.hidden = false;
     host.classList.toggle("classic-sleeves", !exitOnly);
     if (exitOnly) {
-      renderExitOnlyHoldings(data, host);
+      renderExitOnlyHoldings(data, host, rows);
       const hActive = data.config.risk.entry_sleeves?.includes("h_etf");
       set("attribution-note", host.hidden || hActive ? "" : "Legacy holdings follow their original exit rules.");
       return;
@@ -478,7 +493,8 @@
       if (latest && Date.parse(data.generated_at) < Date.parse(latest.generated_at)) throw new Error("Out-of-order dashboard response");
       const snapshotAge = Date.now() - Date.parse(data.generated_at);
       if (snapshotAge > 15000 || snapshotAge < -5000) throw new Error("Dashboard snapshot is stale or its clock is mismatched");
-      renderLiveVotes(data); renderStatus(data); renderAttention(data); renderSleeves(data);
+      const holdings = holdingRows(data);
+      renderLiveVotes(data, holdings); renderStatus(data); renderAttention(data); renderSleeves(data, holdings);
       renderAudit(data); renderCharts(data);
       latest = data; lastSuccess = Date.now();
       byId("data-alert").hidden = true;

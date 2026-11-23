@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 
 import pytest
 
@@ -137,6 +138,38 @@ def test_history_passthrough_and_time_filters():
     assert out['data']['orders'] == orders
     assert '--start' in calls[0] and '1' in calls[0]
     assert '--end' in calls[0] and '2' in calls[0]
+
+
+def test_competition_wait_finds_terminal_fill_on_later_page():
+    from dual_strategy.competition.broker import CompetitionBroker
+
+    calls = []
+
+    def cli(argv):
+        calls.append(argv[1:4])
+        assert argv[1:4] == ['sim', 'order', 'history']
+        if '--next-key' in argv:
+            assert argv[argv.index('--next-key') + 1] == 'more'
+            return json.dumps({'data': {'orders': [
+                {'order_id': 'target', 'qty': '15', 'cum_qty': '15', 'avg_fill_price': '651.47', 'status': 4},
+            ]}, 'pagination': {'has_more': False}})
+        return json.dumps({'data': {'orders': [{'order_id': 'other', 'status': 4}]},
+                           'pagination': {'has_more': True, 'next_key': 'more'}})
+
+    broker = CompetitionBroker.__new__(CompetitionBroker)
+    broker.acc_id = 'PRACTICE'
+    broker.call = CliTransport(ALLOW, DENY, cli_path='fake-moomoo', runner=cli)
+    receipt = broker.wait('target', datetime.now(timezone.utc), seconds=0)
+    assert receipt['status'] == 'FILLED' and receipt['filled'] == 15
+    assert calls == [['sim', 'order', 'history']] * 2
+
+
+def test_history_blocks_repeated_cursor():
+    transport, calls = make_transport({'history': {'data': {'orders': []},
+        'pagination': {'has_more': True, 'next_key': 'repeated'}}})
+    with pytest.raises(ExecutionBlocked, match='history cursor'):
+        transport(HISTORY, {'acc_id': 'PRACTICE', 'market': 100})
+    assert len(calls) == 2
 
 
 def test_history_normalizes_indicative_price_when_no_fills():

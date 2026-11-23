@@ -213,7 +213,7 @@ def _audit_summary(path: Path, mtime_ns: int, size: int) -> dict:
 
 def _observations(store: Store, session: str):
     equity, accounts, decisions, warnings = [], [], [], []
-    for path in (store.dir / "audit" / session).glob("*.json"):
+    for path in (store.dir / "audit" / session).glob("[!.]*.json"):
         try:
             stat = path.stat()
             data = _audit_summary(path, stat.st_mtime_ns, stat.st_size)
@@ -255,7 +255,7 @@ def _access_health(store: Store, state: dict | None, now: datetime) -> dict:
         for path in sorted((store.dir / "outbox").glob("????-??-??.jsonl"))[-2:]:
             records.extend(store.outbox(path.stem))
         for directory in sorted((store.dir / "audit").glob("????-??-??"))[-2:]:
-            for path in directory.glob("*.json"):
+            for path in directory.glob("[!.]*.json"):
                 try:
                     stat = path.stat()
                     record = _audit_summary(path, stat.st_mtime_ns, stat.st_size)

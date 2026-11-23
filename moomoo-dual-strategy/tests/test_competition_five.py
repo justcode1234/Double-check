@@ -84,21 +84,21 @@ def test_half_size_halves_risk_qty_and_notional():
 
 # ------------------------------------------------------------------ shared per-symbol cap
 def test_spy_cap_is_shared_first_come_across_all_five_sleeves():
-    st = state(b3={"US.SPY": 39}, h_etf={"US.SPY": 10}, vwap={"US.SPY": -11})        # 60 x $500 = $30,000 used
-    a = acct(positions={"US.SPY": 38})
+    st = state(b3={"US.SPY": 39}, h_etf={"US.SPY": 10}, vwap={"US.SPY": 11})        # 60 x $500 = $30,000 used
+    a = acct(positions={"US.SPY": 60})
     assert planner.exposure(st, "US.SPY", 500.0) == 30_000
     out, why = planner.plan_target(st, a, SESSION, "noise", "US.SPY", 1, 500.0, 500.0, "noise_long", CFG, NOW, "1030")
     assert why == "entry" and out[0].qty * 500.0 <= 10_000                               # gets the remainder
-    st["sleeves"]["orb"] = {"US.SPY": -20}
-    out, why = planner.plan_target(st, acct(positions={"US.SPY": 18}), SESSION, "noise", "US.SPY", 1, 500.0, 500.0,
+    st["sleeves"]["orb"] = {"US.SPY": 20}
+    out, why = planner.plan_target(st, acct(positions={"US.SPY": 80}), SESSION, "noise", "US.SPY", 1, 500.0, 500.0,
                                    "noise_long", CFG, NOW, "1130")
     assert out == [] and why == "entry size zero"                                       # cap used up: skip
 
 
 def test_b3_counts_noise_area_spy_toward_the_cap():
-    st = state(noise={"US.SPY": -70})
+    st = state(noise={"US.SPY": 70})
     dec = SimpleNamespace(target=1, at=NOW, reason="long", metrics={"open_0930": 500.0})
-    out, why = planner.plan_b3(st, acct(positions={"US.SPY": -70}), SESSION, dec, CFG, NOW)
+    out, why = planner.plan_b3(st, acct(positions={"US.SPY": 70}), SESSION, dec, CFG, NOW)
     assert why == "entry" and out[0].qty * out[0].limit_price <= 5_000 + 1e-6
 
 
@@ -666,10 +666,18 @@ def test_vote_book_banks_gains_and_counts_losses(tmp_path):
     receipt("b", "SELL", 550.0)
     v = sleeve_performance(store, st, asdict(acct()), CFG)["sleeves"]["two_vote"]
     assert v["status"] == "available" and v["gross_pnl"] == 500.0 and v["capital"] == 80_000.0
+    assert v["reserved_profit"] == 500.0
     receipt("c", "BUY", 500.0)
     receipt("d", "SELL", 400.0)
     v = sleeve_performance(store, st, asdict(acct()), CFG)["sleeves"]["two_vote"]
-    assert v["realized_gross"] == -500.0 and v["capital"] == 79_500.0
+    assert v["realized_gross"] == -500.0 and v["reserved_profit"] == 500.0
+    assert v["capital"] == v["limits"]["allocation_budget"] == 79_000.0
+    receipt("e", "SELL", 600.0)
+    receipt("f", "SELL", 450.0)
+    receipt("g", "BUY", 500.0)
+    st["sleeves"]["two_vote"] = {"US.SPY": -10}
+    v = sleeve_performance(store, st, asdict(acct(positions={"US.SPY": -10})), CFG)["sleeves"]["two_vote"]
+    assert v["open_entry_lots"] == {"US.SPY": 1} and v["reserved_profit"] == 1_500.0 and v["capital"] == 79_000.0
 
 
 def _vote_report(opened, k, spy, qqq=0):
@@ -680,41 +688,90 @@ def _vote_report(opened, k, spy, qqq=0):
             "tickers": {"US.SPY": row(spy), "US.QQQ": row(qqq)}}
 
 
-def test_vote_step_lots_never_repeat_an_agreement(runner, monkeypatch):
+def _run_vote_step(runner, monkeypatch, k, spy):
     opened = NOW.replace(hour=9, minute=30)
-    monkeypatch.setattr(runner, "risk", lambda symbols=(): runner.account(symbols))
-    report = {}
-    runner._vote_monitor = SimpleNamespace(observe=lambda now: report)
+    runner._vote_monitor = SimpleNamespace(observe=lambda now: _vote_report(opened, k, spy))
+    monkeypatch.setitem(runner.monitor.__globals__, "datetime", _clock(opened + timedelta(minutes=5 * k, seconds=20)))
+    runner.vote_step()
+
+
+def _recorded_vote_lots(runner):
+    perf = sleeve_performance(runner.store, runner.store.load(), asdict(runner.account()), runner.cfg)
+    return perf["sleeves"]["two_vote"]["open_entry_lots"]
+
+
+def test_vote_cannot_open_against_h_inventory_and_h_cannot_open_against_vote():
+    long_h = state(h_etf={"US.SPY": 20})
+    intents, why = planner.plan_vote_entry(long_h, acct(positions={"US.SPY": 20}), SESSION, "US.SPY", -1, CFG, NOW, "e6")
+    assert not intents and "opposing position in h_etf" in why
+    short_vote = state(two_vote={"US.SPY": -20})
+    intents, why = planner.plan_h_open(short_vote, acct(positions={"US.SPY": -20}), SESSION,
+                                       {"entries": ["US.SPY", "US.IWM"]}, CFG, NOW)
+    assert [i.symbol for i in intents] == ["US.IWM"] and "opposing position in two_vote" in why
+
+
+def test_vote_step_lots_never_repeat_an_agreement(runner, monkeypatch):
+    monkeypatch.setattr(runner, "risk", runner.account)
 
     def step(k, spy):
-        report.clear()
-        report.update(_vote_report(opened, k, spy))
-        monkeypatch.setitem(runner.monitor.__globals__, "datetime",
-                            _clock(opened + timedelta(minutes=5 * k, seconds=20)))
-        runner.vote_step()
+        _run_vote_step(runner, monkeypatch, k, spy)
 
-    day = runner._intraday(SESSION)
     step(6, 1)
     assert [(i.sleeve, i.side) for i in runner.sent] == [("two_vote", "BUY")]
     lot = runner.sent[0].qty
-    assert day["vote_lots"]["US.SPY"] == 1 and runner.state["sleeves"]["two_vote"]["US.SPY"] == lot
+    assert _recorded_vote_lots(runner) == {"US.SPY": 1} and runner.state["sleeves"]["two_vote"]["US.SPY"] == lot
     step(6, 1)                                                                   # same slot again: nothing
     step(7, 1)                                                                   # same agreement continues: no new lot
     assert len(runner.sent) == 1
     step(8, 0)                                                                   # agreement lapses
     step(9, 1)                                                                   # fresh agreement: lot 2
-    assert len(runner.sent) == 2 and day["vote_lots"]["US.SPY"] == 2
+    assert len(runner.sent) == 2 and _recorded_vote_lots(runner) == {"US.SPY": 2}
     assert runner.state["sleeves"]["two_vote"]["US.SPY"] == 2 * lot
     step(10, -1)                                                                 # opposite agreement: close all lots
     assert len(runner.sent) == 3                                                 # no re-entry on the exit bar
     assert [(i.side, i.qty, i.close_only) for i in runner.sent][-1] == ("SELL", 2 * lot, True)
     assert runner.sent[-1].reason == "two_vote_opposite_agreement"
-    assert not runner.state["sleeves"].get("two_vote") and day["vote_lots"].get("US.SPY", 0) == 0
+    assert not runner.state["sleeves"].get("two_vote") and _recorded_vote_lots(runner) == {}
     step(11, -1)                                                                 # next bar: a fresh short agreement
     assert runner.sent[-1].side == "SELL" and runner.sent[-1].opens_short
     assert runner.state["sleeves"]["two_vote"]["US.SPY"] < 0
     runner.flatten_sleeves(("two_vote",), "two_vote_scheduled_flatten")
-    assert day["vote_lots"] == {} and not runner.state["sleeves"].get("two_vote")
+    assert _recorded_vote_lots(runner) == {} and not runner.state["sleeves"].get("two_vote")
+
+
+@pytest.mark.parametrize("partial_exit", [True, False], ids=["partial-exit", "restart"])
+def test_vote_lot_cap_uses_confirmed_fills(runner, monkeypatch, partial_exit):
+    monkeypatch.setattr(runner, "risk", runner.account)
+    for k, side in enumerate([1, 0, 1, 0, 1, 0], 6):
+        _run_vote_step(runner, monkeypatch, k, side)
+    assert [i.qty for i in runner.sent] == [19] * 3
+    if partial_exit:
+        _run_vote_step(runner, monkeypatch, 12, 1)
+        runner.fill[("US.SPY", "SELL")] = 1
+        _run_vote_step(runner, monkeypatch, 13, -1)
+        assert runner.sent[-1].qty == 76 and runner.account().positions == {"US.SPY": 75}
+    else:
+        class Interrupted(BaseException):
+            pass
+
+        send = runner.send
+
+        def interrupt_after_send(*args, **kwargs):
+            send(*args, **kwargs)
+            raise Interrupted
+
+        runner.state["intraday"]["vote_lots"] = {"US.SPY": 3}  # Older saves can contain a stale counter.
+        with monkeypatch.context() as m:
+            m.setattr(runner, "send", interrupt_after_send)
+            with pytest.raises(Interrupted):
+                _run_vote_step(runner, m, 12, 1)
+        runner.state = runner.store.load()
+        assert runner.account().positions == {"US.SPY": 76}
+    submitted = len(runner.sent)
+    assert _recorded_vote_lots(runner) == {"US.SPY": 4}
+    _run_vote_step(runner, monkeypatch, 14, 1)
+    assert len(runner.sent) == submitted
+    assert runner.state["intraday"]["decisions"][-1]["action"] == "entry blocked: maximum open lots"
 
 
 def test_vote_step_entries_only_between_1000_and_1430(runner, monkeypatch):

@@ -90,6 +90,15 @@ def test_inactive_tick_has_no_files_or_broker_calls(scheduler, tmp_path, monkeyp
     assert list(tmp_path.iterdir()) == []
 
 
+def test_preflight_ignores_appledouble_but_blocks_corrupt_outbox(scheduler, project):
+    outbox = project / 'private/competition/live/outbox'
+    (outbox / '._2026-11-20.jsonl').write_bytes(b'\x00\x05\x16\x07\xffAppleDouble')
+    assert scheduler.local_preflight(project, '2026-11-23')['sleeves']['h_etf'] == {'US.XLV': 11}
+    (outbox / '2026-11-19.jsonl').write_bytes(b'\xff')
+    with pytest.raises(UnicodeDecodeError):
+        scheduler.local_preflight(project, '2026-11-23')
+
+
 @pytest.mark.parametrize('count', [1, 2])
 def test_existing_loop_prevents_preflight_and_duplicate_launch(scheduler, project, monkeypatch, count):
     monkeypatch.setattr(scheduler, 'runner_processes', lambda: [{'pid': 100+i, 'state': 'S'} for i in range(count)])

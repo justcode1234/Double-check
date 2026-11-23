@@ -844,6 +844,27 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   assert.match(text('sleeves'), /H ETF sleeve.*\$20,000.00 allocation/);
   assert.match(text('mode-badge'), /H entries enabled/);
   assert.match(text('vote-budget'), /4 positions per ticker.*\$40,000.00 cap/);
+  const voteHolding = fresh();
+  voteHolding.config.risk.legacy_exit_only = true;
+  voteHolding.config.risk.entry_sleeves = ['h_etf','two_vote'];
+  voteHolding.vote_signals = {status:'stale'};
+  voteHolding.broker_observation = {
+    status:'verified', at:voteHolding.generated_at, cash:91000, nav:100000,
+    positions:{'US.QQQ':15}, market_values:{'US.QQQ':9000}
+  };
+  voteHolding.live.sleeves.two_vote = {'US.QQQ':15};
+  await load({data:voteHolding});
+  assert.match(text('vote-cards'), /QQQ.*Paper position15 long.*Verified by Moomoo.*\$9,000.00/);
+  assert.doesNotMatch(text('sleeves'), /QQQ|Sleeve attribution unavailable/);
+  voteHolding.live.sleeves.h_etf = {'US.QQQ':5};
+  voteHolding.live.sleeves.two_vote = {'US.QQQ':10};
+  await load({data:voteHolding});
+  assert.match(text('vote-cards'), /QQQ.*Paper position10 long.*\$6,000.00/);
+  assert.match(text('sleeves'), /QQQ5 long.*\$3,000.00/);
+  voteHolding.live.sleeves = {};
+  await load({data:voteHolding});
+  assert.doesNotMatch(text('vote-cards'), /Paper position/);
+  assert.match(text('sleeves'), /Sleeve attribution unavailable.*QQQ15 long/);
   const exitOnly = fresh();
   exitOnly.config.risk.legacy_exit_only = true;
   exitOnly.config.risk.entry_sleeves = [];

@@ -142,6 +142,13 @@ def entries_disabled(cfg: dict, sleeve: str | None) -> bool:
     return bool(risk.get("legacy_exit_only") and sleeve not in risk.get("entry_sleeves", ()))
 
 
+def direction_conflict(state: dict, symbol: str, side: int, *, closing_sleeve: str | None = None) -> str | None:
+    for sleeve, book in state["sleeves"].items():
+        if sleeve != closing_sleeve and side * book.get(symbol, 0) < 0:
+            return f"{symbol} already has an opposing position in {sleeve}"
+    return None
+
+
 def entry_block(state: dict, account: Account, session: str, cfg: dict, sleeve: str | None = None) -> str | None:
     r = cfg["risk"]
     if entries_disabled(cfg, sleeve):
@@ -263,7 +270,7 @@ def plan_b3(state: dict, account: Account, session: str, decision, cfg: dict, no
         return [], "flat, nothing held"
     if held > 0:
         return [], "long, already held"
-    why = entry_block(state, account, session, cfg, "b3")
+    why = entry_block(state, account, session, cfg, "b3") or direction_conflict(state, sym, 1)
     if why:
         return [], f"entry blocked: {why}"
     limits = capital_limits("b3", account.sleeve_capital.get("b3"), cfg, state["reduced"])
@@ -299,7 +306,12 @@ def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: di
     gross = sum(q * account.quotes.get(s, 0.0) for s, q in held.items() if s not in exiting)
     room = limits["aggregate_limit"] - gross
     cash = min(account.cash - 0.99, account.nav - account.gross)          # no leverage
+    conflicts = []
     for s in entries:
+        conflict = direction_conflict(state, s, 1)
+        if conflict:
+            conflicts.append(conflict)
+            continue
         price = account.quotes.get(s)
         if price is None or not math.isfinite(price) or price <= 0:
             continue
@@ -312,7 +324,7 @@ def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: di
         out.append(_intent(now, session, "h_etf", s, "BUY", qty, price, "h_rsi2_entry", cfg, False, "open"))
         room -= qty * limit
         cash -= qty * limit + 0.99
-    return out, "planned"
+    return out, f"opposing entries skipped ({', '.join(conflicts)})" if conflicts else "planned"
 
 
 def apply_fill(state: dict, intent: Intent | dict, filled: int, session: str) -> None:
@@ -360,7 +372,8 @@ def plan_entry(state: dict, account: Account, session: str, sleeve: str, symbol:
     cash (shorts reserve their full notional). Half size applies to both the risk size and the notional cap."""
     if side < 0 and not shorts_allowed(sleeve, cfg):
         return [], f"entry blocked: {sleeve} may not short"
-    why = entry_block(state, account, session, cfg, sleeve) or no_entry_reason(sleeve, session, now, cfg)
+    why = (entry_block(state, account, session, cfg, sleeve) or no_entry_reason(sleeve, session, now, cfg)
+           or direction_conflict(state, symbol, side))
     if why:
         return [], f"entry blocked: {why}"
     if state["sleeves"].get(sleeve, {}).get(symbol):
@@ -388,7 +401,8 @@ def plan_vote_entry(state: dict, account: Account, session: str, symbol: str, si
     cap and cash. Unlike plan_entry, several lots of the same symbol may be open; the runner enforces the lot count."""
     if side < 0 and not shorts_allowed("two_vote", cfg):
         return [], "entry blocked: two_vote may not short"
-    why = entry_block(state, account, session, cfg, "two_vote") or no_entry_reason("two_vote", session, now, cfg)
+    why = (entry_block(state, account, session, cfg, "two_vote") or no_entry_reason("two_vote", session, now, cfg)
+           or direction_conflict(state, symbol, side))
     if why:
         return [], f"entry blocked: {why}"
     limits = capital_limits("two_vote", account.sleeve_capital.get("two_vote"), cfg, state["reduced"])
@@ -440,7 +454,8 @@ def plan_target(state: dict, account: Account, session: str, sleeve: str, symbol
     if target < 0 and not shorts_allowed(sleeve, cfg):
         return out, f"entry blocked: {sleeve} may not short"
     why = entry_block(state, account, session, cfg, sleeve) if not held else None
-    why = why or no_entry_reason(sleeve, session, now, cfg)
+    why = (why or no_entry_reason(sleeve, session, now, cfg)
+           or direction_conflict(state, symbol, target, closing_sleeve=sleeve))
     if why:
         return out, f"entry blocked: {why}"
     limits = capital_limits(sleeve, account.sleeve_capital.get(sleeve), cfg, state["reduced"])

@@ -156,20 +156,22 @@ class Runner:
         results = []
         for i in intents:
             link = {"intent_id": i.intent_id, "audit_id": audit_id}
-            if self.cfg["risk"].get("legacy_exit_only"):
-                reason = None
-                if not i.close_only and planner.entries_disabled(self.cfg, i.sleeve):
+            reason = None
+            if not i.close_only:
+                if planner.entries_disabled(self.cfg, i.sleeve):
                     reason = "legacy strategies are exit-only"
-                elif i.close_only and self.broker:
-                    account = self.account([i.symbol])
-                    held = self.state["sleeves"].get(i.sleeve, {}).get(i.symbol, 0)
-                    net = account.positions.get(i.symbol, 0)
-                    sign = 1 if i.side == "SELL" else -1
-                    if not 0 < i.qty <= min(sign * held, sign * net):
-                        reason = "close would exceed the reconciled position on that side"
-                if reason:
-                    self.store.append(session, {"event": "order_refused", **link, "reason": reason})
-                    continue
+                else:
+                    reason = planner.direction_conflict(self.state, i.symbol, 1 if i.side == "BUY" else -1)
+            if i.close_only and self.broker and self.cfg["risk"].get("legacy_exit_only"):
+                account = self.account([i.symbol])
+                held = self.state["sleeves"].get(i.sleeve, {}).get(i.symbol, 0)
+                net = account.positions.get(i.symbol, 0)
+                sign = 1 if i.side == "SELL" else -1
+                if not 0 < i.qty <= min(sign * held, sign * net):
+                    reason = "close would exceed the reconciled position on that side"
+            if reason:
+                self.store.append(session, {"event": "order_refused", **link, "reason": reason})
+                continue
             self.store.append(session, {"event": "intent", **i.to_dict(), "audit_id": audit_id,
                                         "mode": "EXECUTE" if self.broker else "PLAN"})
             if not self.broker:
@@ -258,7 +260,7 @@ class Runner:
         plan = self.state.get("h_plan")
         session = self.session()
         if self.broker:
-            for path in (self.store.dir / "audit" / session).glob("*.json"):
+            for path in (self.store.dir / "audit" / session).glob("[!.]*.json"):
                 record = json.loads(path.read_text(encoding="utf-8"))
                 if record.get("mode") == "EXECUTE" and record.get("kind") in ("h_open", "h_open_skipped", "h_open_started"):
                     return log(h_open="already attempted", session=session)
@@ -367,7 +369,6 @@ class Runner:
                    "noise_done": [], "decisions": [], "last_slot": None}
             self.state["intraday"] = cur
         cur.setdefault("vote_sides", {})
-        cur.setdefault("vote_lots", {})
         cur.setdefault("vote_slot", None)
         return cur
 
@@ -581,38 +582,29 @@ class Runner:
             if sides.get(sym) == -(1 if q > 0 else -1):
                 acct = acct or self.risk(sorted(set(held) | set(SYMBOLS)))
                 self._close("two_vote", sym, "two_vote_opposite_agreement", acct, session, day)
-                day["vote_lots"][sym] = 0
                 closed_now.add(sym)
                 acct = None
         held = self.state["sleeves"].get("two_vote", {})
-        for sym in SYMBOLS:
-            if not held.get(sym):
-                day["vote_lots"].pop(sym, None)
         if k <= last_entry(n):
             eligible = [sym for sym in SYMBOLS if sides.get(sym) and sym not in closed_now
-                        and day["vote_lots"].get(sym, 0) < c["max_lots_per_symbol"]
                         and (not held.get(sym) or sides[sym] != day["vote_sides"].get(sym))]
             eligible.sort(key=lambda sym: -report["tickers"][sym]["buy" if sides[sym] > 0 else "sell"])
             for sym in eligible:
                 acct = acct or self.risk(list(SYMBOLS))
-                self.attribute_capital(acct)
-                intents, why = planner.plan_vote_entry(self.state, acct, session, sym, sides[sym], self.cfg, now, f"e{k}")
+                performance = self.attribute_capital(acct)["sleeves"]["two_vote"]
+                if performance["open_entry_lots"].get(sym, 0) >= c["max_lots_per_symbol"]:
+                    intents, why = [], "entry blocked: maximum open lots"
+                else:
+                    intents, why = planner.plan_vote_entry(self.state, acct, session, sym, sides[sym], self.cfg, now, f"e{k}")
                 row = report["tickers"][sym]
                 self._decide(day, "two_vote", symbol=sym, slot=k, action=why, side=sides[sym],
                              buy=row["buy"], sell=row["sell"])
                 if intents:
-                    self._vote_enter(intents, sym, session, day, acct)
+                    audit_id = self.audit(session, "two_vote_entry", state=self.state, account=asdict(acct),
+                                          intents=[i.to_dict() for i in intents])
+                    self.send(intents, session, audit_id)
                     acct = None
         day["vote_sides"] = sides
-        self.store.save(self.state)
-
-    def _vote_enter(self, intents, sym, session, day, acct):
-        audit_id = self.audit(session, "two_vote_entry", state=self.state, account=asdict(acct),
-                              intents=[i.to_dict() for i in intents])
-        results = self.send(intents, session, audit_id)
-        res = results[0][1] if results else None
-        if (res["filled"] if res else 0) > 0 or not self.broker:
-            day["vote_lots"][sym] = day["vote_lots"].get(sym, 0) + 1
         self.store.save(self.state)
 
     def _enter(self, intents, sleeve, sym, side, t, entry_slot, session, day, acct, **extra):
@@ -713,8 +705,6 @@ class Runner:
         day = self._intraday(session)
         if "vwap" in sleeves:
             day["armed"] = {}                                   # no VWAP trigger survives its flatten time
-        if "two_vote" in sleeves:
-            day["vote_lots"] = {}
         if not held:
             return
         acct = self.risk(held)

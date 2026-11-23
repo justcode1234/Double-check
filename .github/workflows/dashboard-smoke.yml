@@ -1,0 +1,39 @@
+name: Dashboard smoke test
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  launch:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Launch from a fresh checkout
+        shell: python
+        run: |
+          import json
+          import subprocess
+          import sys
+          from urllib.request import ProxyHandler, build_opener
+
+          command = [sys.executable, 'start.py', '--no-browser']
+          url = subprocess.check_output(command, text=True, timeout=360).splitlines()[-1]
+          assert url.startswith('http://127.0.0.1:'), url
+          opener = build_opener(ProxyHandler({}))
+          with opener.open(url, timeout=10) as response:
+              assert 'Two-vote sleeve' in response.read().decode()
+          with opener.open(url + 'api/competition', timeout=10) as response:
+              data = json.load(response)
+          assert data['config']['risk']['entry_sleeves'] == ['h_etf']
+          assert data['config']['two_vote']['required_votes'] == 2
+          assert subprocess.check_output(command, text=True, timeout=30).strip() == url

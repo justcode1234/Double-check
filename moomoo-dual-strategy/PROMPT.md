@@ -1,0 +1,9 @@
+# Restore Moo Moo competition startup on Linux
+
+Moo Moo has moved to Linux. The Mac is retired. Work from GitHub `main` and make Linux the sole competition paper runner. The previous check reported that Moomoo CLI login, competition account lookup, market data, and the opening-plan dry run passed. Read [AGENTS.md](AGENTS.md) and the [Linux migration guide](SETUP_AND_RUN.md#linux-migration) before changing the runner.
+
+1. Inspect the Linux scheduler, runner, and `private/competition/` state. Identify the exact check blocking startup. Update Linux instructions or dashboard messages that assume the Mac is still available.
+2. Search the Linux checkout and available backups for the latest trustworthy competition state. Restore it privately and preserve initial NAV, day-start NAV, high-water NAV, halts, sleeve ownership, and order history.
+3. Use the authenticated Moomoo CLI for read-only checks on the exact named competition paper account. Reconcile current positions, cash, working orders, and fills against the saved state. If the state is missing, determine what can be recovered from broker history and existing audit records. Keep execution blocked if ownership, prior risk state, or order outcomes cannot be verified. Report the specific evidence needed.
+4. Confirm Linux will be the only execution host. If the retired Mac's scheduler could still launch and you cannot verify that it is disabled, ask me for that specific confirmation. Keep the Linux timer inactive during recovery.
+5. Add and run regression tests for missing state, mismatched positions, unresolved orders, and duplicate startup. Run the read-only Linux preflight. Report whether Linux is ready, the evidence supporting the result, and any remaining blocker. Ask before arming the timer or submitting paper orders. Keep credentials and account identifiers out of Git and your response.

@@ -679,17 +679,17 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   assert.match(text('nav-summary'), /Awaiting first/);
   assert.match(text('sleeves'), /XLV/);
   assert.match(text('sleeves'), /XLP/);
+  assert.match(text('vote-cards'), /SPY.*QQQ/);
+  assert.match(text('vote-note'), /Completed bar/);
+  assert.match(text('vote-cards'), /Short signal/);
+  assert.match(text('vote-rule-rows'), /Donchian.*Sell short/);
   assert.equal(nodes(get('equity-chart'), 'svg').length, 0);
-  assert.notEqual(text('exchange-clock'), '');
-  const researchPath = nodes(get('preview-chart'), 'path')[0];
-  assert.ok(researchPath.attributes.d.includes('L'), 'Daily research samples must remain connected');
-  assert.match(text('preview-chart'), /2021-01-04/);
 
   const live = fresh();
   live.runtime.market_phase = 'open';
   live.runtime.mark_status = 'stale'; live.runtime.mark_age_seconds = 300;
   Object.assign(live.live, {nav_estimate:100000, high_water:100000, day:live.outbox_session, day_start_nav:100000});
-  live.account_snapshot = {at:live.generated_at,cash:96000,quotes:{'US.XLV':177}};
+  live.account_snapshot = {at:live.generated_at,cash:96000,positions:{'US.XLV':11,'US.SPY':-2},quotes:{'US.XLV':177}};
   live.live.sleeves.h_etf = {'US.XLV':11};
   live.b3_decision = {at:live.generated_at,target:1,reason:'long',metrics:{close:502,upper:501,vwap:500},plan_reason:'entry'};
   live.orders = [{created_at:live.generated_at,intent_id:'one',audit_id:'a',sleeve:'h_etf',symbol:'US.XLV',side:'BUY',qty:11,limit_price:177.5,reference_price:177.4,reason:'h_entry',status:'FILLED',filled:11,avg_price:177.123456789},
@@ -716,7 +716,6 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   assert.ok(!cardText(get('sleeves').children[0]).includes('$88,000.00'));
   for (const value of ['$20,021.17','$2,002.12','$6,006.35']) assert.ok(cardText(get('sleeves').children[1]).includes(value),value);
   assert.match(text('sleeves'),/initial capital/i);
-  assert.doesNotMatch(text('rules-list'),/of current account NAV/);
   live.live.nav_estimate=100000;
   live.performance.sleeves.h_etf.capital=20000;
   live.performance.sleeves.h_etf.limits={allocation_budget:20000,target_before_cap:null,per_etf_budget:2000,aggregate_limit:6000};
@@ -809,9 +808,22 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   await load({data:fresh()});assert.equal(stale(),false);
   const old=fresh();old.generated_at=new Date(clock-1000).toISOString();await load({data:old});
   assert.match(text('data-alert'),/Out-of-order/);
-  const absent=fresh();absent.plan={nav_estimate:999999,sleeves:{b3:{'US.SPY':999}}};absent.live=null;absent.preview=null;
+  const absent=fresh();absent.plan={nav_estimate:999999,sleeves:{b3:{'US.SPY':999}}};absent.live=null;absent.vote_signals={status:'stale'};
   await load({data:absent});assert.match(text('nav-summary'),/Awaiting first/);assert.ok(!text('sleeves').includes('999999'));
-  assert.equal(get('preview-body').children.length,0);assert.equal(text('preview-costs'),'');
+  assert.match(text('vote-note'),/stale/);
+  assert.doesNotMatch(text('vote-cards'), /Short signal/);
+  const exitOnly = fresh();
+  exitOnly.config.risk.legacy_exit_only = true;
+  exitOnly.live.sleeves.h_etf = {'US.XLV':11, 'US.XLP':9};
+  exitOnly.live.h_plan = {asof: '2026-11-19', entries:['US.DIA'], exits:{'US.XLV':'max_hold'}};
+  await load({data:exitOnly});
+  assert.equal(get('sleeves').children.length, 1);
+  assert.match(text('sleeves'),/Exit only.*XLV.*Sell at next open/);
+  assert.match(text('sleeves'),/XLP/);
+  assert.doesNotMatch(text('sleeves'),/DIA/);
+  exitOnly.live.sleeves.h_etf = {};
+  await load({data:exitOnly});
+  assert.match(text('sleeves'),/No legacy positions recorded/);
   for (const request of requests) { assert.equal(request.url,'/api/competition');assert.ok(!request.options.method||request.options.method==='GET'); }
   console.log('Competition DOM behaviors passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });
@@ -834,9 +846,13 @@ def test_competition_dom_status_fills_research_and_failures(tmp_path, monkeypatc
     store.save(state)
     monkeypatch.setattr(report, '_process', lambda project: {'status': 'running', 'count': 1})
     status = report.competition_payload(tmp_path, datetime.fromisoformat('2026-11-20T13:00:00+00:00'))
-    status['preview'] = {'method': 'Hypothetical', 'windows': {'long': {'equity': [
-        {'date': '2021-01-04', 'nav': 100000}, {'date': '2021-01-05', 'nav': 100100}],
-        'net_return_pct': .1, 'max_drawdown_pct': 0, 'halted_on': None}}}
+    status['config']['risk']['legacy_exit_only'] = False
+    status['vote_signals'] = {
+        'status': 'current', 'bar_end': '2026-11-20T14:40:00+00:00', 'required_votes': 2,
+        'tickers': {'US.SPY': {'buy': 0, 'sell': 2, 'signal': -1, 'entry_window': True,
+                              'rules': {'Donchian': -1, 'Noise-area': -1}},
+                    'US.QQQ': {'buy': 1, 'sell': 0, 'signal': 0, 'entry_window': True,
+                              'rules': {'Donchian': 1}}}}
     parser = AssetParser()
     parser.feed((ASSETS / 'competition.html').read_text(encoding='utf-8'))
     payload = {'app': str(ASSETS / 'competition.js'), 'status': status,

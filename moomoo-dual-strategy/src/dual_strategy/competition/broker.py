@@ -124,6 +124,8 @@ class CompetitionBroker:
     def place(self, intent: Intent) -> str:
         cfg = getattr(self, "cfg", None) or {}
         r = cfg.get("risk", {})                          # no config = long-only
+        if r.get("legacy_exit_only") and not intent.close_only:
+            raise ExecutionBlocked("legacy strategies are exit-only")
         if intent.side == "SELL" and not intent.close_only:
             if not (getattr(intent, "opens_short", False) and r.get("long_only") is False
                     and intent.sleeve in r.get("short_sleeves", ()) and cfg.get(intent.sleeve, {}).get("shorts")):

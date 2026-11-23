@@ -286,9 +286,9 @@ At the end, provide a factual table stating **CREATED / VERIFIED / BLOCKED**, ac
 - Independent SPY out-of-sample replication: https://github.com/PazSheimy/spy-intraday-momentum-oos
 
 **Existing context documents, if available in this Qoder project:**
-- `moomoo_qoder_strategy_review.md` — Qoder's initial ORB recommendation.
-- `moomoo_qoder_strategy_validation_response.md` — Qoder's corrected ORB research baseline.
-- `moomoo_qoder_strategy_second_opinion.md` — Claude's initial alternative.
-- `moomoo_qoder_strategy_second_opinion_v2.md` — Claude's revised SPY-only alternative.
+- [Qoder's initial ORB recommendation](../reports/strategy-review/moomoo_qoder_strategy_review.md).
+- [Qoder's corrected ORB research baseline](../reports/strategy-review/moomoo_qoder_strategy_validation_response.md).
+- [Claude's initial alternative](../reports/strategy-review/moomoo_qoder_strategy_second_opinion.md).
+- [Claude's revised SPY-only alternative](../reports/strategy-review/moomoo_qoder_strategy_second_opinion_v2.md).
 
 **Source constraint:** Do **not** open, download, transcribe or process any original workshop videos. Use only prepared notes, transcripts, slides and public text documentation. Verify current official rules and tool schemas; the handbook takes precedence when documents disagree.

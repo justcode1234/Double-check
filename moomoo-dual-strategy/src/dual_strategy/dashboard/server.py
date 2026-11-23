@@ -1,4 +1,6 @@
+import hashlib
 import json
+import os
 import secrets
 import sqlite3
 import socket
@@ -9,15 +11,16 @@ from urllib.parse import urlsplit
 from dual_strategy.portfolio.ledger import Ledger, STRATEGIES
 from dual_strategy.reporting.service import START_BLOCKERS, csv_export, redacted, report_status
 
-ASSETS = {'/': ('index.html', 'text/html'), '/app.js': ('app.js', 'text/javascript'), '/style.css': ('style.css', 'text/css'),
+ASSETS = {'/': ('index.html', 'text/html'), '/practice': ('index.html', 'text/html'), '/app.js': ('app.js', 'text/javascript'), '/style.css': ('style.css', 'text/css'),
           '/backtest': ('backtest.html', 'text/html'), '/backtest.js': ('backtest.js', 'text/javascript'),
           '/backtest.css': ('backtest.css', 'text/css'), '/competition': ('competition.html', 'text/html'),
           '/competition.js': ('competition.js', 'text/javascript'), '/competition.css': ('competition.css', 'text/css')}
 BACKTEST_SCOREBOARD = Path('reports') / 'backtest_v3' / 'scoreboard.json'
 
 
-def create_server(project: Path, db_path: Path, port: int = 8876):
+def create_server(project: Path, db_path: Path, port: int = 8876, competition_home: bool = False):
     control_token = secrets.token_urlsafe(32)
+    project_token = hashlib.sha256(os.fsencode(os.path.normcase(str(project.resolve())))).hexdigest()
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_):
@@ -47,6 +50,11 @@ def create_server(project: Path, db_path: Path, port: int = 8876):
             if not self.allowed_host():
                 return self.send(403, '{"error":"Loopback host required"}')
             path = urlsplit(self.path).path
+            if path == '/api/launcher':
+                return self.send(200, json.dumps({'service': 'moomoo-competition-dashboard',
+                                                 'project': project_token, 'live_votes': competition_home}))
+            if path == '/' and competition_home:
+                path = '/competition'
             if path in ASSETS:
                 filename, mime = ASSETS[path]
                 return self.send(200, (Path(__file__).parent / filename).read_text(encoding='utf-8'), mime)

@@ -50,8 +50,17 @@ def runner_processes():
     result = subprocess.run(['/bin/ps', '-axo', 'pid=,stat=,command='], capture_output=True, text=True,
                             check=True, timeout=10)
     found = []
+    local_prefix = f'{python_path(PROJECT)} {PROJECT / "scripts/run_competition.py"} '
     for line in result.stdout.splitlines():
-        pid, state, command = line.strip().split(None, 2)
+        fields = line.strip().split(None, 2)
+        if len(fields) != 3:
+            continue
+        pid, state, command = fields
+        if command.startswith(local_prefix):
+            args = command[len(local_prefix):].split()
+            if 'loop' in args and '--execute' in args:
+                found.append({'pid': int(pid), 'state': state})
+            continue
         if not Path(command.split()[0]).name.lower().startswith('python'):
             continue
         args = shlex.split(command)

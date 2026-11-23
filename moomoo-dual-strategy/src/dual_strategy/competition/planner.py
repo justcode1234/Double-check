@@ -136,6 +136,8 @@ def attribution_errors(state: dict, account: Account) -> list[str]:
 
 def entry_block(state: dict, account: Account, session: str, cfg: dict) -> str | None:
     r = cfg["risk"]
+    if r.get("legacy_exit_only"):
+        return "legacy strategies are exit-only"
     if state["halted"] is not None:
         return "drawdown_halt (human must clear private state)"
     if state["locked_day"] == session:
@@ -391,6 +393,8 @@ def plan_target(state: dict, account: Account, session: str, sleeve: str, symbol
         out += plan_close(state, account, session, sleeve, symbol, f"{reason}_exit", cfg, now, f"{tag}x")
     if target == 0:
         return out, "exit to flat"
+    if cfg["risk"].get("legacy_exit_only"):
+        return out, "entry blocked: legacy strategies are exit-only"
     if target < 0 and not shorts_allowed(sleeve, cfg):
         return out, f"entry blocked: {sleeve} may not short"
     why = entry_block(state, account, session, cfg) if not held else None

@@ -150,6 +150,20 @@ class Runner:
         results = []
         for i in intents:
             link = {"intent_id": i.intent_id, "audit_id": audit_id}
+            if self.cfg["risk"].get("legacy_exit_only"):
+                reason = None
+                if not i.close_only:
+                    reason = "legacy strategies are exit-only"
+                elif self.broker:
+                    account = self.account([i.symbol])
+                    held = self.state["sleeves"].get(i.sleeve, {}).get(i.symbol, 0)
+                    net = account.positions.get(i.symbol, 0)
+                    sign = 1 if i.side == "SELL" else -1
+                    if not 0 < i.qty <= min(sign * held, sign * net):
+                        reason = "close would exceed the reconciled position on that side"
+                if reason:
+                    self.store.append(session, {"event": "order_refused", **link, "reason": reason})
+                    continue
             self.store.append(session, {"event": "intent", **i.to_dict(), "audit_id": audit_id,
                                         "mode": "EXECUTE" if self.broker else "PLAN"})
             if not self.broker:

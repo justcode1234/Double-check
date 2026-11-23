@@ -43,6 +43,22 @@ def _regime_research(project: Path) -> list[dict]:
     return out
 
 
+def _vote_signals(project: Path, cfg: dict, now: datetime) -> dict:
+    path = project / cfg["state_dir"] / "vote_signals.json"
+    try:
+        report = json.loads(path.read_text(encoding="utf-8"))
+        if report["schema_version"] != 1:
+            return {"status": "unavailable"}
+        age = (now - datetime.fromisoformat(report["observed_at"])).total_seconds()
+        if not -5 <= age <= 60:
+            return {"status": "stale"}
+        return report
+    except FileNotFoundError:
+        return {"status": "waiting"}
+    except (OSError, ValueError, KeyError, TypeError):
+        return {"status": "unavailable"}
+
+
 def _summary(state: dict | None, cfg: dict, now: datetime) -> dict | None:
     if state is None:
         return None
@@ -304,6 +320,7 @@ def competition_payload(project: Path, now: datetime | None = None) -> dict:
         "step_errors": dict(Counter(r.get("step", "unknown") for r in rows if r.get("event") == "runner_error")),
         "step_skips": dict(Counter(r.get("step", "unknown") for r in rows if r.get("event") == "step_skipped")),
         "regime_research": _regime_research(project),
+        "vote_signals": _vote_signals(project, cfg, now),
         "performance": sleeve_performance(stores["live"], states["live"], observations["account_snapshot"], cfg),
         **observations, "preview": preview,
     })

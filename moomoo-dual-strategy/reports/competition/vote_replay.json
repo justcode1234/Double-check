@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "budget_usd": 10000,
+  "account_budget_usd": 100000.0,
+  "required_votes": 2,
+  "max_open_positions": 2,
+  "symbols": [
+    "US.SPY",
+    "US.QQQ"
+  ],
+  "exit_rule": "opposing-vote",
+  "models": {
+    "short_only": {
+      "earlier": {
+        "from": "2025-01-01",
+        "through": "2026-11-06",
+        "sessions": 464,
+        "trades": 829,
+        "long_entries": 0,
+        "short_entries": 829,
+        "active_sessions": 450,
+        "peak_open_positions": 2,
+        "winners": 373,
+        "net_pnl_usd": -2262.67
+      },
+      "recent": {
+        "from": "2026-11-09",
+        "through": "2026-11-20",
+        "sessions": 10,
+        "trades": 18,
+        "long_entries": 0,
+        "short_entries": 18,
+        "active_sessions": 9,
+        "peak_open_positions": 2,
+        "winners": 12,
+        "net_pnl_usd": 1298.97
+      },
+      "recent_sessions": [
+        {
+          "session": "2026-11-09",
+          "max_sell_votes": 1,
+          "max_buy_votes": 0,
+          "trades": 0,
+          "net_pnl_usd": 0.0
+        },
+        {
+          "session": "2026-11-10",
+          "max_sell_votes": 4,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": -40.83
+        },
+        {
+          "session": "2026-11-11",
+          "max_sell_votes": 4,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": 48.52
+        },
+        {
+          "session": "2026-11-12",
+          "max_sell_votes": 3,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": 11.67
+        },
+        {
+          "session": "2026-11-13",
+          "max_sell_votes": 3,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": -13.16
+        },
+        {
+          "session": "2026-11-16",
+          "max_sell_votes": 3,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": 114.6
+        },
+        {
+          "session": "2026-11-17",
+          "max_sell_votes": 4,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": 159.35
+        },
+        {
+          "session": "2026-11-18",
+          "max_sell_votes": 2,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": -50.87
+        },
+        {
+          "session": "2026-11-19",
+          "max_sell_votes": 4,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": 441.87
+        },
+        {
+          "session": "2026-11-20",
+          "max_sell_votes": 4,
+          "max_buy_votes": 0,
+          "trades": 2,
+          "net_pnl_usd": 627.82
+        }
+      ]
+    },
+    "long_short": {
+      "earlier": {
+        "from": "2025-01-01",
+        "through": "2026-11-06",
+        "sessions": 464,
+        "trades": 1763,
+        "long_entries": 910,
+        "short_entries": 853,
+        "active_sessions": 464,
+        "peak_open_positions": 2,
+        "winners": 675,
+        "net_pnl_usd": -2872.58
+      },
+      "recent": {
+        "from": "2026-11-09",
+        "through": "2026-11-20",
+        "sessions": 10,
+        "trades": 33,
+        "long_entries": 14,
+        "short_entries": 19,
+        "active_sessions": 10,
+        "peak_open_positions": 2,
+        "winners": 26,
+        "net_pnl_usd": 1600.66
+      },
+      "recent_sessions": [
+        {
+          "session": "2026-11-09",
+          "max_sell_votes": 1,
+          "max_buy_votes": 3,
+          "trades": 2,
+          "net_pnl_usd": 105.38
+        },
+        {
+          "session": "2026-11-10",
+          "max_sell_votes": 4,
+          "max_buy_votes": 3,
+          "trades": 5,
+          "net_pnl_usd": 70.94
+        },
+        {
+          "session": "2026-11-11",
+          "max_sell_votes": 4,
+          "max_buy_votes": 3,
+          "trades": 4,
+          "net_pnl_usd": 59.63
+        },
+        {
+          "session": "2026-11-12",
+          "max_sell_votes": 3,
+          "max_buy_votes": 3,
+          "trades": 4,
+          "net_pnl_usd": -122.77
+        },
+        {
+          "session": "2026-11-13",
+          "max_sell_votes": 3,
+          "max_buy_votes": 4,
+          "trades": 4,
+          "net_pnl_usd": 162.53
+        },
+        {
+          "session": "2026-11-16",
+          "max_sell_votes": 3,
+          "max_buy_votes": 2,
+          "trades": 3,
+          "net_pnl_usd": 99.12
+        },
+        {
+          "session": "2026-11-17",
+          "max_sell_votes": 4,
+          "max_buy_votes": 2,
+          "trades": 2,
+          "net_pnl_usd": 159.35
+        },
+        {
+          "session": "2026-11-18",
+          "max_sell_votes": 2,
+          "max_buy_votes": 4,
+          "trades": 4,
+          "net_pnl_usd": 68.04
+        },
+        {
+          "session": "2026-11-19",
+          "max_sell_votes": 4,
+          "max_buy_votes": 3,
+          "trades": 3,
+          "net_pnl_usd": 370.62
+        },
+        {
+          "session": "2026-11-20",
+          "max_sell_votes": 4,
+          "max_buy_votes": 2,
+          "trades": 2,
+          "net_pnl_usd": 627.82
+        }
+      ]
+    }
+  }
+}

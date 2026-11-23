@@ -1,5 +1,15 @@
 # Setup and run
 
+## Competition launcher
+
+Run `python start.py` from the workspace root. It uses the Python environment inside this project, opens the competition dashboard in your browser, and returns control to the terminal. A second launch opens the dashboard again using the same background service.
+
+On the authorized Mac, the launcher also registers the existing paper scheduler for the signed-off startup window. That scheduler still requires the confirmed competition account, persisted state, and broker reconciliation. On Windows, the launcher opens the dashboard and quote-only voting feed. The two-vote signals do not place orders. Dashboard startup logs are in `private/launcher/dashboard.log`.
+
+Use `python start.py --dashboard-only` to open the dashboard without registering the Mac scheduler.
+
+## Practice research
+
 **Scope:** Windows Git Bash or macOS, local research/dashboard only. Both portfolios are `SHADOW`; paper execution is disabled. The ordinary practice account is authorized, but broker lifecycle, independent supervision, historical release validation and Cloud deployment remain blocked. Read [AGENTS.md](AGENTS.md) first. Never address live or competition accounts, reset balances, or overwrite private state.
 
 ## 1. Environment

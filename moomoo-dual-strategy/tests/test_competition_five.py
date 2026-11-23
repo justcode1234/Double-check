@@ -23,6 +23,7 @@ from dual_strategy.execution.moomoo_paper import ExecutionBlocked
 
 PROJECT = Path(__file__).resolve().parents[1]
 CFG = load_config(PROJECT)
+CFG["risk"]["legacy_exit_only"] = False  # Exercise the original entry and sizing rules.
 NOW = datetime(2026, 11, 23, 11, 0, tzinfo=NY)
 SESSION = "2026-11-23"
 
@@ -436,3 +437,20 @@ def test_daily_report_after_the_close(runner, tmp_path, monkeypatch):
     rep = __import__("json").loads((runner.store.dir / "reports" / f"{SESSION}.json").read_text())
     assert rep["session"] == SESSION and rep["mode"] == "EXECUTE" and set(rep["sleeves"]) == set(planner.SLEEVES)
     assert all(v["capital"] == 20_000.0 for v in rep["sleeves"].values()) and rep["halted"] is None
+
+
+def test_legacy_exit_only_keeps_existing_h_exit_and_blocks_new_exposure(runner, monkeypatch):
+    runner.cfg = {**runner.cfg, "risk": {**CFG["risk"], "legacy_exit_only": True}}
+    runner.state["sleeves"]["h_etf"] = {"US.SPY": 8, "US.QQQ": 6}
+    account = acct(positions={"US.SPY": 8, "US.QQQ": 6})
+    plan = {"entries": ["US.IWM"], "exits": {"US.SPY": "max_hold"}}
+    exits, why = planner.plan_h_open(runner.state, account, SESSION, plan, runner.cfg, NOW)
+    assert "exit-only" in why
+    assert [(i.symbol, i.side, i.qty, i.close_only) for i in exits] == [("US.SPY", "SELL", 8, True)]
+    monkeypatch.setattr(runner, "account", lambda symbols=(): acct(positions={"US.SPY": 4, "US.QQQ": 6}))
+    assert not runner.send(exits, SESSION, "exit")
+    assert not runner.sent
+    monkeypatch.setattr(runner, "account", lambda symbols=(): account)
+    runner.send(exits, SESSION, "exit")
+    assert len(runner.sent) == 1
+    assert runner.state["sleeves"]["h_etf"] == {"US.QQQ": 6}

@@ -23,14 +23,80 @@
     dl.append(box);
   }
 
+
+  function renderLiveVotes(data) {
+    const vote = data.vote_signals || {}, current = vote.status === "current";
+    const threshold = vote.required_votes || 2;
+    const messages = {
+      preopen: "Waiting for the U.S. regular session to open.",
+      closed: "The regular session is closed.",
+      waiting: "Waiting for completed five-minute bars.",
+      stale: "The vote feed is stale. Signal counts are unavailable.",
+      unavailable: "The market-data feed is unavailable.",
+    };
+    set("vote-note", current ? `Completed bar at ${et(vote.bar_end)} ET ? quote-only signals` : messages[vote.status] || messages.waiting);
+    const cards = byId("vote-cards"), table = byId("vote-rule-rows");
+    cards.replaceChildren(); table.replaceChildren();
+    const symbols = ["US.SPY", "US.QQQ"];
+    const names = new Set();
+    for (const symbol of symbols) {
+      const row = current ? vote.tickers?.[symbol] : null;
+      const card = el("article", "vote-ticker-card"), metrics = el("dl", "metrics capital-metrics");
+      const signal = !row ? "Waiting for data" : !row.entry_window ? "Entry window closed" :
+        ({ "-1": "Short signal", "0": "No agreement", "1": "Long signal" }[row.signal] || "Unverified");
+      card.append(el("h3", "", symbol.slice(3)), el("p", "vote-signal", signal));
+      metric(metrics, "Buy votes", finite(row?.buy) ? `${row.buy} / ${threshold}` : "?");
+      metric(metrics, "Sell votes", finite(row?.sell) ? `${row.sell} / ${threshold}` : "?");
+      card.append(metrics);
+      cards.append(card);
+      Object.keys(row?.rules || {}).forEach(name => names.add(name));
+    }
+    if (!names.size) emptyRow(table, 3, "Waiting for verified rule signals.");
+    for (const name of names) {
+      const line = el("tr"), label = el("th", "", name);
+      label.setAttribute("scope", "row");
+      line.append(label);
+      for (const symbol of symbols) {
+        const signal = vote.tickers?.[symbol]?.rules?.[name];
+        line.append(el("td", signal === -1 ? "negative" : signal === 1 ? "positive" : "",
+          signal === -1 ? "Sell short" : signal === 1 ? "Buy" : signal === 0 ? "Neutral" : "?"));
+      }
+      table.append(line);
+    }
+  }
+
+  function renderExitOnlyHoldings(data, host) {
+    const holdings = data.live?.sleeves;
+    if (!holdings) {
+      host.append(el("p", "empty-state", "Existing paper holdings are unverified."));
+      return;
+    }
+    for (const s of SLEEVE_SPECS) {
+      const positions = Object.entries(holdings[s.id] || {}).filter(([, qty]) => qty);
+      if (!positions.length) continue;
+      const card = el("article", `portfolio-card ${s.css}`), list = el("ul", "plan-list");
+      card.append(el("h3", "", s.title), el("p", "footnote", "Exit only ? new entries blocked"));
+      for (const [symbol, qty] of positions) {
+        const mark = data.account_snapshot?.quotes?.[symbol];
+        const exit = s.id === "h_etf" ? data.live?.h_plan?.exits?.[symbol] : null;
+        const direction = qty > 0 ? "long" : "short";
+        list.append(el("li", "", `${symbol.replace(/^US\./, "")} ? ${Math.abs(qty)} ${direction} ? ${money(finite(mark) ? Math.abs(qty) * mark : null)}${exit ? ` ? Sell at next open ? ${human(exit)}` : ""}`));
+      }
+      card.append(list);
+      host.append(card);
+    }
+    if (!host.children.length) host.append(el("p", "empty-state", "No legacy positions recorded."));
+  }
+
   function renderStatus(data) {
     const r = data.runtime, st = data.live, process = r.process.status;
     set("exchange-clock", et(data.generated_at, true));
-    set("mode-badge", data.config.execution_enabled ? "Paper execution enabled" : "Execution disabled");
+    const exitOnly = data.config.risk.legacy_exit_only;
+    set("mode-badge", exitOnly ? "Legacy exit-only config" : data.config.execution_enabled ? "Paper runner enabled" : "Paper runner disabled");
     byId("mode-badge").className = `badge ${data.config.execution_enabled ? "good" : "warning"}`;
     const titles = { stopped: "Stopped · no matching loop", unknown: "Runner status unverified", multiple: "Multiple loops detected" };
     set("runner-summary", process === "running" ? (r.market_phase === "preopen" ? "Waiting for market open" : "Running · process detected") : titles[process] || "Runner status unverified");
-    set("runner-note", process === "running" ? "One matching Python loop on this Mac. Process liveness is not proof of fresh data or order acceptance." : "This page will not start, stop or restart trading. Verify the runner before relying on execution.");
+    set("runner-note", process === "running" ? "One matching Python loop on the dashboard host. Check the account observation and recorded outcomes below." : "This page will not start, stop or restart trading. Verify the runner before relying on execution.");
     set("market-badge", { preopen: "Pre-market", open: "Regular session", closed: "Market closed" }[r.market_phase]);
     byId("market-badge").className = `badge ${r.market_phase === "open" ? "good" : "neutral"}`;
     const marks = { recent: "Recent risk mark", stale: "Stale risk mark", not_recorded: "No risk mark yet", clock_mismatch: "Mark clock mismatch" };
@@ -106,6 +172,11 @@
   function renderSleeves(data) {
     const host = byId("sleeves"), state = data.live;
     host.replaceChildren();
+    if (data.config.risk.legacy_exit_only) {
+      renderExitOnlyHoldings(data, host);
+      set("attribution-note", "Legacy holdings remain under their original exit rules.");
+      return;
+    }
     const day = state?.intraday && state.intraday.session === data.outbox_session ? state.intraday : null;
     for (const s of SLEEVE_SPECS) {
       const performance = data.performance.sleeves[s.id];
@@ -194,20 +265,6 @@
     set("attribution-note", `Each strategy's P&L follows only its own confirmed fills and marked holdings, shorts included; it is not split by the allocation weights. Account change: ${money(p.account_pnl)}. Unallocated account adjustment: ${money(p.unallocated_account_change)} (fees or other cash flows, not assigned to any strategy).`);
   }
 
-  function renderResearch(data) {
-    const body = byId("regime-body"); if (!body) return;
-    body.replaceChildren();
-    const rows = data.regime_research || [];
-    if (!rows.length) { emptyRow(body, 6, "No regime research summary available."); return; }
-    for (const r of rows) {
-      const tr = el("tr");
-      tr.append(el("td", "", r.strategy), el("td", "", `${money(r.train_2021_24_week)}/wk`),
-        el("td", "", `${money(r.test_2025_26_week)}/wk`), el("td", "", `${money(r.vix30_week)}/wk`), el("td", "", money(r.last_week)),
-        el("td", "", finite(r.trades_per_week) ? r.trades_per_week.toFixed(2) : "—"));
-      body.append(tr);
-    }
-  }
-
   function matches(row) {
     const strategy = byId("strategy-filter").value;
     const query = byId("event-search").value.trim().toLowerCase();
@@ -291,32 +348,6 @@
     set("chart-note", `${data.outbox_session} ET · EXECUTE risk snapshots only. Gaps over 2 minutes are not connected. Marks are account-level; no independent B3/H profit history is assumed.`);
   }
 
-  function renderResearch(data) {
-    const preview = data.preview, body = byId("preview-body"); body.replaceChildren();
-    if (!preview) { set("preview-note", "No research preview available. This does not affect the trading runner."); byId("preview-chart").replaceChildren(); set("preview-costs", ""); return; }
-    set("preview-note", `${preview.method}. Hypothetical research fills, not current broker results. Historical sizing may differ from current capped exposure.`);
-    const points = (preview.windows.long.equity || []).map(p => ({ at: `${p.date}T16:00:00-05:00`, nav: p.nav }));
-    plot("preview-chart", points, "nav", "Historical research NAV", true);
-    for (const [key, label] of [["long", "2021–2025"], ["2021_22", "2021–22 restarted"], ["2023", "2023 restarted"], ["2024_25", "2024–25 after selection"]]) {
-      const v = preview.windows[key]; if (!v) continue;
-      const tr = el("tr"); tr.append(el("td", "", label), el("td", v.net_return_pct < 0 ? "negative" : "", pct(v.net_return_pct)), el("td", "", pct(v.max_drawdown_pct)), el("td", "", v.halted_on || "Never")); body.append(tr);
-    }
-    const costs = preview.cost_stress_return_pct?.long || {};
-    set("preview-costs", `2021–2025 cost sensitivity: 0 bp ${pct(costs["0bp"])}, 5 bp ${pct(costs["5bp"])}, 10 bp ${pct(costs["10bp"])}. Short samples and backtests do not establish alpha.`);
-  }
-
-  function renderRules(data) {
-    const c = data.config, r = c.risk;
-    const rules = [`Starting capital is split once into five sleeves: ${SLEEVE_SPECS.map(s => `${s.letter} ${share(c.allocation[s.id])}`).join(" / ")}. Each budget then changes only with its own confirmed gross P&L. Unattributed fees and cash adjustments are not shared between strategies.`,
-      `B3 targets ${share(c.b3.position_fraction_of_sleeve)} of its allocation. The ${money(r.name_cap_usd)} per-symbol cap counts every sleeve, longs and shorts by absolute value.`,
-      `Noise-area trades ${share(c.noise.position_fraction_of_sleeve)} of its capital in SPY on a target change. VWAP risks ${share(c.vwap.risk_fraction_of_nav)} of NAV per trade (target ${c.vwap.target_r}R); ORB risks ${share(c.orb.risk_fraction_of_nav)}, at most ${money(c.orb.max_notional)} per trade. Only these three may short; shorts reserve their full notional and are never held overnight.`,
-      `H uses ${share(c.h_etf.per_name_fraction_of_sleeve)} of its allocation per ETF, ${share(c.h_etf.aggregate_fraction_of_sleeve)} aggregate. Unused money stays in shared cash.`,
-      `A ${share(r.halt_drawdown_fraction)} high-water drawdown triggers exits and a persistent halt. A ${share(r.daily_loss_fraction)} day-start loss locks the day.`,
-      `An order-error halt blocks entries without itself forcing liquidation. After 3 order errors in a day no further orders can be sent. Only the user can authorize clearing a halt.`,
-      `New positions use half sizing below ${share(r.reduce_drawdown_fraction)} drawdown, still subject to caps. LIMIT orders use quote ± ${r.limit_offset_bps} bp; unfilled orders are cancelled and reconciled after ${r.order_wait_seconds}s.`];
-    byId("rules-list").replaceChildren(...rules.map(text => el("li", "", text)));
-  }
-
   function showFailure(message) {
     byId("data-alert").hidden = false;
     set("data-alert", `${message}. Displayed values may be old; this page never changes trading.`);
@@ -336,7 +367,8 @@
       if (latest && Date.parse(data.generated_at) < Date.parse(latest.generated_at)) throw new Error("Out-of-order dashboard response");
       const snapshotAge = Date.now() - Date.parse(data.generated_at);
       if (snapshotAge > 15000 || snapshotAge < -5000) throw new Error("Dashboard snapshot is stale or its clock is mismatched");
-      renderStatus(data); renderAttention(data); renderSleeves(data); renderResearch(data); renderAudit(data); renderCharts(data); renderResearch(data); renderRules(data);
+      renderLiveVotes(data); renderStatus(data); renderAttention(data); renderSleeves(data);
+      renderAudit(data); renderCharts(data);
       latest = data; lastSuccess = Date.now();
       byId("data-alert").hidden = true;
       byId("live-data").classList.remove("is-stale");

@@ -2,6 +2,14 @@
 .competition-page .page-heading { padding-bottom: 26px; }
 .competition-page h1 { font-weight: 550; }
 .competition-page .download-link { font-size: 12px; }
+.vote-panel { margin-bottom: 22px; border-top: 3px solid var(--teal); }
+.vote-panel h3 { font-size: 14px; margin: 0 0 12px; }
+.vote-panel th[scope='row'] { color: var(--text); letter-spacing: 0; text-transform: none; }
+.vote-cards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; margin-bottom: 16px; }
+.vote-ticker-card { padding: 16px; border: 1px solid var(--border); border-radius: 8px; min-width: 0; }
+.vote-signal { margin: 0 0 12px; color: var(--muted); }
+.vote-panel .positive { color: var(--teal); }
+.paper-sleeves-title { font-size: 18px; margin-bottom: 12px; }
 .session-panel { margin-bottom: 22px; border-top: 3px solid var(--blue); }
 .session-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 22px; }
 .session-heading h2 { font-size: clamp(21px, 2.2vw, 29px); letter-spacing: -.035em; margin-bottom: 4px; }
@@ -50,17 +58,13 @@
 #orders-body pre { max-width: 280px; }
 .competition-page .chart-host { min-height: 190px; }
 .chart-grid.one { grid-template-columns: 1fr; }
-.research-disclosure { margin-bottom: 18px; }
-.research-disclosure > summary { font-size: 13px; font-weight: 550; color: var(--text); }
-.research-disclosure[open] > summary { margin-bottom: 24px; }
-#preview-chart .line { fill: none; stroke: var(--blue); stroke-width: 2; }
-#preview-chart text { fill: var(--muted); font-size: 10px; }
 @media (max-width: 1050px) {
   .account-strip { grid-template-columns: 1fr 1fr; }
   .account-strip > div:nth-child(3) { border-left: 0; }
   .account-strip > div:nth-child(n+3) { border-top: 1px solid var(--border); }
 }
 @media (max-width: 760px) {
+  .vote-cards { grid-template-columns: 1fr; }
   .competition-page .topbar { flex-wrap: wrap; padding: 15px 0; gap: 14px; }
   .competition-page .topbar-right { width: 100%; gap: 16px; justify-content: space-between; }
   .competition-page .read-only { display: inline; font-size: 11px; }

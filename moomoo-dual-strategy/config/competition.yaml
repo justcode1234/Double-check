@@ -93,6 +93,7 @@ h_etf:
   aggregate_fraction_of_sleeve: 0.30
 
 risk:                            # account level (all five sleeves)
+  legacy_exit_only: true         # keep existing exit rules for old holdings and block all new entries
   halt_drawdown_fraction: 0.035  # NAV <= 96.5% of high-water: flatten everything, block entries until a human clears
   daily_loss_fraction: 0.0125    # NAV <= 98.75% of day-start NAV: flatten everything, no entries for the rest of the day
   reduce_drawdown_fraction: 0.02 # NAV <= 98% of high-water: new positions at half size (until back above 98.5%)

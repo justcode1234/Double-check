@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Read-only B3 and H competition monitor: runner status, risk marks, allocations and recorded broker outcomes.">
-  <title>Competition B3 + H</title>
+  <meta name="description" content="Moomoo competition dashboard with SPY and QQQ signals and recorded paper account activity.">
+  <title>Moomoo Competition Dashboard</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/competition.css">
   <script src="/competition.js" defer></script>
@@ -15,32 +15,50 @@
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="/competition" aria-label="Competition monitor"><span class="brand-mark" aria-hidden="true">DS</span><span>DUAL STRATEGY<span class="brand-sub">COMPETITION MONITOR</span></span></a>
-      <nav class="topbar-right" aria-label="Dashboard navigation"><a class="read-only" href="/">Practice ledgers</a><a class="read-only" href="/backtest">Research</a><span class="badge neutral" id="mode-badge">Checking execution gate</span></nav>
+      <nav class="topbar-right" aria-label="Dashboard navigation"><a class="read-only" href="/practice">Practice ledgers</a><span class="badge neutral" id="mode-badge">Checking execution gate</span></nav>
     </header>
     <main id="main">
       <section class="page-heading" aria-labelledby="page-title">
-        <div><p class="eyebrow">MOOMOO × QODER / PAPER ACCOUNT / READ-ONLY</p><h1 id="page-title">Five strategies. One clear view.</h1><p class="subtitle">B3 momentum · H mean reversion · Noise-area momentum · VWAP trend continuation · ORB breakout/breakdown. $20,000 each. See what is running, what is waiting, and what actually filled.</p></div>
+        <div><p class="eyebrow">MOOMOO × QODER / PAPER ACCOUNT / READ-ONLY</p><h1 id="page-title">Competition dashboard</h1><p class="subtitle">Current SPY and QQQ votes, existing positions, and paper account activity.</p></div>
         <div class="refresh-block"><button id="refresh-button" type="button">Refresh now</button><p id="refresh-status" role="status" aria-live="polite">Waiting for dashboard evidence</p></div>
       </section>
       <div id="data-alert" class="data-alert" role="alert" hidden></div>
       <noscript><p class="data-alert">JavaScript is needed to display status. This page never controls trading.</p></noscript>
       <div id="live-data" aria-busy="true">
-        <section class="session-panel panel" aria-label="Runner status">
-          <div class="session-heading"><div><p class="eyebrow">RUNNER · THIS MAC</p><h2 id="runner-summary">Checking process</h2><p id="runner-note" class="section-note">Process liveness and account-data freshness are separate checks.</p></div><div class="session-clock"><span class="context-label">NEW YORK · EXCHANGE TIME</span><time id="exchange-clock">—</time><span class="badge neutral" id="market-badge">Session unknown</span></div></div>
-          <div class="session-facts"><div><span class="context-label">LAST ACCOUNT OBSERVATION</span><strong id="mark-summary">Not received</strong><p id="mark-note" class="footnote"></p></div><div><span class="context-label">NEXT SCHEDULED ACTION</span><strong id="next-summary">—</strong><p id="next-note" class="footnote">Scheduled does not mean executed.</p></div><div><span class="context-label">RISK STATE</span><strong id="risk-summary">Unknown</strong><p id="risk-note" class="footnote"></p></div></div>
-          <div class="operational-facts"><div><span class="context-label">SIGN-IN EVIDENCE</span><strong id="access-summary">Not independently verified</strong><p id="access-note" class="footnote">Passive runner evidence only; this page never refreshes credentials.</p></div><div><span class="context-label">NATIVE STARTUP</span><strong id="startup-summary">Checking recorded startup</strong><p id="startup-note" class="footnote">Startup records are separate from current process health.</p></div></div>
-          <ol id="session-timeline" class="session-timeline" aria-label="Today's exchange schedule"></ol>
-        </section>
-        <div id="attention-alert" class="data-alert attention-alert" role="alert" hidden></div>
-        <div id="health-alert" class="data-alert" role="status" hidden></div>
+
         <section id="account-panel" class="account-strip" aria-label="Last observed account values">
           <div><span class="context-label">ACCOUNT NAV</span><strong id="nav-summary">Awaiting first risk mark</strong><span class="metric-note" id="nav-note">No starting balance assumed</span></div>
           <div><span class="context-label">HIGH-WATER / HALT BELOW</span><strong id="high-water-summary">—</strong><span class="metric-note" id="halt-summary">3.5% drawdown limit</span></div>
           <div><span class="context-label">SHARED CASH</span><strong id="cash-summary">—</strong><span class="metric-note" id="cash-note">From archived broker observation</span></div>
           <div><span class="context-label">TODAY'S RECORDED ORDERS</span><strong id="orders-summary">—</strong><span class="metric-note" id="orders-count-note">Acknowledgements are not fills</span></div>
         </section>
-        <section id="sleeves" class="portfolio-grid" aria-label="Strategy sleeves"><p class="empty-state">Loading strategy evidence.</p></section>
-        <p id="attribution-note" class="footnote">Strategy results come from their own fills, never from an 80/20 split of account profit.</p>
+        <section class="panel vote-panel" aria-labelledby="vote-title">
+          <div class="section-heading">
+            <h2 id="vote-title">Two-vote signals</h2>
+            <span class="badge neutral">SPY &amp; QQQ</span>
+          </div>
+          <p class="section-note" id="vote-note" role="status">Waiting for completed market bars.</p>
+          <div id="vote-cards" class="vote-cards" aria-label="Current votes by ticker"></div>
+          <div class="table-scroll" role="region" aria-label="Current signals by rule" tabindex="0">
+            <table>
+              <thead><tr><th scope="col">Strategy rule</th><th scope="col">SPY</th><th scope="col">QQQ</th></tr></thead>
+              <tbody id="vote-rule-rows"></tbody>
+            </table>
+          </div>
+        </section>
+        <section id="paper-sleeves" aria-labelledby="paper-sleeves-title">
+          <h2 id="paper-sleeves-title" class="paper-sleeves-title">Existing paper strategy holdings</h2>
+          <div id="sleeves" class="portfolio-grid" aria-label="Strategy sleeves"><p class="empty-state">Loading strategy evidence.</p></div>
+        </section>
+        <p id="attribution-note" class="footnote">Each strategy's results come from its own confirmed fills.</p>
+        <section class="session-panel panel" aria-label="Runner status">
+          <div class="session-heading"><div><p class="eyebrow">PAPER RUNNER · LOCAL HOST</p><h2 id="runner-summary">Checking process</h2><p id="runner-note" class="section-note">Process liveness and account-data freshness are separate checks.</p></div><div class="session-clock"><span class="context-label">NEW YORK · EXCHANGE TIME</span><time id="exchange-clock">—</time><span class="badge neutral" id="market-badge">Session unknown</span></div></div>
+          <div class="session-facts"><div><span class="context-label">LAST ACCOUNT OBSERVATION</span><strong id="mark-summary">Not received</strong><p id="mark-note" class="footnote"></p></div><div><span class="context-label">NEXT SCHEDULED ACTION</span><strong id="next-summary">—</strong><p id="next-note" class="footnote">Scheduled does not mean executed.</p></div><div><span class="context-label">RISK STATE</span><strong id="risk-summary">Unknown</strong><p id="risk-note" class="footnote"></p></div></div>
+          <div class="operational-facts"><div><span class="context-label">SIGN-IN EVIDENCE</span><strong id="access-summary">Not independently verified</strong><p id="access-note" class="footnote">Passive runner evidence only; this page never refreshes credentials.</p></div><div><span class="context-label">NATIVE STARTUP</span><strong id="startup-summary">Checking recorded startup</strong><p id="startup-note" class="footnote">Startup records are separate from current process health.</p></div></div>
+          <ol id="session-timeline" class="session-timeline" aria-label="Today's exchange schedule"></ol>
+        </section>
+        <div id="attention-alert" class="data-alert attention-alert" role="alert" hidden></div>
+        <div id="health-alert" class="data-alert" role="status" hidden></div>
         <section class="panel chart-panel" aria-labelledby="performance-title">
           <div class="section-heading"><div><p class="eyebrow">FORWARD PAPER OBSERVATIONS · NOT A BACKTEST</p><h2 id="performance-title">Today's account path</h2></div><span class="badge neutral" id="chart-count">No marks yet</span></div>
           <div class="chart-grid"><figure><figcaption>Recorded account NAV <span>USD</span></figcaption><div id="equity-chart" class="chart-host"></div></figure><figure><figcaption>Drawdown from account high-water <span>%</span></figcaption><div id="drawdown-chart" class="chart-host"></div></figure></div>
@@ -54,11 +72,6 @@
           <details id="events-details" class="evidence-details"><summary>Inspect recent events and step failures</summary><p id="errors-note" class="section-note"></p><div class="table-scroll" role="region" aria-label="Recent event audit" tabindex="0"><table><thead><tr><th scope="col">Time · ET</th><th scope="col">Event / step</th><th scope="col">Details</th></tr></thead><tbody id="audit-body"></tbody></table></div></details>
           <p class="footnote">Local runner receipts, not a fresh broker reconciliation. Cumulative quantity and average fill price are not an individual-execution tape. Private identifiers and error details are omitted.</p>
         </section>
-        <details class="panel research-disclosure" id="research-details"><summary>Historical research · separate from current results</summary>
-          <section aria-labelledby="regime-title"><div class="section-heading"><div><p class="eyebrow">HYPOTHETICAL FILLS · WEAK EVIDENCE</p><h2 id="regime-title">Noise-area, VWAP and ORB backtests ($100,000 book, weekly P&amp;L)</h2></div></div><p class="section-note">Settings picked on 2021–24 only, then reported on 2025–26. The evidence is weak: only ORB was positive in 2025–26 (+$4/wk); all three are trend-followers that did better in high-VIX weeks (13 weeks only) and in last week's selloff. Noise-area works much like B3, so the account is more concentrated in SPY momentum. Research fills, not broker results; the live sleeves are $20,000, so their dollar amounts are smaller.</p><div class="table-scroll" role="region" aria-label="Regime strategy backtests" tabindex="0"><table><thead><tr><th scope="col">Strategy</th><th scope="col">2021–24</th><th scope="col">2025–26</th><th scope="col">VIX ≥ 30 weeks</th><th scope="col">Nov 16–20</th><th scope="col">Trades / wk</th></tr></thead><tbody id="regime-body"></tbody></table></div></section>
-          <section aria-labelledby="preview-title"><div class="section-heading"><div><p class="eyebrow">HYPOTHETICAL FILLS</p><h2 id="preview-title">What the research mix did, 2021–2025</h2></div></div><p class="section-note" id="preview-note"></p><div class="chart-grid one"><figure><figcaption>Historical model NAV <span>USD</span></figcaption><div id="preview-chart" class="chart-host"></div></figure></div><div class="table-scroll" role="region" aria-label="Backtest windows" tabindex="0"><table><thead><tr><th scope="col">Window</th><th scope="col">B3 + H mix net</th><th scope="col">Max drawdown</th><th scope="col">Halted</th></tr></thead><tbody id="preview-body"></tbody></table></div><p class="footnote" id="preview-costs"></p></section>
-        </details>
-        <details class="panel research-disclosure"><summary>Position limits &amp; risk rules</summary><ul id="rules-list" class="blocker-list"></ul></details>
       </div>
     </main>
     <footer><span>DUAL STRATEGY / Local competition evidence</span><span>No trading buttons. Only the deterministic runner sends orders. A halt needs user review.</span></footer>

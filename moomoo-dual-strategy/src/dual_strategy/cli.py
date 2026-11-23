@@ -93,6 +93,7 @@ def main(argv=None):
         commands.add_parser(name)
     serve = commands.add_parser('serve')
     serve.add_argument('--port', type=int, default=8876)
+    serve.add_argument('--live-votes', action='store_true', help='Show competition votes from quote-only market data')
     calendar = commands.add_parser('calendar')
     calendar.add_argument('--date', type=date.fromisoformat, required=True)
     for name in ('pause', 'kill'):
@@ -104,13 +105,25 @@ def main(argv=None):
     if args.command == 'init':
         result = initialize(project, db)
     elif args.command == 'serve':
-        server = create_server(project, db, args.port)
-        print(f'Local dashboard (Start blocked; Stop locks entries): http://127.0.0.1:{server.server_port}', flush=True)
+        import subprocess
+        import sys
+        from dual_strategy.competition.store import load_config
+        server = create_server(project, db, args.port, competition_home=args.live_votes)
+        worker = None
         try:
+            if args.live_votes:
+                output = project / load_config(project)['state_dir'] / 'vote_signals.json'
+                worker = subprocess.Popen(
+                    [sys.executable, str(project / 'scripts/competition_vote_monitor.py'), '--output', str(output)],
+                    cwd=project, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            print(f'Local dashboard: http://127.0.0.1:{server.server_port}', flush=True)
             server.serve_forever()
         except KeyboardInterrupt:
             pass
         finally:
+            if worker is not None:
+                worker.terminate()
+                worker.wait(timeout=10)
             server.server_close()
         return
     elif args.command == 'status':

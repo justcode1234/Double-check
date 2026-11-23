@@ -16,6 +16,7 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
 CFG = load_config(PROJECT)
+CFG["risk"]["legacy_exit_only"] = False  # Exercise the original entry and sizing rules.
 
 
 def session(day, close_hour=16):

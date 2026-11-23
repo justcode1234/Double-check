@@ -117,6 +117,10 @@
     };
     const gross = rows.every(row => finite(marked(row))) ?
       rows.reduce((sum, row) => sum + marked(row), 0) : null;
+    const costBySymbol = {};
+    for (const sleeve of Object.values(data.performance?.sleeves || {}))
+      for (const [sym, p] of Object.entries(sleeve.positions || {}))
+        if (finite(p.cost_basis)) costBySymbol[sym] = (costBySymbol[sym] || 0) + Math.abs(p.cost_basis);
     card.append(el("p", "nav-label", fromBroker ? "Broker gross exposure" : "Recorded gross exposure"),
       el("div", "nav-value", money(gross)));
     const list = el("ul", "legacy-position-list");
@@ -126,7 +130,10 @@
       const item = el("li"), position = el("div"), value = el("div", "legacy-position-value");
       position.append(el("strong", "", symbol.replace(/^US\./, "")),
         el("p", "strategy-description", `${Math.abs(qty)} ${qty > 0 ? "long" : "short"}${s ? ` · ${s.title}` : ""}`));
-      value.append(el("strong", "", money(marked(row))),
+      const current = el("strong", "", money(marked(row)));
+      const orig = costBySymbol[symbol];
+      if (finite(orig)) current.append(el("small", "orig-cost", `(orig ${money(orig)})`));
+      value.append(current,
         el("p", "strategy-description", exit ? `Sell at next open · ${human(exit)}` :
           s ? "Awaiting exit signal" : "Exit signal unavailable"));
       item.append(position, value);

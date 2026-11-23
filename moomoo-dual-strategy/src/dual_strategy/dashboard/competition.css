@@ -17,6 +17,7 @@
 .legacy-position-list li { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--border); padding: 12px 0; }
 .legacy-position-list li > div { min-width: 0; }
 .legacy-position-value { text-align: right; }
+.legacy-position-value .orig-cost { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
 .session-panel { margin-bottom: 22px; border-top: 3px solid var(--blue); }
 .session-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 22px; }
 .session-heading h2 { font-size: clamp(21px, 2.2vw, 29px); letter-spacing: -.035em; margin-bottom: 4px; }

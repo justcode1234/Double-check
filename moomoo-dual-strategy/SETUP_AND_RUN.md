@@ -2,26 +2,34 @@
 
 ## Competition launcher
 
-Run `python start.py` from the workspace root. It uses the Python environment inside this project, opens the competition dashboard in your browser, and returns control to the terminal. A second launch opens the dashboard again using the same background service.
+Install Python 3.12 or later, then run the launcher from the repository root. On Debian and Ubuntu, install the matching `python3-venv` package if Python's `venv` support is missing.
 
-On the authorized Mac, the launcher also registers the existing paper scheduler for the signed-off startup window. On Windows and a fresh Linux checkout, the launcher opens the dashboard and quote-only voting feed. The two-vote sleeve publishes signals only. Startup logs are in `private/launcher/`.
+| Platform | Command |
+| --- | --- |
+| Linux | `python3 start.py` |
+| Windows | `py start.py` |
+| macOS | `python3 start.py` |
 
-Use `python start.py --dashboard-only` to launch just the dashboard. Use `--no-browser` on a headless machine. The dashboard listens on loopback, so use SSH forwarding when viewing it from another machine.
+On first launch, the app creates a local `.venv`, installs the locked dependencies, and opens the H ETF and Two-vote dashboard in your browser. The first setup needs internet access. Later launches reuse the local environment and any running dashboard from the same checkout. Logs are in `private/launcher/` inside the project.
 
-For a console-free Windows launch, run `python start.py --install-shortcut` once. Open **Moo Moo Dashboard** from the desktop afterward. The shortcut uses the project’s `pythonw.exe`, and errors are recorded in `private/launcher/launcher.log`.
+Each checkout can open the dashboard independently. To show broker positions and current market signals on a device, install the [official Moomoo CLI](https://github.com/MoomooOpen/moomoo-cli#install) and sign in on that device. The Two-vote sleeve publishes signals. For a headless launch, add `--no-browser` to print the loopback URL. The ordinary launcher starts the dashboard only on every platform.
+
+For a console-free Windows launch, run `py start.py --install-shortcut` once. Open **Moo Moo Dashboard** from the desktop afterward. The shortcut uses the project’s `pythonw.exe`, and errors are recorded in `private/launcher/launcher.log`.
+
+### Always-on dashboard on Linux
+
+Run `python3 start.py --enable-background --no-browser` to install and start the `moomoo-dashboard.service` systemd user service. The service uses `http://127.0.0.1:8876/` and restarts the dashboard and its vote monitor if either exits unexpectedly. If a manually started dashboard already uses that port, stop it before installing the service. User lingering keeps the service running after logout and starts it at boot.
+
+Use `systemctl --user status moomoo-dashboard.service` to inspect it and `journalctl --user -u moomoo-dashboard.service` for logs. To stop it and remove it from automatic startup, use `systemctl --user disable --now moomoo-dashboard.service`. The dashboard displays account data and signals. Paper execution has its own scheduler and preflight below.
 
 ## Linux migration
 
-Clone `main` and create a fresh environment. Python 3.12 also works with the locked dependencies on Linux.
+The Linux dashboard requires only the launcher setup above. When resuming an existing competition paper runner on Linux, preserve its saved execution state and let a single machine run that account.
 
 ```bash
 git clone --depth 1 --branch main https://github.com/justcode1234/Moo-Moo.git
-cd Moo-Moo/moomoo-dual-strategy
-python3.12 -m venv .venv
-.venv/bin/python -m pip install -r requirements.lock
-.venv/bin/python -m pip install --no-deps -e .
-cd ..
-moomoo-dual-strategy/.venv/bin/python start.py --dashboard-only
+cd Moo-Moo
+python3 start.py
 ```
 
 Install the [official Moomoo CLI for Linux](https://github.com/MoomooOpen/moomoo-cli#install) and complete `moomoo auth login` as the Linux user that will run the service. A fresh checkout can serve the dashboard before sign-in. For paper execution, make the machine switch outside the trading session.

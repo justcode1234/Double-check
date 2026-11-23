@@ -138,9 +138,9 @@ def create_server(project: Path, db_path: Path, port: int = 8876, competition_ho
         do_PATCH = do_PUT
 
     server = ThreadingHTTPServer(('127.0.0.1', port), Handler, bind_and_activate=False)
-    server.allow_reuse_address = False
     try:
         if hasattr(socket, 'SO_EXCLUSIVEADDRUSE'):
+            server.allow_reuse_address = False
             server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
         server.server_bind()
         server.server_activate()

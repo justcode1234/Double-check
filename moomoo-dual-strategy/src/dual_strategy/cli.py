@@ -120,14 +120,23 @@ def main(argv=None):
                 worker = subprocess.Popen(
                     [sys.executable, str(project / 'scripts/competition_vote_monitor.py'), '--output', str(output)],
                     cwd=project, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+
+                def stop_when_votes_exit():
+                    worker.wait()
+                    if not stop.is_set():
+                        server.shutdown()
+
+                Thread(target=stop_when_votes_exit, daemon=True, name='competition-vote-watch').start()
                 Thread(target=observer.run, args=(stop,), daemon=True, name='competition-account-observer').start()
             print(f'Local dashboard: http://127.0.0.1:{server.server_port}', flush=True)
             server.serve_forever()
+            if worker is not None:
+                raise RuntimeError(f'The vote monitor exited with status {worker.returncode}')
         except KeyboardInterrupt:
             pass
         finally:
             stop.set()
-            if worker is not None:
+            if worker is not None and worker.poll() is None:
                 worker.terminate()
                 worker.wait(timeout=10)
             server.server_close()

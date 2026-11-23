@@ -9,7 +9,7 @@
   const pct = v => finite(v) ? `${v > 0 ? "+" : ""}${v.toFixed(2)}%` : "—";
   const share = v => `${+(v * 100).toFixed(2)}%`;
   const human = value => String(value || "—").replaceAll("_", " ");
-  const et = (value, seconds = false) => value && Number.isFinite(Date.parse(value)) ? new Date(value).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour12: false, hour: "2-digit", minute: "2-digit", ...(seconds ? { second: "2-digit" } : {}) }) : "—";
+  const sgt = (value, seconds = false) => value && Number.isFinite(Date.parse(value)) ? new Date(value).toLocaleTimeString("en-US", { timeZone: "Asia/Singapore", hour12: false, hour: "2-digit", minute: "2-digit", ...(seconds ? { second: "2-digit" } : {}) }) : "—";
   const el = (tag, cls = "", text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
   const set = (id, text) => { byId(id).textContent = text; };
   const expanded = new Set();
@@ -28,7 +28,7 @@
     const vote = data.vote_signals || {}, current = vote.status === "current";
     const threshold = vote.required_votes || 2;
     const sizing = data.config.two_vote;
-    set("vote-budget", sizing ? `Up to ${money(sizing.entry_usd)} per position · ${sizing.max_lots_per_symbol} positions per ticker · ${money(data.config.risk.name_cap_usd)} cap per ticker${sizing.bank_realized_gains ? " · Realized gains reserved in replay" : ""}` : "");
+    set("vote-budget", sizing ? `Up to ${money(sizing.entry_usd)} per position · ${sizing.max_lots_per_symbol} positions per ticker · ${money(data.config.risk.name_cap_usd)} cap per ticker${sizing.bank_realized_gains ? " · Realized gains banked outside the entry budget" : ""}` : "");
     const messages = {
       preopen: "Waiting for the U.S. regular session to open.",
       closed: "The regular session is closed.",
@@ -36,7 +36,7 @@
       stale: "The vote feed is stale. Signal counts are unavailable.",
       unavailable: "The market-data feed is unavailable.",
     };
-    set("vote-note", current ? `Completed bar at ${et(vote.bar_end)} ET` : messages[vote.status] || messages.waiting);
+    set("vote-note", current ? `Completed bar at ${sgt(vote.bar_end)} SGT` : messages[vote.status] || messages.waiting);
     const cards = byId("vote-cards"), table = byId("vote-rule-rows");
     cards.replaceChildren(); table.replaceChildren();
     const symbols = ["US.SPY", "US.QQQ"];
@@ -183,8 +183,8 @@
     byId("market-badge").className = `badge ${r.market_phase === "open" ? "good" : "neutral"}`;
     const marks = { recent: "Recent risk mark", stale: "Stale risk mark", not_recorded: "No risk mark yet", clock_mismatch: "Mark clock mismatch" };
     set("mark-summary", marks[r.mark_status] || "Unverified");
-    set("mark-note", r.mark_at ? `${et(r.mark_at, true)} ET · ${Math.round(r.mark_age_seconds)}s old at refresh. Not a streaming-feed check.` : "The runner records account values after the open; no NAV is assumed.");
-    set("next-summary", r.next_action ? `${et(r.next_action.at, true)} ET · ${r.next_action.label}` : "No more scheduled actions today");
+    set("mark-note", r.mark_at ? `${sgt(r.mark_at, true)} SGT · ${Math.round(r.mark_age_seconds)}s old at refresh. Not a streaming-feed check.` : "The runner records account values after the open; no NAV is assumed.");
+    set("next-summary", r.next_action ? `${sgt(r.next_action.at, true)} SGT · ${r.next_action.label}` : "No more scheduled actions today");
     let risk = st ? "No stored halt" : "No live state", note = "Risk thresholds are evaluated by the runner, not this page.";
     if (st?.halted) {
       risk = st.halted.kind === "order_error" ? "Order-error halt" : "Drawdown halt";
@@ -196,7 +196,7 @@
     const timeline = byId("session-timeline");
     timeline.replaceChildren(...r.schedule.map(s => {
       const item = el("li", s.at === r.next_action?.at ? "up-next" : Date.parse(s.at) <= Date.parse(data.generated_at) ? "elapsed" : "");
-      const time = el("time", "", et(s.at)); time.dateTime = s.at;
+      const time = el("time", "", sgt(s.at)); time.dateTime = s.at;
       item.append(time, el("span", "", s.label));
       return item;
     }));
@@ -223,7 +223,7 @@
     set("halt-summary", `${money(st?.halt_level)} halt level · ${pct(st?.drawdown_pct)} drawdown`);
     set("cash-summary", money(independent?.cash ?? data.account_snapshot?.cash));
     set("cash-note", independent?.at ? brokerNote(data) : data.account_snapshot ?
-      `Runner observed ${et(data.account_snapshot.at, true)} ET` : "Awaiting broker or runner data");
+      `Runner observed ${sgt(data.account_snapshot.at, true)} SGT` : "Awaiting broker or runner data");
     const c = data.order_counts;
     set("orders-summary", `${c.acknowledged} ack / ${c.filled} filled`);
     set("orders-count-note", `${c.partial} partial · ${c.rejected} rejected · ${c.errors} errors · local receipts`);
@@ -238,7 +238,7 @@
       observation?.status === "unavailable" ? "Competition broker read unavailable" :
         observation?.at ? "Competition snapshot stale" : accessLabels[access.status]);
     set("access-note", observation?.at ? brokerNote(data) : access.at ?
-      `Runner evidence ${et(access.at, true)} ET` : "Awaiting competition account data");
+      `Runner evidence ${sgt(access.at, true)} SGT` : "Awaiting competition account data");
     set("startup-summary", startupLabels[startup.status]);
     set("startup-note", `${startup.session ? `Session ${startup.session}. ` : ""}Startup records cover previous attempts.`);
     const messages = [];
@@ -310,7 +310,7 @@
       card.append(el("h4", "context-label", "Capital limits · not performance"));
       const limits = el("dl", "metrics capital-metrics"), lim = performance.limits || {}, half = state?.reduced ? " · half sizing" : "";
       metric(limits, "Allocation budget", money(budget), finite(budget) ? `${money(performance.initial_capital)} initial capital + own gross P&L; unattributed fees excluded` : "Capital unverified; new entries blocked");
-      metric(limits, "Marked holdings · gross", money(exposure), names.length ? `Quotes at ${et(data.account_snapshot?.at)} ET` : held ? "No sleeve-owned shares recorded" : "Holdings not verified");
+      metric(limits, "Marked holdings · gross", money(exposure), names.length ? `Quotes at ${sgt(data.account_snapshot?.at)} SGT` : held ? "No sleeve-owned shares recorded" : "Holdings not verified");
       if (s.id === "b3") metric(limits, "Target before cap", money(lim.target_before_cap), `SPY cap ${money(data.config.risk.name_cap_usd)} counts every sleeve`);
       if (s.id === "h_etf") {
         metric(limits, "Per ETF budget", money(lim.per_etf_budget), `${share(data.config.h_etf.per_name_fraction_of_sleeve)} of H capital${half}`);
@@ -327,7 +327,7 @@
       if (open.length || armed.length) {
         const g = el("div", "metric-group"), list = el("ul", "plan-list"); g.append(el("h4", "", "Open stops, targets and trails"));
         for (const [k, p] of open) list.append(el("li", "", `${k.split("|")[1].replace("US.", "")} ${p.side > 0 ? "long" : "short"} · ${p.half_done ? `half taken · breakeven stop ${money(p.stop)} · 5-minute trail` : `stop ${money(p.stop)} · target ${money(p.target)}`}`));
-        for (const [sym, a] of armed) list.append(el("li", "", `${sym.replace("US.", "")} ${a.side > 0 ? "buy" : "sell short"} trigger ${money(a.trigger)} until ${et(a.valid_until)} ET · stop ${money(a.stop)}`));
+        for (const [sym, a] of armed) list.append(el("li", "", `${sym.replace("US.", "")} ${a.side > 0 ? "buy" : "sell short"} trigger ${money(a.trigger)} until ${sgt(a.valid_until)} SGT · stop ${money(a.stop)}`));
         g.append(list); card.append(g);
       }
       const signal = el("div", "metric-group");
@@ -346,7 +346,7 @@
       }
       if (s.id === "b3") {
         const d = data.b3_decision;
-        signal.append(el("h4", "", d ? `Latest decision · ${et(d.at)} ET` : "Latest B3 decision"));
+        signal.append(el("h4", "", d ? `Latest decision · ${sgt(d.at)} SGT` : "Latest B3 decision"));
         signal.append(el("p", "strategy-description", !d ? "No B3 decision recorded today. First scheduled check is 10:00 ET." :
           `${d.target === 1 ? "LONG signal" : d.target === 0 ? "FLAT signal" : "BLOCKED"} · ${human(d.reason)}`));
         if (d) {
@@ -358,7 +358,7 @@
         const decisions = (day?.decisions || []).filter(x => x.sleeve === s.id).slice(-4).reverse();
         if (decisions.length) {
           const list = el("ul", "plan-list");
-          for (const x of decisions) list.append(el("li", "", `${et(x.at)} ET · ${(x.symbol || "").replace(/US\./g, "")} · ${human(x.action)}${x.why ? ` · ${human(x.why)}` : x.reason ? ` · ${human(x.reason)}` : ""}`));
+          for (const x of decisions) list.append(el("li", "", `${sgt(x.at)} SGT · ${(x.symbol || "").replace(/US\./g, "")} · ${human(x.action)}${x.why ? ` · ${human(x.why)}` : x.reason ? ` · ${human(x.reason)}` : ""}`));
           signal.append(el("h4", "", "Today's decisions"), list);
         } else if (s.id !== "h_etf") signal.append(el("h4", "", "Today's decisions"), el("p", "footnote", "No decision recorded today."));
       }
@@ -398,7 +398,7 @@
       details.addEventListener("toggle", () => { if (details.open) expanded.add(key); else expanded.delete(key); });
       details.append(el("summary", "", human(order.reason)), el("pre", "", JSON.stringify({ reference_price: order.reference_price, limit_price: order.limit_price, filled: order.filled, avg_price: order.avg_price, has_error: order.has_error, audit_id: order.audit_id, intent_id: order.intent_id, created_at: order.created_at }, null, 2)));
       evidence.append(details);
-      tr.append(el("td", "", et(order.created_at || order.logged_at, true)), symbol, intent, el("td", `status-cell ${cls}`, status), fill, evidence);
+      tr.append(el("td", "", sgt(order.created_at || order.logged_at, true)), symbol, intent, el("td", `status-cell ${cls}`, status), fill, evidence);
       body.append(tr);
     }
     const audit = byId("audit-body"); audit.replaceChildren();
@@ -411,7 +411,7 @@
       expansion.addEventListener("toggle", () => { if (expansion.open) expanded.add(key); else expanded.delete(key); });
       expansion.append(el("summary", "", row.sleeve ? `${human(row.sleeve)} · ${human(row.status || row.reason || row.event)}` : human(row.step || row.event)), el("pre", "", JSON.stringify(row, null, 2)));
       detail.append(expansion);
-      tr.append(el("td", "", et(row.logged_at, true)), el("td", "", `${human(row.event)}${row.step ? ` / ${row.step}` : ""}`), detail);
+      tr.append(el("td", "", sgt(row.logged_at, true)), el("td", "", `${human(row.event)}${row.step ? ` / ${row.step}` : ""}`), detail);
       audit.append(tr);
     }
     const errors = Object.entries(data.step_errors);
@@ -440,7 +440,7 @@
     const path = values.map((p, i) => `${!i || (!historical && Date.parse(p.at) - Date.parse(values[i - 1].at) > 120000) ? "M" : "L"}${x(p).toFixed(2)},${y(p).toFixed(2)}`).join(" ");
     svg.append(node("path", { d: path, class: "chart-line" }));
     values.forEach(p => svg.append(node("circle", { cx: x(p), cy: y(p), r: values.length === 1 ? 4 : 2, class: "chart-dot" })));
-    const axisLabel = point => historical ? point.at.slice(0, 10) : `${et(point.at)} ET`;
+    const axisLabel = point => historical ? point.at.slice(0, 10) : `${sgt(point.at)} SGT`;
     svg.append(node("text", { x: left, y: h - 7, class: "chart-axis" }, axisLabel(values[0])), node("text", { x: w - 85, y: h - 7, class: "chart-axis" }, axisLabel(values.at(-1))));
     host.append(svg);
   }
@@ -477,7 +477,7 @@
       byId("data-alert").hidden = true;
       byId("live-data").classList.remove("is-stale");
       byId("live-data").setAttribute("aria-busy", "false");
-      set("refresh-status", `Updated ${et(data.generated_at, true)} ET · refreshes every 5s`);
+      set("refresh-status", `Updated ${sgt(data.generated_at, true)} SGT · refreshes every 5s`);
     } catch (err) { showFailure(err.name === "AbortError" ? "Dashboard request timed out" : err.message); }
     finally { clearTimeout(timer); pending = false; }
   }

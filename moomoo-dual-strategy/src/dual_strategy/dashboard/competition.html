@@ -39,7 +39,7 @@
                 <span class="strategy-letter" aria-hidden="true">2V</span>
                 <div><h2 id="vote-title">Two-vote sleeve</h2><p class="strategy-description">SPY and QQQ</p></div>
               </div>
-              <span class="badge neutral">Signals only</span>
+              <span class="badge neutral">$80,000 sizing book</span>
             </div>
             <p class="section-note" id="vote-note" role="status">Waiting for completed market bars.</p>
             <p class="strategy-description" id="vote-budget"></p>
@@ -76,8 +76,8 @@
           <div class="section-heading"><div><p class="eyebrow">SIGNAL → INTENT → ACKNOWLEDGEMENT → OUTCOME</p><h2 id="orders-title">Execution &amp; audit</h2></div><a href="/api/competition" download="competition-status.json" class="download-link">Download status JSON</a></div>
           <p id="orders-note" class="section-note"></p>
           <div class="audit-controls"><div class="field"><label for="strategy-filter">Strategy</label><select id="strategy-filter"><option value="all">All strategies</option><option value="b3">B3 · SPY</option><option value="h_etf">H · ETFs</option><option value="noise">Noise-area · SPY</option><option value="vwap">VWAP · SPY/QQQ</option><option value="orb">ORB · ETFs</option></select></div><div class="field search-field"><label for="event-search">Search orders &amp; events</label><input id="event-search" type="search" placeholder="Symbol, status, reason or audit reference" autocomplete="off"></div><p id="filter-count" role="status" aria-live="polite"></p></div>
-          <div class="table-scroll" role="region" aria-label="Order intents and recorded outcomes" tabindex="0"><table><thead><tr><th scope="col">Time · ET</th><th scope="col">Strategy / symbol</th><th scope="col">Intent</th><th scope="col">Recorded status</th><th scope="col">Filled / avg. price</th><th scope="col">Decision evidence</th></tr></thead><tbody id="orders-body"></tbody></table></div>
-          <details id="events-details" class="evidence-details"><summary>Inspect recent events and step failures</summary><p id="errors-note" class="section-note"></p><div class="table-scroll" role="region" aria-label="Recent event audit" tabindex="0"><table><thead><tr><th scope="col">Time · ET</th><th scope="col">Event / step</th><th scope="col">Details</th></tr></thead><tbody id="audit-body"></tbody></table></div></details>
+          <div class="table-scroll" role="region" aria-label="Order intents and recorded outcomes" tabindex="0"><table><thead><tr><th scope="col">Time · SGT</th><th scope="col">Strategy / symbol</th><th scope="col">Intent</th><th scope="col">Recorded status</th><th scope="col">Filled / avg. price</th><th scope="col">Decision evidence</th></tr></thead><tbody id="orders-body"></tbody></table></div>
+          <details id="events-details" class="evidence-details"><summary>Inspect recent events and step failures</summary><p id="errors-note" class="section-note"></p><div class="table-scroll" role="region" aria-label="Recent event audit" tabindex="0"><table><thead><tr><th scope="col">Time · SGT</th><th scope="col">Event / step</th><th scope="col">Details</th></tr></thead><tbody id="audit-body"></tbody></table></div></details>
           <p class="footnote">Local runner receipts, not a fresh broker reconciliation. Cumulative quantity and average fill price are not an individual-execution tape. Private identifiers and error details are omitted.</p>
         </section>
       </div>

@@ -193,7 +193,11 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
         if s not in incomplete:
             sleeve.update(realized_gross=realized[s], unrealized_gross=unrealized, gross_pnl=realized[s] + unrealized)
             if initialized:
-                sleeve["capital"] = sleeve["initial_capital"] + sleeve["gross_pnl"]
+                if s == "two_vote" and cfg.get("two_vote", {}).get("bank_realized_gains"):
+                    # the replay's VoteCash rule: realized gains are reserved outside the entry budget
+                    sleeve["capital"] = sleeve["initial_capital"] + min(0.0, realized[s])
+                else:
+                    sleeve["capital"] = sleeve["initial_capital"] + sleeve["gross_pnl"]
                 sleeve["limits"] = capital_limits(s, sleeve["capital"], cfg, reduced)
             if not sleeve["fill_count"]:
                 sleeve.update(fees=0.0, net_pnl=0.0)

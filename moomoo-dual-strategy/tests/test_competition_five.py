@@ -33,7 +33,7 @@ def acct(nav=100_000.0, positions=None, quotes=None, total=None):
     quotes = {"US.SPY": 500.0, "US.QQQ": 400.0, "US.IWM": 200.0, **(quotes or {})}
     cash = nav - sum(q * quotes[s] for s, q in positions.items())
     return planner.Account(datetime.now(timezone.utc), cash, positions, quotes, {s: 1.0 for s in quotes},
-                           {s: 20_000.0 for s in planner.SLEEVES}, broker_total=total)
+                           {s: (80_000.0 if s == "two_vote" else 20_000.0) for s in planner.SLEEVES}, broker_total=total)
 
 
 def state(**books):
@@ -45,9 +45,9 @@ def state(**books):
 
 
 def test_five_sleeves_named_not_numbered():
-    assert planner.SLEEVES == ("b3", "h_etf", "noise", "vwap", "orb")
-    assert CFG["allocation"] == {s: 0.20 for s in planner.SLEEVES}
-    assert CFG["risk"]["short_sleeves"] == ["noise", "vwap", "orb"] and CFG["risk"]["long_only"] is False
+    assert planner.SLEEVES == ("b3", "h_etf", "noise", "vwap", "orb", "two_vote")
+    assert CFG["allocation"] == {**{s: 0.20 for s in planner.SLEEVES if s != "two_vote"}, "two_vote": 0.0}
+    assert CFG["risk"]["short_sleeves"] == ["noise", "vwap", "orb", "two_vote"] and CFG["risk"]["long_only"] is False
     assert "fbr" not in CFG and "pairs" not in CFG
 
 
@@ -55,7 +55,8 @@ def test_five_sleeves_named_not_numbered():
 def test_each_sleeve_starts_at_20k_and_moves_only_with_its_own_pnl():
     st = {**state(), "initial_nav": 100_000.0}
     perf = sleeve_performance(Store(PROJECT, {"state_dir": "nonexistent-state"}), st, asdict(acct()), CFG)
-    assert {s: v["initial_capital"] for s, v in perf["sleeves"].items()} == {s: 20_000.0 for s in planner.SLEEVES}
+    assert {s: v["initial_capital"] for s, v in perf["sleeves"].items()} == {
+        s: (80_000.0 if s == "two_vote" else 20_000.0) for s in planner.SLEEVES}
 
 
 def test_noise_area_trades_its_whole_20k_sleeve():
@@ -436,7 +437,8 @@ def test_daily_report_after_the_close(runner, tmp_path, monkeypatch):
     runner.daily_report(SESSION)
     rep = __import__("json").loads((runner.store.dir / "reports" / f"{SESSION}.json").read_text())
     assert rep["session"] == SESSION and rep["mode"] == "EXECUTE" and set(rep["sleeves"]) == set(planner.SLEEVES)
-    assert all(v["capital"] == 20_000.0 for v in rep["sleeves"].values()) and rep["halted"] is None
+    assert all(v["capital"] == (80_000.0 if s == "two_vote" else 20_000.0) for s, v in rep["sleeves"].items()) \
+        and rep["halted"] is None
 
 
 def test_legacy_exit_only_keeps_existing_h_exit_and_blocks_new_exposure(runner, monkeypatch):
@@ -614,3 +616,116 @@ def test_two_vote_replay_caps_and_reserve_hold_across_200_seeded_paths(vote_repl
         losses = sum(min(0, t.pnl) for t in trades)
         assert cash.reserved_profit == pytest.approx(gains)
         assert cash.sizing_capital == pytest.approx(80000 + losses)
+
+
+# ------------------------------------------------------------------ two-vote live sleeve
+def test_vote_lot_is_10k_within_book_name_cap_and_cash():
+    st = state()
+    out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.SPY", 1, CFG, NOW, "e6")
+    assert why == "entry" and out[0].sleeve == "two_vote" and not out[0].close_only and not out[0].opens_short
+    assert out[0].qty == math.floor(10_000 / out[0].limit_price)
+    out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.QQQ", -1, CFG, NOW, "e6")
+    assert why == "entry" and out[0].side == "SELL" and out[0].opens_short
+    st["sleeves"]["two_vote"] = {"US.SPY": 19}                                   # a second lot of the same symbol
+    out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 19}), SESSION, "US.SPY", 1, CFG, NOW, "e7")
+    assert why == "entry" and out[0].qty * out[0].limit_price <= 10_000 + 1e-6
+    st["sleeves"]["vwap"] = {"US.SPY": 50}                                       # $34,500 of the $40,000 name cap used
+    out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 69}), SESSION, "US.SPY", 1, CFG, NOW, "e8")
+    assert why == "entry" and out[0].qty * out[0].limit_price <= 5_500 + 1e-6
+    st = state(two_vote={"US.SPY": 80, "US.QQQ": 100})                           # $80,000 book fully deployed
+    out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 80, "US.QQQ": 100}), SESSION, "US.SPY", 1,
+                                       CFG, NOW, "e9")
+    assert out == [] and why == "entry size zero"
+    st = state()
+    st["reduced"] = True
+    out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.SPY", 1, CFG, NOW, "e6")
+    assert why == "entry" and out[0].qty == math.floor(5_000 / out[0].limit_price)
+    st = state()
+    st["halted"] = "drawdown"
+    out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.SPY", 1, CFG, NOW, "e6")
+    assert out == [] and "drawdown_halt" in why
+    st = state()
+    st["locked_day"] = SESSION
+    out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.SPY", 1, CFG, NOW, "e6")
+    assert out == [] and "daily_loss_lock" in why
+
+
+def test_vote_book_banks_gains_and_counts_losses(tmp_path):
+    store = Store(tmp_path, {"state_dir": "state"})
+    st = {**state(), "initial_nav": 100_000.0}
+
+    def receipt(tag, side, price):
+        link = {"audit_id": tag, "intent_id": tag}
+        store.append(SESSION, {"event": "intent", "mode": "EXECUTE", **link, "sleeve": "two_vote",
+                               "symbol": "US.SPY", "side": side, "qty": 10})
+        store.append(SESSION, {"event": "acknowledged", **link, "order_id": f"o{tag}"})
+        store.append(SESSION, {"event": "outcome", **link, "order_id": f"o{tag}", "status": "FILLED",
+                               "qty": 10, "filled": 10, "avg_price": price})
+
+    receipt("a", "BUY", 500.0)
+    receipt("b", "SELL", 550.0)
+    v = sleeve_performance(store, st, asdict(acct()), CFG)["sleeves"]["two_vote"]
+    assert v["status"] == "available" and v["gross_pnl"] == 500.0 and v["capital"] == 80_000.0
+    receipt("c", "BUY", 500.0)
+    receipt("d", "SELL", 400.0)
+    v = sleeve_performance(store, st, asdict(acct()), CFG)["sleeves"]["two_vote"]
+    assert v["realized_gross"] == -500.0 and v["capital"] == 79_500.0
+
+
+def _vote_report(opened, k, spy, qqq=0):
+    def row(signal):
+        return {"buy": 3 if signal > 0 else 0, "sell": 3 if signal < 0 else 0, "rules": [],
+                "entry_window": True, "signal": signal}
+    return {"status": "current", "bar_end": (opened + timedelta(minutes=5 * k)).isoformat(),
+            "tickers": {"US.SPY": row(spy), "US.QQQ": row(qqq)}}
+
+
+def test_vote_step_lots_never_repeat_an_agreement(runner, monkeypatch):
+    opened = NOW.replace(hour=9, minute=30)
+    monkeypatch.setattr(runner, "risk", lambda symbols=(): runner.account(symbols))
+    report = {}
+    runner._vote_monitor = SimpleNamespace(observe=lambda now: report)
+
+    def step(k, spy):
+        report.clear()
+        report.update(_vote_report(opened, k, spy))
+        monkeypatch.setitem(runner.monitor.__globals__, "datetime",
+                            _clock(opened + timedelta(minutes=5 * k, seconds=20)))
+        runner.vote_step()
+
+    day = runner._intraday(SESSION)
+    step(6, 1)
+    assert [(i.sleeve, i.side) for i in runner.sent] == [("two_vote", "BUY")]
+    lot = runner.sent[0].qty
+    assert day["vote_lots"]["US.SPY"] == 1 and runner.state["sleeves"]["two_vote"]["US.SPY"] == lot
+    step(6, 1)                                                                   # same slot again: nothing
+    step(7, 1)                                                                   # same agreement continues: no new lot
+    assert len(runner.sent) == 1
+    step(8, 0)                                                                   # agreement lapses
+    step(9, 1)                                                                   # fresh agreement: lot 2
+    assert len(runner.sent) == 2 and day["vote_lots"]["US.SPY"] == 2
+    assert runner.state["sleeves"]["two_vote"]["US.SPY"] == 2 * lot
+    step(10, -1)                                                                 # opposite agreement: close all lots
+    assert len(runner.sent) == 3                                                 # no re-entry on the exit bar
+    assert [(i.side, i.qty, i.close_only) for i in runner.sent][-1] == ("SELL", 2 * lot, True)
+    assert runner.sent[-1].reason == "two_vote_opposite_agreement"
+    assert not runner.state["sleeves"].get("two_vote") and day["vote_lots"].get("US.SPY", 0) == 0
+    step(11, -1)                                                                 # next bar: a fresh short agreement
+    assert runner.sent[-1].side == "SELL" and runner.sent[-1].opens_short
+    assert runner.state["sleeves"]["two_vote"]["US.SPY"] < 0
+    runner.flatten_sleeves(("two_vote",), "two_vote_scheduled_flatten")
+    assert day["vote_lots"] == {} and not runner.state["sleeves"].get("two_vote")
+
+
+def test_vote_step_entries_only_between_1000_and_1430(runner, monkeypatch):
+    opened = NOW.replace(hour=9, minute=30)
+    monkeypatch.setattr(runner, "risk", lambda symbols=(): runner.account(symbols))
+    report = {}
+    runner._vote_monitor = SimpleNamespace(observe=lambda now: report)
+    for k in (5, 61):
+        report.clear()
+        report.update(_vote_report(opened, k, 1, 1))
+        monkeypatch.setitem(runner.monitor.__globals__, "datetime",
+                            _clock(opened + timedelta(minutes=5 * k, seconds=20)))
+        runner.vote_step()
+    assert runner.sent == []

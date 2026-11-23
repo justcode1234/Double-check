@@ -1,4 +1,4 @@
-"""Deterministic risk state, sizing and order intents for the five-sleeve competition portfolio. No broker I/O.
+"""Deterministic risk state, sizing and order intents for the competition portfolio. No broker I/O.
 
 State (persisted by `store.py`, never reset by code): initial NAV, high-water NAV, day-start NAV, the account halt
 (3.5% drawdown, permanent until a human clears it), the daily loss lock, the half-size flag, today's order count and
@@ -13,8 +13,8 @@ import math
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 
-SLEEVES = ("b3", "h_etf", "noise", "vwap", "orb")
-INTRADAY = ("b3", "noise", "vwap", "orb")         # must be flat at every close
+SLEEVES = ("b3", "h_etf", "noise", "vwap", "orb", "two_vote")
+INTRADAY = ("b3", "noise", "vwap", "orb", "two_vote")         # must be flat at every close
 
 
 @dataclass
@@ -213,7 +213,7 @@ def short_sleeves_of(state_or_cfg) -> tuple:
     return tuple(r.get("short_sleeves", ())) if r and not r.get("long_only", True) else SHORTABLE
 
 
-SHORTABLE = ("noise", "vwap", "orb")
+SHORTABLE = ("noise", "vwap", "orb", "two_vote")
 
 
 def cash_room(account: Account) -> float:
@@ -238,6 +238,9 @@ def capital_limits(sleeve: str, capital: float | None, cfg: dict, reduced: bool)
     elif sleeve == "orb":                                  # the reference's 10% cap per trade, within the sleeve
         limits["per_trade_notional"] = min(available, cfg["orb"]["max_notional"]) * factor
         limits["aggregate_limit"] = available
+    elif sleeve == "two_vote":                             # fixed $10k lots; book capped at 2 x the per-name cap
+        limits["per_trade_notional"] = min(available, cfg["two_vote"]["entry_usd"]) * factor
+        limits["aggregate_limit"] = min(available, 2 * cfg["risk"]["name_cap_usd"])
     else:                                                  # vwap: one trade's notional never exceeds the sleeve
         limits["per_trade_notional"] = available * factor
         limits["aggregate_limit"] = available
@@ -375,6 +378,35 @@ def plan_entry(state: dict, account: Account, session: str, sleeve: str, symbol:
     if qty <= 0:
         return [], "entry size zero"
     i = _intent(now, session, sleeve, symbol, order_side, qty, ref_price, reason, cfg, False, tag)
+    i.opens_short = side < 0
+    return [i], "entry"
+
+
+def plan_vote_entry(state: dict, account: Account, session: str, symbol: str, side: int, cfg: dict,
+                    now: datetime, tag: str) -> tuple[list[Intent], str]:
+    """One two-vote lot: $10k (half size when reduced), within the sleeve's $80k book, the cross-sleeve per-symbol
+    cap and cash. Unlike plan_entry, several lots of the same symbol may be open; the runner enforces the lot count."""
+    if side < 0 and not shorts_allowed("two_vote", cfg):
+        return [], "entry blocked: two_vote may not short"
+    why = entry_block(state, account, session, cfg, "two_vote") or no_entry_reason("two_vote", session, now, cfg)
+    if why:
+        return [], f"entry blocked: {why}"
+    limits = capital_limits("two_vote", account.sleeve_capital.get("two_vote"), cfg, state["reduced"])
+    if limits["allocation_budget"] is None or limits["allocation_budget"] <= 0:
+        return [], "entry blocked: unverified or depleted two_vote capital"
+    price = account.quotes.get(symbol)
+    if price is None or not math.isfinite(price) or price <= 0:
+        return [], "blocked: no quote"
+    order_side = "BUY" if side > 0 else "SELL"
+    limit = _limit(price, order_side, cfg)
+    open_gross = sum(abs(q) * account.quotes.get(s, 0.0) for s, q in state["sleeves"].get("two_vote", {}).items())
+    budget = min(limits["per_trade_notional"], limits["aggregate_limit"] - open_gross,
+                 cfg["risk"]["name_cap_usd"] - exposure(state, symbol, price), cash_room(account))
+    qty = math.floor(max(0.0, budget) / max(limit, price))
+    if qty <= 0:
+        return [], "entry size zero"
+    i = _intent(now, session, "two_vote", symbol, order_side, qty, price,
+                f"two_vote_{'long' if side > 0 else 'short'}", cfg, False, tag)
     i.opens_short = side < 0
     return [i], "entry"
 

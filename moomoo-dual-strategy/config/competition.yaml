@@ -1,6 +1,6 @@
-# Five-strategy competition portfolio (user decision 2026-11-21), $20,000 each of the starting NAV:
-#   B3 (SPY Noise-Area, hourly, long-only), H (ETF RSI-2 reversal panel), Noise-area momentum (noise),
-#   VWAP trend continuation (vwap) and ORB breakout/breakdown (orb). Spec: QODER_FIVE_STRATEGIES.md (commit eca98ae).
+# Competition portfolio: B3, H, Noise-area, VWAP, ORB at $20,000 each (user decision 2026-11-21), plus the
+# Two-vote SPY/QQQ sleeve on a fixed $80,000 sizing book (user decision 2026-11-23; B3 entries retired, exit-only).
+# Spec: QODER_FIVE_STRATEGIES.md (commit eca98ae, archived); two-vote rules: src/dual_strategy/competition/vote_rules.py.
 # Parameters are the frozen research settings (Codex A-J freeze, verified by Claude's independent replay).
 # Every number below is applied by deterministic Python (src/dual_strategy/competition); agents never size or override.
 
@@ -23,6 +23,7 @@ allocation:                      # of the starting NAV; each sleeve's capital th
   noise: 0.20
   vwap: 0.20
   orb: 0.20
+  two_vote: 0.0                  # not a NAV fraction: fixed $80,000 sizing book below (user decision 2026-11-23)
 
 # --- Noise-area momentum (reports/claude_regime/rstrats.py s10_noise; settings picked on 2021-24) -------------------
 noise:
@@ -93,15 +94,18 @@ h_etf:
   per_name_fraction_of_sleeve: 0.10
   aggregate_fraction_of_sleeve: 0.30
 
-two_vote:                        # sizing for replay; live dashboard publishes signals only
+two_vote:                        # live execution approved by the user 2026-11-23 (replaces B3 entries; B3 exit-only)
+  initial_allocation_usd: 80000  # sizing book = 2 symbols x risk.name_cap_usd; gains banked outside the budget
   required_votes: 2
   entry_usd: 10000
   max_lots_per_symbol: 4
   bank_realized_gains: true
+  shorts: true
+  flatten_minutes_before_close: 5    # 15:55 ET (12:55 on 13:00 half-days); entries end 14:30 ET (12:30 half-days)
 
 risk:                            # account level (all five sleeves)
   legacy_exit_only: true         # older deployments stay exit-only
-  entry_sleeves: [h_etf]         # restore normal entries for the $20k H allocation
+  entry_sleeves: [h_etf, two_vote]   # H entries plus the Two-vote sleeve (user decision 2026-11-23); B3 stays exit-only
   halt_drawdown_fraction: 0.035  # NAV <= 96.5% of high-water: flatten everything, block entries until a human clears
   daily_loss_fraction: 0.0125    # NAV <= 98.75% of day-start NAV: flatten everything, no entries for the rest of the day
   reduce_drawdown_fraction: 0.02 # NAV <= 98% of high-water: new positions at half size (until back above 98.5%)
@@ -111,6 +115,6 @@ risk:                            # account level (all five sleeves)
   order_wait_seconds: 30         # cancel and reconcile anything not filled by then
   max_quote_age_seconds: 15
   long_only: false               # shorts verified allowed on the competition account (read-only max_sell_short, 2026-11-21)
-  short_sleeves: [noise, vwap, orb]   # the ONLY sleeves that may open shorts; shorts never carried overnight
+  short_sleeves: [noise, vwap, orb, two_vote]   # the ONLY sleeves that may open shorts; shorts never carried overnight
   nav_check_fraction: 0.01       # runner NAV vs broker total_asset: a larger gap blocks entries and never halts
   monitor_seconds: 10            # VWAP/ORB stop, target and trigger polling

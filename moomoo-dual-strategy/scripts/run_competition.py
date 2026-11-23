@@ -1,4 +1,4 @@
-"""Competition runner: five sleeves at $20,000 each (B3, H, Noise-area, VWAP, ORB) with a 3.5% account halt.
+"""Competition runner: B3, H, Noise-area, VWAP, ORB and the Two-vote SPY/QQQ sleeve, with a 3.5% account halt.
 
 The TOOL decides, sizes, gates and (only with --execute) sends orders; an agent may launch, monitor or stop it but
 never places or edits orders by hand. Default is PLAN: intents are written to private/competition/plan/outbox and
@@ -8,12 +8,12 @@ nothing is sent. Commands (America/New_York times):
   plan-h [--asof DATE]        H plan from DATE's completed close (default: last completed session) for the next open
   h-open                      next-open H exits/entries from the stored plan            (run 09:30:10 ET)
   b3 [--at HH:MM]             B3 decision at a completed 5-minute bar (default: latest decision tick today)
-  flatten [--sleeve b3|h_etf|noise|vwap|orb|all] [--reason TEXT]   close-only exits (short covers first)
+  flatten [--sleeve b3|h_etf|noise|vwap|orb|two_vote|all] [--reason TEXT]   close-only exits (short covers first)
   noise --at HH:MM            Noise-area decision at a completed bar (10:30, 11:30, 13:30, 14:30)
   replay-intraday --day DATE  PLAN-only: Noise-area/VWAP/ORB research replay of a completed session (hypothetical P&L)
   loop                        all of the above on the XNYS clock until the session ends: every completed 5-minute slot
-                              ORB then VWAP; Noise-area at its four times; ~10 s stop/target/trigger monitor; 15:45 VWAP
-                              flatten; 15:55 ORB/Noise-area/B3 flatten; ~16:15 H plan
+                              ORB then VWAP then the Two-vote sleeve; Noise-area at its four times; ~10 s stop/target/
+                              trigger monitor; 15:45 VWAP flatten; 15:55 ORB/Noise-area/B3/Two-vote flatten; ~16:15 H plan
 
 Add --execute to send orders. That also requires execution_enabled: true in config/competition.yaml and the private
 competition account file; otherwise the runner refuses before contacting any account.
@@ -41,6 +41,8 @@ from dual_strategy.competition.market import Market, MarketDataError  # noqa: E4
 from dual_strategy.competition.signals import b3_decision, b3_decision_times, h_plan  # noqa: E402
 from dual_strategy.competition import intraday as I  # noqa: E402
 from dual_strategy.competition.store import Store, load_config, sleeve_performance  # noqa: E402
+from dual_strategy.competition.vote_live import Monitor  # noqa: E402
+from dual_strategy.competition.vote_rules import FIRST_ENTRY, SYMBOLS, last_entry  # noqa: E402
 from dual_strategy.data.calendar import NY, session_bounds  # noqa: E402
 from dual_strategy.execution.moomoo_paper import ExecutionBlocked
 
@@ -84,6 +86,7 @@ class Runner:
         self._provenance_id = None
         self.market = Market()
         self.broker = None
+        self._vote_monitor = None
         self.virtual_nav = nav
         if execute:
             from dual_strategy.competition.broker import CompetitionBroker      # gated: raises unless all locks open
@@ -132,7 +135,7 @@ class Runner:
                      "src/dual_strategy/execution/moomoo_cli.py", "src/dual_strategy/execution/moomoo_paper.py",
                      "src/dual_strategy/research/data.py"]
             files += [f"src/dual_strategy/competition/{name}.py"
-                      for name in ("signals", "planner", "market", "broker", "store")]
+                      for name in ("signals", "planner", "market", "broker", "store", "vote_rules", "vote_live")]
             sources = {}
             for name in files:
                 text = (PROJECT / name).read_text(encoding="utf-8")
@@ -363,6 +366,9 @@ class Runner:
             cur = {"session": session, "armed": {}, "positions": {}, "orb_done": [], "orb_base": {}, "vwap_trades": {},
                    "noise_done": [], "decisions": [], "last_slot": None}
             self.state["intraday"] = cur
+        cur.setdefault("vote_sides", {})
+        cur.setdefault("vote_lots", {})
+        cur.setdefault("vote_slot", None)
         return cur
 
     def _decide(self, day: dict, sleeve: str, **row):
@@ -545,6 +551,70 @@ class Runner:
         log(noise={"at": tick.isoformat(), "target": d["target"], "reason": d["reason"]}, plan=why)
         self.send(intents, session, audit_id)
 
+    # ------------------------------------------------------------------ Two-vote SPY/QQQ
+    def vote_step(self):
+        """Each completed 5-minute bar: opposite 2-vote agreement closes every lot of a symbol; a fresh agreement
+        (the side changed from the prior bar, or the symbol is flat) opens one lot, 10:00-14:30 ET. Mirrors the
+        two-vote replay: repeated bars of one agreement never authorize another lot, and no re-entry on the exit bar."""
+        now = datetime.now(NY)
+        ctx = self._day(now.date())
+        if not ctx:
+            return
+        opened, closed, n = ctx
+        session = now.date().isoformat()
+        day = self._intraday(session)
+        if self._vote_monitor is None:
+            self._vote_monitor = Monitor(self.market)
+        report = self._vote_monitor.observe(datetime.now(timezone.utc))
+        if report.get("status") != "current":
+            return
+        k = int((datetime.fromisoformat(report["bar_end"]) - opened).total_seconds() // 300)
+        if k < FIRST_ENTRY or day.get("vote_slot") == k:
+            return
+        day["vote_slot"] = k
+        self.audit(session, "vote_step", slot=k, bar_end=report["bar_end"], at=now, votes=report["tickers"])
+        c = self.cfg["two_vote"]
+        sides = {sym: row["signal"] for sym, row in report["tickers"].items()}
+        held = self.state["sleeves"].get("two_vote", {})
+        closed_now, acct = set(), None
+        for sym, q in sorted(held.items()):
+            if sides.get(sym) == -(1 if q > 0 else -1):
+                acct = acct or self.risk(sorted(set(held) | set(SYMBOLS)))
+                self._close("two_vote", sym, "two_vote_opposite_agreement", acct, session, day)
+                day["vote_lots"][sym] = 0
+                closed_now.add(sym)
+                acct = None
+        held = self.state["sleeves"].get("two_vote", {})
+        for sym in SYMBOLS:
+            if not held.get(sym):
+                day["vote_lots"].pop(sym, None)
+        if k <= last_entry(n):
+            eligible = [sym for sym in SYMBOLS if sides.get(sym) and sym not in closed_now
+                        and day["vote_lots"].get(sym, 0) < c["max_lots_per_symbol"]
+                        and (not held.get(sym) or sides[sym] != day["vote_sides"].get(sym))]
+            eligible.sort(key=lambda sym: -report["tickers"][sym]["buy" if sides[sym] > 0 else "sell"])
+            for sym in eligible:
+                acct = acct or self.risk(list(SYMBOLS))
+                self.attribute_capital(acct)
+                intents, why = planner.plan_vote_entry(self.state, acct, session, sym, sides[sym], self.cfg, now, f"e{k}")
+                row = report["tickers"][sym]
+                self._decide(day, "two_vote", symbol=sym, slot=k, action=why, side=sides[sym],
+                             buy=row["buy"], sell=row["sell"])
+                if intents:
+                    self._vote_enter(intents, sym, session, day, acct)
+                    acct = None
+        day["vote_sides"] = sides
+        self.store.save(self.state)
+
+    def _vote_enter(self, intents, sym, session, day, acct):
+        audit_id = self.audit(session, "two_vote_entry", state=self.state, account=asdict(acct),
+                              intents=[i.to_dict() for i in intents])
+        results = self.send(intents, session, audit_id)
+        res = results[0][1] if results else None
+        if (res["filled"] if res else 0) > 0 or not self.broker:
+            day["vote_lots"][sym] = day["vote_lots"].get(sym, 0) + 1
+        self.store.save(self.state)
+
     def _enter(self, intents, sleeve, sym, side, t, entry_slot, session, day, acct, **extra):
         audit_id = self.audit(session, f"{sleeve}_entry", state=self.state, account=asdict(acct), trade=t, extra=extra,
                               intents=[i.to_dict() for i in intents])
@@ -643,6 +713,8 @@ class Runner:
         day = self._intraday(session)
         if "vwap" in sleeves:
             day["armed"] = {}                                   # no VWAP trigger survives its flatten time
+        if "two_vote" in sleeves:
+            day["vote_lots"] = {}
         if not held:
             return
         acct = self.risk(held)
@@ -822,6 +894,7 @@ class Runner:
                 slot = I.last_completed_slot(opened, seen, n)
                 if f"bar-{now.date()}-{slot}" not in done:
                     self.guarded("bar", self.bar_step, seen)            # ORB, then VWAP
+                self.guarded("two-vote", self.vote_step)
             for t in I.noise_decision_times(opened, closed, self.cfg["noise"]["decision_times"]):
                 if f"noise-{t}" not in done and t + timedelta(seconds=15) <= now < t + timedelta(minutes=4):
                     self.guarded("noise", self.noise, t.strftime("%H:%M"))
@@ -832,7 +905,8 @@ class Runner:
                 last_monitor = time.monotonic()
             for name, at in (("vwap", closed - timedelta(minutes=5 * self.cfg["vwap"]["flatten_slots_before_close"])),
                              ("orb", closed - timedelta(minutes=5 * self.cfg["orb"]["flatten_slots_before_close"])),
-                             ("noise", closed - timedelta(minutes=self.cfg["noise"]["flatten_minutes_before_close"]))):
+                             ("noise", closed - timedelta(minutes=self.cfg["noise"]["flatten_minutes_before_close"])),
+                             ("two_vote", closed - timedelta(minutes=self.cfg["two_vote"]["flatten_minutes_before_close"]))):
                 if f"flat-{name}-{now.date()}" not in done and at <= now < closed:
                     self.guarded(f"{name}-flatten", self.flatten_sleeves, (name,), f"{name}_scheduled_flatten")
                     if self.is_flat((name,)) or now >= closed - timedelta(minutes=1):
@@ -858,7 +932,7 @@ def main():
     ap.add_argument("--asof", type=date.fromisoformat)
     ap.add_argument("--at")
     ap.add_argument("--day", type=date.fromisoformat, help="PLAN-only: replay B3 on a completed past session")
-    ap.add_argument("--sleeve", default="all", choices=["b3", "h_etf", "noise", "vwap", "orb", "all"])
+    ap.add_argument("--sleeve", default="all", choices=["b3", "h_etf", "noise", "vwap", "orb", "two_vote", "all"])
     ap.add_argument("--reason", default="manual_flatten")
     a = ap.parse_args()
     r = Runner(a.execute, a.nav, a.ephemeral)

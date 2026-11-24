@@ -67,6 +67,21 @@ class Market:
             raise MarketDataError(f"no last price for {symbol}")
         return price, datetime.now(timezone.utc)
 
+    def timestamped_quotes(self, symbols) -> dict[str, tuple[float, datetime]]:
+        data = self._run(["quote", *symbols])
+        rows = data.get("data", [data]) if isinstance(data, dict) else data
+        quotes = {}
+        for row in rows if isinstance(rows, list) else []:
+            try:
+                price = float(row["last_price"])
+                at = datetime.fromtimestamp(int(row["data_time"]) / 1000, timezone.utc)
+                symbol = row.get("code") or row.get("symbol")
+            except (KeyError, TypeError, ValueError, OverflowError, OSError):
+                continue
+            if symbol in symbols and 0 < price < float("inf"):
+                quotes[symbol] = (price, at)
+        return quotes
+
     # ------------------------------------------------------------------ bars
     @staticmethod
     def _klines(data):

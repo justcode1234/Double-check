@@ -2,6 +2,7 @@
 per-symbol cap, shorts, the VWAP/ORB stop/target/trail monitor, Noise-area target changes, halts with shorts, signed
 attribution, and parity of the live Noise-area/VWAP/ORB code with reports/claude_regime/rstrats.py."""
 
+import json
 import math
 import runpy
 from dataclasses import asdict
@@ -19,6 +20,7 @@ from dual_strategy.competition.broker import CompetitionBroker, parse_positions
 from dual_strategy.competition.signals import Bar5
 from dual_strategy.competition.store import Store, load_config, sleeve_performance
 from dual_strategy.data.calendar import NY
+from dual_strategy.execution.moomoo_cli import CliTransport
 from dual_strategy.execution.moomoo_paper import ExecutionBlocked
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -153,7 +155,7 @@ def test_flatten_covers_shorts_first():
     assert set(sides[2:]) == {("b3", "US.SPY", "SELL", 20, True), ("vwap", "US.IWM", "SELL", 7, True)}
 
 
-@pytest.mark.parametrize("reason,nav", [("drawdown_halt", 96_000.0), ("daily_loss_lock", 98_700.0)])
+@pytest.mark.parametrize("reason,nav", [("drawdown_halt", 92_900.0), ("daily_loss_lock", 97_400.0)])
 def test_halt_and_lock_flatten_every_sleeve_including_shorts(reason, nav):
     st = state()
     st["high_water"] = st["day_start_nav"] = 100_000.0
@@ -261,6 +263,46 @@ def test_sleeve_performance_realizes_short_pnl(tmp_path):
     assert perf["sleeves"]["orb"]["realized_gross"] == pytest.approx(100.0)
     assert perf["sleeves"]["vwap"]["unrealized_gross"] == pytest.approx(20.0)
     assert perf["sleeves"]["orb"]["capital"] == pytest.approx(20_100.0)
+
+
+def test_sleeve_performance_lists_every_trade_with_action_reason_and_order_time(tmp_path):
+    store = Store(tmp_path, {"state_dir": "st"})
+    st = {**state(), "initial_nav": 100_000.0}
+    rows = [("a1", "orb", "US.QQQ", "SELL", 10, 400.0, "orb_short", "2026-11-20T10:00:00-05:00"),
+            ("a2", "orb", "US.QQQ", "BUY", 10, 390.0, "orb_trail", "2026-11-20T15:05:00+00:00"),   # 10:05 ET, UTC text
+            ("a3", "vwap", "US.SPY", "SELL", 4, 500.0, "vwap_short", "2026-11-20T10:02:00-05:00"),
+            ("a4", "h_etf", "US.XLV", "BUY", 3, 100.0, "h_rsi2_entry", "2026-11-20T09:30:30-05:00"),
+            ("a5", "h_etf", "US.XLV", "SELL", 3, 101.5, "h_etf_take_profit", "2026-11-20T10:10:00-05:00")]
+    for k, (aid, sleeve, sym, side, q, px, reason, created) in enumerate(rows):
+        intent = {"intent_id": f"i{k}", "sleeve": sleeve, "symbol": sym, "side": side, "qty": q, "reason": reason,
+                  "created_at": created}
+        store.append(SESSION, {"event": "intent", "audit_id": aid, **intent, "mode": "EXECUTE"})
+        store.append(SESSION, {"event": "acknowledged", "audit_id": aid, "intent_id": f"i{k}", "order_id": f"o{k}"})
+        store.append(SESSION, {"event": "outcome", "audit_id": aid, "intent_id": f"i{k}", "order_id": f"o{k}",
+                               "status": "FILLED", "filled": q, "qty": q, "avg_price": px,
+                               "logged_at": "2026-11-20T20:00:00+00:00"})
+    st["sleeves"]["vwap"] = {"US.SPY": -4}
+    perf = sleeve_performance(store, st, asdict(acct(positions={"US.SPY": -4}, quotes={"US.SPY": 495.0})), CFG)
+    trades = perf["trades"]
+    assert [(t["intent_id"], t["action"], t["realized_gross"], t["reason"]) for t in trades] == [
+        ("i3", "buy", None, "h_rsi2_entry"), ("i0", "short", None, "orb_short"), ("i2", "short", None, "vwap_short"),
+        ("i1", "cover", 100.0, "orb_trail"), ("i4", "sell", 4.5, "h_etf_take_profit")]
+    assert all(t["verified"] and t["source"] == "automatic" for t in trades)
+    assert trades[3]["ordered_at"] == "2026-11-20T15:05:00+00:00"
+    assert trades[0]["shares"] == 3 and trades[0]["notional"] == pytest.approx(300.0)
+    assert sleeve_performance(store, None, None, CFG)["trades"] == []
+
+
+def test_account_pnl_uses_moomoo_total_assets_while_short(tmp_path):
+    """Moomoo cash excludes short-sale proceeds: with 15 QQQ short it reported $94,412 cash but $100,124 total assets."""
+    store = Store(tmp_path, {"state_dir": "st"})
+    st = {**state(), "initial_nav": 100_000.0}
+    short_account = planner.Account(datetime.now(timezone.utc), 94_412.248, {"US.QQQ": -15}, {"US.QQQ": 634.6},
+                                    {"US.QQQ": 1.0}, {}, broker_total=100_124.188)
+    assert sleeve_performance(store, st, asdict(short_account), CFG)["account_pnl"] == pytest.approx(124.188)
+    no_total = asdict(acct(nav=100_050.0))
+    no_total.pop("broker_total")
+    assert sleeve_performance(store, st, no_total, CFG)["account_pnl"] == pytest.approx(50.0)
 
 
 def test_position_parser_reads_signed_and_unsigned_shorts_or_fails_closed():
@@ -467,35 +509,35 @@ def test_h_entries_are_restored_without_enabling_other_legacy_entries(runner):
     assert why == "planned"
     buy, = intents
     assert buy.symbol == "US.IWM" and buy.side == "BUY" and not buy.close_only
-    assert buy.qty * buy.limit_price <= 2000
+    assert 9800 <= buy.qty * buy.limit_price <= 10000
     assert planner.entry_block(runner.state, account, SESSION, runner.cfg, "b3") == "legacy strategies are exit-only"
     runner.send(intents, SESSION, "h-entry")
     assert runner.state["sleeves"]["h_etf"] == {"US.XLP": 2, "US.IWM": buy.qty}
 
 
-@pytest.mark.parametrize("sold,buys", [(0, []), (10, [("US.IWM", 4)]), (60, [("US.IWM", 9), ("US.QQQ", 4)])])
+@pytest.mark.parametrize("sold,buys", [(0, []), (10, [("US.IWM", 4)]), (200, [("US.IWM", 49), ("US.QQQ", 24)])])
 def test_h_open_resizes_from_confirmed_exit_and_entry_fills(runner, monkeypatch, sold, buys):
     monkeypatch.delattr(runner, "audit")
     runner.cfg = load_config(PROJECT)
     runner.quotes["US.XLP"] = 100
-    runner.state["sleeves"]["h_etf"] = {"US.XLP": 60}
+    runner.state["sleeves"]["h_etf"] = {"US.XLP": 200}
     runner.state["h_entry_session"]["US.XLP"] = "2026-11-20"
     runner.state["h_plan"] = {"asof": "2026-11-20", "entries": ["US.IWM", "US.QQQ"],
                               "exits": {"US.XLP": "rsi_recovery"}}
     link = {"intent_id": "previous-buy", "audit_id": "test", "order_id": "prior"}
     for event, fields in [
-        ("intent", {"mode": "EXECUTE", "sleeve": "h_etf", "symbol": "US.XLP", "side": "BUY", "qty": 60}),
+        ("intent", {"mode": "EXECUTE", "sleeve": "h_etf", "symbol": "US.XLP", "side": "BUY", "qty": 200}),
         ("acknowledged", {}),
-        ("outcome", {"status": "FILLED", "filled": 60, "qty": 60, "avg_price": 100}),
+        ("outcome", {"status": "FILLED", "filled": 200, "qty": 200, "avg_price": 100}),
     ]:
         runner.store.append("2026-11-20", {"event": event, **link, **fields})
     runner.fill["US.XLP", "SELL"] = sold
 
     runner.h_open()
-    assert [(i.symbol, i.side, i.qty) for i in runner.sent][:1] == [("US.XLP", "SELL", 60)]
+    assert [(i.symbol, i.side, i.qty) for i in runner.sent][:1] == [("US.XLP", "SELL", 200)]
     assert [(i.symbol, i.qty) for i in runner.sent if i.side == "BUY"] == buys
     exposure = sum(q * runner.quotes[s] for s, q in runner.state["sleeves"]["h_etf"].items())
-    assert exposure <= 6000
+    assert exposure <= 20000
     runner.h_open()
     assert len(runner.sent) == 1 + len(buys)
 
@@ -515,6 +557,10 @@ def test_invalid_terminal_fill_halts_before_retrying_or_opening_again(runner, mo
     saved = runner.store.load()
     assert saved["halted"]["kind"] == "order_error"
     assert saved["sleeves"]["h_etf"] == {}
+    runner.state = saved
+    late_close = planner.Intent("close", "t", "h_etf", "US.IWM", "SELL", 2, 200, 200, "scheduled_flatten", True)
+    assert runner.send([late_close], SESSION) == []
+    assert len(runner.sent) == 1
 
 
 def test_h_open_atomic_claim_prevents_second_caller_after_a_clear_prescan(runner, monkeypatch):
@@ -550,16 +596,18 @@ def test_two_vote_replay_caps_each_ticker_across_lots_and_reserves_gains(vote_re
     opens[spy][0, 12:], opens[qqq][0, 12:] = 102.0, 102.0
     opens[spy][0, -1], opens[qqq][0, -1] = 110.0, 90.0
     pulses = np.zeros(78, dtype=int)
-    pulses[[6, 8, 10, 12, 14]] = 2
+    pulses[[6, 12, 14]] = 2                               # 3 fresh agreements; only 2 lots fit
     neutral = np.zeros_like(pulses)
     cash = replay["VoteCash"]()
+    lot = replay["LOT_USD"]
+    assert (lot, replay["LOTS_PER_SYMBOL"]) == (20_000, 2)
     trades = replay["replay_day"](0, {s: SimpleNamespace(open=a) for s, a in opens.items()},
-                                  {spy: (neutral, pulses), qqq: (pulses, neutral)}, 10000, 2, capital=cash)
-    assert len(trades) == 8
+                                  {spy: (neutral, pulses), qqq: (pulses, neutral)}, lot, 2, capital=cash)
+    assert len(trades) == 4
     for symbol in (spy, qqq):
         lots = [t for t in trades if t.symbol == symbol]
-        assert [t.entry_slot for t in lots] == [6, 8, 10, 12]
-        assert all(t.shares * t.entry * (1 + I.FR) <= 10000 for t in lots)
+        assert [t.entry_slot for t in lots] == [6, 12]
+        assert all(t.shares * t.entry * (1 + I.FR) <= lot for t in lots)
         assert sum(t.shares for t in lots) * 102.0 * (1 + I.FR) <= 40000
         assert lots[-1].shares < lots[0].shares
     assert all(t.pnl > 0 for t in trades)
@@ -619,17 +667,19 @@ def test_two_vote_replay_caps_and_reserve_hold_across_200_seeded_paths(vote_repl
 
 
 # ------------------------------------------------------------------ two-vote live sleeve
-def test_vote_lot_is_10k_within_book_name_cap_and_cash():
+def test_vote_lot_uses_configured_size_within_book_name_cap_and_cash():
+    lot = CFG["two_vote"]["entry_usd"]
+    assert lot == 20_000 and CFG["two_vote"]["max_lots_per_symbol"] == 2 and CFG["two_vote"]["take_profit_usd"] == 100
     st = state()
     out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.SPY", 1, CFG, NOW, "e6")
     assert why == "entry" and out[0].sleeve == "two_vote" and not out[0].close_only and not out[0].opens_short
-    assert out[0].qty == math.floor(10_000 / out[0].limit_price)
+    assert out[0].qty == math.floor(lot / out[0].limit_price)
     out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.QQQ", -1, CFG, NOW, "e6")
     assert why == "entry" and out[0].side == "SELL" and out[0].opens_short
-    st["sleeves"]["two_vote"] = {"US.SPY": 19}                                   # a second lot of the same symbol
-    out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 19}), SESSION, "US.SPY", 1, CFG, NOW, "e7")
-    assert why == "entry" and out[0].qty * out[0].limit_price <= 10_000 + 1e-6
-    st["sleeves"]["vwap"] = {"US.SPY": 50}                                       # $34,500 of the $40,000 name cap used
+    st["sleeves"]["two_vote"] = {"US.SPY": 39}                                   # a second lot of the same symbol
+    out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 39}), SESSION, "US.SPY", 1, CFG, NOW, "e7")
+    assert why == "entry" and out[0].qty * out[0].limit_price <= lot + 1e-6
+    st["sleeves"]["vwap"] = {"US.SPY": 30}                                       # $34,500 of the $40,000 name cap used
     out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 69}), SESSION, "US.SPY", 1, CFG, NOW, "e8")
     assert why == "entry" and out[0].qty * out[0].limit_price <= 5_500 + 1e-6
     st = state(two_vote={"US.SPY": 80, "US.QQQ": 100})                           # $80,000 book fully deployed
@@ -639,7 +689,7 @@ def test_vote_lot_is_10k_within_book_name_cap_and_cash():
     st = state()
     st["reduced"] = True
     out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.SPY", 1, CFG, NOW, "e6")
-    assert why == "entry" and out[0].qty == math.floor(5_000 / out[0].limit_price)
+    assert why == "entry" and out[0].qty == math.floor(lot / 2 / out[0].limit_price)
     st = state()
     st["halted"] = "drawdown"
     out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.SPY", 1, CFG, NOW, "e6")
@@ -700,6 +750,221 @@ def _recorded_vote_lots(runner):
     return perf["sleeves"]["two_vote"]["open_entry_lots"]
 
 
+def _historic_vote_lots(runner):
+    """Mechanics tests written around $10k lots, 4 per ticker and a $50 target. The live sizes are plain config
+    (see test_vote_lot_uses_configured_size_within_book_name_cap_and_cash); copy, never mutate the shared CFG."""
+    runner.cfg = {**runner.cfg, "two_vote": {**runner.cfg["two_vote"], "entry_usd": 10_000, "max_lots_per_symbol": 4,
+                                             "take_profit_usd": 50}}
+    if getattr(runner, "broker", None) is not None:
+        runner.broker.cfg = runner.cfg
+
+
+def _profit_quotes(runner, age=0):
+    runner.market.timestamped_quotes = lambda symbols: {
+        sym: (runner.quotes[sym], runner.take_profit.__globals__["datetime"].now(timezone.utc) - timedelta(seconds=age))
+        for sym in symbols
+    }
+
+
+def _profit_buy(runner, sleeve, symbol, qty, tag="buy"):
+    price = runner.quotes[symbol]
+    intent = planner.Intent(f"{sleeve}-{symbol}-{tag}", NOW.isoformat(), sleeve, symbol, "BUY", qty, price, price, "test", False)
+    runner.send([intent], SESSION)
+
+
+def test_profit_exit_uses_legacy_h_target_and_remembers_new_h_target(runner):
+    runner.cfg = load_config(PROJECT)
+    _profit_quotes(runner)
+    _profit_buy(runner, "h_etf", "US.IWM", 10)
+    runner.state.pop("h_take_profit_targets")  # Old $2,000 entry had no per-position target in its saved state.
+    _profit_buy(runner, "h_etf", "US.QQQ", 10)
+    runner.state = runner.store.load()
+    assert runner.state["h_take_profit_targets"] == {"US.QQQ": 20}
+
+    runner.quotes.update({"US.IWM": 200.50, "US.QQQ": 401})
+    runner.take_profit()
+    assert [(i.symbol, i.qty, i.reason) for i in runner.sent if i.close_only] == [("US.IWM", 10, "h_etf_take_profit")]
+    assert runner.store.load()["take_profit_counts"] == {"h_etf": {"US.IWM": 1}}
+    assert runner.state["sleeves"]["h_etf"] == {"US.QQQ": 10}
+
+    runner.quotes["US.QQQ"] = 402
+    runner.take_profit()
+    assert runner.state["sleeves"]["h_etf"] == {} and runner.state["h_take_profit_targets"] == {}
+    assert runner.store.load()["take_profit_counts"]["h_etf"] == {"US.IWM": 1, "US.QQQ": 1}
+
+
+def test_two_vote_profit_exit_rejects_stale_data_and_retries_partial_without_counting_again(runner, monkeypatch):
+    runner.cfg = load_config(PROJECT)
+    _historic_vote_lots(runner)
+    monkeypatch.setattr(runner, "risk", runner.account)
+    _profit_buy(runner, "two_vote", "US.SPY", 20)
+    _profit_buy(runner, "two_vote", "US.QQQ", 20)
+    runner.quotes.update({"US.SPY": 502.50, "US.QQQ": 402.49})
+    _profit_quotes(runner, age=40)
+    runner.take_profit()
+    assert len(runner.sent) == 2 and "take_profit_counts" not in runner.state
+
+    _profit_quotes(runner)
+    runner.fill[("US.SPY", "SELL")] = 1
+    runner.take_profit()
+    assert (runner.sent[-1].symbol, runner.sent[-1].qty, runner.sent[-1].reason) == ("US.SPY", 20, "two_vote_take_profit")
+    runner.state = runner.store.load()
+    assert runner.state["take_profit_pending"]["two_vote"] == {"US.SPY": runner.sent[-1].take_profit_lot_id}
+    assert runner.state["sleeves"]["two_vote"] == {"US.SPY": 19, "US.QQQ": 20}
+
+    runner.fill.clear()
+    runner.quotes["US.SPY"] = 500.50
+    monkeypatch.setitem(runner.take_profit.__globals__, "datetime", _clock(NOW + timedelta(seconds=10)))
+    runner.take_profit()
+    assert (runner.sent[-1].symbol, runner.sent[-1].qty) == ("US.SPY", 19)
+    assert runner.store.load()["take_profit_counts"] == {"two_vote": {"US.SPY": 1}}
+    assert runner.state["take_profit_pending"]["two_vote"] == {}
+    activations = [r for r in runner.store.outbox(SESSION) if r["event"] == "take_profit_activation"]
+    assert len(activations) == 1 and activations[0]["shares"] == 20 and activations[0]["target_usd"] == 50
+    submitted = len(runner.sent)
+    _run_vote_step(runner, monkeypatch, 20, 1)                         # agreement still holds after the profit exit
+    reentry = runner.sent[-1]
+    assert len(runner.sent) == submitted + 1
+    assert (reentry.symbol, reentry.side, reentry.close_only, reentry.reason) == ("US.SPY", "BUY", False, "two_vote_long")
+    _run_vote_step(runner, monkeypatch, 21, 0)                         # lapsed: nothing new
+    assert len(runner.sent) == submitted + 1
+    _run_vote_step(runner, monkeypatch, 22, 1)
+    assert runner.sent[-1].symbol == "US.SPY" and runner.sent[-1].side == "BUY"
+
+
+def test_two_vote_profit_exits_only_the_qualifying_entry_lot(runner):
+    runner.cfg = load_config(PROJECT)
+    _historic_vote_lots(runner)
+    _profit_quotes(runner)
+    runner.quotes["US.QQQ"] = 655
+    _profit_buy(runner, "two_vote", "US.QQQ", 15, "first")
+    runner.quotes["US.QQQ"] = 649
+    _profit_buy(runner, "two_vote", "US.QQQ", 15, "second")
+    runner.state = runner.store.load()
+    runner.quotes["US.QQQ"] = 653
+
+    runner.take_profit()
+    exit = runner.sent[-1]
+    assert exit.close_only and exit.side == "SELL" and exit.qty == 15
+    assert exit.take_profit_lot_id.endswith("-second")
+    performance = runner.attribute_capital(runner.account())["sleeves"]["two_vote"]
+    assert performance["positions"]["US.QQQ"]["cost_basis"] == 655 * 15
+    assert performance["realized_gross"] == 60
+    assert performance["open_entry_lots"] == {"US.QQQ": 1}
+    assert runner.state["take_profit_pending"]["two_vote"] == {}
+    assert runner.state["take_profit_counts"]["two_vote"] == {"US.QQQ": 1}
+
+
+
+def test_two_vote_short_lot_takes_profit_at_the_configured_target_when_price_falls(runner):
+    """15 QQQ sold short at $634.875 covers once the lot is up $100, the live target (price <= ~$628.21)."""
+    runner.cfg = load_config(PROJECT)
+    _profit_quotes(runner)
+    runner.quotes["US.QQQ"] = 634.875
+    short = planner.Intent("two_vote-US.QQQ-short", NOW.isoformat(), "two_vote", "US.QQQ", "SELL", 15, 634.875, 634.875,
+                           "two_vote_short", False, opens_short=True)
+    runner.send([short], SESSION)
+    runner.state = runner.store.load()
+    assert runner.state["sleeves"]["two_vote"] == {"US.QQQ": -15}
+    sent = len(runner.sent)
+    assert runner.cfg["two_vote"]["take_profit_usd"] == 100
+    for price in (640.0, 631.50):          # a loss, then +$50.63 (the old target): neither reaches $100
+        runner.quotes["US.QQQ"] = price
+        runner.take_profit()
+        assert len(runner.sent) == sent, price
+    runner.quotes["US.QQQ"] = 628.0        # 15 x (634.875 - 628.0) = +$103.13
+    runner.take_profit()
+    cover = runner.sent[-1]
+    assert (cover.side, cover.qty, cover.close_only, cover.reason) == ("BUY", 15, True, "two_vote_take_profit")
+    assert cover.take_profit_lot_id.endswith("-short")
+    assert runner.state["sleeves"]["two_vote"] == {}
+    assert runner.state["take_profit_counts"]["two_vote"] == {"US.QQQ": 1}
+    activation = [r for r in runner.store.outbox(SESSION) if r["event"] == "take_profit_activation"][-1]
+    assert activation["target_usd"] == 100 and activation["gross_usd"] == pytest.approx(103.125)
+
+@pytest.mark.parametrize("overlap", [None, "cash", "other_order"])
+def test_two_vote_close_reconciles_cancelled_remainder_from_moomoo(runner, monkeypatch, overlap):
+    from dual_strategy.competition import broker as broker_module
+
+    runner.cfg = load_config(PROJECT)
+    runner.cfg["risk"]["order_wait_seconds"] = 0
+    _historic_vote_lots(runner)
+    _profit_quotes(runner)
+    runner.quotes["US.QQQ"] = 655
+    _profit_buy(runner, "two_vote", "US.QQQ", 15, "first")
+    runner.quotes["US.QQQ"] = 649
+    _profit_buy(runner, "two_vote", "US.QQQ", 15, "second")
+    runner.quotes["US.QQQ"] = 653
+    monkeypatch.delattr(runner, "audit")
+    monkeypatch.delattr(runner.broker, "place")
+    monkeypatch.delattr(runner.broker, "wait")
+    clock = runner.take_profit.__globals__["datetime"]
+    monkeypatch.setattr(broker_module, "time", SimpleNamespace(monotonic=lambda: 0, sleep=lambda *_: None))
+    runner.broker.acc_id = "test-paper"
+    net, cash = 30, 80000.0
+    submitted, history = [], []
+    cancellations = []
+
+    def account(extra=()):
+        result = acct(positions={"US.QQQ": net}, quotes=runner.quotes)
+        result.cash = cash
+        return result
+
+    def cli(argv):
+        nonlocal net, cash
+        args = argv[1:]
+        if args[:3] == ["sim", "order", "sell"]:
+            qty = int(args[4])
+            stamp = int(clock.now(timezone.utc).timestamp()) * 1_000_000
+            order = {"order_id": f"new-{len(submitted)}", "status": 2, "symbol": "QQQ", "side": 2,
+                     "text": args[args.index("--text") + 1], "qty": str(qty), "cum_qty": "0",
+                     "price": args[args.index("--price") + 1], "avg_fill_price": "653.6",
+                     "create_time": stamp, "update_time": stamp}
+            history.append(order)
+            submitted.append(qty)
+            if len(submitted) > 1:
+                order.update(status=4, cum_qty=str(qty))
+                net -= qty
+                cash += qty * 653.6 - 1
+            return json.dumps({"order_id": order["order_id"]})
+        if args[:3] == ["sim", "order", "cancel"]:
+            cancellations.append(args[3])
+            history[-1].update(status=5, qty="5")  # Moomoo reports only the remaining quantity and zero fills.
+            net -= 10
+            cash += 10 * 653.6 - (2 if overlap == "cash" else 1)
+            return "{}"
+        if args[:3] == ["sim", "order", "history"]:
+            rows = history.copy()
+            if cancellations and overlap == "other_order":
+                rows.append({**history[-1], "order_id": "outside", "status": 4})
+            return json.dumps({"data": {"orders": rows}})
+        if args[:3] == ["sim", "account", "funds"]:
+            return json.dumps({"balance": str(cash), "short_mv": "0"})
+        if args[:2] == ["sim", "position"]:
+            return json.dumps({"positions": [{"symbol": "QQQ", "qty": str(net)}]})
+        raise AssertionError(args)
+
+    runner.broker.call = CliTransport(frozenset({"test-paper"}), frozenset(), cli_path="fake", runner=cli)
+    monkeypatch.setattr(runner, "account", account)
+    if overlap:
+        with pytest.raises(ExecutionBlocked, match="did not reconcile"):
+            runner.take_profit()
+        assert runner.store.load()["halted"]["kind"] == "order_error"
+        assert runner.state["sleeves"]["two_vote"] == {"US.QQQ": 30} and submitted == [15]
+        return
+
+    runner.take_profit()
+    assert submitted == [15] and runner.state["sleeves"]["two_vote"] == {"US.QQQ": 20}
+    outcome = runner.store.outbox(SESSION)[-1]
+    assert outcome["filled"] == 10 and outcome["broker_terminal"]["qty"] == 5
+    runner.state = runner.store.load()
+    monkeypatch.setitem(runner.take_profit.__globals__, "datetime", _clock(NOW + timedelta(seconds=10)))
+    runner.take_profit()
+    assert submitted == [15, 5] and len(cancellations) == 1
+    assert runner.state["sleeves"]["two_vote"] == {"US.QQQ": 15}
+    assert runner.state["halted"] is None and runner.state["take_profit_counts"]["two_vote"] == {"US.QQQ": 1}
+
+
 def test_vote_cannot_open_against_h_inventory_and_h_cannot_open_against_vote():
     long_h = state(h_etf={"US.SPY": 20})
     intents, why = planner.plan_vote_entry(long_h, acct(positions={"US.SPY": 20}), SESSION, "US.SPY", -1, CFG, NOW, "e6")
@@ -710,8 +975,11 @@ def test_vote_cannot_open_against_h_inventory_and_h_cannot_open_against_vote():
     assert [i.symbol for i in intents] == ["US.IWM"] and "opposing position in two_vote" in why
 
 
-def test_vote_step_lots_never_repeat_an_agreement(runner, monkeypatch):
+def test_vote_step_adds_a_lot_each_bar_while_the_agreement_holds_up_to_the_cap(runner, monkeypatch):
+    """User decision 2026-11-25: a continuing 2-vote agreement adds one lot per bar up to max_lots_per_symbol (2 x $20k
+    = the $40k name cap) and re-enters after exits; never on an opposite-agreement exit bar or while a profit exit works."""
     monkeypatch.setattr(runner, "risk", runner.account)
+    assert (runner.cfg["two_vote"]["entry_usd"], runner.cfg["two_vote"]["max_lots_per_symbol"]) == (20_000, 2)
 
     def step(k, spy):
         _run_vote_step(runner, monkeypatch, k, spy)
@@ -719,28 +987,65 @@ def test_vote_step_lots_never_repeat_an_agreement(runner, monkeypatch):
     step(6, 1)
     assert [(i.sleeve, i.side) for i in runner.sent] == [("two_vote", "BUY")]
     lot = runner.sent[0].qty
+    assert lot * runner.sent[0].limit_price <= 20_000 + 1e-6
     assert _recorded_vote_lots(runner) == {"US.SPY": 1} and runner.state["sleeves"]["two_vote"]["US.SPY"] == lot
     step(6, 1)                                                                   # same slot again: nothing
-    step(7, 1)                                                                   # same agreement continues: no new lot
     assert len(runner.sent) == 1
-    step(8, 0)                                                                   # agreement lapses
-    step(9, 1)                                                                   # fresh agreement: lot 2
+    step(7, 1)                                                                   # agreement still holds: lot 2
     assert len(runner.sent) == 2 and _recorded_vote_lots(runner) == {"US.SPY": 2}
     assert runner.state["sleeves"]["two_vote"]["US.SPY"] == 2 * lot
+    step(8, 1)                                                                   # at the 2-lot cap: nothing
+    step(9, 0)                                                                   # agreement lapses: hold
+    assert len(runner.sent) == 2
     step(10, -1)                                                                 # opposite agreement: close all lots
     assert len(runner.sent) == 3                                                 # no re-entry on the exit bar
     assert [(i.side, i.qty, i.close_only) for i in runner.sent][-1] == ("SELL", 2 * lot, True)
     assert runner.sent[-1].reason == "two_vote_opposite_agreement"
     assert not runner.state["sleeves"].get("two_vote") and _recorded_vote_lots(runner) == {}
-    step(11, -1)                                                                 # next bar: a fresh short agreement
-    assert runner.sent[-1].side == "SELL" and runner.sent[-1].opens_short
-    assert runner.state["sleeves"]["two_vote"]["US.SPY"] < 0
+    step(11, -1)                                                                 # next bar: short lot 1
+    step(12, -1)                                                                 # still agreeing: short lot 2
+    assert [(i.side, i.opens_short) for i in runner.sent[-2:]] == [("SELL", True), ("SELL", True)]
+    assert _recorded_vote_lots(runner) == {"US.SPY": 2} and runner.state["sleeves"]["two_vote"]["US.SPY"] < 0
     runner.flatten_sleeves(("two_vote",), "two_vote_scheduled_flatten")
     assert _recorded_vote_lots(runner) == {} and not runner.state["sleeves"].get("two_vote")
+    sent = len(runner.sent)
+    runner.state.setdefault("take_profit_pending", {})["two_vote"] = {"US.SPY": "lot-still-closing"}
+    step(13, -1)                                                                 # a profit exit is still working
+    assert len(runner.sent) == sent
+    runner.state["take_profit_pending"]["two_vote"] = {}
+    step(14, -1)                                                                 # cleared: re-enter
+    assert len(runner.sent) == sent + 1 and runner.sent[-1].opens_short
 
+
+def test_two_vote_short_backs_out_when_two_rules_turn_buy_before_profit_target(runner, monkeypatch):
+    """Short on 2+ sells, add a lot while they hold, keep it while it lapses; 2+ buys cover every share before any target."""
+    monkeypatch.setattr(runner, "risk", runner.account)
+    opened = NOW.replace(hour=9, minute=30)
+
+    def step(k, qqq):
+        runner._vote_monitor = SimpleNamespace(observe=lambda now: _vote_report(opened, k, 0, qqq))
+        monkeypatch.setitem(runner.monitor.__globals__, "datetime", _clock(opened + timedelta(minutes=5 * k, seconds=20)))
+        runner.vote_step()
+
+    step(12, -1)                                                       # 2+ sells: open a short
+    entry = runner.sent[-1]
+    assert (entry.symbol, entry.side, entry.opens_short) == ("US.QQQ", "SELL", True)
+    short = runner.state["sleeves"]["two_vote"]["US.QQQ"]
+    assert short < 0
+    step(13, -1)                                                       # agreement still holds: second short lot
+    assert len(runner.sent) == 2 and runner.sent[-1].opens_short
+    short = runner.state["sleeves"]["two_vote"]["US.QQQ"]
+    step(14, 0)                                                        # agreement lapses: still hold both lots
+    assert len(runner.sent) == 2 and runner.state["sleeves"]["two_vote"]["US.QQQ"] == short
+    step(15, 1)                                                        # 2+ rules vote Buy: back out of everything
+    cover = runner.sent[-1]
+    assert (cover.symbol, cover.side, cover.qty, cover.close_only, cover.reason) == (
+        "US.QQQ", "BUY", -short, True, "two_vote_opposite_agreement")
+    assert not runner.state["sleeves"].get("two_vote") and len(runner.sent) == 3   # no long re-entry on the exit bar
 
 @pytest.mark.parametrize("partial_exit", [True, False], ids=["partial-exit", "restart"])
 def test_vote_lot_cap_uses_confirmed_fills(runner, monkeypatch, partial_exit):
+    _historic_vote_lots(runner)
     monkeypatch.setattr(runner, "risk", runner.account)
     for k, side in enumerate([1, 0, 1, 0, 1, 0], 6):
         _run_vote_step(runner, monkeypatch, k, side)

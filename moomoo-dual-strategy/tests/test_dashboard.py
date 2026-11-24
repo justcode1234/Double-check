@@ -695,6 +695,12 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   assert.match(text('vote-note'), /Completed bar/);
   assert.match(text('vote-cards'), /Short signal/);
   assert.match(text('vote-rule-rows'), /Donchian.*Sell short/);
+  assert.equal(get('rule-activity-date').value, '2026-11-20');
+  assert.equal(text('latest-trade'), 'No trades recorded yet.');
+  assert.equal(text('trade-count'), '0 trades · 0 tonight');
+  assert.match(text('rule-activity-date'), /^Tonight · Fri 20 NovAll nights · totals$/);
+  assert.match(text('rule-activity-body'), /^Donchian0——Keltner0——.*NR70——Noise-area \(SPY only\)0—n\/aTrade signal \(2\+ rules agree\)0——$/);
+  assert.match(text('rule-activity-summary'), /Tonight: no vote records yet/);
   assert.equal(nodes(get('equity-chart'), 'svg').length, 0);
 
   const live = fresh();
@@ -712,6 +718,83 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   live.performance={asof:live.generated_at,account_pnl:19.19,unallocated_account_change:-1.98,sleeves:{
     b3:{status:'available',gross_pnl:0,realized_gross:0,unrealized_gross:0,fill_count:0,fees:0,net_pnl:0,initial_capital:80000,capital:80000,limits:{allocation_budget:80000,target_before_cap:80000,per_etf_budget:null,aggregate_limit:null}},
     h_etf:{status:'available',gross_pnl:21.17,realized_gross:0,unrealized_gross:21.17,fill_count:2,fees:null,net_pnl:null,initial_capital:20000,capital:20021.17,limits:{allocation_budget:20021.17,target_before_cap:null,per_etf_budget:2002.117,aggregate_limit:6006.351}}}};
+  live.live.take_profit_counts = {two_vote:{'US.QQQ':1}};
+  live.performance.exits = {status:'available', totals:{realized_gross:12, closed_trade_gross:12,
+      exit_orders:2, manual_exits:1, automatic_exits:1, closed_trade_count:1, expectancy_dollars:12},
+    sleeves:{two_vote:{realized_gross:12}}, reviews:{'2026-11-19':'review'},
+    fills:[{session:'2026-11-19', sleeve:'two_vote', symbol:'US.QQQ', side:'SELL', source:'manual',
+      shares:3, avg_price:123.45, realized_gross:9, status:'FILLED', audit_id:'audit', intent_id:'exit'}]};
+  live.performance.trades = [
+    {session:'2026-11-19', sleeve:'two_vote', symbol:'US.QQQ', side:'BUY', action:'buy', shares:3, avg_price:120.45, realized_gross:null,
+     reason:'two_vote_long', source:'automatic', status:'FILLED', ordered_at:'2026-11-19T10:55:17-05:00', audit_id:'a0',
+     intent_id:'2026-11-19-two_vote-e17-QQQ-BUY', rules:['Donchian','RSI(2)'], verified:true},
+    {session:'2026-11-19', sleeve:'two_vote', symbol:'US.QQQ', side:'SELL', action:'sell', shares:3, avg_price:123.45, realized_gross:9,
+     reason:'user_manual_sell', source:'manual', status:'FILLED', ordered_at:'2026-11-19T20:43:35+00:00', audit_id:'audit', intent_id:'exit', verified:true},
+    {session:'2026-11-20', sleeve:'two_vote', symbol:'US.SPY', side:'SELL', action:'short', shares:2, avg_price:500.5, realized_gross:null,
+     reason:'two_vote_short', source:'automatic', status:'FILLED', ordered_at:'2026-11-20T10:30:18-05:00', audit_id:'a2',
+     intent_id:'2026-11-20-two_vote-e12-SPY-SELL', rules:['Donchian','Keltner'], verified:true}];
+  await load({data:live});
+  assert.equal(text('trade-count'), '3 trades · 1 tonight');
+  assert.match(text('positions-body'), /No open positions\. Everything is closed\./);
+  assert.equal(text('latest-trade'), 'Latest trade: Sold short 2 SPY at $500.50 · Fri 20 Nov 23:30 SGT · Two-vote · 2+ rules voted Sell: Donchian, Keltner.');
+  assert.ok(get('latest-trade').classList.contains('is-today'));
+  assert.match(text('exit-metrics'), /Account P&L\$19\.19.*Realized P&L · gross\$12\.00.*Open positionsNoneEverything is closed.*Trades31 tonight · 2 entries · 1 close.*Profit-target activations1.*Expectancy per closed trade\$12\.00/);
+  assert.match(text('exit-body'), /^Fri 20 Nov 23:30Two-vote · SPYSold short2\+ rules voted Sell: Donchian, Keltner2\$500\.50EntryEvidence/);
+  assert.match(text('exit-body'), /Fri 20 Nov 04:43Two-vote · QQQSold · manualYou sold it manually3\$123\.45\$9\.00Evidence.*"session_review": "review"/s);
+  assert.match(text('exit-body'), /Thu 19 Nov 23:55Two-vote · QQQBought2\+ rules voted Buy: Donchian, RSI\(2\)3\$120\.45Entry/);
+  assert.equal(get('exit-body').children[0].className, 'today-row');
+  assert.equal(get('exit-body').children[1].className, '');
+  assert.match(text('expectancy-formula'), /win rate × average win.*\$12.00 per trade.*when the order was placed/);
+  const withOpen = structuredClone(live);
+  withOpen.performance.sleeves.two_vote = {status:'available', positions:{'US.SPY':{qty:-2, cost_basis:-1001, mark_price:501, unrealized_gross:-1}}};
+  withOpen.open_positions = [{sleeve:'two_vote', symbol:'US.SPY', qty:-2, side:'short', entry_price:500.5, cost:1001,
+    opened_at:'2026-11-20T10:30:18-05:00', mark_price:501, value:1002, unrealized_gross:-1, take_profit_usd:50, take_profit_price:475.5}];
+  withOpen.runtime.session_close = '2026-11-20T16:00:00-05:00';
+  await load({data:withOpen});
+  assert.match(text('latest-trade'), /Still open: -\$1\.00 unrealized\.$/);
+  assert.equal(text('positions-body'), 'Two-vote · SPY2 short$500.50Fri 20 Nov 23:30$1,001.00$501.00-$1.00Profit target: ≤ $475.50 (+$50.00) · or 2+ Buy votes · or auto-close 04:55 SGT');
+  assert.equal(get('positions-body').children[0].children[6].className, 'negative');
+  assert.match(text('exit-metrics'), /Open positionsSPY 2 shortUnrealized -\$1\.00/);
+  const noTrades = structuredClone(live); delete noTrades.performance.trades;
+  await load({data:noTrades});
+  assert.equal(text('trade-count'), 'Unavailable');
+  assert.match(text('latest-trade'), /unavailable/);
+  assert.match(text('exit-body'), /Trade list unavailable/);
+  await load({data:live});
+  live.vote_activity = {status:'available', today:'2026-11-20',
+    sessions:{'2026-11-19':{first_bar:'2026-11-19T10:45:00-05:00',last_bar:'2026-11-19T15:55:00-05:00',bars:62},
+              '2026-11-20':{first_bar:'2026-11-20T10:00:00-05:00',last_bar:'2026-11-20T10:10:00-05:00',bars:3}},
+    rules:[{rule:'Donchian',today:1,total:2,fires:[
+              {session:'2026-11-19',symbol:'US.SPY',side:'BUY',bar_end:'2026-11-19T10:45:00-05:00',slot:15,first_observed:true},
+              {session:'2026-11-20',symbol:'US.QQQ',side:'SELL',bar_end:'2026-11-20T10:05:00-05:00',slot:7,first_observed:false}]},
+           {rule:'Keltner',today:0,total:0,fires:[]},{rule:'Noise-area',today:0,total:0,fires:[]}],
+    signals:[{session:'2026-11-19',symbol:'US.SPY',side:'BUY',bar_end:'2026-11-19T11:45:00-05:00',slot:27,first_observed:false}]};
+  await load({data:live});
+  const picker = get('rule-activity-date');
+  assert.equal(picker.value, '2026-11-20');
+  assert.equal(text('rule-activity-date'), 'Tonight · Fri 20 NovThu 19 Nov nightAll nights · totals');
+  assert.match(text('rule-activity-body'), /^Donchian1—23:05 SellKeltner0——Noise-area \(SPY only\)0—n\/aTrade signal \(2\+ rules agree\)0——$/);
+  assert.equal(text('rule-activity-summary'), 'Tonight: 1 rule fire · 0 trade signals. Runner recorded 3 bars, 23:00–23:10 SGT.');
+  assert.equal(text('rule-activity-spy-label'), 'SPY · time fired (SGT)');
+  picker.value = '2026-11-19'; picker.listeners.change();
+  assert.match(text('rule-activity-body'), /^Donchian123:45 Buy · already on—.*Trade signal \(2\+ rules agree\)100:45 Buy—$/);
+  assert.match(text('rule-activity-summary'), /^Thu 19 Nov night: 1 rule fire · 1 trade signal\. Runner recorded 62 bars, 23:45–04:55 SGT\. Records started late/);
+  const chips = nodes(get('rule-activity-body'), 'span');
+  assert.match(chips[0].attributes.title, /already on when the runner's records began at 23:45 SGT/);
+  assert.match(chips[1].attributes.title, /switched on when the 5-minute bar closed at 00:45 SGT/);
+  assert.equal(chips.filter(n => n.className.includes('negative')).length, 0);
+  await load({data:live});
+  assert.equal(get('rule-activity-date').value, '2026-11-19', 'Selected night survives the 5-second refresh');
+  assert.match(text('rule-activity-body'), /23:45 Buy · already on/);
+  picker.value = 'all'; picker.listeners.change();
+  assert.match(text('rule-activity-body'), /^Donchian211Keltner000Noise-area \(SPY only\)00n\/aTrade signal \(2\+ rules agree\)110$/);
+  assert.equal(text('rule-activity-count-label'), 'Fires · all nights');
+  assert.equal(text('rule-activity-summary'), 'All 2 recorded nights: 2 rule fires · 1 trade signal. Pick a night to see the times.');
+  picker.value = '2026-11-20'; picker.listeners.change();
+  const noActivity = structuredClone(live); delete noActivity.vote_activity;
+  await load({data:noActivity});
+  assert.match(text('rule-activity-summary'), /unavailable/);
+  assert.match(text('rule-activity-body'), /No rule activity available/);
   await load({data:live});
   const pnl=card=>nodes(card,'div').find(n=>n.className.split(' ').includes('nav-value')).textContent;
   assert.equal(pnl(get('sleeves').children[0]),'$0.00');
@@ -843,7 +926,7 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   await load({data:absent});
   assert.match(text('sleeves'), /H ETF sleeve.*\$20,000.00 allocation/);
   assert.match(text('mode-badge'), /H entries enabled/);
-  assert.match(text('vote-budget'), /4 positions per ticker.*\$40,000.00 cap/);
+  assert.match(text('vote-budget'), /\$20,000.00 per position · 2 positions per ticker.*\$40,000.00 cap/);
   const voteHolding = fresh();
   voteHolding.config.risk.legacy_exit_only = true;
   voteHolding.config.risk.entry_sleeves = ['h_etf','two_vote'];
@@ -853,14 +936,18 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
     positions:{'US.QQQ':15}, market_values:{'US.QQQ':9000}
   };
   voteHolding.live.sleeves.two_vote = {'US.QQQ':15};
+  voteHolding.live.take_profit_counts = {two_vote:{'US.SPY':2,'US.QQQ':3},h_etf:{'US.XLV':1}};
   await load({data:voteHolding});
   assert.match(text('vote-cards'), /QQQ.*Paper position15 long.*Verified by Moomoo.*\$9,000.00/);
+  assert.match(text('vote-cards'), /SPY.*\$100.00 profit triggers2.*QQQ.*\$100.00 profit triggers3/);
+  assert.match(text('sleeves'), /Profit triggers1.*New entry size\$10,000.00.*\$20.00 profit target/);
   assert.doesNotMatch(text('sleeves'), /QQQ|Sleeve attribution unavailable/);
   voteHolding.live.sleeves.h_etf = {'US.QQQ':5};
   voteHolding.live.sleeves.two_vote = {'US.QQQ':10};
   await load({data:voteHolding});
   assert.match(text('vote-cards'), /QQQ.*Paper position10 long.*\$6,000.00/);
   assert.match(text('sleeves'), /QQQ5 long.*\$3,000.00/);
+  assert.match(text('sleeves'), /\$5.00 profit target/);
   voteHolding.live.sleeves = {};
   await load({data:voteHolding});
   assert.doesNotMatch(text('vote-cards'), /Paper position/);
@@ -924,3 +1011,79 @@ def test_competition_dom_status_fills_research_and_failures(tmp_path, monkeypatc
                             encoding='utf-8', capture_output=True, timeout=20)
     assert result.returncode == 0, result.stdout + result.stderr
     assert 'Competition DOM behaviors passed' in result.stdout
+
+
+def test_vote_activity_counts_each_rule_switching_on(tmp_path):
+    from dual_strategy.competition.report import _vote_activity
+    from dual_strategy.competition.store import Store, load_config
+
+    (tmp_path / 'config').mkdir()
+    shutil.copyfile(Path(__file__).resolve().parents[1] / 'config' / 'competition.yaml', tmp_path / 'config' / 'competition.yaml')
+    cfg = load_config(tmp_path)
+    store = Store(tmp_path, {**cfg, 'state_dir': 'private/competition/live'})
+
+    def step(session, slot, spy, qqq, mode='EXECUTE', name=None):
+        folder = store.dir / 'audit' / session
+        folder.mkdir(parents=True, exist_ok=True)
+        hh, mm = divmod(9 * 60 + 30 + 5 * slot, 60)
+        row = lambda rules: {'buy': sum(v > 0 for v in rules.values()), 'sell': sum(v < 0 for v in rules.values()),
+                             'rules': rules, 'entry_window': True,
+                             'signal': 1 if sum(v > 0 for v in rules.values()) >= 2 else -1 if sum(v < 0 for v in rules.values()) >= 2 else 0}
+        record = {'kind': 'vote_step', 'session': session, 'mode': mode, 'slot': slot,
+                  'bar_end': f'{session}T{hh:02d}:{mm:02d}:00-05:00', 'votes': {'US.SPY': row(spy), 'US.QQQ': row(qqq)}}
+        (folder / (name or f'{mode}-{slot}.json')).write_text(json.dumps(record), encoding='utf-8')
+
+    off = {'Donchian': 0, 'MACD': 0, 'Noise-area': 0}
+    step('2026-11-23', 15, {**off, 'Donchian': 1}, {'Donchian': 0, 'MACD': 0})          # already on at first record
+    step('2026-11-23', 16, {**off, 'Donchian': 1, 'MACD': 1}, {'Donchian': 0, 'MACD': -1})
+    step('2026-11-23', 17, {**off, 'Donchian': -1, 'MACD': 1}, {'Donchian': 0, 'MACD': 0})  # flip counts again
+    step('2026-11-24', 6, off, {'Donchian': 0, 'MACD': 0})
+    step('2026-11-24', 7, {**off, 'Noise-area': -1}, {'Donchian': 1, 'MACD': 0})
+    step('2026-11-24', 8, {**off, 'Noise-area': -1}, {'Donchian': 1, 'MACD': 0})            # still on: no new fire
+    step('2026-11-24', 9, {**off, 'Donchian': 1}, {'Donchian': 1, 'MACD': 0}, mode='PLAN')  # PLAN records ignored
+    (store.dir / 'audit' / '2026-11-24' / 'partial.json').write_text('{"kind": "vote', encoding='utf-8')
+
+    act = _vote_activity(store, '2026-11-24')
+    rules = {r['rule']: r for r in act['rules']}
+    assert [r['rule'] for r in act['rules']][:10] == ['Donchian', 'Keltner', 'RSI(2)', 'MACD', 'DMI/ADX', 'Stochastic',
+                                                       'Chandelier', 'Turtle Soup', 'NR7', 'Noise-area']
+    assert act['status'] == 'incomplete'
+    assert (rules['Donchian']['total'], rules['Donchian']['today']) == (3, 1)
+    assert [(f['symbol'], f['side'], f['slot'], f['first_observed']) for f in rules['Donchian']['fires']] == [
+        ('US.SPY', 'BUY', 15, True), ('US.SPY', 'SELL', 17, False), ('US.QQQ', 'BUY', 7, False)]
+    assert [(f['symbol'], f['side']) for f in rules['MACD']['fires']] == [('US.QQQ', 'SELL'), ('US.SPY', 'BUY')]
+    assert (rules['Noise-area']['total'], rules['Noise-area']['fires'][0]['bar_end']) == (1, '2026-11-24T10:05:00-05:00')
+    assert rules['Keltner'] == {'rule': 'Keltner', 'today': 0, 'total': 0, 'fires': []}
+    assert [(s['session'], s['symbol'], s['side'], s['slot']) for s in act['signals']] == [('2026-11-23', 'US.SPY', 'BUY', 16)]
+    assert act['sessions']['2026-11-23'] == {'first_bar': '2026-11-23T10:45:00-05:00', 'last_bar': '2026-11-23T10:55:00-05:00', 'bars': 3}
+    assert act['sessions']['2026-11-24']['bars'] == 3
+
+
+def test_open_positions_show_entry_price_cost_mark_and_profit_exit():
+    from dual_strategy.competition.report import _open_positions
+
+    performance = {
+        'trades': [
+            {'sleeve': 'two_vote', 'symbol': 'US.QQQ', 'action': 'short', 'intent_id': '2026-11-24-two_vote-e12-QQQ-SELL',
+             'ordered_at': '2026-11-24T10:30:18-05:00'},
+            {'sleeve': 'h_etf', 'symbol': 'US.XLV', 'action': 'buy', 'intent_id': 'h1', 'ordered_at': '2026-11-20T09:30:35-05:00'}],
+        'sleeves': {
+            'two_vote': {'positions': {'US.QQQ': {'qty': -15, 'cost_basis': -9523.125, 'mark_price': 635.9}},
+                         'entry_lots': {'US.QQQ': [{'id': 'audit:2026-11-24-two_vote-e12-QQQ-SELL', 'shares': 15,
+                                                    'entry_price': 634.875, 'side': -1}]}},
+            'h_etf': {'positions': {'US.XLV': {'qty': 11, 'cost_basis': 1968.45, 'mark_price': None},
+                                    'US.XLP': {'qty': 0, 'cost_basis': 0.0}}}}}
+    cfg = {'two_vote': {'take_profit_usd': 50}, 'h_etf': {'take_profit_usd': 20, 'legacy_take_profit_usd': 5}}
+    rows = _open_positions(performance, cfg, {'h_take_profit_targets': {}})
+    assert rows[0] == {'sleeve': 'two_vote', 'symbol': 'US.QQQ', 'qty': -15, 'side': 'short', 'entry_price': 634.875,
+                       'cost': pytest.approx(9523.125), 'opened_at': '2026-11-24T10:30:18-05:00', 'mark_price': 635.9,
+                       'value': pytest.approx(9538.5), 'unrealized_gross': pytest.approx(-15.375),
+                       'take_profit_usd': 50, 'take_profit_price': pytest.approx(631.5417)}
+    xlv = rows[1]
+    assert (xlv['symbol'], xlv['side'], xlv['entry_price'], xlv['opened_at']) == ('US.XLV', 'long', pytest.approx(178.95),
+                                                                               '2026-11-20T09:30:35-05:00')
+    assert xlv['mark_price'] is None and xlv['unrealized_gross'] is None and xlv['value'] is None
+    assert (xlv['take_profit_usd'], xlv['take_profit_price']) == (5, pytest.approx(179.4045))   # legacy $5 target
+    assert len(rows) == 2                                                                        # flat XLP skipped
+    rows = _open_positions(performance, cfg, {'h_take_profit_targets': {'US.XLV': 20}})
+    assert rows[1]['take_profit_price'] == pytest.approx(180.7682)

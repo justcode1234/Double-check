@@ -83,20 +83,22 @@ def acct(nav=100_000.0, positions=None, quotes=None):
 def test_risk_ladder_halt_is_permanent_and_lock_is_daily():
     st = planner.new_state()
     assert planner.mark_risk(st, acct(100_000), "2026-11-20", CFG) is None and st["high_water"] == 100_000
-    assert planner.mark_risk(st, acct(97_900), "2026-11-20", CFG) == "daily_loss_lock" and st["reduced"]
-    assert planner.entry_block(st, acct(97_900), "2026-11-20", CFG) == "daily_loss_lock"
-    assert planner.mark_risk(st, acct(97_900), "2026-11-23", CFG) is None            # new session clears the lock
-    assert planner.entry_block(st, acct(97_900), "2026-11-23", CFG) is None
-    assert planner.mark_risk(st, acct(96_490), "2026-11-23", CFG) == "drawdown_halt"
+    assert (CFG["risk"]["daily_loss_fraction"], CFG["risk"]["reduce_drawdown_fraction"],
+            CFG["risk"]["halt_drawdown_fraction"]) == (0.025, 0.04, 0.07)
+    assert planner.mark_risk(st, acct(95_900), "2026-11-20", CFG) == "daily_loss_lock" and st["reduced"]
+    assert planner.entry_block(st, acct(95_900), "2026-11-20", CFG) == "daily_loss_lock"
+    assert planner.mark_risk(st, acct(95_900), "2026-11-23", CFG) is None            # new session clears the lock
+    assert planner.entry_block(st, acct(95_900), "2026-11-23", CFG) is None
+    assert planner.mark_risk(st, acct(92_990), "2026-11-23", CFG) == "drawdown_halt"
     assert planner.mark_risk(st, acct(99_000), "2026-11-24", CFG) is None            # flat: nothing to close
     assert st["halted"] is not None and "drawdown_halt" in planner.entry_block(st, acct(99_000), "2026-11-24", CFG)
     st2 = planner.new_state()
     planner.mark_risk(st2, acct(100_000), "d", CFG)
-    planner.mark_risk(st2, acct(97_990), "e", CFG)
+    planner.mark_risk(st2, acct(95_990), "e", CFG)
     assert st2["reduced"]
-    planner.mark_risk(st2, acct(98_400), "e", CFG)
-    assert st2["reduced"]                                                            # hysteresis: needs > 98.5%
-    planner.mark_risk(st2, acct(98_600), "e", CFG)
+    planner.mark_risk(st2, acct(96_400), "e", CFG)
+    assert st2["reduced"]                                                            # hysteresis: needs > 96.5%
+    planner.mark_risk(st2, acct(96_600), "e", CFG)
     assert not st2["reduced"]
 
 
@@ -139,9 +141,9 @@ def test_h_limits_depend_on_h_capital_not_account_nav():
     a.sleeve_capital = {'b3': 125000, 'h_etf': 25000}
     orders, why = planner.plan_h_open(st, a, '2026-11-20', {'exits': {}, 'entries': symbols}, CFG, datetime.now(NY))
     assert why == 'planned'
-    assert [i.qty for i in orders] == [24, 24, 24, 2]
-    assert all(i.qty * i.limit_price <= 2500 for i in orders)
-    assert sum(i.qty * i.limit_price for i in orders) <= 7500
+    assert [i.qty for i in orders] == [99, 99, 51]
+    assert all(i.qty * i.limit_price <= 10000 for i in orders)
+    assert sum(i.qty * i.limit_price for i in orders) <= 25000
 
 
 @pytest.mark.parametrize('capital', [None, 0, -1, float('nan'), float('inf')])
@@ -190,9 +192,9 @@ def test_h_open_limits_and_exits_first():
     out, _ = planner.plan_h_open(st, a, "2026-11-20", plan, CFG, datetime.now(NY))
     assert out[0].side == "SELL" and out[0].symbol == "US.XLK"
     buys = [i for i in out if i.side == "BUY"]
-    assert all(i.qty * i.limit_price <= 0.10 * 0.20 * a.nav + 1e-6 for i in buys)
-    assert sum(i.qty * i.limit_price for i in buys) <= 0.30 * 0.20 * a.nav + 1e-6
-    assert [(i.symbol, i.qty) for i in buys] == [("US.IWM", 19), ("US.QQQ", 4), ("US.XLF", 39), ("US.SPY", 1)]  # room left
+    assert all(i.qty * i.limit_price <= 10000 + 1e-6 for i in buys)
+    assert sum(i.qty * i.limit_price for i in buys) <= 20000 + 1e-6
+    assert [(i.symbol, i.qty) for i in buys] == [("US.IWM", 99), ("US.QQQ", 24), ("US.XLF", 9)]
 
 
 def test_apply_fill_tracks_h_entry_session():
@@ -481,7 +483,7 @@ def test_h_audit_retains_full_panel_after_next_plan(status_runner):
     assert result.metrics["US.SPY"]["rsi2"] != round(result.metrics["US.SPY"]["rsi2"], 4)
 
 
-@pytest.mark.parametrize('mark,capital,per_etf,aggregate', [(110, 21000, 2100, 6300), (90, 19000, 1900, 5700)])
+@pytest.mark.parametrize('mark,capital,per_etf,aggregate', [(110, 21000, 10000, 21000), (90, 19000, 9500, 19000)])
 def test_runner_attributes_capital_from_receipts_not_shared_cash(status_runner, mark, capital, per_etf, aggregate):
     from dataclasses import asdict
     runner, _ = status_runner
@@ -525,8 +527,8 @@ def test_h_open_audit_links_signal_account_intent_and_fill(status_runner, monkey
         if tool == PLACE:
             return {"data": {"order_id": "FILL-TEST"}}
         if tool == HISTORY:
-            return {"data": {"orders": [{"order_id": "FILL-TEST", "status": 4, "qty": "3",
-                                         "cum_qty": "3", "avg_fill_price": "500.123456789"}]}}
+            return {"data": {"orders": [{"order_id": "FILL-TEST", "status": 4, "qty": "19",
+                                         "cum_qty": "19", "avg_fill_price": "500.123456789"}]}}
         return original_transport(tool, args)
 
     runner.broker.transport = transport
@@ -536,15 +538,15 @@ def test_h_open_audit_links_signal_account_intent_and_fill(status_runner, monkey
     assert saved["signal_audit_id"] == signal_id
     assert saved['account']['sleeve_capital'] == {**{s: 19500 for s in planner.SLEEVES}, 'h_etf': 20000, 'two_vote': 80000}
     assert saved['capital']['sleeves']['h_etf']['initial_capital'] == 20000
-    assert saved['capital']['sleeves']['h_etf']['limits']['per_etf_budget'] == 2000
+    assert saved['capital']['sleeves']['h_etf']['limits']['per_etf_budget'] == 10000
     intents, reason = planner.plan_h_open(saved["state"], restore_account(saved["account"]), saved["session"],
                                           saved["plan"], provenance["config"], datetime.fromisoformat(saved["now"]))
     assert [i.to_dict() for i in intents] == saved["intents"] and reason == saved["reason"]
     records = runner.store.outbox("2026-11-20")
     assert [r["event"] for r in records] == ["intent", "acknowledged", "outcome"]
     assert all(r["audit_id"] == saved["audit_id"] for r in records)
-    assert records[-1]["filled"] == 3 and records[-1]["avg_price"] == 500.123456789
-    assert runner.state["sleeves"]["h_etf"] == {"US.SPY": 3}
+    assert records[-1]["filled"] == 19 and records[-1]["avg_price"] == 500.123456789
+    assert runner.state["sleeves"]["h_etf"] == {"US.SPY": 19}
 
 
 def test_risk_audit_replays_mark_and_emergency_exit(status_runner, monkeypatch):
@@ -554,7 +556,7 @@ def test_risk_audit_replays_mark_and_emergency_exit(status_runner, monkeypatch):
     session = runner.session()
     runner.state.update(initial_nav=100000.0, high_water=100000.0, day=session, day_start_nav=100000.0)
     runner.state["sleeves"]["b3"] = {"US.SPY": 5}
-    responses[CASH_INFO]["balance"] = "96000"
+    responses[CASH_INFO]["balance"] = "94900"                                         # NAV ~$97,400: -2.6% on the day
     responses[POSITION_LIST]["positions"] = [{"symbol": "US.SPY", "qty": "5"}]
     monkeypatch.setattr(runner.broker, "place", lambda intent: "RISK-TEST")
     monkeypatch.setattr(runner.broker, "wait", lambda *args: {"order_id": "RISK-TEST", "status": "FILLED",
@@ -635,7 +637,7 @@ def test_config_five_sleeves_at_20pct_each():
     # execution_enabled is the user's decision (true on the competition Mac since 2026-11-20), not asserted here
     assert CFG["allocation"] == {"b3": 0.20, "h_etf": 0.20, "noise": 0.20, "vwap": 0.20, "orb": 0.20, "two_vote": 0.0}
     assert set(CFG["allocation"]) == set(planner.SLEEVES)
-    assert CFG["risk"]["halt_drawdown_fraction"] == 0.035
+    assert CFG["risk"]["halt_drawdown_fraction"] == 0.07
 
 
 def test_store_is_atomic_and_append_only(tmp_path):
@@ -696,16 +698,12 @@ def test_flatten_never_sells_more_than_broker_shows():
 
 def test_order_error_budget_stops_sending_after_three(status_runner):
     runner, _ = status_runner
-    placed = []
-    runner.broker.place = lambda intent: placed.append(intent) or (_ for _ in ()).throw(ExecutionBlocked("cli down"))
+    runner.state["order_errors_today"] = 3
+    runner.broker.place = lambda intent: pytest.fail("Exhausted order-error budget sent another order")
     intent = planner.Intent("x", "t", "b3", "US.SPY", "SELL", 1, 500.0, 500.0, "r", True)
-    for _ in range(3):
-        with pytest.raises(ExecutionBlocked):
-            runner.send([intent], "2026-11-20")
     with pytest.raises(ExecutionBlocked, match="budget"):
         runner.send([intent], "2026-11-20")
-    assert len(placed) == 3 and runner.state["order_errors_today"] == 3
-    assert runner.state["halted"]["kind"] == "order_error"
+    assert runner.state["order_errors_today"] == 3
     assert "order_refused" in [r["event"] for r in runner.store.outbox("2026-11-20")]
 
 

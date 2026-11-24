@@ -56,9 +56,13 @@ class Intent:
     order_type: str = "LIMIT"
     time_in_force: str = "DAY"
     opens_short: bool = False  # a SELL that opens or adds to a short (only for risk.short_sleeves)
+    take_profit_lot_id: str | None = None
 
     def to_dict(self):
-        return asdict(self)
+        fields = asdict(self)
+        if self.take_profit_lot_id is None:
+            fields.pop("take_profit_lot_id")
+        return fields
 
 
 def new_state() -> dict:
@@ -238,14 +242,15 @@ def capital_limits(sleeve: str, capital: float | None, cfg: dict, reduced: bool)
     if sleeve == "b3":
         limits["target_before_cap"] = available * cfg["b3"]["position_fraction_of_sleeve"] * factor
     elif sleeve == "h_etf":
-        limits["per_etf_budget"] = available * cfg["h_etf"]["per_name_fraction_of_sleeve"] * factor
+        h = cfg["h_etf"]
+        limits["per_etf_budget"] = min(h.get("entry_usd", math.inf), available * h["per_name_fraction_of_sleeve"]) * factor
         limits["aggregate_limit"] = available * cfg["h_etf"]["aggregate_fraction_of_sleeve"]
     elif sleeve == "noise":                                # 100% of the sleeve per entry, like B3
         limits["target_before_cap"] = available * cfg["noise"]["position_fraction_of_sleeve"] * factor
     elif sleeve == "orb":                                  # the reference's 10% cap per trade, within the sleeve
         limits["per_trade_notional"] = min(available, cfg["orb"]["max_notional"]) * factor
         limits["aggregate_limit"] = available
-    elif sleeve == "two_vote":                             # fixed $10k lots; book capped at 2 x the per-name cap
+    elif sleeve == "two_vote":                             # fixed two_vote.entry_usd lots; book capped at 2 x the per-name cap
         limits["per_trade_notional"] = min(available, cfg["two_vote"]["entry_usd"]) * factor
         limits["aggregate_limit"] = min(available, 2 * cfg["risk"]["name_cap_usd"])
     else:                                                  # vwap: one trade's notional never exceeds the sleeve
@@ -397,7 +402,7 @@ def plan_entry(state: dict, account: Account, session: str, sleeve: str, symbol:
 
 def plan_vote_entry(state: dict, account: Account, session: str, symbol: str, side: int, cfg: dict,
                     now: datetime, tag: str) -> tuple[list[Intent], str]:
-    """One two-vote lot: $10k (half size when reduced), within the sleeve's $80k book, the cross-sleeve per-symbol
+    """One two-vote lot: two_vote.entry_usd (half size when reduced), within the sleeve's $80k book, the cross-sleeve per-symbol
     cap and cash. Unlike plan_entry, several lots of the same symbol may be open; the runner enforces the lot count."""
     if side < 0 and not shorts_allowed("two_vote", cfg):
         return [], "entry blocked: two_vote may not short"

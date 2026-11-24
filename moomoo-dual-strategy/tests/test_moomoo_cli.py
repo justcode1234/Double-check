@@ -179,6 +179,7 @@ def test_history_normalizes_indicative_price_when_no_fills():
     out = t(HISTORY, {'acc_id': 'PRACTICE', 'market': 100})
     rows = out['data']['orders']
     assert rows[0]['avg_fill_price'] == '0'
+    assert rows[0]['reported_avg_fill_price'] == '732.29'
     assert rows[1]['avg_fill_price'] == '732.34'
 
 

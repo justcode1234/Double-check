@@ -28,7 +28,7 @@ import math
 import sys
 import time
 from copy import deepcopy
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import date, datetime, timedelta, timezone
 from importlib.metadata import version
 from pathlib import Path
@@ -152,11 +152,15 @@ class Runner:
         return self.store.audit(session, record)
 
     def send(self, intents, session, audit_id=None):
+        halt = self.state.get("halted")
+        if self.broker and isinstance(halt, dict) and halt.get("kind") == "order_error":
+            return []  # An unresolved order also blocks scheduled close orders against the saved position.
         audit_id = audit_id or self.audit(session, "orders", state=self.state, intents=[i.to_dict() for i in intents])
         results = []
         for i in intents:
             link = {"intent_id": i.intent_id, "audit_id": audit_id}
             reason = None
+            before_close = None
             if not i.close_only:
                 if planner.entries_disabled(self.cfg, i.sleeve):
                     reason = "legacy strategies are exit-only"
@@ -164,6 +168,8 @@ class Runner:
                     reason = planner.direction_conflict(self.state, i.symbol, 1 if i.side == "BUY" else -1)
             if i.close_only and self.broker and self.cfg["risk"].get("legacy_exit_only"):
                 account = self.account([i.symbol])
+                if not planner.attribution_errors(self.state, account):
+                    before_close = account
                 held = self.state["sleeves"].get(i.sleeve, {}).get(i.symbol, 0)
                 net = account.positions.get(i.symbol, 0)
                 sign = 1 if i.side == "SELL" else -1
@@ -192,6 +198,13 @@ class Runner:
                 if result["status"] == "REJECTED":
                     self.store.append(session, {"event": "outcome", **link, **result})
                     raise ExecutionBlocked("broker rejected order; human reconciliation required")
+                if (before_close is not None and result.get("order_id") == oid and result["status"] == "CANCELLED"
+                        and type(result.get("filled")) is int and result["filled"] == 0
+                        and type(result.get("qty")) is int and 0 < result["qty"] < i.qty):
+                    result, evidence = self.broker.reconcile_cancelled_close(i, placed, before_close, oid, result["qty"])
+                    review = self.audit(session, "broker_reconciliation", reviewed_errors=[],
+                                        broker_cancellations={oid: result["broker_terminal"]}, evidence=evidence)
+                    self.store.append(session, {"event": "broker_reconciliation", "audit_id": review})
                 filled = result.get("filled")
                 price = result.get("avg_price")
                 if (result.get("order_id") != oid or result.get("qty") != i.qty
@@ -208,6 +221,15 @@ class Runner:
                 self.store.save(self.state)
                 raise
             planner.apply_fill(self.state, i, result["filled"], session)
+            if i.sleeve == "h_etf" and not i.close_only and result["filled"]:
+                target = self.cfg["h_etf"].get("take_profit_usd")
+                if target is not None:
+                    self.state.setdefault("h_take_profit_targets", {})[i.symbol] = target
+            flat = not self.state["sleeves"][i.sleeve].get(i.symbol)
+            if i.close_only and (flat or (i.take_profit_lot_id and result["filled"] == i.qty)):
+                self.state.get("take_profit_pending", {}).get(i.sleeve, {}).pop(i.symbol, None)
+                if flat and i.sleeve == "h_etf":
+                    self.state.get("h_take_profit_targets", {}).pop(i.symbol, None)
             self.store.append(session, {"event": "outcome", **link, **result})
             self.store.save(self.state)
             log(intent=i.intent_id, outcome=result)
@@ -218,6 +240,7 @@ class Runner:
     # ------------------------------------------------------------------ risk
     def risk(self, symbols=()):
         acct = self.account(list(symbols))
+        self._profit_account = acct
         session = self.session()
         before = deepcopy(self.state)
         reason = planner.mark_risk(self.state, acct, session, self.cfg)
@@ -554,9 +577,11 @@ class Runner:
 
     # ------------------------------------------------------------------ Two-vote SPY/QQQ
     def vote_step(self):
-        """Each completed 5-minute bar: opposite 2-vote agreement closes every lot of a symbol; a fresh agreement
-        (the side changed from the prior bar, or the symbol is flat) opens one lot, 10:00-14:30 ET. Mirrors the
-        two-vote replay: repeated bars of one agreement never authorize another lot, and no re-entry on the exit bar."""
+        """Each completed 5-minute bar: opposite 2-vote agreement closes every lot of a symbol. While a 2-vote
+        agreement holds, every bar may open one more lot in that direction, 10:00-14:30 ET, up to
+        two_vote.max_lots_per_symbol and within the name cap, including re-entry after a profit exit (user decision
+        2026-11-25; the historic replay only added a lot on a fresh agreement). Never on the bar an opposite agreement
+        closed the symbol, and never while that symbol's profit exit is still working."""
         now = datetime.now(NY)
         ctx = self._day(now.date())
         if not ctx:
@@ -576,6 +601,7 @@ class Runner:
         self.audit(session, "vote_step", slot=k, bar_end=report["bar_end"], at=now, votes=report["tickers"])
         c = self.cfg["two_vote"]
         sides = {sym: row["signal"] for sym, row in report["tickers"].items()}
+        pending_profit = self.state.get("take_profit_pending", {}).get("two_vote", {})
         held = self.state["sleeves"].get("two_vote", {})
         closed_now, acct = set(), None
         for sym, q in sorted(held.items()):
@@ -587,7 +613,7 @@ class Runner:
         held = self.state["sleeves"].get("two_vote", {})
         if k <= last_entry(n):
             eligible = [sym for sym in SYMBOLS if sides.get(sym) and sym not in closed_now
-                        and (not held.get(sym) or sides[sym] != day["vote_sides"].get(sym))]
+                        and sym not in pending_profit and held.get(sym, 0) * sides[sym] >= 0]   # flat or same side
             eligible.sort(key=lambda sym: -report["tickers"][sym]["buy" if sides[sym] > 0 else "sell"])
             for sym in eligible:
                 acct = acct or self.risk(list(SYMBOLS))
@@ -624,18 +650,29 @@ class Runner:
             day["vwap_trades"][sym] = day["vwap_trades"].get(sym, 0) + 1
         self.store.save(self.state)
 
-    def _close(self, sleeve, sym, reason, acct, session, day, half=False):
+    def _close(self, sleeve, sym, reason, acct, session, day, half=False, lot_id=None, lot_qty=None, **evidence):
         now = datetime.now(NY)
         pos = day["positions"].get(f"{sleeve}|{sym}")
-        qty = None
+        qty = lot_qty
         if half and pos:                                           # ORB: half at the target (round(qty x 0.5))
             held = self.state["sleeves"].get(sleeve, {}).get(sym, 0)
             q = min(abs(held), int(round(pos["qty0"] * 0.5)))
             qty = q if held > 0 else -q
-        intents = planner.plan_close(self.state, acct, session, sleeve, sym, reason, self.cfg, now,
-                                     f"x{now.strftime('%H%M%S')}", qty=qty)
+        tag = f"x{now.strftime('%H%M%S')}"
+        if lot_id is not None:
+            tag += hashlib.sha256(lot_id.encode()).hexdigest()[:8]
+        intents = planner.plan_close(self.state, acct, session, sleeve, sym, reason, self.cfg, now, tag, qty=qty)
+        if lot_id is not None:
+            for intent in intents:
+                intent.take_profit_lot_id = lot_id
         audit_id = self.audit(session, f"{sleeve}_exit", state=self.state, account=asdict(acct), reason=reason,
-                              position=pos, intents=[i.to_dict() for i in intents])
+                              position=pos, intents=[i.to_dict() for i in intents], **evidence)
+        take_profit = evidence.get("take_profit")
+        if take_profit and take_profit["activation"]:
+            self.store.append(session, {"event": "take_profit_activation", "audit_id": audit_id,
+                                        "sleeve": sleeve, "symbol": sym, "entry_lot_id": lot_id,
+                                        "shares": abs(lot_qty) if lot_qty is not None else abs(self.state["sleeves"][sleeve].get(sym, 0)),
+                                        **take_profit})
         self.send(intents, session, audit_id)
         if half and pos and (self.state["sleeves"].get(sleeve, {}).get(sym) or not self.broker):
             pos["half_done"], pos["stop"] = True, pos["entry_ref"]  # remainder: breakeven stop + trail
@@ -643,6 +680,90 @@ class Runner:
             day["positions"].pop(f"{sleeve}|{sym}", None)
         self._decide(day, sleeve, symbol=sym, action="exit_half" if half else "exit", why=reason)
         self.store.save(self.state)
+
+    def _profit_candidates(self, watch, acct, quotes):
+        if planner.attribution_errors(self.state, acct):
+            return []
+        reports = sleeve_performance(self.store, self.state, asdict(acct), self.cfg)["sleeves"]
+        pending = self.state.get("take_profit_pending", {})
+        now = datetime.now(timezone.utc)
+        candidates = []
+        for sleeve, sym, target in watch:
+            report = reports[sleeve]
+            sample = quotes.get(sym)
+            position = report["positions"].get(sym)
+            if report["status"] != "available" or position is None or sample is None:
+                continue
+            price, at = sample
+            age = (now - at).total_seconds()
+            if not -5 <= age <= self.cfg["risk"]["max_quote_age_seconds"]:
+                continue
+            waiting = pending.get(sleeve, {}).get(sym)
+            if sleeve == "two_vote":
+                lots = report["entry_lots"].get(sym, ())
+                if not any(lot["id"] == waiting for lot in lots):
+                    waiting = None
+                for lot in lots:
+                    qty = lot["shares"] * lot["side"]
+                    gross = round(qty * (price - lot["entry_price"]), 8)
+                    if waiting == lot["id"] or (waiting is None and gross >= target):
+                        candidates.append((sleeve, sym, target, lot["id"], qty, price, gross, at))
+            else:
+                gross = round(position["qty"] * price - position["cost_basis"], 8)
+                if waiting or gross >= target:
+                    candidates.append((sleeve, sym, target, None, None, price, gross, at))
+        return candidates
+
+    def take_profit(self):
+        """Check marked gross profit per sleeve and ticker, using timestamped broker quotes and confirmed fills."""
+        now = datetime.now(NY)
+        bounds = session_bounds(now)
+        if not self.broker or not bounds or not bounds[0] <= now < bounds[1] or self.state.get("halted"):
+            return
+        session = now.date().isoformat()
+        if self.state.get("day") != session or self.state.get("locked_day") == session:
+            return
+        watch = []
+        for sleeve in ("two_vote", "h_etf"):
+            config = self.cfg[sleeve]
+            if sleeve == "two_vote" and now >= bounds[1] - timedelta(minutes=config["flatten_minutes_before_close"]):
+                continue
+            for sym, qty in self.state["sleeves"].get(sleeve, {}).items():
+                target = config.get("take_profit_usd")
+                if sleeve == "h_etf":
+                    target = self.state.get("h_take_profit_targets", {}).get(sym, config.get("legacy_take_profit_usd", target))
+                if qty and type(target) in (int, float) and math.isfinite(target) and target > 0:
+                    watch.append((sleeve, sym, target))
+        if not watch:
+            return
+        quotes = self.market.timestamped_quotes(sorted({sym for _, sym, _ in watch}))
+        acct = getattr(self, "_profit_account", None)
+        if acct is None or planner.attribution_errors(self.state, acct):
+            acct = self._profit_account = self.account()
+        for sleeve, sym, target, lot_id, *_ in self._profit_candidates(watch, acct, quotes):
+            if self.state.get("halted") or datetime.now(NY) >= bounds[1]:
+                break
+            acct = self._profit_account = self.account()
+            quotes = self.market.timestamped_quotes([sym])
+            confirmed = [row for row in self._profit_candidates([(sleeve, sym, target)], acct, quotes)
+                         if row[3] == lot_id]
+            if not confirmed:
+                continue
+            _, _, _, _, lot_qty, price, gross, at = confirmed[0]
+            pending = self.state.setdefault("take_profit_pending", {}).setdefault(sleeve, {})
+            day = self._intraday(session)
+            pending_key = lot_id if lot_id is not None else True
+            activated = pending.get(sym) != pending_key
+            if activated:
+                pending[sym] = pending_key
+                counts = self.state.setdefault("take_profit_counts", {}).setdefault(sleeve, {})
+                counts[sym] = counts.get(sym, 0) + 1
+                self.store.save(self.state)
+            marked = replace(acct, quotes={**acct.quotes, sym: price})
+            self._close(sleeve, sym, f"{sleeve}_take_profit", marked, session, day,
+                        lot_id=lot_id, lot_qty=lot_qty,
+                        take_profit={"activation": activated, "target_usd": target, "gross_usd": gross,
+                                     "quote_at": at.isoformat()})
 
     def monitor(self):
         """~10 s: VWAP triggers armed for the current slot; stops and targets of open VWAP/ORB positions (quotes)."""
@@ -726,6 +847,7 @@ class Runner:
         perf = sleeve_performance(self.store, self.state, asdict(acct) if acct else None, self.cfg)
         s = self.state
         rows = self.store.outbox(session)
+        exits = perf["exits"]
         report = {"session": session, "generated_at": datetime.now(timezone.utc).isoformat(),
                   "mode": "EXECUTE" if self.broker else "PLAN", "nav": acct.nav if acct else s.get("last_nav"),
                   "day_start_nav": s.get("day_start_nav"), "high_water": s.get("high_water"), "halted": s.get("halted"),
@@ -733,6 +855,9 @@ class Runner:
                   "orders_filled": sum(1 for r in rows if r.get("event") == "outcome" and (r.get("filled") or 0) > 0),
                   "order_errors": s.get("order_errors_today", 0),
                   "runner_errors": sum(1 for r in rows if r.get("event") == "runner_error"),
+                  "exit_performance": {"status": exits["status"], "since_start": exits["totals"],
+                                       "session_fills": [f for f in exits["fills"] if f["session"] == session],
+                                       "profit_target_activations_since_enabled": s.get("take_profit_counts", {})},
                   "sleeves": {k: {"capital": v["capital"], "gross_pnl": v["gross_pnl"], "realized": v["realized_gross"],
                                   "unrealized": v["unrealized_gross"], "status": v["status"],
                                   "positions": {sym: q["qty"] for sym, q in v["positions"].items()}}
@@ -891,6 +1016,7 @@ class Runner:
                     done.add(f"noise-{t}")
                     done.add(f"bar-{now.date()}-{slot}")
             if now < closed and time.monotonic() - last_monitor >= self.cfg["risk"].get("monitor_seconds", 10):
+                self.guarded("take-profit", self.take_profit)
                 self.guarded("monitor", self.monitor)
                 last_monitor = time.monotonic()
             for name, at in (("vwap", closed - timedelta(minutes=5 * self.cfg["vwap"]["flatten_slots_before_close"])),

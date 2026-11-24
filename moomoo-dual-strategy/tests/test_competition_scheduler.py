@@ -99,6 +99,36 @@ def test_preflight_ignores_appledouble_but_blocks_corrupt_outbox(scheduler, proj
         scheduler.local_preflight(project, '2026-11-23')
 
 
+def test_reviewed_cancellation_preserves_the_raw_broker_receipt(scheduler, project, monkeypatch):
+    from dual_strategy.competition.store import Store
+
+    store = Store(project, {'state_dir': 'private/competition/live'})
+    session = '2026-11-19'
+    link = {'audit_id': 'original', 'intent_id': 'partial', 'order_id': 'TEST-PARTIAL'}
+    terminal = {'status': 'CANCELLED', 'qty': 10, 'filled': 0, 'avg_price': 652.247}
+    store.append(session, {'event': 'intent', **link, 'mode': 'EXECUTE', 'qty': 30})
+    store.append(session, {'event': 'acknowledged', **link})
+    store.append(session, {'event': 'order_error', **link})
+    error = store.outbox(session)[-1]
+    store.append(session, {'event': 'outcome', **link, 'status': 'CANCELLED', 'qty': 30, 'filled': 20,
+                           'avg_price': 652.247, 'broker_terminal': terminal})
+    with pytest.raises(scheduler.Blocked, match='prior_execution_error'):
+        scheduler.execution_outcomes(project)
+    audit_id = store.audit(session, {'kind': 'broker_reconciliation',
+        'reviewed_errors': [scheduler.execution_error_key(error)], 'broker_cancellations': {'TEST-PARTIAL': terminal}})
+    store.append(session, {'event': 'broker_reconciliation', 'audit_id': audit_id})
+    result = scheduler.execution_outcomes(project)
+    assert result['TEST-PARTIAL']['filled'] == 20 and result['TEST-PARTIAL']['broker_terminal'] == terminal
+
+    first, = scheduler.broker_history(project, '2026-11-23')
+    broker_row = {'order_id': 'TEST-PARTIAL', 'status': 5, 'qty': '10', 'cum_qty': '0', 'avg_fill_price': '0'}
+    monkeypatch.setattr(scheduler, 'broker_history', lambda *_: [first, broker_row])
+    assert scheduler.preflight(project, store.load(), '2026-11-23')['reconciled_orders'] == 2
+    broker_row['qty'] = '9'
+    with pytest.raises(scheduler.Blocked, match='broker_order_outcome_mismatch'):
+        scheduler.preflight(project, store.load(), '2026-11-23')
+
+
 @pytest.mark.parametrize('count', [1, 2])
 def test_existing_loop_prevents_preflight_and_duplicate_launch(scheduler, project, monkeypatch, count):
     monkeypatch.setattr(scheduler, 'runner_processes', lambda: [{'pid': 100+i, 'state': 'S'} for i in range(count)])

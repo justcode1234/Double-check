@@ -55,6 +55,9 @@
 .plan-list li { padding: 3px 0; }
 .competition-page .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .competition-page .capital-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#exit-metrics { grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+#exit-body td { white-space: nowrap; }
+#exit-body pre { max-width: 260px; }
 #attribution-note { margin: -8px 0 24px; }
 .competition-page .status-list { grid-template-columns: 1fr 1fr; }
 .status-cell.filled { color: var(--teal); }
@@ -85,3 +88,21 @@
   .competition-page .portfolio-header { flex-wrap: wrap; }
   .competition-page .topbar-right .badge { max-width: none; }
 }
+.rule-activity-table th[scope='row'] { color: var(--text); letter-spacing: 0; text-transform: none; white-space: nowrap; }
+.rule-activity-table .fire-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.rule-activity-table .positive { color: var(--teal); }
+.fire-chip { border: 1px solid currentColor; border-radius: 5px; padding: 2px 7px; font-family: var(--font-data); font-size: 11px; white-space: nowrap; }
+.rule-activity-table tr.signal-row th, .rule-activity-table tr.signal-row td { border-top: 2px solid var(--border); font-weight: 600; }
+.rule-activity-table td:nth-child(2) { font-family: var(--font-data); }
+#rule-activity .section-heading .field select { min-width: 190px; }
+.latest-trade { margin: 12px 0 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; line-height: 1.6; }
+.latest-trade.is-today { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 9%, transparent); }
+.trades-table tr.today-row td { background: color-mix(in srgb, var(--teal) 6%, transparent); }
+.trades-table td { white-space: nowrap; }
+.trades-table td:nth-child(4) { white-space: normal; min-width: 180px; }
+.trades-table .positive { color: var(--teal); }
+.trades-table .muted-cell { color: var(--muted); }
+.results-subhead { font-size: 13px; margin: 18px 0 6px; color: var(--text); }
+.positions-table td:last-child { white-space: normal; min-width: 220px; color: var(--muted); }
+.vote-ticker-card .negative { color: var(--red); }
+#exit-metrics { margin-top: 16px; }

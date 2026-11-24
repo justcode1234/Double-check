@@ -13,13 +13,13 @@ from functools import lru_cache
 from pathlib import Path
 
 from dual_strategy.competition.signals import b3_decision_times
-from dual_strategy.competition.store import Store, load_config, sleeve_performance
+from dual_strategy.competition.store import MANUAL_FILL, Store, load_config, sleeve_performance
 from dual_strategy.data.calendar import NY, next_session_open, session_bounds
 from dual_strategy.reporting.service import redacted
 
 SAFE_KEYS = ("initial_nav", "high_water", "last_nav", "last_mark_at", "day", "day_start_nav", "halted", "locked_day",
              "reduced", "orders_today", "order_errors_today", "sleeves", "h_entry_session", "h_plan", "h_plan_audit_id",
-             "intraday", "nav_mismatch")
+             "intraday", "nav_mismatch", "take_profit_counts", "take_profit_pending", "h_take_profit_targets")
 REGIME_ROWS = {"10 Noise-area momentum": "noise", "2 VWAP trend continuation": "vwap", "1 ORB breakout/breakdown": "orb"}
 
 
@@ -184,6 +184,8 @@ def _orders(rows: list[dict]):
             outcomes[row["order_id"]] = row
             if key in intents:
                 intents[key].update({k: row.get(k) for k in ("status", "filled", "avg_price")})
+                intents[key]["recorded_source"] = "manual" if row.get("source") == MANUAL_FILL else "automatic"
+                intents[key]["source_evidence"] = row.get("source")
         elif event == "order_error":
             errors.add(key)
             if key in intents:
@@ -236,6 +238,123 @@ def _observations(store: Store, session: str):
     return {"equity": equity, "account_snapshot": max(accounts, key=lambda a: a["at"]) if accounts else None,
             "b3_decision": max(decisions, key=lambda d: d["at"]) if decisions else None,
             "evidence_warnings": list(dict.fromkeys(warnings))}
+
+
+VOTE_RULES = ("Donchian", "Keltner", "RSI(2)", "MACD", "DMI/ADX", "Stochastic", "Chandelier", "Turtle Soup", "NR7",
+              "Noise-area")
+_VOTE_STEPS: dict[tuple, dict | None] = {}
+
+
+def _vote_step(path: Path, mtime_ns: int, size: int) -> dict | None:
+    """The per-bar votes of one EXECUTE vote_step audit record (None for any other record). Cached per file version."""
+    key = (str(path), mtime_ns, size)
+    if key not in _VOTE_STEPS:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        keep = None
+        if data.get("kind") == "vote_step" and data.get("mode") == "EXECUTE":
+            keep = {"slot": data["slot"], "bar_end": data["bar_end"],
+                    "votes": {symbol: {"rules": dict(row["rules"]), "signal": row.get("signal")}
+                              for symbol, row in data["votes"].items()}}
+        _VOTE_STEPS[key] = keep
+    return _VOTE_STEPS[key]
+
+
+def _vote_steps(store: Store) -> tuple[dict[str, list[dict]], bool]:
+    """The runner's per-bar votes by session, ordered by slot; True when some audit record was unreadable."""
+    by_session, incomplete = {}, False
+    for directory in sorted((store.dir / "audit").glob("????-??-??")):
+        steps = []
+        for path in directory.glob("[!.]*.json"):
+            try:
+                stat = path.stat()
+                step = _vote_step(path, stat.st_mtime_ns, stat.st_size)
+            except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                incomplete = True
+                continue
+            if step and type(step["slot"]) is int:
+                steps.append(step)
+        if steps:
+            by_session[directory.name] = sorted(steps, key=lambda s: s["slot"])
+    return by_session, incomplete
+
+
+def _trade_rules(trades: list[dict], by_session: dict[str, list[dict]]) -> None:
+    """Name the rules behind each Two-vote signal trade (intent ids carry the slot as -e<slot>-)."""
+    for trade in trades:
+        match = re.search(r"-e(\d+)-", trade.get("intent_id") or "")
+        if trade.get("sleeve") != "two_vote" or not match:
+            continue
+        step = next((s for s in by_session.get(trade["session"], []) if s["slot"] == int(match.group(1))), None)
+        rules = ((step or {}).get("votes", {}).get(trade["symbol"]) or {}).get("rules")
+        if rules:
+            side = 1 if trade["side"] == "BUY" else -1
+            trade["rules"] = [name for name, vote in rules.items() if vote == side]
+
+
+def _open_positions(performance: dict, cfg: dict, state: dict | None) -> list[dict]:
+    """What is held now: one row per Two-vote entry lot (each has its own price and $ target), else one per position."""
+    trades = performance.get("trades") or []
+    opened_by_intent = {t["intent_id"]: t.get("ordered_at") for t in trades}
+
+    def row(sleeve, symbol, qty, entry, opened_at, mark, target):
+        finite_mark = type(mark) in (int, float) and math.isfinite(mark) and mark > 0
+        return {"sleeve": sleeve, "symbol": symbol, "qty": qty, "side": "long" if qty > 0 else "short",
+                "entry_price": entry, "cost": abs(qty) * entry, "opened_at": opened_at,
+                "mark_price": mark if finite_mark else None,
+                "value": abs(qty) * mark if finite_mark else None,
+                "unrealized_gross": round(qty * (mark - entry), 8) if finite_mark else None,
+                "take_profit_usd": target,
+                # long: entry + target/shares; short: entry - target/shares (qty is negative)
+                "take_profit_price": round(entry + target / qty, 4) if target else None}
+
+    rows = []
+    for s, sleeve in (performance.get("sleeves") or {}).items():
+        for symbol, p in (sleeve.get("positions") or {}).items():
+            qty, mark = p.get("qty"), p.get("mark_price")
+            if not qty:
+                continue
+            lots = (sleeve.get("entry_lots") or {}).get(symbol) if s == "two_vote" else None
+            if lots:
+                for lot in lots:
+                    rows.append(row(s, symbol, lot["shares"] * lot["side"], lot["entry_price"],
+                                    opened_by_intent.get(lot["id"].split(":", 1)[-1]), mark,
+                                    cfg.get("two_vote", {}).get("take_profit_usd")))
+                continue
+            target = None
+            if s == "h_etf":
+                h = cfg.get("h_etf", {})
+                target = ((state or {}).get("h_take_profit_targets") or {}).get(
+                    symbol, h.get("legacy_take_profit_usd", h.get("take_profit_usd")))
+            opens = [t for t in trades if t["sleeve"] == s and t["symbol"] == symbol and t["action"] in ("buy", "short")]
+            rows.append(row(s, symbol, qty, p["cost_basis"] / qty, opens[-1].get("ordered_at") if opens else None, mark,
+                            target))
+    return rows
+
+
+def _vote_activity(store: Store, today: str, loaded: tuple | None = None) -> dict:
+    """Each time a Two-vote rule switched on (to buy or sell short), from the runner's per-bar vote_step records."""
+    by_session, incomplete = loaded or _vote_steps(store)
+    fires, signals, sessions = [], [], {}
+    for session, steps in by_session.items():
+        sessions[session] = {"first_bar": steps[0]["bar_end"], "last_bar": steps[-1]["bar_end"], "bars": len(steps)}
+        previous = {}
+        for index, step in enumerate(steps):
+            for symbol, row in sorted(step["votes"].items()):
+                for rule, side in [*row["rules"].items(), (None, row["signal"])]:
+                    if type(side) is not int or side not in (-1, 0, 1):
+                        incomplete = True
+                        continue
+                    if side and side != previous.get((symbol, rule), 0):
+                        fire = {"session": session, "symbol": symbol, "side": "BUY" if side > 0 else "SELL",
+                                "bar_end": step["bar_end"], "slot": step["slot"], "first_observed": index == 0}
+                        (signals if rule is None else fires).append({**fire, **({"rule": rule} if rule else {})})
+                    previous[(symbol, rule)] = side
+    names = [*VOTE_RULES, *sorted({f["rule"] for f in fires} - set(VOTE_RULES))]
+    rules = [{"rule": name, "today": sum(f["session"] == today for f in fires if f["rule"] == name),
+              "total": sum(f["rule"] == name for f in fires), "fires": [f for f in fires if f["rule"] == name]}
+             for name in names]
+    return {"status": "incomplete" if incomplete else "available", "today": today, "sessions": sessions,
+            "rules": rules, "signals": signals}
 
 
 def _observed_time(value, now):
@@ -349,6 +468,9 @@ def competition_payload(project: Path, now: datetime | None = None) -> dict:
                 w.pop("equity", None)
     observations = _observations(stores["live"], session)
     runtime = _runtime(project, states["live"], cfg, now)
+    votes = _vote_steps(stores["live"])
+    performance = sleeve_performance(stores["live"], states["live"], observations["account_snapshot"], cfg)
+    _trade_rules(performance.get("trades", []), votes[0])
     return _clean({
         "generated_at": now.isoformat(),
         "config": {k: cfg[k] for k in ("allocation", "b3", "h_etf", "noise", "vwap", "orb", "two_vote", "risk", "execution_enabled")
@@ -362,6 +484,8 @@ def competition_payload(project: Path, now: datetime | None = None) -> dict:
         "step_skips": dict(Counter(r.get("step", "unknown") for r in rows if r.get("event") == "step_skipped")),
         "regime_research": _regime_research(project),
         "vote_signals": _vote_signals(project, cfg, now),
-        "performance": sleeve_performance(stores["live"], states["live"], observations["account_snapshot"], cfg),
+        "vote_activity": _vote_activity(stores["live"], session, votes),
+        "performance": performance,
+        "open_positions": _open_positions(performance, cfg, states["live"]),
         **observations, "preview": preview,
     })

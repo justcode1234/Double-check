@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import hashlib
 import json
 import math
 import os
@@ -116,13 +117,27 @@ def execution_outcomes(root):
     confirmed = {}
     for path in sorted((root / 'private/competition/live/outbox').glob('????-??-??.jsonl')):
         intents, acknowledgements, outcomes = {}, {}, {}
+        errors, covered_errors, reviewed_cancellations = set(), set(), {}
         for line in path.read_text().splitlines():
             if not line.strip():
                 continue
             row = json.loads(line)
             event = row['event']
             if event in ('order_error', 'order_refused', 'runner_error'):
-                raise Blocked('prior_execution_error_requires_review')
+                errors.add(execution_error_key(row))
+            elif event == 'broker_reconciliation':
+                key = row['audit_id'].split('/')
+                if len(key) != 2 or key[0] != path.stem or not key[1].isalnum():
+                    raise Blocked('invalid_reconciliation_evidence')
+                audit = path.parent.parent / 'audit' / key[0] / f'{key[1]}.json'
+                review = json.loads(audit.read_text(encoding='utf-8'))
+                if review.get('kind') != 'broker_reconciliation' or review.get('audit_id') != row['audit_id']:
+                    raise Blocked('invalid_reconciliation_evidence')
+                reviewed = set(review['reviewed_errors'])
+                if not reviewed <= errors or reviewed & covered_errors:
+                    raise Blocked('invalid_reconciliation_evidence')
+                covered_errors.update(reviewed)
+                reviewed_cancellations.update(review['broker_cancellations'])
             if event == 'intent' and row['mode'] == 'EXECUTE':
                 key = (row['audit_id'], row['intent_id'])
                 if key in intents:
@@ -138,6 +153,8 @@ def execution_outcomes(root):
                 if key in outcomes or row['status'] not in ('FILLED', 'CANCELLED'):
                     raise Blocked('unresolved_order_outcome')
                 outcomes[key] = row
+        if errors != covered_errors:
+            raise Blocked('prior_execution_error_requires_review')
         if not intents.keys() == outcomes.keys() == acknowledgements.keys():
             raise Blocked('unresolved_execution_intent')
         for key, outcome in outcomes.items():
@@ -148,8 +165,18 @@ def execution_outcomes(root):
                     or (outcome['status'] == 'FILLED' and filled != qty)
                     or (filled > 0 and not positive(outcome['avg_price']))):
                 raise Blocked('inconsistent_order_evidence')
+            if 'broker_terminal' in outcome:
+                terminal = outcome['broker_terminal']
+                if (reviewed_cancellations.get(oid) != terminal or outcome['status'] != 'CANCELLED'
+                        or terminal.get('status') != 'CANCELLED' or terminal.get('filled') != 0
+                        or not 0 < filled < qty or terminal.get('qty') != qty - filled):
+                    raise Blocked('invalid_reconciled_cancellation')
             confirmed[oid] = outcome
     return confirmed
+
+
+def execution_error_key(record):
+    return hashlib.sha256(json.dumps(record, sort_keys=True).encode()).hexdigest()
 
 
 def broker_history(root, session):
@@ -189,10 +216,14 @@ def preflight(root, state, session):
         raise Blocked('broker_order_history_mismatch')
     for row in history:
         outcome = expected[str(row['order_id'])]
+        broker_outcome = outcome.get('broker_terminal', outcome)
         if (row['status'] not in (4, 5, 7)
-                or ('FILLED' if row['status'] == 4 else 'CANCELLED') != outcome['status']
-                or float(row['qty']) != outcome['qty'] or float(row['cum_qty']) != outcome['filled']
-                or (outcome['filled'] > 0 and not math.isclose(float(row['avg_fill_price']), outcome['avg_price'],
+                or ('FILLED' if row['status'] == 4 else 'CANCELLED') != broker_outcome['status']
+                or float(row['qty']) != broker_outcome['qty'] or float(row['cum_qty']) != broker_outcome['filled']
+                or ('broker_terminal' in outcome and row.get('reported_avg_fill_price') is not None
+                    and not math.isclose(float(row['reported_avg_fill_price']), broker_outcome['avg_price'],
+                                         rel_tol=0, abs_tol=0.000001))
+                or (broker_outcome['filled'] > 0 and not math.isclose(float(row['avg_fill_price']), broker_outcome['avg_price'],
                                                              rel_tol=0, abs_tol=0.000001))):
             raise Blocked('broker_order_outcome_mismatch')
     return {'nav': status['nav'], 'reconciled_orders': len(history)}

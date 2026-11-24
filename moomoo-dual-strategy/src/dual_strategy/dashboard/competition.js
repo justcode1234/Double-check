@@ -6,6 +6,7 @@
   const byId = id => document.getElementById(id);
   const finite = v => typeof v === "number" && Number.isFinite(v);
   const money = v => finite(v) ? v.toLocaleString("en-US", { style: "currency", currency: "USD" }) : "—";
+  const fillPrice = v => finite(v) ? v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 4 }) : "—";
   const pct = v => finite(v) ? `${v > 0 ? "+" : ""}${v.toFixed(2)}%` : "—";
   const share = v => `${+(v * 100).toFixed(2)}%`;
   const human = value => String(value || "—").replaceAll("_", " ");
@@ -13,11 +14,11 @@
   const el = (tag, cls = "", text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
   const set = (id, text) => { byId(id).textContent = text; };
   const expanded = new Set();
-  let latest = null, pending = false, lastSuccess = 0;
+  let latest = null, pending = false, lastSuccess = 0, activityChoice = null;
 
-  function metric(dl, label, value, note) {
+  function metric(dl, label, value, note, cls = "") {
     const box = el("div", "metric");
-    const dd = el("dd", value === "—" ? "unavailable" : "", value);
+    const dd = el("dd", value === "—" ? "unavailable" : cls, value);
     if (note) dd.append(el("small", "", note));
     box.append(el("dt", "", label), dd);
     dl.append(box);
@@ -28,6 +29,7 @@
     const vote = data.vote_signals || {}, current = vote.status === "current";
     const threshold = vote.required_votes || 2;
     const sizing = data.config.two_vote;
+    const profitCounts = data.live?.take_profit_counts?.two_vote || {};
     set("vote-budget", sizing ? `Up to ${money(sizing.entry_usd)} per position · ${sizing.max_lots_per_symbol} positions per ticker · ${money(data.config.risk.name_cap_usd)} cap per ticker${sizing.bank_realized_gains ? " · Realized gains banked outside the entry budget" : ""}` : "");
     const messages = {
       preopen: "Waiting for the U.S. regular session to open.",
@@ -49,12 +51,22 @@
       card.append(el("h3", "", symbol.slice(3)), el("p", "vote-signal", signal));
       metric(metrics, "Buy votes", finite(row?.buy) ? `${row.buy} / ${threshold}` : "—");
       metric(metrics, "Sell votes", finite(row?.sell) ? `${row.sell} / ${threshold}` : "—");
+      if (finite(sizing?.take_profit_usd)) {
+        metric(metrics, `${money(sizing.take_profit_usd)} profit triggers`, data.live ? String(profitCounts[symbol] || 0) : "—",
+          data.live?.take_profit_pending?.two_vote?.[symbol] ? "Exit pending" : "Per entry lot · since enabled");
+      }
       const holding = holdings.find(h => h.s?.id === "two_vote" && h.symbol === symbol);
       if (holding) {
         const position = `${Math.abs(holding.qty)} ${holding.qty > 0 ? "long" : "short"}`;
         const cost = data.performance.sleeves.two_vote?.positions?.[symbol]?.cost_basis;
         metric(metrics, "Paper position", position, holding.fromBroker ? brokerNote(data) : "Recorded in sleeve ledger");
         metric(metrics, "Position value", money(holding.value), finite(cost) ? `Orig ${money(Math.abs(cost))}` : "");
+        const pos = data.performance.sleeves.two_vote?.positions?.[symbol];
+        if (pos?.qty) {
+          metric(metrics, "Entry price", fillPrice(pos.cost_basis / pos.qty), finite(pos.mark_price) ? `Now ${fillPrice(pos.mark_price)}` : "");
+          metric(metrics, "Unrealized P&L", money(pos.unrealized_gross), pos.qty < 0 ? "Short: gains when the price falls" : "Long: gains when the price rises",
+            pos.unrealized_gross > 0 ? "positive" : pos.unrealized_gross < 0 ? "negative" : "");
+        }
       }
       card.append(metrics);
       cards.append(card);
@@ -118,6 +130,14 @@
       sleeveHeader("H", "H ETF sleeve", "RSI-2 mean reversion", `${money(data.config.h_etf.initial_allocation_usd)} allocation`) :
       sleeveHeader(owner?.letter || "L", "Legacy holdings", owner?.title || "Existing paper positions", "Exit only"));
     host.append(card);
+    const hConfig = data.config.h_etf;
+    if (hActive && finite(hConfig.take_profit_usd)) {
+      const counts = Object.values(data.live?.take_profit_counts?.h_etf || {});
+      const metrics = el("dl", "metrics capital-metrics");
+      metric(metrics, "Profit triggers", data.live ? String(counts.reduce((sum, n) => sum + n, 0)) : "—", "Since enabled");
+      metric(metrics, "New entry size", money(hConfig.entry_usd), `${money(hConfig.take_profit_usd)} profit target`);
+      card.append(metrics);
+    }
     if (fromBroker) {
       card.append(el("p", "strategy-description", `${brokerNote(data)}${rows.some(row => !row.s) ? " · Sleeve attribution unavailable" : ""}`));
     } else if (!holdings) {
@@ -141,6 +161,8 @@
     for (const row of rows) {
       const { s, symbol, qty } = row;
       const exit = s?.id === "h_etf" ? data.live?.h_plan?.exits?.[symbol] : null;
+      const profitTarget = s?.id === "h_etf" ? data.live?.h_take_profit_targets?.[symbol] ?? hConfig.legacy_take_profit_usd : null;
+      const profitPending = data.live?.take_profit_pending?.h_etf?.[symbol];
       const item = el("li"), position = el("div"), value = el("div", "legacy-position-value");
       position.append(el("strong", "", symbol.replace(/^US\./, "")),
         el("p", "strategy-description", `${Math.abs(qty)} ${qty > 0 ? "long" : "short"}${s ? ` · ${s.title}` : ""}`));
@@ -149,6 +171,7 @@
       if (finite(orig)) current.append(el("small", "orig-cost", `(orig ${money(orig)})`));
       value.append(current,
         el("p", "strategy-description", exit ? `Sell at next open · ${human(exit)}` :
+          profitPending ? "Profit exit pending" : finite(profitTarget) ? `${money(profitTarget)} profit target` :
           s ? "Awaiting exit signal" : "Exit signal unavailable"));
       item.append(position, value);
       list.append(item);
@@ -281,6 +304,7 @@
     { id: "orb", letter: "OR", title: "ORB breakout/breakdown", css: "strategy-e", description: "SPY/QQQ/IWM · 15-minute range · half at 2R, trail the rest · flat 15:55" }];
   const TWO_VOTE = { id: "two_vote", letter: "2V", title: "Two-vote sleeve" };
   const LETTER = Object.fromEntries([...SLEEVE_SPECS, TWO_VOTE].map(s => [s.id, s.letter]));
+  const EXIT_SLEEVES = {two_vote: "Two-vote", h_etf: "H ETF"};
   const shares = (q) => `${q < 0 ? "SHORT " : ""}${Math.abs(q)} sh`;
 
   function sleeveHeader(letter, label, description, badge) {
@@ -401,6 +425,178 @@
     const tr = el("tr"), td = el("td", "empty-state", text); td.colSpan = columns; tr.append(td); body.append(tr);
   }
 
+  const TRADE_ACTIONS = { buy: "Bought", short: "Sold short", sell: "Sold", cover: "Bought to cover" };
+  const TRADE_REASONS = {
+    two_vote_long: "2+ rules voted Buy", two_vote_short: "2+ rules voted Sell",
+    two_vote_take_profit: "Profit target hit", two_vote_opposite_agreement: "2+ rules voted the other way",
+    h_rsi2_entry: "H plan entry (RSI-2 dip)", h_etf_take_profit: "Profit target hit", user_manual_sell: "You sold it manually",
+  };
+  const tradeWhy = t => (TRADE_REASONS[t.reason] || (/flatten/.test(t.reason || "") ? "End-of-day close" : human(t.reason)))
+    + (t.rules?.length ? `: ${t.rules.join(", ")}` : "");
+  const tradeTime = value => value && Number.isFinite(Date.parse(value))
+    ? `${new Date(value).toLocaleDateString("en-GB", { timeZone: "Asia/Singapore", weekday: "short", day: "numeric", month: "short" })} ${sgt(value)}` : "—";
+
+  function renderResults(data) {
+    const perf = data.performance, totals = perf?.exits?.totals;
+    const metrics = byId("exit-metrics"), body = byId("exit-body");
+    metrics.replaceChildren();
+    body.replaceChildren();
+    const trades = Array.isArray(perf?.trades) ? perf.trades : null;
+    const today = data.outbox_session;
+    const sleeveName = s => EXIT_SLEEVES[s] || LETTER[s] || human(s);
+    const ticker = symbol => String(symbol).replace(/^US\./, "");
+    const open = Object.entries(perf?.sleeves || {}).flatMap(([s, sleeve]) =>
+      Object.entries(sleeve?.positions || {}).map(([symbol, p]) => ({ s, symbol, ...p })));
+    const counts = data.live?.take_profit_counts || {};
+    const activations = sleeve => Object.values(counts[sleeve] || {}).reduce((total, n) => total + n, 0);
+
+    const latest = trades?.at(-1);
+    const latestLine = byId("latest-trade");
+    latestLine.classList.toggle("is-today", Boolean(latest && latest.session === today));
+    if (!trades) latestLine.textContent = "Trade list unavailable in this snapshot.";
+    else if (!latest) latestLine.textContent = "No trades recorded yet.";
+    else {
+      const still = open.find(p => p.s === latest.sleeve && p.symbol === latest.symbol);
+      latestLine.textContent = `Latest trade: ${TRADE_ACTIONS[latest.action] || human(latest.action)} ${latest.shares} ${ticker(latest.symbol)} at ${fillPrice(latest.avg_price)}`
+        + ` · ${tradeTime(latest.ordered_at)} SGT · ${sleeveName(latest.sleeve)} · ${tradeWhy(latest)}.`
+        + (still && ["buy", "short"].includes(latest.action) ? ` Still open: ${money(still.unrealized_gross)} unrealized.` : "");
+    }
+    const posBody = byId("positions-body"), held = data.open_positions;
+    posBody.replaceChildren();
+    const flatMinutes = data.config?.two_vote?.flatten_minutes_before_close ?? 5;
+    const closeAt = data.runtime?.session_close && Number.isFinite(Date.parse(data.runtime.session_close))
+      ? `${sgt(new Date(Date.parse(data.runtime.session_close) - flatMinutes * 60000).toISOString())} SGT` : `${flatMinutes} min before the close`;
+    const autoExit = p => {
+      const target = finite(p.take_profit_price) ? `Profit target: ${p.qty < 0 ? "≤" : "≥"} ${money(p.take_profit_price)} (+${money(p.take_profit_usd)})` : "";
+      if (p.sleeve === "two_vote") return `${target} · or 2+ ${p.qty < 0 ? "Buy" : "Sell"} votes · or auto-close ${closeAt}`;
+      if (p.sleeve === "h_etf") return `${target} · or H plan exit at the next open`;
+      return "Strategy exit rules";
+    };
+    if (!Array.isArray(held)) emptyRow(posBody, 8, "Positions unavailable in this snapshot.");
+    else if (!held.length) emptyRow(posBody, 8, "No open positions. Everything is closed.");
+    for (const p of held || []) {
+      const row = el("tr");
+      row.append(el("td", "", `${sleeveName(p.sleeve)} · ${ticker(p.symbol)}`), el("td", p.qty < 0 ? "negative" : "positive", `${Math.abs(p.qty)} ${p.side}`),
+        el("td", "", fillPrice(p.entry_price)), el("td", "", tradeTime(p.opened_at)), el("td", "", money(p.cost)),
+        el("td", "", fillPrice(p.mark_price)),
+        el("td", p.unrealized_gross > 0 ? "positive" : p.unrealized_gross < 0 ? "negative" : "", money(p.unrealized_gross)),
+        el("td", "", autoExit(p)));
+      posBody.append(row);
+    }
+    const todayCount = trades ? trades.filter(t => t.session === today).length : 0;
+    set("trade-count", trades ? `${trades.length} ${trades.length === 1 ? "trade" : "trades"} · ${todayCount} tonight` : "Unavailable");
+
+    const unrealized = open.reduce((sum, p) => sum + (finite(p.unrealized_gross) ? p.unrealized_gross : 0), 0);
+    metric(metrics, "Account P&L", money(perf?.account_pnl), finite(perf?.account_pnl) ? "Moomoo NAV vs the starting balance" : "");
+    metric(metrics, "Realized P&L · gross", money(totals?.realized_gross),
+      totals ? Object.entries(EXIT_SLEEVES).map(([s, label]) => `${label} ${money(perf?.exits?.sleeves?.[s]?.realized_gross)}`).join(" · ") : "");
+    metric(metrics, "Open positions", open.length ? open.map(p => `${ticker(p.symbol)} ${Math.abs(p.qty)} ${p.qty > 0 ? "long" : "short"}`).join(", ") : "None",
+      open.length ? `Unrealized ${money(unrealized)}` : "Everything is closed");
+    if (trades) {
+      const entries = trades.filter(t => ["buy", "short"].includes(t.action)).length, closes = trades.length - entries;
+      metric(metrics, "Trades", String(trades.length),
+        `${todayCount} tonight · ${entries} ${entries === 1 ? "entry" : "entries"} · ${closes} ${closes === 1 ? "close" : "closes"}`);
+    } else metric(metrics, "Trades", "—");
+    metric(metrics, "Profit-target activations", data.live ? String(activations("two_vote") + activations("h_etf")) : "—",
+      data.live ? `Two-vote ${activations("two_vote")} · H ETF ${activations("h_etf")}` : "");
+    metric(metrics, "Expectancy per closed trade", money(totals?.expectancy_dollars),
+      totals ? `${totals.closed_trade_count} fully closed trades · before fees` : "");
+    let formula = "Expectancy = (win rate × average win) − (loss rate × average loss magnitude).";
+    if (totals?.closed_trade_count) {
+      formula += ` Here, ${money(totals.closed_trade_gross)} gross P&L ÷ ${totals.closed_trade_count} fully closed trades = ${money(totals.expectancy_dollars)} per trade.`;
+    } else if (perf?.exits?.status === "incomplete") {
+      formula += " Totals are unavailable while execution receipts are incomplete.";
+    }
+    set("expectancy-formula", formula + " Time = when the order was placed (manual sells: the broker's fill time).");
+
+    if (!trades?.length) emptyRow(body, 8, trades ? "No confirmed trades yet." : "Trade list unavailable.");
+    for (const t of (trades || []).slice().reverse()) {
+      const row = el("tr", t.session === today ? "today-row" : ""), audit = el("td"), details = el("details");
+      const key = `trade/${t.audit_id}/${t.intent_id}`;
+      details.open = expanded.has(key);
+      details.addEventListener("toggle", () => { if (details.open) expanded.add(key); else expanded.delete(key); });
+      details.append(el("summary", "", "Evidence"), el("pre", "", JSON.stringify({ audit_id: t.audit_id, intent_id: t.intent_id,
+        ordered_at: t.ordered_at, recorded_at: t.recorded_at, source: t.source, status: t.status, verified: t.verified,
+        session_review: perf.exits?.reviews?.[t.session] }, null, 2)));
+      audit.append(details);
+      const entry = ["buy", "short"].includes(t.action);
+      const action = `${TRADE_ACTIONS[t.action] || human(t.action)}${t.source === "manual" ? " · manual" : ""}${t.verified === false ? " · unverified" : ""}`;
+      row.append(el("td", "", tradeTime(t.ordered_at)), el("td", "", `${sleeveName(t.sleeve)} · ${ticker(t.symbol)}`),
+        el("td", t.action === "buy" ? "positive" : t.action === "short" ? "negative" : "", action), el("td", "", tradeWhy(t)),
+        el("td", "", String(t.shares)), el("td", "", fillPrice(t.avg_price)),
+        el("td", entry ? "muted-cell" : t.realized_gross > 0 ? "positive" : t.realized_gross < 0 ? "negative" : "", entry ? "Entry" : money(t.realized_gross)),
+        audit);
+      body.append(row);
+    }
+  }
+
+  function renderRuleActivity(data) {
+    const act = data.vote_activity, body = byId("rule-activity-body"), picker = byId("rule-activity-date");
+    body.replaceChildren();
+    if (!act || !Array.isArray(act.rules)) {
+      picker.replaceChildren();
+      set("rule-activity-summary", "Signal tracker data is unavailable in this snapshot.");
+      emptyRow(body, 4, "No rule activity available.");
+      return;
+    }
+    const nightLabel = day => new Date(`${day}T12:00:00Z`).toLocaleDateString("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short" });
+    const days = [...new Set([act.today, ...Object.keys(act.sessions || {})])].filter(Boolean).sort().reverse();
+    const choices = [...days.map(day => [day, day === act.today ? `Tonight · ${nightLabel(day)}` : `${nightLabel(day)} night`]), ["all", "All nights · totals"]];
+    if (!choices.some(([value]) => value === activityChoice)) activityChoice = act.today || "all";
+    picker.replaceChildren(...choices.map(([value, label]) => { const option = el("option", "", label); option.value = value; return option; }));
+    picker.value = activityChoice;
+    const all = activityChoice === "all";
+    const pick = fires => (fires || []).filter(f => all || f.session === activityChoice);
+    const ticker = symbol => symbol.replace(/^US\./, "");
+    set("rule-activity-count-label", all ? "Fires · all nights" : "Fires");
+    set("rule-activity-spy-label", all ? "SPY fires" : "SPY · time fired (SGT)");
+    set("rule-activity-qqq-label", all ? "QQQ fires" : "QQQ · time fired (SGT)");
+    const cell = (fires, symbol, spyOnly) => {
+      const td = el("td"), list = el("div", "fire-list"), mine = fires.filter(f => f.symbol === symbol);
+      if (spyOnly && symbol !== "US.SPY") list.textContent = "n/a";
+      else if (all) list.textContent = String(mine.length);
+      else if (!mine.length) list.textContent = "—";
+      else list.append(...mine.map(fire => {
+        const chip = el("span", `fire-chip ${fire.side === "BUY" ? "positive" : "negative"}`,
+          `${sgt(fire.bar_end)} ${fire.side === "BUY" ? "Buy" : "Sell"}${fire.first_observed ? " · already on" : ""}`);
+        chip.setAttribute("title", fire.first_observed
+          ? `${ticker(fire.symbol)} vote was already on when the runner's records began at ${sgt(fire.bar_end)} SGT; it fired at or before this time.`
+          : `${ticker(fire.symbol)} vote switched on when the 5-minute bar closed at ${sgt(fire.bar_end)} SGT.`);
+        return chip;
+      }));
+      td.append(list);
+      return td;
+    };
+    const line = (name, fires, cls = "", spyOnly = false) => {
+      const row = el("tr", cls), label = el("th", "", name);
+      label.setAttribute("scope", "row");
+      row.append(label, el("td", fires.length ? "positive" : "", String(fires.length)),
+        cell(fires, "US.SPY", spyOnly), cell(fires, "US.QQQ", spyOnly));
+      body.append(row);
+    };
+    let fired = 0;
+    for (const rule of act.rules) {
+      const fires = pick(rule.fires);
+      fired += fires.length;
+      line(rule.rule === "Noise-area" ? "Noise-area (SPY only)" : rule.rule, fires, "", rule.rule === "Noise-area");
+    }
+    const signals = pick(act.signals);
+    line("Trade signal (2+ rules agree)", signals, "signal-row");
+    const counts = `${fired} rule ${fired === 1 ? "fire" : "fires"} · ${signals.length} trade ${signals.length === 1 ? "signal" : "signals"}`;
+    let summary;
+    if (all) {
+      summary = `All ${Object.keys(act.sessions || {}).length} recorded nights: ${counts}. Pick a night to see the times.`;
+    } else {
+      const night = act.sessions?.[activityChoice];
+      const label = activityChoice === act.today ? "Tonight" : `${nightLabel(activityChoice)} night`;
+      summary = !night ? `${label}: no vote records yet. Rules can start voting from 23:00 SGT.`
+        : `${label}: ${counts}. Runner recorded ${night.bars} bars, ${sgt(night.first_bar)}–${sgt(night.last_bar)} SGT.` +
+          (String(night.first_bar).slice(11, 16) > "10:00"   // bar_end carries its ET offset; 10:00 ET is the first voting bar
+            ? ` Records started late, so "already on" votes may have fired earlier.` : "");
+    }
+    set("rule-activity-summary", summary + (act.status === "incomplete" ? " Some records were unreadable, so counts may be incomplete." : ""));
+  }
+
   function renderAudit(data) {
     const body = byId("orders-body"); body.replaceChildren();
     const orders = data.orders.filter(matches).slice().reverse();
@@ -410,7 +606,8 @@
     for (const order of orders) {
       const tr = el("tr");
       const status = order.status || "UNCONFIRMED";
-      const cls = status === "FILLED" ? "filled" : ["ERROR", "REJECTED", "REFUSED"].includes(status) ? "failed" : "planned";
+      const partial = status === "CANCELLED" && order.filled > 0;
+      const cls = status === "FILLED" || partial ? "filled" : ["ERROR", "REJECTED", "REFUSED"].includes(status) ? "failed" : "planned";
       const symbol = el("td", "", `${LETTER[order.sleeve] || "?"} · ${String(order.symbol || "—").replace("US.", "")}`);
       const intent = el("td", "", `${order.side || "—"} ${order.qty ?? "—"} shares`); intent.append(el("small", "", `Limit ${money(order.limit_price)}`));
       const fill = el("td", "", finite(order.filled) ? `${order.filled} / ${order.qty ?? "—"}` : "Not confirmed");
@@ -418,9 +615,9 @@
       const evidence = el("td"), details = el("details"), key = `${order.audit_id}/${order.intent_id}`;
       details.open = expanded.has(key);
       details.addEventListener("toggle", () => { if (details.open) expanded.add(key); else expanded.delete(key); });
-      details.append(el("summary", "", human(order.reason)), el("pre", "", JSON.stringify({ reference_price: order.reference_price, limit_price: order.limit_price, filled: order.filled, avg_price: order.avg_price, has_error: order.has_error, audit_id: order.audit_id, intent_id: order.intent_id, created_at: order.created_at }, null, 2)));
+      details.append(el("summary", "", order.recorded_source === "manual" ? "Manual broker fill" : human(order.reason)), el("pre", "", JSON.stringify({ reference_price: order.reference_price, limit_price: order.limit_price, filled: order.filled, avg_price: order.avg_price, has_error: order.has_error, source: order.source_evidence, audit_id: order.audit_id, intent_id: order.intent_id, created_at: order.created_at }, null, 2)));
       evidence.append(details);
-      tr.append(el("td", "", sgt(order.created_at || order.logged_at, true)), symbol, intent, el("td", `status-cell ${cls}`, status), fill, evidence);
+      tr.append(el("td", "", sgt(order.created_at || order.logged_at, true)), symbol, intent, el("td", `status-cell ${cls}`, partial ? "PARTIAL · CANCELLED" : status), fill, evidence);
       body.append(tr);
     }
     const audit = byId("audit-body"); audit.replaceChildren();
@@ -495,7 +692,7 @@
       if (snapshotAge > 15000 || snapshotAge < -5000) throw new Error("Dashboard snapshot is stale or its clock is mismatched");
       const holdings = holdingRows(data);
       renderLiveVotes(data, holdings); renderStatus(data); renderAttention(data); renderSleeves(data, holdings);
-      renderAudit(data); renderCharts(data);
+      renderResults(data); renderRuleActivity(data); renderAudit(data); renderCharts(data);
       latest = data; lastSuccess = Date.now();
       byId("data-alert").hidden = true;
       byId("live-data").classList.remove("is-stale");
@@ -507,6 +704,7 @@
 
   byId("refresh-button").addEventListener("click", refresh);
   byId("strategy-filter").addEventListener("change", () => { if (latest) renderAudit(latest); });
+  byId("rule-activity-date").addEventListener("change", () => { activityChoice = byId("rule-activity-date").value; if (latest) renderRuleActivity(latest); });
   byId("event-search").addEventListener("input", () => { if (latest) renderAudit(latest); });
   setInterval(() => {
     renderMarketCountdown(latest);

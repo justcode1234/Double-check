@@ -689,13 +689,13 @@ def test_competition_startup_absence_and_native_failure_before_daily_record(comp
     assert report.competition_payload(tmp_path, now)['startup']['status'] == 'not_recorded'
 
 
-def _record_sleeve_fill(store, day, key, sleeve, symbol, side, qty, price, status='FILLED', requested=None):
+def _record_sleeve_fill(store, day, key, sleeve, symbol, side, qty, price, status='FILLED', requested=None, source=None):
     link = {'intent_id': key, 'audit_id': day + '/' + key}
     store.append(day, {'event': 'intent', **link, 'mode': 'EXECUTE', 'sleeve': sleeve,
                       'symbol': symbol, 'side': side, 'qty': requested or qty})
     store.append(day, {'event': 'acknowledged', **link, 'order_id': 'private-' + key})
     store.append(day, {'event': 'outcome', **link, 'order_id': 'private-' + key,
-                      'status': status, 'qty': requested or qty, 'filled': qty, 'avg_price': price})
+                      'status': status, 'qty': requested or qty, 'filled': qty, 'avg_price': price, 'source': source})
 
 
 def _mark_sleeves(store, sleeves, quotes, cash=96000):
@@ -731,8 +731,8 @@ def test_competition_profit_belongs_to_h_not_shared_nav_allocation(competition_r
     assert p['sleeves']['b3']['limits']['target_before_cap'] == 20000
     assert h['initial_capital'] == 20000
     assert h['capital'] == pytest.approx(20021.17)
-    assert h['limits']['per_etf_budget'] == pytest.approx(2002.117)
-    assert h['limits']['aggregate_limit'] == pytest.approx(6006.351)
+    assert h['limits']['per_etf_budget'] == 10000
+    assert h['limits']['aggregate_limit'] == pytest.approx(20021.17)
     assert h['fees'] is None and h['net_pnl'] is None
     assert h['fill_count'] == 2
     assert h['positions']['US.XLV']['cost_basis'] == pytest.approx(1968.45)
@@ -742,6 +742,34 @@ def test_competition_profit_belongs_to_h_not_shared_nav_allocation(competition_r
     assert len(h['receipts']) == 2 and h['receipts'][0]['audit_id'] == '2026-11-20/xlv-buy'
     assert 'private-xlv-buy' not in json.dumps(p)
     assert {str(p): p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()} == before
+
+
+def test_competition_exit_history_counts_closed_lots_once_without_current_quotes(competition_report, tmp_path):
+    from dual_strategy.competition.store import MANUAL_FILL
+
+    report, store = competition_report
+    day = '2026-11-23'
+    _record_sleeve_fill(store, day, 'first-buy', 'two_vote', 'US.QQQ', 'BUY', 10, 100)
+    _record_sleeve_fill(store, day, 'second-buy', 'two_vote', 'US.QQQ', 'BUY', 10, 110)
+    _record_sleeve_fill(store, day, 'partial', 'two_vote', 'US.QQQ', 'SELL', 5, 120, 'CANCELLED', 10)
+    _record_sleeve_fill(store, day, 'manual-first', 'two_vote', 'US.QQQ', 'SELL', 5, 118, source=MANUAL_FILL)
+    _record_sleeve_fill(store, day, 'manual-second', 'two_vote', 'US.QQQ', 'SELL', 4, 100, source=MANUAL_FILL)
+    _record_sleeve_fill(store, '2026-11-20', 'h-buy', 'h_etf', 'US.XLV', 'BUY', 11, 178.95)
+    _record_sleeve_fill(store, day, 'h-close', 'h_etf', 'US.XLV', 'SELL', 11, 177.95, source=MANUAL_FILL)
+    _mark_sleeves(store, {'two_vote': {'US.QQQ': 6}}, {'US.QQQ': 110})
+
+    data = report.competition_payload(tmp_path, datetime(2026, 11, 24, 12, tzinfo=timezone.utc))
+    assert data['orders'] == [] and data['account_snapshot'] is None
+    exits = data['performance']['exits']
+    assert exits['status'] == 'available'
+    assert [(f['source'], f['shares'], f['realized_gross']) for f in exits['fills']] == [
+        ('automatic', 5, 100), ('manual', 5, 90), ('manual', 4, -40), ('manual', 11, -11)]
+    totals = exits['totals']
+    assert totals['realized_gross'] == 139 and totals['closed_trade_gross'] == 179
+    assert (totals['exit_orders'], totals['manual_exits'], totals['closed_trade_count']) == (4, 3, 2)
+    assert totals['expectancy_dollars'] == 89.5 and totals['average_loss'] == -11
+    assert totals['win_rate_pct'] == totals['loss_rate_pct'] == 50
+    assert 'private-manual-first' not in json.dumps(exits)
 
 
 def test_competition_same_symbol_sleeves_and_realized_profit_stay_separate(competition_report, tmp_path):
@@ -760,7 +788,7 @@ def test_competition_same_symbol_sleeves_and_realized_profit_stay_separate(compe
     assert h['gross_pnl'] == pytest.approx(50)
     assert h['positions']['US.SPY']['cost_basis'] == 200
     assert b['capital'] == 20225 and b['limits']['target_before_cap'] == 20225
-    assert h['capital'] == 20050 and h['limits']['aggregate_limit'] == 6015
+    assert h['capital'] == 20050 and h['limits']['aggregate_limit'] == 20050
 
 
 @pytest.mark.parametrize('problem', ['missing_fill', 'missing_ack', 'wrong_ack', 'duplicate_outcome', 'missing_quote', 'wrong_ownership', 'ambiguous_order'])
@@ -844,6 +872,6 @@ def test_competition_closed_trade_keeps_profit_and_plan_never_contributes(compet
     assert p['sleeves']['h_etf']['gross_pnl'] == 0
     assert p['sleeves']['b3']['capital'] == 20015
     assert p['sleeves']['h_etf']['capital'] == 20000
-    assert p['sleeves']['h_etf']['limits']['aggregate_limit'] == 6000
+    assert p['sleeves']['h_etf']['limits']['aggregate_limit'] == 20000
     assert p['account_pnl'] == pytest.approx(13.02)
     assert p['unallocated_account_change'] == pytest.approx(-1.98)

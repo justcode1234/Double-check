@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import time
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from dual_strategy.competition.planner import Account, Intent, entries_disabled
@@ -156,12 +157,75 @@ class CompetitionBroker:
             time.sleep(2)
 
     def _find(self, order_id, placed_at):
-        begin = int((placed_at - timedelta(minutes=2)).timestamp() * 1e6)
-        end = int((datetime.now(timezone.utc) + timedelta(minutes=2)).timestamp() * 1e6)
-        rows = self.call(HISTORY, {"acc_id": self.acc_id, "market": 100, "time_begin": begin, "time_end": end})["data"]["orders"]
-        for r in rows:
-            if str(r.get("order_id")) == str(order_id):
-                return {"order_id": str(order_id), "status": STATUS.get(r.get("status"), "UNKNOWN"),
-                        "filled": int(float(r.get("cum_qty", 0))), "avg_price": float(r.get("avg_fill_price", 0) or 0),
-                        "qty": int(float(r.get("qty", 0)))}
+        rows = self._history(placed_at - timedelta(minutes=2))
+        for row in rows:
+            if str(row.get("order_id")) == str(order_id):
+                qty = Decimal(str(row["qty"]))
+                filled = Decimal(str(row.get("cum_qty", 0)))
+                if not all(value.is_finite() and value == value.to_integral_value() for value in (qty, filled)):
+                    raise ExecutionBlocked("non-integer ETF order quantity; reconcile before retrying")
+                return {"order_id": str(order_id), "status": STATUS.get(row.get("status"), "UNKNOWN"),
+                        "filled": int(filled), "avg_price": float(row.get("avg_fill_price", 0) or 0), "qty": int(qty)}
         return None
+
+    def _history(self, since):
+        begin = int(since.timestamp() * 1e6)
+        end = int((datetime.now(timezone.utc) + timedelta(minutes=2)).timestamp() * 1e6)
+        return self.call(HISTORY, {"acc_id": self.acc_id, "market": 100, "time_begin": begin, "time_end": end})["data"]["orders"]
+
+    def reconcile_cancelled_close(self, intent: Intent, placed_at: datetime, before: Account, order_id: str, cancelled_qty: int):
+        """Verify a partial close when Moomoo reports only the cancelled remainder as the order quantity."""
+        filled = intent.qty - cancelled_qty
+        signed_change = -filled if intent.side == "SELL" else filled
+        held = before.positions.get(intent.symbol, 0)
+        if not intent.close_only or not 0 < cancelled_qty < intent.qty or signed_change * held >= 0 or intent.qty > abs(held):
+            raise ExecutionBlocked("invalid terminal fill; close quantity does not reconcile")
+        expected = {**before.positions, intent.symbol: held + signed_change}
+        expected = {sym: qty for sym, qty in expected.items() if qty}
+        try:
+            account = {"acc_id": self.acc_id, "market": 100}
+            funds = self.call(CASH_INFO, account)["data"]
+            rows = self.call(POSITION_LIST, account)["data"]["positions"]
+            if any(Decimal(str(r.get("qty", r.get("quantity")))) % 1 for r in rows):
+                raise ValueError("non-integer position")
+            positions = parse_positions(rows, funds, expected)
+            cash = Decimal(str(funds["balance"]))
+
+            # Include orders which were already working before the close, and reject any overlapping activity.
+            history = self._history(placed_at - timedelta(days=1))
+            matches = [row for row in history if str(row["order_id"]) == order_id]
+            if len(matches) != 1:
+                raise ValueError("unique broker order missing")
+            row = matches[0]
+            start = int(placed_at.timestamp()) * 1_000_000
+            if any(str(other["order_id"]) != order_id and
+                   (STATUS.get(other["status"]) in ("WORKING", "PARTIAL", None) or
+                    max(int(other["create_time"]), int(other["update_time"])) >= start) for other in history):
+                raise ValueError("other order activity overlapped the close")
+            limit = Decimal(f"{intent.limit_price:.2f}")
+            if (STATUS.get(row["status"]) != "CANCELLED" or Decimal(str(row["qty"])) != cancelled_qty
+                    or Decimal(str(row["cum_qty"])) != 0 or row["text"] != intent.intent_id[:60]
+                    or row["symbol"] not in (intent.symbol, intent.symbol[3:])
+                    or int(row.get("side", row.get("order_side"))) != (2 if intent.side == "SELL" else 1)
+                    or Decimal(str(row["price"])) != limit
+                    or not 0 < start <= int(row["create_time"]) <= int(row["update_time"])):
+                raise ValueError("terminal receipt no longer matches the close")
+            raw_price = row.get("reported_avg_fill_price", row.get("avg_fill_price"))
+            price = Decimal(str(raw_price))
+            if not price.is_finite() or price <= 0 or (price - limit) * signed_change > 0:
+                raise ValueError("broker price violates the limit")
+
+            # Cash must independently corroborate the reported average and the exact shares that disappeared.
+            fee = Decimal(str(before.cash)) - cash - signed_change * price
+            activity_fee = min(Decimal("8.30"), filled * Decimal("0.000166")) if signed_change < 0 else Decimal(0)
+            if positions != expected or not cash.is_finite() or abs(fee - Decimal("0.99") - activity_fee) > Decimal("0.02"):
+                raise ValueError("position or cash failed to corroborate the fill")
+        except (InvalidOperation, KeyError, TypeError, ValueError, OverflowError) as exc:
+            raise ExecutionBlocked("invalid terminal fill; broker cancellation evidence did not reconcile") from exc
+
+        terminal = {"status": "CANCELLED", "qty": cancelled_qty, "filled": 0, "avg_price": float(price)}
+        evidence = {"positions_before": before.positions, "positions_after": positions, "cash_before": before.cash,
+                    "cash_after": str(cash), "cash_corroborated_fee": str(fee)}
+        return {"order_id": order_id, "status": "CANCELLED", "qty": intent.qty, "filled": filled,
+                "avg_price": float(price), "broker_terminal": terminal,
+                "source": "reconciled_from_broker_position_and_cash"}, evidence

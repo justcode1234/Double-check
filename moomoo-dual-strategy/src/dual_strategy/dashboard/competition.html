@@ -28,7 +28,7 @@
 
         <section id="account-panel" class="account-strip" aria-label="Last observed account values">
           <div><span class="context-label">ACCOUNT NAV</span><strong id="nav-summary">Awaiting first risk mark</strong><span class="metric-note" id="nav-note">No starting balance assumed</span></div>
-          <div><span class="context-label">HIGH-WATER / HALT BELOW</span><strong id="high-water-summary">—</strong><span class="metric-note" id="halt-summary">3.5% drawdown limit</span></div>
+          <div><span class="context-label">HIGH-WATER / HALT BELOW</span><strong id="high-water-summary">—</strong><span class="metric-note" id="halt-summary">Drawdown halt level</span></div>
           <div><span class="context-label">SHARED CASH</span><strong id="cash-summary">—</strong><span class="metric-note" id="cash-note">From archived broker observation</span></div>
           <div><span class="context-label">TODAY'S RECORDED ORDERS</span><strong id="orders-summary">—</strong><span class="metric-note" id="orders-count-note">Acknowledgements are not fills</span></div>
         </section>
@@ -59,6 +59,32 @@
           </div>
         </section>
         <p id="attribution-note" class="footnote">Each strategy's results come from its own confirmed fills.</p>
+        <section class="panel chart-panel" id="exit-results" aria-labelledby="exit-title">
+          <div class="section-heading"><div><p class="eyebrow">ALL STRATEGIES · EVERY CONFIRMED FILL</p><h2 id="exit-title">Overall results</h2></div><span class="badge neutral" id="trade-count">No trades yet</span></div>
+          <p id="latest-trade" class="latest-trade" role="status">No trades recorded yet.</p>
+          <h3 class="results-subhead">Positions you hold now</h3>
+          <div class="table-scroll" role="region" aria-label="Positions you hold now" tabindex="0"><table class="trades-table positions-table">
+            <thead><tr><th scope="col">Strategy · ticker</th><th scope="col">Position</th><th scope="col">Entry price</th><th scope="col">Opened · SGT</th><th scope="col">Cost at entry</th><th scope="col">Price now</th><th scope="col">Unrealized P&amp;L</th><th scope="col">Auto exit</th></tr></thead>
+            <tbody id="positions-body"></tbody>
+          </table></div>
+          <dl class="metrics" id="exit-metrics"></dl>
+          <h3 class="results-subhead">All trades · newest first</h3>
+          <div class="table-scroll" role="region" aria-label="All filled trades, newest first" tabindex="0"><table class="trades-table">
+            <thead><tr><th scope="col">Time · SGT</th><th scope="col">Strategy · ticker</th><th scope="col">Action</th><th scope="col">Why</th><th scope="col">Shares</th><th scope="col">Avg. price</th><th scope="col">Realized P&amp;L</th><th scope="col">Audit</th></tr></thead>
+            <tbody id="exit-body"></tbody>
+          </table></div>
+          <p id="expectancy-formula" class="footnote"></p>
+        </section>
+        <section class="panel chart-panel" id="rule-activity" aria-labelledby="rule-activity-title">
+          <div class="section-heading"><div><p class="eyebrow">TWO-VOTE · WHEN EACH RULE FIRED</p><h2 id="rule-activity-title">Signal tracker</h2></div>
+            <div class="field"><label for="rule-activity-date">Trading night</label><select id="rule-activity-date"></select></div></div>
+          <p id="rule-activity-summary" class="section-note" role="status">Waiting for the runner's vote records.</p>
+          <div class="table-scroll" role="region" aria-label="When each strategy rule fired" tabindex="0"><table class="rule-activity-table">
+            <thead><tr><th scope="col">Strategy rule</th><th scope="col" id="rule-activity-count-label">Fires</th><th scope="col" id="rule-activity-spy-label">SPY</th><th scope="col" id="rule-activity-qqq-label">QQQ</th></tr></thead>
+            <tbody id="rule-activity-body"></tbody>
+          </table></div>
+          <p id="rule-activity-note" class="footnote">Time = SGT close of the 5-minute bar that switched the vote on; the runner acts on it within about 20 seconds. Rules can only start voting between 23:00 and 03:30 SGT (10:00–14:30 ET). A trade needs 2 or more rules agreeing on the same ticker.</p>
+        </section>
         <section class="session-panel panel" aria-label="Runner status">
           <div class="session-heading"><div><p class="eyebrow">PAPER RUNNER · LOCAL HOST</p><h2 id="runner-summary">Checking process</h2><p id="runner-note" class="section-note">Process liveness and account-data freshness are separate checks.</p></div><div class="session-clock"><span class="context-label">Time to market open</span><span id="market-countdown">—</span><span class="badge neutral" id="market-badge">Session unknown</span></div></div>
           <div class="session-facts"><div><span class="context-label">LAST ACCOUNT OBSERVATION</span><strong id="mark-summary">Not received</strong><p id="mark-note" class="footnote"></p></div><div><span class="context-label">NEXT SCHEDULED ACTION</span><strong id="next-summary">—</strong><p id="next-note" class="footnote">Scheduled does not mean executed.</p></div><div><span class="context-label">RISK STATE</span><strong id="risk-summary">Unknown</strong><p id="risk-note" class="footnote"></p></div></div>
@@ -75,7 +101,7 @@
         <section class="panel chart-panel" aria-labelledby="orders-title">
           <div class="section-heading"><div><p class="eyebrow">SIGNAL → INTENT → ACKNOWLEDGEMENT → OUTCOME</p><h2 id="orders-title">Execution &amp; audit</h2></div><a href="/api/competition" download="competition-status.json" class="download-link">Download status JSON</a></div>
           <p id="orders-note" class="section-note"></p>
-          <div class="audit-controls"><div class="field"><label for="strategy-filter">Strategy</label><select id="strategy-filter"><option value="all">All strategies</option><option value="b3">B3 · SPY</option><option value="h_etf">H · ETFs</option><option value="noise">Noise-area · SPY</option><option value="vwap">VWAP · SPY/QQQ</option><option value="orb">ORB · ETFs</option></select></div><div class="field search-field"><label for="event-search">Search orders &amp; events</label><input id="event-search" type="search" placeholder="Symbol, status, reason or audit reference" autocomplete="off"></div><p id="filter-count" role="status" aria-live="polite"></p></div>
+          <div class="audit-controls"><div class="field"><label for="strategy-filter">Strategy</label><select id="strategy-filter"><option value="all">All strategies</option><option value="two_vote">Two-vote · SPY/QQQ</option><option value="b3">B3 · SPY</option><option value="h_etf">H · ETFs</option><option value="noise">Noise-area · SPY</option><option value="vwap">VWAP · SPY/QQQ</option><option value="orb">ORB · ETFs</option></select></div><div class="field search-field"><label for="event-search">Search orders &amp; events</label><input id="event-search" type="search" placeholder="Symbol, status, reason or audit reference" autocomplete="off"></div><p id="filter-count" role="status" aria-live="polite"></p></div>
           <div class="table-scroll" role="region" aria-label="Order intents and recorded outcomes" tabindex="0"><table><thead><tr><th scope="col">Time · SGT</th><th scope="col">Strategy / symbol</th><th scope="col">Intent</th><th scope="col">Recorded status</th><th scope="col">Filled / avg. price</th><th scope="col">Decision evidence</th></tr></thead><tbody id="orders-body"></tbody></table></div>
           <details id="events-details" class="evidence-details"><summary>Inspect recent events and step failures</summary><p id="errors-note" class="section-note"></p><div class="table-scroll" role="region" aria-label="Recent event audit" tabindex="0"><table><thead><tr><th scope="col">Time · SGT</th><th scope="col">Event / step</th><th scope="col">Details</th></tr></thead><tbody id="audit-body"></tbody></table></div></details>
           <p class="footnote">Local runner receipts, not a fresh broker reconciliation. Cumulative quantity and average fill price are not an individual-execution tape. Private identifiers and error details are omitted.</p>

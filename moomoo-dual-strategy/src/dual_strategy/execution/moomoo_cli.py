@@ -155,7 +155,9 @@ class CliTransport:
                     raise ExecutionBlocked('Unexpected history response shape')
                 for row in orders:
                     # A zero-fill order can carry an indicative price from the broker.
-                    normalized.append({**row, 'avg_fill_price': '0'} if str(row.get('cum_qty')) == '0' else row)
+                    if str(row.get('cum_qty')) == '0':
+                        row = {**row, 'reported_avg_fill_price': row.get('avg_fill_price'), 'avg_fill_price': '0'}
+                    normalized.append(row)
                 if not pagination['has_more']:
                     break
                 cursor = pagination.get('next_key')

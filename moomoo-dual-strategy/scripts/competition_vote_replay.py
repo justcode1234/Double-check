@@ -33,8 +33,9 @@ from dual_strategy.competition.vote_rules import (
 
 DEFAULT_VOTES = CFG["two_vote"]["required_votes"]
 LOT_USD = CFG["two_vote"]["entry_usd"]
-LOTS_PER_SYMBOL = CFG["two_vote"]["max_lots_per_symbol"]
 SYMBOL_CAP = CFG["risk"]["name_cap_usd"]
+# Live null = no lot count, dollar cap only; the research replay models that as whole entry lots within the cap.
+LOTS_PER_SYMBOL = CFG["two_vote"]["max_lots_per_symbol"] or max(1, int(SYMBOL_CAP // LOT_USD))
 PORTFOLIO_CAP = len(SYMBOLS) * SYMBOL_CAP
 BANK_GAINS = CFG["two_vote"]["bank_realized_gains"]
 EARLIER = ("2025-01-01", "2026-11-06")

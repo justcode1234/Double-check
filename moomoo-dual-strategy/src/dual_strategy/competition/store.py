@@ -98,7 +98,8 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
                    "initial_capital": initial_allocations.get(s),
                    "capital": None, "limits": capital_limits(s, None, cfg, reduced),
                    "positions": {}, "receipts": []} for s in SLEEVES}
-    sleeves["two_vote"].update(open_entry_lots={}, entry_lots={}, reserved_profit=None, cost_method="identified_entry_lots")
+    sleeves["two_vote"].update(open_entry_lots={}, entry_lots={}, ledger_lots={}, reserved_profit=None,
+                               cost_method="identified_entry_lots")
     exits = {"status": "not_recorded", "fills": [], "totals": None, "sleeves": {}, "reviews": {}}
     result = {"asof": (account or {}).get("at"), "sleeves": sleeves, "exits": exits, "trades": [],
               "account_pnl": None, "unallocated_account_change": None, "cost_method": "weighted_average",
@@ -263,6 +264,7 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
         positions = sleeve["positions"]
         if {symbol: p["qty"] for symbol, p in positions.items()} != state["sleeves"].get(s, {}):
             incomplete.add(s)
+    balanced = set(sleeves) - incomplete     # receipts complete and equal to the runner's books; marks not needed yet
     # Historical realized P&L needs complete, balanced receipts. It does not need a current quote.
     def when(trade):
         try:
@@ -293,6 +295,10 @@ def sleeve_performance(store: Store, state: dict | None, account: dict | None, c
         if not math.isfinite(realized[s] + unrealized):
             incomplete.add(s)
         sleeve["status"] = "incomplete" if s in incomplete else "available"
+        if s == "two_vote" and s in balanced:
+            # Display only (the dashboard's per-lot rows without live quotes). Trading reads entry_lots, which exist
+            # only when the sleeve is fully available.
+            sleeve["ledger_lots"] = {sym: [dict(lot) for lot in lots] for sym, lots in vote_lots.items() if lots}
         if s not in incomplete:
             sleeve.update(realized_gross=realized[s], unrealized_gross=unrealized, gross_pnl=realized[s] + unrealized)
             bank_gains = s == "two_vote" and cfg.get("two_vote", {}).get("bank_realized_gains")

@@ -22,8 +22,6 @@
 .session-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 22px; }
 .session-heading h2 { font-size: clamp(21px, 2.2vw, 29px); letter-spacing: -.035em; margin-bottom: 4px; }
 .session-heading .section-note { margin: 6px 0 18px; }
-.session-clock { text-align: right; flex-shrink: 0; }
-#market-countdown { font: 20px var(--font-data); display: block; margin: 8px 0; }
 .session-facts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; border-top: 1px solid var(--border); padding-top: 18px; }
 .operational-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border-top: 1px solid var(--border); padding-top: 18px; margin-top: 18px; }
 .operational-facts strong { display: block; font-size: 13px; font-weight: 500; }
@@ -39,10 +37,11 @@
 .session-timeline time { display: block; font: 12px var(--font-data); margin-bottom: 5px; }
 .session-timeline .up-next { border-color: var(--teal); color: var(--text); }
 .session-timeline .elapsed { opacity: .65; }
-.account-strip { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1.25fr; margin-bottom: 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.account-strip { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1.25fr 1fr; margin-bottom: 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
 .account-strip > div { padding: 20px; min-width: 0; }
 .account-strip > div + div { border-left: 1px solid var(--border); }
 .account-strip strong { display: block; font-size: clamp(17px, 1.6vw, 23px); font-weight: 550; font-variant-numeric: tabular-nums; letter-spacing: -.025em; }
+#market-countdown { font-family: var(--font-data); }
 .metric-note { display: block; color: var(--muted); font-size: 10px; margin-top: 7px; }
 .account-stale strong { color: var(--muted); }
 .competition-page .portfolio-card .nav-value { font-size: clamp(27px, 3vw, 38px); }
@@ -73,14 +72,13 @@
   .account-strip { grid-template-columns: 1fr 1fr; }
   .account-strip > div:nth-child(3) { border-left: 0; }
   .account-strip > div:nth-child(n+3) { border-top: 1px solid var(--border); }
+  .account-strip > .account-clock { grid-column: 1 / -1; border-left: 0; }
 }
 @media (max-width: 760px) {
   .competition-page .topbar { flex-wrap: wrap; padding: 15px 0; gap: 14px; }
   .competition-page .topbar-right { width: 100%; gap: 16px; justify-content: space-between; }
   .competition-page .read-only { display: inline; font-size: 11px; }
   .session-heading { flex-direction: column; gap: 0; }
-  .session-clock { text-align: left; margin-bottom: 16px; }
-  #market-countdown { display: inline-block; margin-right: 16px; font-size: 17px; }
   .session-facts, .operational-facts { grid-template-columns: 1fr; gap: 14px; }
   .session-panel { padding: 18px; }
   .account-strip > div { padding: 15px; }

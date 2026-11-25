@@ -101,20 +101,33 @@ two_vote:                        # live execution approved by the user 2026-11-2
   initial_allocation_usd: 80000  # sizing book = 2 symbols x risk.name_cap_usd; gains banked outside the budget
   required_votes: 2
   entry_usd: 20000                 # per entry lot (user decision 2026-11-25; was 10000)
-  max_lots_per_symbol: 2           # 2 x $20k = the $40k per-ticker name cap (official 40% of $100k); a 3rd lot would be dust
+  max_lots_per_symbol: null        # no lot count: add lots while the ticker stays within the name cap (user decision
+                                   # 2026-11-25; was 2). Old $10k lots + $20k lots fill the cap, e.g. 10k + 10k + 20k.
+  min_lot_usd: 5000                # never open a top-up lot smaller than this (no dust lots as the price drifts)
   bank_realized_gains: true
-  take_profit_usd: 100             # per entry lot, gross (user decision 2026-11-25; was 50)
+  take_profit_usd: null            # no profit target: let winners run; exit on 2+ opposite votes or the scheduled flatten,
+                                   # long lots only when that lot sells at a profit (risk.long_sales_only_at_profit).
+                                   # User decision 2026-11-25 from the exit backtest (2021-2026 SPY/QQQ 5-min replay,
+                                   # reports/competition/exit_backtest): best expectancy every period; was 100, then 50.
   shorts: true
-  flatten_minutes_before_close: 5    # 15:55 ET (12:55 on 13:00 half-days); entries end 14:30 ET (12:30 half-days)
+  flatten_minutes_before_close: 5    # 15:55 ET (12:55 on 13:00 half-days); entries end 14:30 ET (12:30 half-days).
+                                     # Shorts are always covered; long lots in profit are sold, losing long lots carry.
 
 risk:                            # account level (all five sleeves)
   legacy_exit_only: true         # older deployments stay exit-only
   entry_sleeves: [h_etf, two_vote]   # H entries plus the Two-vote sleeve (user decision 2026-11-23); B3 stays exit-only
-  halt_drawdown_fraction: 0.07   # NAV <= 93% of high-water: flatten everything, block entries until a human clears
-  daily_loss_fraction: 0.025     # NAV <= 97.5% of day-start NAV: flatten everything, no entries for the rest of the day
+  halt_drawdown_fraction: 0.07   # NAV <= 93% of high-water: cover shorts, sell longs in profit, block entries until a human clears
+  daily_loss_fraction: 0.025     # NAV <= 97.5% of day-start NAV: same exits, no entries for the rest of the day
   reduce_drawdown_fraction: 0.04 # NAV <= 96% of high-water: new positions at half size (until back above 96.5%)
                                  # all three doubled with the $20k two-vote lots (user decision 2026-11-25; were 3.5%, 1.25%, 2%)
   name_cap_usd: 40000            # handbook cap per stock/ETF: the SUM over all sleeves, longs and shorts by absolute value
+  name_cap_fraction_of_nav: 0.395  # ...and at most 39.5% of live NAV (official: <= 40% of assets; only price-move breaches
+                                   # are exempt, so an entry must never be what crosses 40%)
+  long_sales_only_at_profit: true  # NEVER sell a long at a loss, whatever asks (votes, flatten, H exit, risk lock/halt,
+                                   # manual flatten): only when the SELL limit nets > min_long_sale_net_usd after fees, per
+                                   # entry lot. Losing longs are kept (overnight). Shorts may still be covered at a loss.
+                                   # User decision 2026-11-25.
+  min_long_sale_net_usd: 0.0
   max_orders_per_day: 200
   limit_offset_bps: 5            # marketable LIMIT: buy at quote x (1 + 5 bp), sell at quote x (1 - 5 bp)
   order_wait_seconds: 30         # cancel and reconcile anything not filled by then

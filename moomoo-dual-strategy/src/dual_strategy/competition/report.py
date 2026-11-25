@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 
+from dual_strategy.competition.planner import break_even_quote, loss_guard
 from dual_strategy.competition.signals import b3_decision_times
 from dual_strategy.competition.store import MANUAL_FILL, Store, load_config, sleeve_performance
 from dual_strategy.data.calendar import NY, next_session_open, session_bounds
@@ -291,6 +292,34 @@ def _trade_rules(trades: list[dict], by_session: dict[str, list[dict]]) -> None:
             trade["rules"] = [name for name, vote in rules.items() if vote == side]
 
 
+_PROVENANCE_CONFIG: dict[str, dict | None] = {}
+
+
+def _runner_config(store: Store, session: str) -> dict | None:
+    """The config the runner that audited this session actually loaded (from its provenance record), or None.
+    Config edits only take effect when a runner starts, so the dashboard must show what is running, not the file."""
+    newest, newest_ns = None, -1
+    for path in (store.dir / "audit" / session).glob("[!.]*.json"):
+        try:
+            mtime = path.stat().st_mtime_ns
+        except OSError:
+            continue
+        if mtime > newest_ns:
+            newest, newest_ns = path, mtime
+    if newest is None:
+        return None
+    try:
+        pid = json.loads(newest.read_text(encoding="utf-8")).get("provenance_id")
+        if not isinstance(pid, str) or not re.fullmatch(r"provenance/[0-9a-f]{32}", pid):
+            return None
+        if pid not in _PROVENANCE_CONFIG:
+            record = json.loads((store.dir / "audit" / f"{pid}.json").read_text(encoding="utf-8"))
+            _PROVENANCE_CONFIG[pid] = record.get("config") if isinstance(record.get("config"), dict) else None
+        return _PROVENANCE_CONFIG[pid]
+    except (OSError, ValueError):
+        return None
+
+
 def _open_positions(performance: dict, cfg: dict, state: dict | None) -> list[dict]:
     """What is held now: one row per Two-vote entry lot (each has its own price and $ target), else one per position."""
     trades = performance.get("trades") or []
@@ -305,7 +334,9 @@ def _open_positions(performance: dict, cfg: dict, state: dict | None) -> list[di
                 "unrealized_gross": round(qty * (mark - entry), 8) if finite_mark else None,
                 "take_profit_usd": target,
                 # long: entry + target/shares; short: entry - target/shares (qty is negative)
-                "take_profit_price": round(entry + target / qty, 4) if target else None}
+                "take_profit_price": round(entry + target / qty, 4) if target else None,
+                # risk.long_sales_only_at_profit: the lowest quote at which this long may be sold (net > 0 after fees)
+                "sell_floor_price": break_even_quote(entry, qty, cfg) if qty > 0 and loss_guard(cfg) else None}
 
     rows = []
     for s, sleeve in (performance.get("sleeves") or {}).items():
@@ -313,7 +344,7 @@ def _open_positions(performance: dict, cfg: dict, state: dict | None) -> list[di
             qty, mark = p.get("qty"), p.get("mark_price")
             if not qty:
                 continue
-            lots = (sleeve.get("entry_lots") or {}).get(symbol) if s == "two_vote" else None
+            lots = (sleeve.get("entry_lots") or sleeve.get("ledger_lots") or {}).get(symbol) if s == "two_vote" else None
             if lots:
                 for lot in lots:
                     rows.append(row(s, symbol, lot["shares"] * lot["side"], lot["entry_price"],
@@ -471,11 +502,18 @@ def competition_payload(project: Path, now: datetime | None = None) -> dict:
     votes = _vote_steps(stores["live"])
     performance = sleeve_performance(stores["live"], states["live"], observations["account_snapshot"], cfg)
     _trade_rules(performance.get("trades", []), votes[0])
+    # While a runner is active, show the settings it loaded; edits to the file only apply at the next start.
+    running = _runner_config(stores["live"], session) if runtime["process"]["status"] == "running" else None
+    live_keys = ("two_vote", "h_etf", "risk")
+    shown = {**cfg, **{k: running[k] for k in live_keys if isinstance((running or {}).get(k), dict)}}
+    pending = {k: cfg[k] for k in live_keys if k in cfg and shown.get(k) != cfg[k]}
     return _clean({
         "generated_at": now.isoformat(),
-        "config": {k: cfg[k] for k in ("allocation", "b3", "h_etf", "noise", "vwap", "orb", "two_vote", "risk", "execution_enabled")
-                   if k in cfg},
-        "live": _summary(states["live"], cfg, now), "plan": _summary(states["plan"], cfg, now),
+        "config": {k: shown[k] for k in ("allocation", "b3", "h_etf", "noise", "vwap", "orb", "two_vote", "risk", "execution_enabled")
+                   if k in shown},
+        "config_source": "running runner" if running else "config file",
+        "config_pending": pending,
+        "live": _summary(states["live"], shown, now), "plan": _summary(states["plan"], cfg, now),
         "runtime": runtime, "access": _access_health(stores["live"], states["live"], now),
         "startup": _startup_health(project, runtime["process"], now),
         "outbox_source": "LIVE runner" if source == "live" else "PLAN runner (nothing sent)",
@@ -486,6 +524,6 @@ def competition_payload(project: Path, now: datetime | None = None) -> dict:
         "vote_signals": _vote_signals(project, cfg, now),
         "vote_activity": _vote_activity(stores["live"], session, votes),
         "performance": performance,
-        "open_positions": _open_positions(performance, cfg, states["live"]),
+        "open_positions": _open_positions(performance, shown, states["live"]),
         **observations, "preview": preview,
     })

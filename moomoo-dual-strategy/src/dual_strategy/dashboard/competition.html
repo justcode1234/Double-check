@@ -31,6 +31,7 @@
           <div><span class="context-label">HIGH-WATER / HALT BELOW</span><strong id="high-water-summary">—</strong><span class="metric-note" id="halt-summary">Drawdown halt level</span></div>
           <div><span class="context-label">SHARED CASH</span><strong id="cash-summary">—</strong><span class="metric-note" id="cash-note">From archived broker observation</span></div>
           <div><span class="context-label">TODAY'S RECORDED ORDERS</span><strong id="orders-summary">—</strong><span class="metric-note" id="orders-count-note">Acknowledgements are not fills</span></div>
+          <div class="account-clock"><span class="context-label">TIME TO MARKET OPEN</span><strong id="market-countdown">—</strong><span class="metric-note"><span class="badge neutral" id="market-badge">Session unknown</span></span></div>
         </section>
         <section id="paper-sleeves" class="portfolio-grid competition-sleeve-grid" aria-label="Competition sleeves">
           <article class="portfolio-card strategy-a vote-panel" id="vote-sleeve" aria-labelledby="vote-title">
@@ -86,7 +87,7 @@
           <p id="rule-activity-note" class="footnote">Time = SGT close of the 5-minute bar that switched the vote on; the runner acts on it within about 20 seconds. Rules can only start voting between 23:00 and 03:30 SGT (10:00–14:30 ET). A trade needs 2 or more rules agreeing on the same ticker.</p>
         </section>
         <section class="session-panel panel" aria-label="Runner status">
-          <div class="session-heading"><div><p class="eyebrow">PAPER RUNNER · LOCAL HOST</p><h2 id="runner-summary">Checking process</h2><p id="runner-note" class="section-note">Process liveness and account-data freshness are separate checks.</p></div><div class="session-clock"><span class="context-label">Time to market open</span><span id="market-countdown">—</span><span class="badge neutral" id="market-badge">Session unknown</span></div></div>
+          <div class="session-heading"><div><p class="eyebrow">PAPER RUNNER · LOCAL HOST</p><h2 id="runner-summary">Checking process</h2><p id="runner-note" class="section-note">Process liveness and account-data freshness are separate checks.</p></div></div>
           <div class="session-facts"><div><span class="context-label">LAST ACCOUNT OBSERVATION</span><strong id="mark-summary">Not received</strong><p id="mark-note" class="footnote"></p></div><div><span class="context-label">NEXT SCHEDULED ACTION</span><strong id="next-summary">—</strong><p id="next-note" class="footnote">Scheduled does not mean executed.</p></div><div><span class="context-label">RISK STATE</span><strong id="risk-summary">Unknown</strong><p id="risk-note" class="footnote"></p></div></div>
           <div class="operational-facts"><div><span class="context-label">SIGN-IN EVIDENCE</span><strong id="access-summary">Not independently verified</strong><p id="access-note" class="footnote">Passive runner evidence only; this page never refreshes credentials.</p></div><div><span class="context-label">NATIVE STARTUP</span><strong id="startup-summary">Checking recorded startup</strong><p id="startup-note" class="footnote">Startup records are separate from current process health.</p></div></div>
           <ol id="session-timeline" class="session-timeline" aria-label="Today's exchange schedule"></ol>

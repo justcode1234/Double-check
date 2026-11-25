@@ -26,6 +26,9 @@ from dual_strategy.execution.moomoo_paper import ExecutionBlocked
 PROJECT = Path(__file__).resolve().parents[1]
 CFG = load_config(PROJECT)
 CFG["risk"]["legacy_exit_only"] = False  # Exercise the original entry and sizing rules.
+# Exercise the original exit mechanics on positions set directly in state (no receipts). The live profit-only rule
+# (risk.long_sales_only_at_profit) has its own tests in test_long_sales_only_at_profit.py.
+CFG["risk"]["long_sales_only_at_profit"] = False
 NOW = datetime(2026, 11, 23, 11, 0, tzinfo=NY)
 SESSION = "2026-11-23"
 
@@ -519,6 +522,7 @@ def test_h_entries_are_restored_without_enabling_other_legacy_entries(runner):
 def test_h_open_resizes_from_confirmed_exit_and_entry_fills(runner, monkeypatch, sold, buys):
     monkeypatch.delattr(runner, "audit")
     runner.cfg = load_config(PROJECT)
+    runner.cfg["risk"]["long_sales_only_at_profit"] = False   # resizing mechanics; exits at a loss are tested elsewhere
     runner.quotes["US.XLP"] = 100
     runner.state["sleeves"]["h_etf"] = {"US.XLP": 200}
     runner.state["h_entry_session"]["US.XLP"] = "2026-11-20"
@@ -669,7 +673,13 @@ def test_two_vote_replay_caps_and_reserve_hold_across_200_seeded_paths(vote_repl
 # ------------------------------------------------------------------ two-vote live sleeve
 def test_vote_lot_uses_configured_size_within_book_name_cap_and_cash():
     lot = CFG["two_vote"]["entry_usd"]
-    assert lot == 20_000 and CFG["two_vote"]["max_lots_per_symbol"] == 2 and CFG["two_vote"]["take_profit_usd"] == 100
+    # User decisions 2026-11-25: $20k lots, no lot count (the per-ticker dollar cap alone), no profit target.
+    assert lot == 20_000 and CFG["two_vote"]["max_lots_per_symbol"] is None and CFG["two_vote"]["take_profit_usd"] is None
+    assert CFG["two_vote"]["min_lot_usd"] == 5_000 and CFG["risk"]["name_cap_usd"] == 40_000
+    assert CFG["risk"]["name_cap_fraction_of_nav"] == 0.395
+    assert planner.name_cap(CFG, acct()) == pytest.approx(39_500)                 # 39.5% of a $100,000 NAV
+    assert planner.name_cap(CFG, acct(nav=110_000)) == 40_000                    # never above the $40k cap
+    assert planner.name_cap(CFG, acct(nav=90_000)) == pytest.approx(35_550)
     st = state()
     out, why = planner.plan_vote_entry(st, acct(), SESSION, "US.SPY", 1, CFG, NOW, "e6")
     assert why == "entry" and out[0].sleeve == "two_vote" and not out[0].close_only and not out[0].opens_short
@@ -679,9 +689,15 @@ def test_vote_lot_uses_configured_size_within_book_name_cap_and_cash():
     st["sleeves"]["two_vote"] = {"US.SPY": 39}                                   # a second lot of the same symbol
     out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 39}), SESSION, "US.SPY", 1, CFG, NOW, "e7")
     assert why == "entry" and out[0].qty * out[0].limit_price <= lot + 1e-6
-    st["sleeves"]["vwap"] = {"US.SPY": 30}                                       # $34,500 of the $40,000 name cap used
+    st["sleeves"]["vwap"] = {"US.SPY": 20}                                       # $29,500 of the $39,500 name cap used
+    out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 59}), SESSION, "US.SPY", 1, CFG, NOW, "e8")
+    assert why == "entry" and 5_000 <= out[0].qty * out[0].limit_price <= 10_000 + 1e-6   # a top-up to the cap
+    st["sleeves"]["vwap"] = {"US.SPY": 30}                                       # $34,500 used: only $5,000 left
     out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 69}), SESSION, "US.SPY", 1, CFG, NOW, "e8")
-    assert why == "entry" and out[0].qty * out[0].limit_price <= 5_500 + 1e-6
+    assert out == [] and "below the $5,000 minimum lot" in why                   # 9 shares = $4,502: dust, skipped
+    st["sleeves"]["vwap"] = {}                                                   # a lower NAV lowers the cap
+    out, why = planner.plan_vote_entry(st, acct(nav=90_000, positions={"US.SPY": 39}), SESSION, "US.SPY", 1, CFG, NOW, "e8")
+    assert why == "entry" and 39 * 500 + out[0].qty * out[0].limit_price <= 35_550 + 1e-6
     st = state(two_vote={"US.SPY": 80, "US.QQQ": 100})                           # $80,000 book fully deployed
     out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 80, "US.QQQ": 100}), SESSION, "US.SPY", 1,
                                        CFG, NOW, "e9")
@@ -856,8 +872,8 @@ def test_two_vote_profit_exits_only_the_qualifying_entry_lot(runner):
 
 
 
-def test_two_vote_short_lot_takes_profit_at_the_configured_target_when_price_falls(runner):
-    """15 QQQ sold short at $634.875 covers once the lot is up $100, the live target (price <= ~$628.21)."""
+def test_two_vote_short_lot_takes_profit_at_a_configured_target_when_price_falls(runner):
+    """With a $100 target set, 15 QQQ sold short at $634.875 covers once the lot is up $100 (price <= ~$628.21)."""
     runner.cfg = load_config(PROJECT)
     _profit_quotes(runner)
     runner.quotes["US.QQQ"] = 634.875
@@ -867,7 +883,7 @@ def test_two_vote_short_lot_takes_profit_at_the_configured_target_when_price_fal
     runner.state = runner.store.load()
     assert runner.state["sleeves"]["two_vote"] == {"US.QQQ": -15}
     sent = len(runner.sent)
-    assert runner.cfg["two_vote"]["take_profit_usd"] == 100
+    runner.cfg = {**runner.cfg, "two_vote": {**runner.cfg["two_vote"], "take_profit_usd": 100}}   # live config has none
     for price in (640.0, 631.50):          # a loss, then +$50.63 (the old target): neither reaches $100
         runner.quotes["US.QQQ"] = price
         runner.take_profit()
@@ -881,6 +897,23 @@ def test_two_vote_short_lot_takes_profit_at_the_configured_target_when_price_fal
     assert runner.state["take_profit_counts"]["two_vote"] == {"US.QQQ": 1}
     activation = [r for r in runner.store.outbox(SESSION) if r["event"] == "take_profit_activation"][-1]
     assert activation["target_usd"] == 100 and activation["gross_usd"] == pytest.approx(103.125)
+
+
+def test_live_two_vote_has_no_profit_target_but_h_etf_keeps_its_target(runner):
+    """Exit-backtest decision 2026-11-25: Two-vote lets winners run (vote flip or scheduled flatten only)."""
+    runner.cfg = load_config(PROJECT)
+    assert runner.cfg["two_vote"]["take_profit_usd"] is None and runner.cfg["h_etf"]["take_profit_usd"] == 20
+    _profit_quotes(runner)
+    runner.quotes.update({"US.QQQ": 400.0, "US.IWM": 200.0})
+    _profit_buy(runner, "two_vote", "US.QQQ", 50)
+    _profit_buy(runner, "h_etf", "US.IWM", 10)
+    runner.state = runner.store.load()
+    sent = len(runner.sent)
+    runner.quotes.update({"US.QQQ": 440.0, "US.IWM": 203.0})       # two_vote +$2,000, h_etf +$30
+    runner.take_profit()
+    closes = [(i.sleeve, i.symbol, i.reason) for i in runner.sent[sent:]]
+    assert closes == [("h_etf", "US.IWM", "h_etf_take_profit")]
+    assert runner.state["sleeves"]["two_vote"] == {"US.QQQ": 50}
 
 @pytest.mark.parametrize("overlap", [None, "cash", "other_order"])
 def test_two_vote_close_reconciles_cancelled_remainder_from_moomoo(runner, monkeypatch, overlap):
@@ -976,10 +1009,11 @@ def test_vote_cannot_open_against_h_inventory_and_h_cannot_open_against_vote():
 
 
 def test_vote_step_adds_a_lot_each_bar_while_the_agreement_holds_up_to_the_cap(runner, monkeypatch):
-    """User decision 2026-11-25: a continuing 2-vote agreement adds one lot per bar up to max_lots_per_symbol (2 x $20k
-    = the $40k name cap) and re-enters after exits; never on an opposite-agreement exit bar or while a profit exit works."""
+    """User decisions 2026-11-25: a continuing 2-vote agreement adds one lot per bar until the per-ticker dollar cap is
+    full (no lot count: $39,500 = 39.5% of NAV here, so two $20k lots) and re-enters after exits; never on an
+    opposite-agreement exit bar or while a profit exit works."""
     monkeypatch.setattr(runner, "risk", runner.account)
-    assert (runner.cfg["two_vote"]["entry_usd"], runner.cfg["two_vote"]["max_lots_per_symbol"]) == (20_000, 2)
+    assert (runner.cfg["two_vote"]["entry_usd"], runner.cfg["two_vote"]["max_lots_per_symbol"]) == (20_000, None)
 
     def step(k, spy):
         _run_vote_step(runner, monkeypatch, k, spy)
@@ -994,7 +1028,7 @@ def test_vote_step_adds_a_lot_each_bar_while_the_agreement_holds_up_to_the_cap(r
     step(7, 1)                                                                   # agreement still holds: lot 2
     assert len(runner.sent) == 2 and _recorded_vote_lots(runner) == {"US.SPY": 2}
     assert runner.state["sleeves"]["two_vote"]["US.SPY"] == 2 * lot
-    step(8, 1)                                                                   # at the 2-lot cap: nothing
+    step(8, 1)                                                                   # dollar cap full ($39,000 of $39,500): nothing
     step(9, 0)                                                                   # agreement lapses: hold
     assert len(runner.sent) == 2
     step(10, -1)                                                                 # opposite agreement: close all lots

@@ -5,16 +5,151 @@ State (persisted by `store.py`, never reset by code): initial NAV, high-water NA
 the sleeve that owns every share. Several sleeves can hold the same ETF (SPY can be held by all five), so ownership is
 tracked per sleeve and must sum to the broker position before any entry is allowed. Only the sleeves listed in
 risk.short_sleeves may hold negative quantities (shorts); shorts are covered by close-only BUYs and never kept overnight.
+
+Long sales only at a profit (risk.long_sales_only_at_profit, user decision 2026-11-25): no order ever sells a long at a
+loss, whatever asked for it (opposite votes, a scheduled flatten, an H exit, a risk lock or halt, a manual flatten).
+A sale is allowed only when its worst-case fill (the SELL limit; a limit never fills lower) nets more than
+risk.min_long_sale_net_usd after the entry order fee and the sale's order and activity fees, per entry lot (Two-vote
+lots are judged on their own entry price and size, so old $10k lots and new $20k lots each have their own break-even).
+A losing long is kept, overnight if needed; shorts are still covered at a loss.
 """
 
 from __future__ import annotations
 
+import hashlib
 import math
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 
 SLEEVES = ("b3", "h_etf", "noise", "vwap", "orb", "two_vote")
-INTRADAY = ("b3", "noise", "vwap", "orb", "two_vote")         # must be flat at every close
+INTRADAY = ("b3", "noise", "vwap", "orb", "two_vote")         # flattened at every close (Two-vote: only lots in profit)
+
+ORDER_FEE = 0.99                     # Moomoo US: $0.99 per order (broker.py corroborates it against cash on every fill)
+
+
+def sale_fee(shares: int) -> float:
+    """Order fee plus the regulatory activity fee on a sale: $0.000166 per share, at most $8.30 (broker.py)."""
+    return ORDER_FEE + min(0.000166 * abs(shares), 8.30)
+
+
+def long_sale_net(entry_price: float, shares: int, sale_price: float) -> float:
+    """Worst-case net P&L of selling `shares` bought at `entry_price` at `sale_price`: price gain minus the entry order
+    fee and the sale's fees."""
+    return shares * (sale_price - entry_price) - ORDER_FEE - sale_fee(shares)
+
+
+def loss_guard(cfg: dict) -> bool:
+    return cfg.get("risk", {}).get("long_sales_only_at_profit") is True
+
+
+def min_sale_net(cfg: dict) -> float:
+    v = cfg.get("risk", {}).get("min_long_sale_net_usd", 0.0)
+    return float(v) if type(v) in (int, float) and math.isfinite(v) and v >= 0 else 0.0
+
+
+def break_even_quote(entry_price: float, shares: int, cfg: dict) -> float:
+    """Lowest quote (in cents) at which the marketable SELL limit planned from it (_limit: quote - limit_offset_bps,
+    rounded to the cent) nets > min_sale_net for `shares` bought at `entry_price`: exactly the rule the guard applies."""
+    off = cfg["risk"]["limit_offset_bps"] / 1e4
+    need = entry_price + (ORDER_FEE + sale_fee(shares) + min_sale_net(cfg)) / shares
+    quote = round(math.floor(need / (1 - off) * 100) / 100 - 0.03, 2)
+    while not long_sale_net(entry_price, shares, _limit(quote, "SELL", cfg)) > min_sale_net(cfg):
+        quote = round(quote + 0.01, 2)
+    return quote
+
+
+def basis_view(sleeves: dict) -> dict:
+    """The part of store.sleeve_performance()["sleeves"] the profit-only rule reads (audited with every decision, so
+    the decision replays exactly): status, positions (qty, cost_basis) and Two-vote entry lots."""
+    return {name: {"status": book.get("status"),
+                   "positions": {sym: {"qty": p.get("qty"), "cost_basis": p.get("cost_basis")}
+                                 for sym, p in (book.get("positions") or {}).items()},
+                   "entry_lots": {sym: [{"id": lot["id"], "shares": lot["shares"], "entry_price": lot["entry_price"],
+                                         "side": lot["side"]} for lot in lots]
+                                  for sym, lots in (book.get("entry_lots") or {}).items()}}
+            for name, book in (sleeves or {}).items()}
+
+
+def long_lots(sleeve: str, symbol: str, basis: dict | None) -> list[dict] | None:
+    """Open long entry lots [{id, shares, entry_price}] from confirmed receipts (store.sleeve_performance): Two-vote's
+    identified lots, oldest first; other sleeves one lot at their weighted average cost. None when unverified."""
+    book = (basis or {}).get(sleeve)
+    if not book or book.get("status") != "available":
+        return None
+    if sleeve == "two_vote":
+        lots = (book.get("entry_lots") or {}).get(symbol)
+        if not lots or any(lot.get("side") != 1 for lot in lots):
+            return None
+        return [{"id": lot["id"], "shares": lot["shares"], "entry_price": lot["entry_price"]} for lot in lots]
+    position = (book.get("positions") or {}).get(symbol)
+    if not position or position.get("qty", 0) <= 0:
+        return None
+    return [{"id": None, "shares": position["qty"], "entry_price": position["cost_basis"] / position["qty"]}]
+
+
+def long_sale_block(state: dict, sleeve: str, symbol: str, qty: int, limit_price: float, cfg: dict, basis: dict | None,
+                    lot_id: str | None = None) -> str | None:
+    """Why selling `qty` of a long at `limit_price` is not allowed (None: allowed). The named lot, else the oldest lots
+    first (the store's attribution), each judged alone: one losing lot blocks the whole order."""
+    if not loss_guard(cfg) or state["sleeves"].get(sleeve, {}).get(symbol, 0) <= 0:
+        return None
+    lots = long_lots(sleeve, symbol, basis)
+    if lots is None:
+        return "cost basis unverified: a long is never sold without proof the sale is profitable"
+    if lot_id is not None:
+        lots = [lot for lot in lots if lot["id"] == lot_id]
+        if len(lots) != 1 or qty > lots[0]["shares"]:
+            return f"lot {lot_id} not open for {qty} shares"
+    left = qty
+    for lot in lots:
+        if left <= 0:
+            break
+        n = min(left, lot["shares"])
+        net = long_sale_net(lot["entry_price"], n, limit_price)
+        if not net > min_sale_net(cfg):
+            return (f"would sell {n} {symbol} bought at {lot['entry_price']:.4f} at a limit of {limit_price:.2f}: "
+                    f"net {net:+.2f} after fees (long sales only at a profit)")
+        left -= n
+    return "close exceeds the verified lots" if left > 0 else None
+
+
+def profitable_long_sales(state: dict, account: "Account", session: str, sleeve: str, symbol: str, reason: str,
+                          cfg: dict, now: datetime, tag: str, basis: dict | None) -> tuple[list["Intent"], list[dict]]:
+    """Close-only SELLs for the long lots that would sell at a profit now, and the lots kept because they would not.
+    Two-vote: one order per profitable lot, naming the lot. Other sleeves: the whole position or nothing."""
+    price = account.quotes.get(symbol)
+    held = state["sleeves"].get(sleeve, {}).get(symbol, 0)
+    if held <= 0 or not price or not math.isfinite(price) or price <= 0:
+        return [], []
+    lots = long_lots(sleeve, symbol, basis)
+    if lots is None or sum(lot["shares"] for lot in lots) != held:
+        return [], [{"sleeve": sleeve, "symbol": symbol, "shares": held, "why": "cost basis unverified"}]
+    limit = _limit(price, "SELL", cfg)
+    sells, kept = [], []
+    for lot in lots:
+        net = long_sale_net(lot["entry_price"], lot["shares"], limit)
+        if net > min_sale_net(cfg):
+            lot_tag = tag if lot["id"] is None else f"{tag}{hashlib.sha256(lot['id'].encode()).hexdigest()[:8]}"
+            i = _intent(now, session, sleeve, symbol, "SELL", lot["shares"], price, reason, cfg, True, lot_tag)
+            i.take_profit_lot_id = lot["id"]
+            sells.append(i)
+        else:
+            kept.append({"sleeve": sleeve, "symbol": symbol, "lot_id": lot["id"], "shares": lot["shares"],
+                         "entry_price": lot["entry_price"], "limit": limit, "net": round(net, 2),
+                         "break_even_quote": break_even_quote(lot["entry_price"], lot["shares"], cfg)})
+    return sells, kept
+
+
+def name_cap(cfg: dict, account: "Account") -> float:
+    """Per-ticker cap, every sleeve summed: risk.name_cap_usd, and at most risk.name_cap_fraction_of_nav of the live
+    account NAV (official rule: no more than 40% of assets in one stock; only price-move breaches are exempt)."""
+    r = cfg["risk"]
+    cap = float(r["name_cap_usd"])
+    frac = r.get("name_cap_fraction_of_nav")
+    if frac is not None:
+        nav = account.nav
+        cap = min(cap, frac * nav) if math.isfinite(nav) and nav > 0 else 0.0
+    return cap
 
 
 @dataclass
@@ -190,10 +325,12 @@ def _intent(now, session, sleeve, symbol, side, qty, ref, reason, cfg, close_onl
 
 
 def plan_flatten(state: dict, account: Account, session: str, reason: str, cfg: dict, now: datetime,
-                 sleeves=SLEEVES) -> list[Intent]:
+                 sleeves=SLEEVES, basis: dict | None = None, kept: list | None = None) -> list[Intent]:
     """Close-only orders for everything the given sleeves own: short covers (BUY) first, then long sales (SELL), so no
     single order crosses the broker's net position through zero. With consistent attribution each sleeve closes its own
-    quantity (sleeves net at the broker); otherwise the order is capped at what the broker shows on that side."""
+    quantity (sleeves net at the broker); otherwise the order is capped at what the broker shows on that side.
+    With risk.long_sales_only_at_profit, longs sell only the lots in profit (`basis`: sleeve_performance()["sleeves"];
+    without it no long is sold). Lots kept are appended to `kept`."""
     consistent = not attribution_errors(state, account)
     covers, sells = [], []
     for sleeve in sleeves:
@@ -206,6 +343,16 @@ def plan_flatten(state: dict, account: Account, session: str, reason: str, cfg: 
                 if n > 0:
                     covers.append(_intent(now, session, sleeve, s, "BUY", n, account.quotes[s], reason, cfg, True,
                                           f"flat{now.strftime('%H%M%S')}"))
+            elif loss_guard(cfg):
+                if not consistent:
+                    (kept if kept is not None else []).append({"sleeve": sleeve, "symbol": s, "shares": q,
+                                                               "why": "attribution mismatch"})
+                    continue
+                lot_sells, held = profitable_long_sales(state, account, session, sleeve, s, reason, cfg, now,
+                                                        f"flat{now.strftime('%H%M%S')}", basis)
+                sells += lot_sells
+                if kept is not None:
+                    kept += held
             else:
                 n = q if consistent else min(q, max(0, broker))   # never sell more than the broker shows
                 if n > 0:
@@ -282,7 +429,7 @@ def plan_b3(state: dict, account: Account, session: str, decision, cfg: dict, no
     if limits["allocation_budget"] is None or limits["allocation_budget"] <= 0:
         return [], "entry blocked: unverified or depleted B3 capital"
     held_value = exposure(state, sym, price)                                 # SPY other sleeves hold, long or short
-    budget = min(limits["target_before_cap"], cfg["risk"]["name_cap_usd"] - held_value, cash_room(account))
+    budget = min(limits["target_before_cap"], name_cap(cfg, account) - held_value, cash_room(account))
     limit = _limit(price, "BUY", cfg)
     qty = math.floor(budget / max(limit, decision.metrics.get("open_0930", limit)))
     if qty <= 0:
@@ -290,13 +437,22 @@ def plan_b3(state: dict, account: Account, session: str, decision, cfg: dict, no
     return [_intent(now, session, "b3", sym, "BUY", qty, price, "b3_target_long", cfg, False, tag)], "entry"
 
 
-def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: dict, now: datetime) -> tuple[list[Intent], str]:
-    """Next-open orders from the last close's H plan: exits first, then entries within the H sleeve limits."""
+def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: dict, now: datetime,
+                basis: dict | None = None, kept: list | None = None) -> tuple[list[Intent], str]:
+    """Next-open orders from the last close's H plan: exits first, then entries within the H sleeve limits.
+    With risk.long_sales_only_at_profit an exit sells only a position in profit (else it is kept, see `kept`)."""
     out = []
     held = state["sleeves"]["h_etf"]
     for s, why in sorted(plan.get("exits", {}).items()):
         q = held.get(s, 0)
         if q > 0 and s in account.quotes:
+            if loss_guard(cfg):
+                sells, losing = profitable_long_sales(state, account, session, "h_etf", s, f"h_{why}", cfg, now,
+                                                      "open", basis)
+                out += sells
+                if kept is not None:
+                    kept += losing
+                continue
             out.append(_intent(now, session, "h_etf", s, "SELL", q, account.quotes[s], f"h_{why}", cfg, True, "open"))
     entries = [s for s in dict.fromkeys(plan.get("entries", [])) if held.get(s, 0) == 0]
     if not entries:
@@ -322,7 +478,7 @@ def plan_h_open(state: dict, account: Account, session: str, plan: dict, cfg: di
             continue
         limit = _limit(price, "BUY", cfg)
         held_value = exposure(state, s, max(price, limit))                # every sleeve counts toward the cap
-        budget = min(limits["per_etf_budget"], cfg["risk"]["name_cap_usd"] - held_value, room, cash)
+        budget = min(limits["per_etf_budget"], name_cap(cfg, account) - held_value, room, cash)
         qty = math.floor(budget / limit)
         if qty <= 0:
             continue
@@ -390,7 +546,7 @@ def plan_entry(state: dict, account: Account, session: str, sleeve: str, symbol:
     limit = _limit(ref_price, order_side, cfg)
     open_gross = sum(abs(q) * account.quotes.get(s, 0.0) for s, q in state["sleeves"].get(sleeve, {}).items())
     budget = min(limits["per_trade_notional"], limits["aggregate_limit"] - open_gross,
-                 cfg["risk"]["name_cap_usd"] - exposure(state, symbol, ref_price), cash_room(account))
+                 name_cap(cfg, account) - exposure(state, symbol, ref_price), cash_room(account))
     factor = 0.5 if state["reduced"] else 1.0
     qty = min(int(risk_qty * factor), math.floor(max(0.0, budget) / max(limit, ref_price)))
     if qty <= 0:
@@ -403,7 +559,8 @@ def plan_entry(state: dict, account: Account, session: str, sleeve: str, symbol:
 def plan_vote_entry(state: dict, account: Account, session: str, symbol: str, side: int, cfg: dict,
                     now: datetime, tag: str) -> tuple[list[Intent], str]:
     """One two-vote lot: two_vote.entry_usd (half size when reduced), within the sleeve's $80k book, the cross-sleeve per-symbol
-    cap and cash. Unlike plan_entry, several lots of the same symbol may be open; the runner enforces the lot count."""
+    cap (name_cap) and cash; a top-up below two_vote.min_lot_usd is skipped. Several lots of the same symbol may be open;
+    the runner enforces two_vote.max_lots_per_symbol when it is set (null: the dollar cap alone, user decision 2026-11-25)."""
     if side < 0 and not shorts_allowed("two_vote", cfg):
         return [], "entry blocked: two_vote may not short"
     why = (entry_block(state, account, session, cfg, "two_vote") or no_entry_reason("two_vote", session, now, cfg)
@@ -420,10 +577,13 @@ def plan_vote_entry(state: dict, account: Account, session: str, symbol: str, si
     limit = _limit(price, order_side, cfg)
     open_gross = sum(abs(q) * account.quotes.get(s, 0.0) for s, q in state["sleeves"].get("two_vote", {}).items())
     budget = min(limits["per_trade_notional"], limits["aggregate_limit"] - open_gross,
-                 cfg["risk"]["name_cap_usd"] - exposure(state, symbol, price), cash_room(account))
+                 name_cap(cfg, account) - exposure(state, symbol, price), cash_room(account))
     qty = math.floor(max(0.0, budget) / max(limit, price))
     if qty <= 0:
         return [], "entry size zero"
+    min_lot = cfg["two_vote"].get("min_lot_usd") or 0
+    if qty * max(limit, price) < min_lot:
+        return [], f"entry blocked: room for ${qty * max(limit, price):,.0f} is below the ${min_lot:,.0f} minimum lot"
     i = _intent(now, session, "two_vote", symbol, order_side, qty, price,
                 f"two_vote_{'long' if side > 0 else 'short'}", cfg, False, tag)
     i.opens_short = side < 0
@@ -469,7 +629,7 @@ def plan_target(state: dict, account: Account, session: str, sleeve: str, symbol
     side = "BUY" if target > 0 else "SELL"
     limit = _limit(ref_price, side, cfg)
     others = exposure(state, symbol, ref_price) - abs(held) * ref_price      # this sleeve's old side is being closed
-    budget = min(limits["target_before_cap"], cfg["risk"]["name_cap_usd"] - others,
+    budget = min(limits["target_before_cap"], name_cap(cfg, account) - others,
                  cash_room(account) + abs(held) * ref_price)
     qty = math.floor(max(0.0, budget) / max(limit, open0, ref_price))
     if qty <= 0:

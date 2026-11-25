@@ -80,7 +80,8 @@ class Monitor:
         day = now.astimezone(NY).date()
         base = {"schema_version": 1, "observed_at": now.isoformat(), "symbols": SYMBOLS,
                 "required_votes": DEFAULT_VOTES, "entry_usd": LOT_USD,
-                "max_open_positions": len(SYMBOLS) * LOTS_PER_SYMBOL}
+                # null max_lots_per_symbol: lots are limited by the per-ticker dollar cap only
+                "max_open_positions": None if LOTS_PER_SYMBOL is None else len(SYMBOLS) * LOTS_PER_SYMBOL}
         bounds = session_bounds(day)
         if not bounds or now >= bounds[1]:
             return {**base, "status": "closed"}

@@ -1,5 +1,7 @@
 # Moo-Moo porting guide
 
+**Competition write-up:** [COMPETITION.md](COMPETITION.md), covering the strategy, risk controls, validation, the exit backtest and live results.
+
 Updated 23 November 2026. Run the H ETF and Two-vote dashboard locally on Linux, Windows, or macOS.
 
 ## Install on a new device

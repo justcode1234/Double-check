@@ -390,3 +390,19 @@ def test_process_appearing_after_preflight_blocks_launch(scheduler, project, mon
     monkeypatch.setattr(scheduler, 'preflight', appeared)
     assert scheduler.tick(project)['status'] == 'blocked'
     assert not (project / 'loop-ran').exists()
+
+
+@pytest.mark.parametrize('sleeves,blocked', [
+    ({'two_vote': {'US.SPY': 13, 'US.QQQ': 30}}, False),     # user decision 2026-11-25: Two-vote longs may carry
+    ({'two_vote': {'US.QQQ': -30}}, True),                     # shorts never carry overnight
+    ({'orb': {'US.SPY': 5}}, True), ({'vwap': {'US.QQQ': 5}}, True), ({'noise': {'US.SPY': 5}}, True)])
+def test_only_two_vote_longs_may_carry_overnight(scheduler, project, sleeves, blocked):
+    path = project / 'private/competition/live/state.json'
+    state = json.loads(path.read_text())
+    state['sleeves'] = {**state['sleeves'], **sleeves}
+    path.write_text(json.dumps(state))
+    if blocked:
+        with pytest.raises(scheduler.Blocked, match='prior_intraday_position_not_flat'):
+            scheduler.local_preflight(project, '2026-11-23')
+    else:
+        assert scheduler.local_preflight(project, '2026-11-23')['sleeves']['two_vote'] == sleeves['two_vote']

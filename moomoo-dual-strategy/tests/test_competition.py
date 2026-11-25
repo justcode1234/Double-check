@@ -17,6 +17,9 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[1]
 CFG = load_config(PROJECT)
 CFG["risk"]["legacy_exit_only"] = False  # Exercise the original entry and sizing rules.
+# Exercise the original exit mechanics on positions set directly in state (no receipts). The live profit-only rule
+# (risk.long_sales_only_at_profit) has its own tests in test_long_sales_only_at_profit.py.
+CFG["risk"]["long_sales_only_at_profit"] = False
 
 
 def session(day, close_hour=16):

@@ -926,8 +926,15 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   await load({data:absent});
   assert.match(text('sleeves'), /H ETF sleeve.*\$20,000.00 allocation/);
   assert.match(text('mode-badge'), /H entries enabled/);
-  assert.match(text('vote-budget'), /\$20,000.00 per position · 2 positions per ticker.*\$40,000.00 cap/);
+  assert.match(text('vote-budget'), /\$20,000.00 per position · positions added up to the per-ticker cap · \$40,000.00 cap per ticker \(at most 39.5% of NAV\) · Longs are never sold at a loss/);
+  assert.doesNotMatch(text('vote-budget'), /Saved for the next session/);
+  absent.config_pending = {two_vote: {entry_usd: 30000, max_lots_per_symbol: 1, take_profit_usd: 150}};
+  await load({data:absent});
+  assert.match(text('vote-budget'), /\$20,000.00 per position.*Saved for the next session start: \$30,000.00 per position, 1 position per ticker, \$150.00 target$/);
+  absent.config_pending = {};
+  await load({data:absent});
   const voteHolding = fresh();
+  voteHolding.config.two_vote.take_profit_usd = 100;                      // live config has none; exercise the display
   voteHolding.config.risk.legacy_exit_only = true;
   voteHolding.config.risk.entry_sleeves = ['h_etf','two_vote'];
   voteHolding.vote_signals = {status:'stale'};
@@ -940,6 +947,10 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   await load({data:voteHolding});
   assert.match(text('vote-cards'), /QQQ.*Paper position15 long.*Verified by Moomoo.*\$9,000.00/);
   assert.match(text('vote-cards'), /SPY.*\$100.00 profit triggers2.*QQQ.*\$100.00 profit triggers3/);
+  const noTarget = structuredClone(voteHolding); noTarget.config.two_vote.take_profit_usd = null;
+  await load({data:noTarget});
+  assert.doesNotMatch(text('vote-cards'), /profit triggers/);
+  await load({data:voteHolding});
   assert.match(text('sleeves'), /Profit triggers1.*New entry size\$10,000.00.*\$20.00 profit target/);
   assert.doesNotMatch(text('sleeves'), /QQQ|Sleeve attribution unavailable/);
   voteHolding.live.sleeves.h_etf = {'US.QQQ':5};
@@ -1078,7 +1089,7 @@ def test_open_positions_show_entry_price_cost_mark_and_profit_exit():
     assert rows[0] == {'sleeve': 'two_vote', 'symbol': 'US.QQQ', 'qty': -15, 'side': 'short', 'entry_price': 634.875,
                        'cost': pytest.approx(9523.125), 'opened_at': '2026-11-24T10:30:18-05:00', 'mark_price': 635.9,
                        'value': pytest.approx(9538.5), 'unrealized_gross': pytest.approx(-15.375),
-                       'take_profit_usd': 50, 'take_profit_price': pytest.approx(631.5417)}
+                       'take_profit_usd': 50, 'take_profit_price': pytest.approx(631.5417), 'sell_floor_price': None}
     xlv = rows[1]
     assert (xlv['symbol'], xlv['side'], xlv['entry_price'], xlv['opened_at']) == ('US.XLV', 'long', pytest.approx(178.95),
                                                                                '2026-11-20T09:30:35-05:00')
@@ -1087,3 +1098,41 @@ def test_open_positions_show_entry_price_cost_mark_and_profit_exit():
     assert len(rows) == 2                                                                        # flat XLP skipped
     rows = _open_positions(performance, cfg, {'h_take_profit_targets': {'US.XLV': 20}})
     assert rows[1]['take_profit_price'] == pytest.approx(180.7682)
+    # risk.long_sales_only_at_profit: each long shows the lowest quote it may be sold at (net > $0 after fees);
+    # shorts have no floor (they may be covered at a loss).
+    cfg['risk'] = {'long_sales_only_at_profit': True, 'limit_offset_bps': 5, 'min_long_sale_net_usd': 0.0}
+    rows = _open_positions(performance, cfg, {'h_take_profit_targets': {}})
+    assert rows[0]['sell_floor_price'] is None and rows[1]['sell_floor_price'] == 179.23
+
+
+def test_dashboard_shows_the_running_runners_settings_not_the_edited_file(tmp_path, monkeypatch):
+    from dual_strategy.competition import report
+    from dual_strategy.competition.planner import new_state
+    from dual_strategy.competition.store import Store, load_config
+
+    (tmp_path / 'config').mkdir()
+    shutil.copyfile(Path(__file__).resolve().parents[1] / 'config' / 'competition.yaml', tmp_path / 'config' / 'competition.yaml')
+    cfg = load_config(tmp_path)
+    store = Store(tmp_path, {**cfg, 'state_dir': 'private/competition/live'})
+    store.save(new_state())
+    now = datetime.fromisoformat('2026-11-24T17:00:00+00:00')
+    session = '2026-11-24'
+    old = {**cfg, 'two_vote': {**cfg['two_vote'], 'entry_usd': 10000, 'max_lots_per_symbol': 4, 'take_profit_usd': 50},
+           'risk': {**cfg['risk'], 'halt_drawdown_fraction': 0.035}}
+    pid = 'provenance/' + 'a' * 32
+    (store.dir / 'audit' / 'provenance').mkdir(parents=True)
+    (store.dir / 'audit' / f'{pid}.json').write_text(json.dumps({'kind': 'provenance', 'config': old}), encoding='utf-8')
+    (store.dir / 'audit' / session).mkdir(parents=True)
+    (store.dir / 'audit' / session / 'risk.json').write_text(json.dumps({'kind': 'risk', 'provenance_id': pid}), encoding='utf-8')
+
+    monkeypatch.setattr(report, '_process', lambda project: {'status': 'running', 'count': 1})
+    status = report.competition_payload(tmp_path, now)
+    assert status['config_source'] == 'running runner'
+    assert (status['config']['two_vote']['take_profit_usd'], status['config']['risk']['halt_drawdown_fraction']) == (50, 0.035)
+    assert status['config_pending']['two_vote']['take_profit_usd'] is cfg['two_vote']['take_profit_usd'] is None
+    monkeypatch.setattr(report, '_process', lambda project: {'status': 'stopped', 'count': 0})
+    status = report.competition_payload(tmp_path, now)
+    assert status['config_source'] == 'config file' and status['config_pending'] == {}
+    assert status['config']['two_vote']['take_profit_usd'] is None
+    (store.dir / 'audit' / session / 'risk.json').write_text(json.dumps({'provenance_id': '../../etc/passwd'}), encoding='utf-8')
+    assert report._runner_config(store, session) is None

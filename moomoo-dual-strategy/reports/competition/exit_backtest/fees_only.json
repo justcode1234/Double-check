@@ -1,0 +1,1062 @@
+{
+ "note": "HYPOTHETICAL replay on cached research bars; research cost model; conservative intrabar order",
+ "data": {
+  "from": "2021-01-04",
+  "to": "2026-11-20",
+  "sessions": 1477
+ },
+ "variants": {
+  "A  current: $100 target + vote flip + 04:55 close": {
+   "params": {
+    "tp": 100,
+    "sl": null,
+    "trail": null,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 13763,
+    "net_usd": 15975.75,
+    "win_rate_pct": 49.6,
+    "avg_win": 72.2,
+    "avg_loss": -68.79,
+    "expectancy_usd": 1.16,
+    "profit_factor": 1.03,
+    "worst_trade": -771.41,
+    "worst_day": -3392.78,
+    "max_drawdown_usd": 13121.61,
+    "sharpe_daily_ann": 0.37,
+    "exits": {
+     "target": 4139,
+     "flip": 5313,
+     "eod": 4311
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 4279,
+    "net_usd": 18012.19,
+    "win_rate_pct": 49.1,
+    "avg_win": 69.51,
+    "avg_loss": -58.73,
+    "expectancy_usd": 4.21,
+    "profit_factor": 1.14,
+    "worst_trade": -548.29,
+    "worst_day": -1961.21,
+    "max_drawdown_usd": 7768.48,
+    "sharpe_daily_ann": 1.43,
+    "exits": {
+     "target": 1201,
+     "flip": 1616,
+     "eod": 1462
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 611,
+    "net_usd": 7774.56,
+    "win_rate_pct": 51.7,
+    "avg_win": 66.33,
+    "avg_loss": -44.69,
+    "expectancy_usd": 12.72,
+    "profit_factor": 1.59,
+    "worst_trade": -271.62,
+    "worst_day": -651.9,
+    "max_drawdown_usd": 1165.73,
+    "sharpe_daily_ann": 4.4,
+    "exits": {
+     "flip": 229,
+     "target": 162,
+     "eod": 220
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 72,
+    "net_usd": 4550.01,
+    "win_rate_pct": 79.2,
+    "avg_win": 96.64,
+    "avg_loss": -63.92,
+    "expectancy_usd": 63.19,
+    "profit_factor": 5.75,
+    "worst_trade": -195.78,
+    "worst_day": 132.38,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 16.26,
+    "exits": {
+     "target": 56,
+     "flip": 4,
+     "eod": 12
+    }
+   }
+  },
+  "B  + stop = target ($100/$100)": {
+   "params": {
+    "tp": 100,
+    "sl": 100,
+    "trail": null,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 15177,
+    "net_usd": 5258.11,
+    "win_rate_pct": 46.4,
+    "avg_win": 73.25,
+    "avg_loss": -62.86,
+    "expectancy_usd": 0.35,
+    "profit_factor": 1.01,
+    "worst_trade": -103.4,
+    "worst_day": -1692.39,
+    "max_drawdown_usd": 15085.82,
+    "sharpe_daily_ann": 0.14,
+    "exits": {
+     "target": 4385,
+     "stop": 3046,
+     "flip": 4364,
+     "eod": 3382
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 4698,
+    "net_usd": 5800.34,
+    "win_rate_pct": 46.3,
+    "avg_win": 70.32,
+    "avg_loss": -58.22,
+    "expectancy_usd": 1.23,
+    "profit_factor": 1.04,
+    "worst_trade": -103.4,
+    "worst_day": -1426.23,
+    "max_drawdown_usd": 9094.14,
+    "sharpe_daily_ann": 0.52,
+    "exits": {
+     "target": 1267,
+     "stop": 807,
+     "flip": 1383,
+     "eod": 1241
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 664,
+    "net_usd": 6423.2,
+    "win_rate_pct": 50.5,
+    "avg_win": 68.42,
+    "avg_loss": -50.15,
+    "expectancy_usd": 9.67,
+    "profit_factor": 1.39,
+    "worst_trade": -101.99,
+    "worst_day": -647.14,
+    "max_drawdown_usd": 1194.87,
+    "sharpe_daily_ann": 4.21,
+    "exits": {
+     "flip": 206,
+     "target": 181,
+     "eod": 198,
+     "stop": 79
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 108,
+    "net_usd": 3842.19,
+    "win_rate_pct": 68.5,
+    "avg_win": 94.82,
+    "avg_loss": -93.38,
+    "expectancy_usd": 35.58,
+    "profit_factor": 2.21,
+    "worst_trade": -101.99,
+    "worst_day": 168.89,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 18.98,
+    "exits": {
+     "target": 70,
+     "stop": 30,
+     "eod": 6,
+     "flip": 2
+    }
+   }
+  },
+  "C  + tight stop ($100 target / $50 stop)": {
+   "params": {
+    "tp": 100,
+    "sl": 50,
+    "trail": null,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 19125,
+    "net_usd": -6955.45,
+    "win_rate_pct": 37.3,
+    "avg_win": 74.86,
+    "avg_loss": -45.12,
+    "expectancy_usd": -0.36,
+    "profit_factor": 0.99,
+    "worst_trade": -52.55,
+    "worst_day": -1375.65,
+    "max_drawdown_usd": 18423.11,
+    "sharpe_daily_ann": -0.2,
+    "exits": {
+     "stop": 9048,
+     "target": 4607,
+     "flip": 2998,
+     "eod": 2472
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 5783,
+    "net_usd": -1795.97,
+    "win_rate_pct": 37.5,
+    "avg_win": 71.83,
+    "avg_loss": -43.51,
+    "expectancy_usd": -0.31,
+    "profit_factor": 0.99,
+    "worst_trade": -52.21,
+    "worst_day": -1172.16,
+    "max_drawdown_usd": 13487.68,
+    "sharpe_daily_ann": -0.17,
+    "exits": {
+     "target": 1306,
+     "stop": 2581,
+     "flip": 976,
+     "eod": 920
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 807,
+    "net_usd": 6264.48,
+    "win_rate_pct": 43.6,
+    "avg_win": 71.0,
+    "avg_loss": -41.16,
+    "expectancy_usd": 7.76,
+    "profit_factor": 1.33,
+    "worst_trade": -51.99,
+    "worst_day": -676.39,
+    "max_drawdown_usd": 1187.43,
+    "sharpe_daily_ann": 4.25,
+    "exits": {
+     "stop": 288,
+     "flip": 164,
+     "target": 200,
+     "eod": 155
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 160,
+    "net_usd": 3870.37,
+    "win_rate_pct": 51.2,
+    "avg_win": 95.58,
+    "avg_loss": -50.86,
+    "expectancy_usd": 24.19,
+    "profit_factor": 1.98,
+    "worst_trade": -51.99,
+    "worst_day": 72.06,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 24.26,
+    "exits": {
+     "stop": 75,
+     "target": 78,
+     "flip": 3,
+     "eod": 4
+    }
+   }
+  },
+  "D  wider ($200 target / $100 stop)": {
+   "params": {
+    "tp": 200,
+    "sl": 100,
+    "trail": null,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 12520,
+    "net_usd": 17404.81,
+    "win_rate_pct": 41.6,
+    "avg_win": 88.72,
+    "avg_loss": -60.77,
+    "expectancy_usd": 1.39,
+    "profit_factor": 1.04,
+    "worst_trade": -102.73,
+    "worst_day": -1751.72,
+    "max_drawdown_usd": 14702.76,
+    "sharpe_daily_ann": 0.41,
+    "exits": {
+     "stop": 2544,
+     "target": 1195,
+     "flip": 4540,
+     "eod": 4241
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 3925,
+    "net_usd": 8274.02,
+    "win_rate_pct": 41.9,
+    "avg_win": 82.54,
+    "avg_loss": -55.86,
+    "expectancy_usd": 2.11,
+    "profit_factor": 1.06,
+    "worst_trade": -101.99,
+    "worst_day": -1424.25,
+    "max_drawdown_usd": 9119.92,
+    "sharpe_daily_ann": 0.68,
+    "exits": {
+     "target": 353,
+     "flip": 1429,
+     "eod": 1479,
+     "stop": 664
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 556,
+    "net_usd": 7686.79,
+    "win_rate_pct": 47.5,
+    "avg_win": 80.63,
+    "avg_loss": -46.57,
+    "expectancy_usd": 13.83,
+    "profit_factor": 1.57,
+    "worst_trade": -101.99,
+    "worst_day": -647.14,
+    "max_drawdown_usd": 1350.55,
+    "sharpe_daily_ann": 4.13,
+    "exits": {
+     "flip": 211,
+     "eod": 227,
+     "stop": 60,
+     "target": 58
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 65,
+    "net_usd": 5013.68,
+    "win_rate_pct": 70.8,
+    "avg_win": 148.76,
+    "avg_loss": -96.28,
+    "expectancy_usd": 77.13,
+    "profit_factor": 3.74,
+    "worst_trade": -101.99,
+    "worst_day": 320.2,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 18.36,
+    "exits": {
+     "flip": 5,
+     "eod": 14,
+     "target": 29,
+     "stop": 17
+    }
+   }
+  },
+  "E  trailing $100, no target": {
+   "params": {
+    "tp": null,
+    "sl": null,
+    "trail": 100,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 13961,
+    "net_usd": 7479.63,
+    "win_rate_pct": 40.0,
+    "avg_win": 74.74,
+    "avg_loss": -48.87,
+    "expectancy_usd": 0.54,
+    "profit_factor": 1.02,
+    "worst_trade": -101.99,
+    "worst_day": -1352.3,
+    "max_drawdown_usd": 13746.71,
+    "sharpe_daily_ann": 0.19,
+    "exits": {
+     "trail": 6771,
+     "flip": 3681,
+     "eod": 3509
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 4324,
+    "net_usd": -3699.1,
+    "win_rate_pct": 40.0,
+    "avg_win": 67.65,
+    "avg_loss": -46.5,
+    "expectancy_usd": -0.86,
+    "profit_factor": 0.97,
+    "worst_trade": -101.99,
+    "worst_day": -1086.49,
+    "max_drawdown_usd": 13746.71,
+    "sharpe_daily_ann": -0.32,
+    "exits": {
+     "trail": 1924,
+     "flip": 1194,
+     "eod": 1206
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 583,
+    "net_usd": 4833.64,
+    "win_rate_pct": 45.1,
+    "avg_win": 65.04,
+    "avg_loss": -38.35,
+    "expectancy_usd": 8.29,
+    "profit_factor": 1.39,
+    "worst_trade": -101.98,
+    "worst_day": -655.58,
+    "max_drawdown_usd": 1307.42,
+    "sharpe_daily_ann": 3.23,
+    "exits": {
+     "flip": 185,
+     "eod": 199,
+     "trail": 199
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 78,
+    "net_usd": 3355.79,
+    "win_rate_pct": 57.7,
+    "avg_win": 107.34,
+    "avg_loss": -44.68,
+    "expectancy_usd": 43.02,
+    "profit_factor": 3.28,
+    "worst_trade": -101.98,
+    "worst_day": -359.01,
+    "max_drawdown_usd": 359.01,
+    "sharpe_daily_ann": 15.75,
+    "exits": {
+     "trail": 70,
+     "flip": 4,
+     "eod": 4
+    }
+   }
+  },
+  "F  trailing $150, no target": {
+   "params": {
+    "tp": null,
+    "sl": null,
+    "trail": 150,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 11788,
+    "net_usd": 16237.34,
+    "win_rate_pct": 42.0,
+    "avg_win": 83.23,
+    "avg_loss": -57.79,
+    "expectancy_usd": 1.38,
+    "profit_factor": 1.04,
+    "worst_trade": -151.99,
+    "worst_day": -1670.1,
+    "max_drawdown_usd": 12546.42,
+    "sharpe_daily_ann": 0.39,
+    "exits": {
+     "trail": 2679,
+     "flip": 4649,
+     "eod": 4460
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 3680,
+    "net_usd": 2795.51,
+    "win_rate_pct": 42.4,
+    "avg_win": 74.15,
+    "avg_loss": -53.19,
+    "expectancy_usd": 0.76,
+    "profit_factor": 1.02,
+    "worst_trade": -151.99,
+    "worst_day": -1670.1,
+    "max_drawdown_usd": 10192.87,
+    "sharpe_daily_ann": 0.23,
+    "exits": {
+     "trail": 720,
+     "flip": 1466,
+     "eod": 1494
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 520,
+    "net_usd": 7232.88,
+    "win_rate_pct": 48.7,
+    "avg_win": 71.97,
+    "avg_loss": -41.1,
+    "expectancy_usd": 13.91,
+    "profit_factor": 1.66,
+    "worst_trade": -151.08,
+    "worst_day": -651.9,
+    "max_drawdown_usd": 1328.05,
+    "sharpe_daily_ann": 4.47,
+    "exits": {
+     "flip": 220,
+     "eod": 235,
+     "trail": 65
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 51,
+    "net_usd": 4469.48,
+    "win_rate_pct": 78.4,
+    "avg_win": 125.48,
+    "avg_loss": -49.97,
+    "expectancy_usd": 87.64,
+    "profit_factor": 9.13,
+    "worst_trade": -113.1,
+    "worst_day": 233.31,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 24.98,
+    "exits": {
+     "trail": 31,
+     "eod": 16,
+     "flip": 4
+    }
+   }
+  },
+  "G  $100 target + trailing $100": {
+   "params": {
+    "tp": 100,
+    "sl": null,
+    "trail": 100,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 16894,
+    "net_usd": -1057.81,
+    "win_rate_pct": 40.4,
+    "avg_win": 74.07,
+    "avg_loss": -50.25,
+    "expectancy_usd": -0.06,
+    "profit_factor": 1.0,
+    "worst_trade": -101.99,
+    "worst_day": -1476.34,
+    "max_drawdown_usd": 14090.9,
+    "sharpe_daily_ann": -0.03,
+    "exits": {
+     "trail": 6162,
+     "target": 4334,
+     "flip": 3637,
+     "eod": 2761
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 5152,
+    "net_usd": -1878.1,
+    "win_rate_pct": 40.2,
+    "avg_win": 70.77,
+    "avg_loss": -48.22,
+    "expectancy_usd": -0.36,
+    "profit_factor": 0.99,
+    "worst_trade": -101.99,
+    "worst_day": -1086.49,
+    "max_drawdown_usd": 13630.71,
+    "sharpe_daily_ann": -0.17,
+    "exits": {
+     "target": 1223,
+     "trail": 1709,
+     "flip": 1184,
+     "eod": 1036
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 712,
+    "net_usd": 5385.16,
+    "win_rate_pct": 44.8,
+    "avg_win": 67.74,
+    "avg_loss": -41.28,
+    "expectancy_usd": 7.56,
+    "profit_factor": 1.33,
+    "worst_trade": -101.99,
+    "worst_day": -655.58,
+    "max_drawdown_usd": 1257.42,
+    "sharpe_daily_ann": 3.42,
+    "exits": {
+     "flip": 184,
+     "target": 170,
+     "eod": 183,
+     "trail": 175
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 127,
+    "net_usd": 3426.45,
+    "win_rate_pct": 52.8,
+    "avg_win": 95.02,
+    "avg_loss": -49.0,
+    "expectancy_usd": 26.98,
+    "profit_factor": 2.17,
+    "worst_trade": -101.99,
+    "worst_day": -431.41,
+    "max_drawdown_usd": 431.41,
+    "sharpe_daily_ann": 13.26,
+    "exits": {
+     "target": 64,
+     "trail": 55,
+     "flip": 4,
+     "eod": 4
+    }
+   }
+  },
+  "H  no target, no stop (flip + close only)": {
+   "params": {
+    "tp": null,
+    "sl": null,
+    "trail": null,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 10904,
+    "net_usd": 29508.0,
+    "win_rate_pct": 43.6,
+    "avg_win": 89.05,
+    "avg_loss": -64.01,
+    "expectancy_usd": 2.71,
+    "profit_factor": 1.07,
+    "worst_trade": -771.41,
+    "worst_day": -3412.44,
+    "max_drawdown_usd": 11614.52,
+    "sharpe_daily_ann": 0.59,
+    "exits": {
+     "flip": 5396,
+     "eod": 5508
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 3412,
+    "net_usd": 17798.18,
+    "win_rate_pct": 43.3,
+    "avg_win": 82.88,
+    "avg_loss": -53.99,
+    "expectancy_usd": 5.22,
+    "profit_factor": 1.17,
+    "worst_trade": -520.87,
+    "worst_day": -1960.23,
+    "max_drawdown_usd": 7392.77,
+    "sharpe_daily_ann": 1.07,
+    "exits": {
+     "flip": 1642,
+     "eod": 1770
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 489,
+    "net_usd": 8258.42,
+    "win_rate_pct": 48.9,
+    "avg_win": 77.47,
+    "avg_loss": -41.03,
+    "expectancy_usd": 16.89,
+    "profit_factor": 1.81,
+    "worst_trade": -271.62,
+    "worst_day": -651.9,
+    "max_drawdown_usd": 1235.13,
+    "sharpe_daily_ann": 4.43,
+    "exits": {
+     "flip": 234,
+     "eod": 255
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 28,
+    "net_usd": 5170.24,
+    "win_rate_pct": 85.7,
+    "avg_win": 223.98,
+    "avg_loss": -51.33,
+    "expectancy_usd": 184.65,
+    "profit_factor": 26.18,
+    "worst_trade": -70.29,
+    "worst_day": 219.05,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 17.97,
+    "exits": {
+     "flip": 8,
+     "eod": 20
+    }
+   }
+  },
+  "I  $100 target, NO vote-flip exit": {
+   "params": {
+    "tp": 100,
+    "sl": null,
+    "trail": null,
+    "flip": false,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 8084,
+    "net_usd": 6032.62,
+    "win_rate_pct": 58.9,
+    "avg_win": 77.67,
+    "avg_loss": -109.58,
+    "expectancy_usd": 0.75,
+    "profit_factor": 1.02,
+    "worst_trade": -2431.27,
+    "worst_day": -8373.81,
+    "max_drawdown_usd": 19633.46,
+    "sharpe_daily_ann": 0.13,
+    "exits": {
+     "target": 3225,
+     "eod": 4859
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 2516,
+    "net_usd": -3863.06,
+    "win_rate_pct": 57.0,
+    "avg_win": 73.99,
+    "avg_loss": -101.64,
+    "expectancy_usd": -1.54,
+    "profit_factor": 0.96,
+    "worst_trade": -2431.27,
+    "worst_day": -8373.81,
+    "max_drawdown_usd": 17771.95,
+    "sharpe_daily_ann": -0.22,
+    "exits": {
+     "target": 901,
+     "eod": 1615
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 380,
+    "net_usd": 5573.94,
+    "win_rate_pct": 61.1,
+    "avg_win": 72.5,
+    "avg_loss": -75.99,
+    "expectancy_usd": 14.67,
+    "profit_factor": 1.5,
+    "worst_trade": -271.62,
+    "worst_day": -603.53,
+    "max_drawdown_usd": 1939.05,
+    "sharpe_daily_ann": 3.04,
+    "exits": {
+     "target": 148,
+     "eod": 232
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 66,
+    "net_usd": 4557.05,
+    "win_rate_pct": 86.4,
+    "avg_win": 95.13,
+    "avg_loss": -96.16,
+    "expectancy_usd": 69.05,
+    "profit_factor": 6.27,
+    "worst_trade": -195.78,
+    "worst_day": 46.0,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 16.16,
+    "exits": {
+     "target": 55,
+     "eod": 11
+    }
+   }
+  },
+  "J  $100/$100 target+stop, NO vote-flip exit": {
+   "params": {
+    "tp": 100,
+    "sl": 100,
+    "trail": null,
+    "flip": false,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 11695,
+    "net_usd": -74.96,
+    "win_rate_pct": 51.1,
+    "avg_win": 79.67,
+    "avg_loss": -83.2,
+    "expectancy_usd": -0.01,
+    "profit_factor": 1.0,
+    "worst_trade": -103.4,
+    "worst_day": -2043.8,
+    "max_drawdown_usd": 15794.69,
+    "sharpe_daily_ann": -0.0,
+    "exits": {
+     "target": 4231,
+     "stop": 4113,
+     "eod": 3351
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 3583,
+    "net_usd": 2053.32,
+    "win_rate_pct": 51.4,
+    "avg_win": 75.68,
+    "avg_loss": -78.72,
+    "expectancy_usd": 0.57,
+    "profit_factor": 1.01,
+    "worst_trade": -103.4,
+    "worst_day": -1325.81,
+    "max_drawdown_usd": 9950.62,
+    "sharpe_daily_ann": 0.18,
+    "exits": {
+     "target": 1209,
+     "stop": 1143,
+     "eod": 1231
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 483,
+    "net_usd": 4149.49,
+    "win_rate_pct": 56.5,
+    "avg_win": 73.64,
+    "avg_loss": -75.98,
+    "expectancy_usd": 8.59,
+    "profit_factor": 1.26,
+    "worst_trade": -101.99,
+    "worst_day": -519.41,
+    "max_drawdown_usd": 2041.24,
+    "sharpe_daily_ann": 2.53,
+    "exits": {
+     "stop": 122,
+     "target": 177,
+     "eod": 184
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 106,
+    "net_usd": 4137.69,
+    "win_rate_pct": 70.8,
+    "avg_win": 94.87,
+    "avg_loss": -96.04,
+    "expectancy_usd": 39.03,
+    "profit_factor": 2.39,
+    "worst_trade": -101.99,
+    "worst_day": 289.59,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 22.46,
+    "exits": {
+     "target": 71,
+     "stop": 29,
+     "eod": 6
+    }
+   }
+  },
+  "K  until tonight: $10k lots x4, $50 target, fresh-agreement entries": {
+   "params": {
+    "tp": 50,
+    "sl": null,
+    "trail": null,
+    "flip": true,
+    "entry_rule": "fresh",
+    "lot_usd": 10000,
+    "max_lots": 4
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 8730,
+    "net_usd": -4651.41,
+    "win_rate_pct": 46.4,
+    "avg_win": 33.48,
+    "avg_loss": -29.98,
+    "expectancy_usd": -0.53,
+    "profit_factor": 0.97,
+    "worst_trade": -386.7,
+    "worst_day": -616.8,
+    "max_drawdown_usd": 7266.47,
+    "sharpe_daily_ann": -0.37,
+    "exits": {
+     "target": 2244,
+     "flip": 3673,
+     "eod": 2813
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 2789,
+    "net_usd": -382.24,
+    "win_rate_pct": 45.1,
+    "avg_win": 31.4,
+    "avg_loss": -26.01,
+    "expectancy_usd": -0.14,
+    "profit_factor": 0.99,
+    "worst_trade": -221.18,
+    "worst_day": -616.8,
+    "max_drawdown_usd": 4402.82,
+    "sharpe_daily_ann": -0.1,
+    "exits": {
+     "target": 628,
+     "eod": 1023,
+     "flip": 1138
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 387,
+    "net_usd": 1339.26,
+    "win_rate_pct": 47.0,
+    "avg_win": 29.48,
+    "avg_loss": -19.64,
+    "expectancy_usd": 3.46,
+    "profit_factor": 1.33,
+    "worst_trade": -119.72,
+    "worst_day": -188.87,
+    "max_drawdown_usd": 637.15,
+    "sharpe_daily_ann": 3.06,
+    "exits": {
+     "flip": 163,
+     "target": 78,
+     "eod": 146
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 26,
+    "net_usd": 1050.22,
+    "win_rate_pct": 92.3,
+    "avg_win": 45.24,
+    "avg_loss": -17.71,
+    "expectancy_usd": 40.39,
+    "profit_factor": 30.65,
+    "worst_trade": -20.05,
+    "worst_day": 84.5,
+    "max_drawdown_usd": 0.0,
+    "sharpe_daily_ann": 42.75,
+    "exits": {
+     "target": 22,
+     "eod": 3,
+     "flip": 1
+    }
+   }
+  },
+  "L  $50 target at $20k (old target, new size)": {
+   "params": {
+    "tp": 50,
+    "sl": null,
+    "trail": null,
+    "flip": true,
+    "entry_rule": "add",
+    "lot_usd": 20000,
+    "max_lots": 2
+   },
+   "2021-2026 (5.9 yrs)": {
+    "sessions": 1477,
+    "trades": 18989,
+    "net_usd": -1271.9,
+    "win_rate_pct": 61.8,
+    "avg_win": 44.44,
+    "avg_loss": -72.04,
+    "expectancy_usd": -0.07,
+    "profit_factor": 1.0,
+    "worst_trade": -820.63,
+    "worst_day": -3557.05,
+    "max_drawdown_usd": 16287.87,
+    "sharpe_daily_ann": -0.03,
+    "exits": {
+     "target": 10407,
+     "flip": 5081,
+     "eod": 3501
+    }
+   },
+   "2025-2026": {
+    "sessions": 474,
+    "trades": 5830,
+    "net_usd": 9395.34,
+    "win_rate_pct": 60.3,
+    "avg_win": 43.9,
+    "avg_loss": -62.51,
+    "expectancy_usd": 1.61,
+    "profit_factor": 1.06,
+    "worst_trade": -548.29,
+    "worst_day": -1837.59,
+    "max_drawdown_usd": 9114.69,
+    "sharpe_daily_ann": 0.84,
+    "exits": {
+     "target": 3063,
+     "flip": 1553,
+     "eod": 1214
+    }
+   },
+   "last 3 months": {
+    "sessions": 66,
+    "trades": 827,
+    "net_usd": 5919.06,
+    "win_rate_pct": 60.5,
+    "avg_win": 43.77,
+    "avg_loss": -48.83,
+    "expectancy_usd": 7.16,
+    "profit_factor": 1.37,
+    "worst_trade": -271.62,
+    "worst_day": -643.23,
+    "max_drawdown_usd": 1297.79,
+    "sharpe_daily_ann": 3.56,
+    "exits": {
+     "target": 433,
+     "flip": 223,
+     "eod": 171
+    }
+   },
+   "16-20 Nov 2026": {
+    "sessions": 5,
+    "trades": 118,
+    "net_usd": 3887.33,
+    "win_rate_pct": 86.4,
+    "avg_win": 48.02,
+    "avg_loss": -63.14,
+    "expectancy_usd": 32.94,
+    "profit_factor": 4.85,
+    "worst_trade": -195.78,
+    "worst_day": -14.53,
+    "max_drawdown_usd": 14.53,
+    "sharpe_daily_ann": 14.25,
+    "exits": {
+     "target": 102,
+     "flip": 4,
+     "eod": 12
+    }
+   }
+  }
+ }
+}

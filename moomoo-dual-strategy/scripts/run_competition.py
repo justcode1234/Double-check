@@ -125,6 +125,21 @@ class Runner:
         acct.sleeve_capital = {s: p["capital"] for s, p in performance["sleeves"].items()}
         return performance
 
+    def basis(self, acct) -> dict:
+        """Confirmed cost basis per sleeve (entry lots, weighted cost) for the profit-only rule on long sales."""
+        return planner.basis_view(sleeve_performance(self.store, self.state, asdict(acct), self.cfg)["sleeves"])
+
+    def note_kept(self, session, kept, source):
+        """Record (once per lot per session) a long the runner did not sell because the sale would not be profitable."""
+        noted = self.__dict__.setdefault("_held_noted", set())
+        for row in kept:
+            key = (session, row.get("sleeve"), row.get("symbol"), row.get("lot_id"))
+            if key in noted:
+                continue
+            noted.add(key)
+            self.store.append(session, {"event": "long_sale_held", "source": source, **row})
+            log(long_sale_held=row, source=source)
+
     def session(self, now=None) -> str:
         return (now or datetime.now(timezone.utc)).astimezone(NY).date().isoformat()
 
@@ -161,6 +176,7 @@ class Runner:
             link = {"intent_id": i.intent_id, "audit_id": audit_id}
             reason = None
             before_close = None
+            account = None
             if not i.close_only:
                 if planner.entries_disabled(self.cfg, i.sleeve):
                     reason = "legacy strategies are exit-only"
@@ -175,6 +191,18 @@ class Runner:
                 sign = 1 if i.side == "SELL" else -1
                 if not 0 < i.qty <= min(sign * held, sign * net):
                     reason = "close would exceed the reconciled position on that side"
+            if (not reason and i.close_only and i.side == "SELL" and planner.loss_guard(self.cfg)
+                    and self.state["sleeves"].get(i.sleeve, {}).get(i.symbol, 0) > 0):
+                # Last line of defence for the profit-only rule: whatever planned it, a long sale whose worst-case fill
+                # (its limit) would not net a profit after fees is never sent.
+                account = account or self.account([i.symbol])
+                block = planner.long_sale_block(self.state, i.sleeve, i.symbol, i.qty, i.limit_price, self.cfg,
+                                                self.basis(account), i.take_profit_lot_id)
+                if block:
+                    self.note_kept(session, [{"sleeve": i.sleeve, "symbol": i.symbol, "lot_id": i.take_profit_lot_id,
+                                              "shares": i.qty, "limit": i.limit_price, "intent_id": i.intent_id,
+                                              "why": block}], "send_guard")
+                    continue
             if reason:
                 self.store.append(session, {"event": "order_refused", **link, "reason": reason})
                 continue
@@ -246,9 +274,12 @@ class Runner:
         reason = planner.mark_risk(self.state, acct, session, self.cfg)
         self.store.save(self.state)
         now = datetime.now(NY)
-        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now) if reason else []
+        kept, basis = [], self.basis(acct) if reason else None
+        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now,
+                                       basis=basis, kept=kept) if reason else []
         audit_id = self.audit(session, "risk", account=asdict(acct), state_before=before, state_after=self.state,
-                              now=now, reason=reason, intents=[i.to_dict() for i in intents])
+                              now=now, reason=reason, intents=[i.to_dict() for i in intents], kept=kept, basis=basis)
+        self.note_kept(session, kept, reason or "risk")
         if reason:
             log(risk=reason, nav=acct.nav, high_water=self.state["high_water"], flatten=len(intents))
             self.send(intents, session, audit_id)
@@ -312,10 +343,13 @@ class Runner:
     def _send_h_open(self, session, plan, acct, kind):
         capital = self.attribute_capital(acct)
         now = datetime.now(NY)
-        intents, why = planner.plan_h_open(self.state, acct, session, plan, self.cfg, now)
+        kept = []
+        basis = planner.basis_view(capital["sleeves"])
+        intents, why = planner.plan_h_open(self.state, acct, session, plan, self.cfg, now, basis=basis, kept=kept)
         audit_id = self.audit(session, kind, plan=plan, signal_audit_id=self.state.get("h_plan_audit_id"),
                               state=self.state, account=asdict(acct), capital=capital, now=now, reason=why,
-                              intents=[i.to_dict() for i in intents])
+                              intents=[i.to_dict() for i in intents], kept=kept, basis=basis)
+        self.note_kept(session, kept, kind)
         log(h_open=why, intents=len(intents))
         self.send(intents, session, audit_id)
 
@@ -372,9 +406,13 @@ class Runner:
         sleeves = planner.SLEEVES if sleeve == "all" else (sleeve,)
         acct = self.account([s for sl in sleeves for s in self.state["sleeves"].get(sl, {})])
         session, now = self.session(), datetime.now(NY)
-        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now, sleeves)
+        kept, basis = [], self.basis(acct)
+        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now, sleeves,
+                                       basis=basis, kept=kept)
         audit_id = self.audit(session, "flatten", state=self.state, account=asdict(acct), now=now,
-                              sleeves=sleeves, reason=reason, intents=[i.to_dict() for i in intents])
+                              sleeves=sleeves, reason=reason, intents=[i.to_dict() for i in intents], kept=kept,
+                              basis=basis)
+        self.note_kept(session, kept, reason)
         self.send(intents, session, audit_id)
 
     # ------------------------------------------------------------------ Noise-area / VWAP / ORB
@@ -577,11 +615,12 @@ class Runner:
 
     # ------------------------------------------------------------------ Two-vote SPY/QQQ
     def vote_step(self):
-        """Each completed 5-minute bar: opposite 2-vote agreement closes every lot of a symbol. While a 2-vote
-        agreement holds, every bar may open one more lot in that direction, 10:00-14:30 ET, up to
-        two_vote.max_lots_per_symbol and within the name cap, including re-entry after a profit exit (user decision
-        2026-11-25; the historic replay only added a lot on a fresh agreement). Never on the bar an opposite agreement
-        closed the symbol, and never while that symbol's profit exit is still working."""
+        """Each completed 5-minute bar: opposite 2-vote agreement closes the symbol: every short lot, but only the long
+        lots that sell at a profit after fees (risk.long_sales_only_at_profit; losing long lots are kept). While a 2-vote
+        agreement holds, every bar may open one more lot in that direction, 10:00-14:30 ET, within the name cap (and
+        two_vote.max_lots_per_symbol when set; null = dollar cap only, user decision 2026-11-25), including re-entry
+        after an exit. Never on the bar an opposite agreement closed the symbol, and never while that symbol's profit
+        exit is still working."""
         now = datetime.now(NY)
         ctx = self._day(now.date())
         if not ctx:
@@ -607,7 +646,19 @@ class Runner:
         for sym, q in sorted(held.items()):
             if sides.get(sym) == -(1 if q > 0 else -1):
                 acct = acct or self.risk(sorted(set(held) | set(SYMBOLS)))
-                self._close("two_vote", sym, "two_vote_opposite_agreement", acct, session, day)
+                if q > 0 and planner.loss_guard(self.cfg):
+                    # Longs: sell only the lots that would sell at a profit after fees; losing lots are kept.
+                    sells, kept = planner.profitable_long_sales(self.state, acct, session, "two_vote", sym, "",
+                                                                self.cfg, now, "", self.basis(acct))
+                    self.note_kept(session, kept, "two_vote_opposite_agreement")
+                    for lot in kept:
+                        self._decide(day, "two_vote", symbol=sym, slot=k, action="kept: lot would not sell at a profit",
+                                     lot=lot.get("lot_id"), net=lot.get("net"), break_even=lot.get("break_even_quote"))
+                    for sell in sells:
+                        self._close("two_vote", sym, "two_vote_opposite_agreement", acct, session, day,
+                                    lot_id=sell.take_profit_lot_id, lot_qty=sell.qty)
+                else:
+                    self._close("two_vote", sym, "two_vote_opposite_agreement", acct, session, day)
                 closed_now.add(sym)
                 acct = None
         held = self.state["sleeves"].get("two_vote", {})
@@ -618,7 +669,8 @@ class Runner:
             for sym in eligible:
                 acct = acct or self.risk(list(SYMBOLS))
                 performance = self.attribute_capital(acct)["sleeves"]["two_vote"]
-                if performance["open_entry_lots"].get(sym, 0) >= c["max_lots_per_symbol"]:
+                max_lots = c.get("max_lots_per_symbol")
+                if max_lots is not None and performance["open_entry_lots"].get(sym, 0) >= max_lots:
                     intents, why = [], "entry blocked: maximum open lots"
                 else:
                     intents, why = planner.plan_vote_entry(self.state, acct, session, sym, sides[sym], self.cfg, now, f"e{k}")
@@ -830,10 +882,14 @@ class Runner:
             return
         acct = self.risk(held)
         now = datetime.now(NY)
-        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now, sleeves)
-        audit_id = self.audit(session, "flatten", state=self.state, account=asdict(acct), now=now, sleeves=sleeves,
-                              reason=reason, intents=[i.to_dict() for i in intents])
-        self.send(intents, session, audit_id)
+        kept, basis = [], self.basis(acct)
+        intents = planner.plan_flatten(self.state, acct, session, reason, self.cfg, now, sleeves,
+                                       basis=basis, kept=kept)
+        self.note_kept(session, kept, reason)
+        if intents or not kept:
+            audit_id = self.audit(session, "flatten", state=self.state, account=asdict(acct), now=now, sleeves=sleeves,
+                                  reason=reason, intents=[i.to_dict() for i in intents], kept=kept, basis=basis)
+            self.send(intents, session, audit_id)
         for key in list(day["positions"]):
             sl, sym = key.split("|")
             if sl in sleeves and not self.state["sleeves"].get(sl, {}).get(sym):
@@ -973,7 +1029,7 @@ class Runner:
             return False
 
     def loop(self):
-        done, last_risk, last_monitor = set(), -1e9, -1e9
+        done, last_risk, last_monitor, retry_flat = set(), -1e9, -1e9, {}
         while True:
             now = datetime.now(NY)
             bounds = session_bounds(now.date())
@@ -1023,10 +1079,13 @@ class Runner:
                              ("orb", closed - timedelta(minutes=5 * self.cfg["orb"]["flatten_slots_before_close"])),
                              ("noise", closed - timedelta(minutes=self.cfg["noise"]["flatten_minutes_before_close"])),
                              ("two_vote", closed - timedelta(minutes=self.cfg["two_vote"]["flatten_minutes_before_close"]))):
-                if f"flat-{name}-{now.date()}" not in done and at <= now < closed:
+                if (f"flat-{name}-{now.date()}" not in done and at <= now < closed
+                        and time.monotonic() >= retry_flat.get(name, -1e9)):
                     self.guarded(f"{name}-flatten", self.flatten_sleeves, (name,), f"{name}_scheduled_flatten")
                     if self.is_flat((name,)) or now >= closed - timedelta(minutes=1):
-                        done.add(f"flat-{name}-{now.date()}")           # retried every pass until 1 minute before the close
+                        done.add(f"flat-{name}-{now.date()}")           # retried until 1 minute before the close
+                    else:
+                        retry_flat[name] = time.monotonic() + 20         # kept losing lots: re-check every 20 s
             flat = closed - timedelta(minutes=self.cfg["b3"]["flatten_minutes_before_close"])
             if f"flat-{now.date()}" not in done and flat <= now < closed:
                 if self.guarded("b3-flatten", self.flatten, "b3", "b3_scheduled_flatten") or now >= closed - timedelta(minutes=1):

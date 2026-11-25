@@ -856,7 +856,17 @@ def test_malformed_receipt_cannot_certify_sizing_capital(competition_report, tmp
     p = sleeve_performance(store, store.load(), asdict(a), cfg)
     assert all(s['capital'] is None and s['status'] == 'incomplete' for s in p['sleeves'].values())
     a.sleeve_capital = {s: v['capital'] for s, v in p['sleeves'].items()}
-    intents, why = planner.plan_h_open(store.load(), a, '2026-11-23', {'entries': ['US.XLP'], 'exits': {'US.XLV': 'exit'}}, cfg, a.at)
+    plan = {'entries': ['US.XLP'], 'exits': {'US.XLV': 'exit'}}
+    # Live rule: an unverifiable cost basis can never prove a sale is profitable, so the long is kept.
+    kept = []
+    intents, why = planner.plan_h_open(store.load(), a, '2026-11-23', plan, cfg, a.at,
+                                       basis=planner.basis_view(p['sleeves']), kept=kept)
+    assert cfg['risk']['long_sales_only_at_profit'] is True
+    assert intents == [] and 'capital' in why and kept == [{'sleeve': 'h_etf', 'symbol': 'US.XLV', 'shares': 2,
+                                                            'why': 'cost basis unverified'}]
+    # Without the rule the exit itself is never blocked by the capital gate.
+    cfg['risk']['long_sales_only_at_profit'] = False
+    intents, why = planner.plan_h_open(store.load(), a, '2026-11-23', plan, cfg, a.at)
     assert [(i.side, i.qty) for i in intents] == [('SELL', 2)] and 'capital' in why
 
 

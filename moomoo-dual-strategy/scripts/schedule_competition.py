@@ -103,8 +103,12 @@ def local_preflight(root, session):
         raise Blocked('persisted_capital_invalid')
     if state['halted'] is not None or state['locked_day'] == session or state.get('order_errors_today', 0):
         raise Blocked('persistent_safety_block')
-    if any(state['sleeves'].get(s) for s in ('b3', 'noise', 'vwap', 'orb', 'two_vote')):
+    if any(state['sleeves'].get(s) for s in ('b3', 'noise', 'vwap', 'orb')):
         raise Blocked('prior_intraday_position_not_flat')     # intraday sleeves never hold overnight
+    # Two-vote LONG lots may be carried to the next session (user decision 2026-11-25: the 2026-11-24 lots were held
+    # through the close instead of flattened). Shorts never carry: preflight rejects negative ownership.
+    if any(q < 0 for q in state['sleeves'].get('two_vote', {}).values()):
+        raise Blocked('prior_intraday_position_not_flat')
     if (state['day'] >= session
             or datetime.fromisoformat(state['last_mark_at']).astimezone(NY).date().isoformat() >= session
             or (live / 'outbox' / f'{session}.jsonl').exists()):

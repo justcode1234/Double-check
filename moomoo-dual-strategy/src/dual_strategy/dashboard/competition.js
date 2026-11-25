@@ -30,7 +30,13 @@
     const threshold = vote.required_votes || 2;
     const sizing = data.config.two_vote;
     const profitCounts = data.live?.take_profit_counts?.two_vote || {};
-    set("vote-budget", sizing ? `Up to ${money(sizing.entry_usd)} per position · ${sizing.max_lots_per_symbol} positions per ticker · ${money(data.config.risk.name_cap_usd)} cap per ticker${sizing.bank_realized_gains ? " · Realized gains banked outside the entry budget" : ""}` : "");
+    const saved = data.config_pending?.two_vote;
+    const lots = c => c.max_lots_per_symbol == null ? "positions added up to the per-ticker cap"
+      : `${c.max_lots_per_symbol} ${c.max_lots_per_symbol === 1 ? "position" : "positions"} per ticker`;
+    const nextSession = saved ? ` · Saved for the next session start: ${money(saved.entry_usd)} per position, ${lots(saved)}, ${finite(saved.take_profit_usd) ? `${money(saved.take_profit_usd)} target` : "no profit target"}` : "";
+    const noLossSales = data.config.risk?.long_sales_only_at_profit === true ? " · Longs are never sold at a loss" : "";
+    const navCap = finite(data.config.risk?.name_cap_fraction_of_nav) ? ` (at most ${+(data.config.risk.name_cap_fraction_of_nav * 100).toFixed(1)}% of NAV)` : "";
+    set("vote-budget", sizing ? `Up to ${money(sizing.entry_usd)} per position · ${lots(sizing)} · ${money(data.config.risk.name_cap_usd)} cap per ticker${navCap}${noLossSales}${sizing.bank_realized_gains ? " · Realized gains banked outside the entry budget" : ""}${nextSession}` : "");
     const messages = {
       preopen: "Waiting for the U.S. regular session to open.",
       closed: "The regular session is closed.",
@@ -468,9 +474,11 @@
       ? `${sgt(new Date(Date.parse(data.runtime.session_close) - flatMinutes * 60000).toISOString())} SGT` : `${flatMinutes} min before the close`;
     const autoExit = p => {
       const target = finite(p.take_profit_price) ? `Profit target: ${p.qty < 0 ? "≤" : "≥"} ${money(p.take_profit_price)} (+${money(p.take_profit_usd)})` : "";
-      if (p.sleeve === "two_vote") return `${target} · or 2+ ${p.qty < 0 ? "Buy" : "Sell"} votes · or auto-close ${closeAt}`;
-      if (p.sleeve === "h_etf") return `${target} · or H plan exit at the next open`;
-      return "Strategy exit rules";
+      const floor = finite(p.sell_floor_price) ? `only at ${fillPrice(p.sell_floor_price)} or higher (a profit after fees), else kept overnight` : "";
+      const rules = p.sleeve === "two_vote" ? [target, `2+ ${p.qty < 0 ? "Buy" : "Sell"} votes`, `auto-close ${closeAt}`]
+        : p.sleeve === "h_etf" ? [target, "H plan exit at the next open"] : ["Strategy exit rules"];
+      const text = rules.filter(Boolean).join(" · or ");
+      return floor ? `${text}; ${floor}` : text;
     };
     if (!Array.isArray(held)) emptyRow(posBody, 8, "Positions unavailable in this snapshot.");
     else if (!held.length) emptyRow(posBody, 8, "No open positions. Everything is closed.");

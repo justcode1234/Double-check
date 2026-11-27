@@ -281,7 +281,7 @@ The evidence package contains **2,601 EXECUTE risk snapshots** across the compet
 | 24 Nov | $100,005.70 | −0.0996% | −0.1684% |
 | 25 Nov | $99,949.85 | −0.0559% | −0.2241% |
 
-The maximum observed drawdown in the archived risk snapshots was **−1.5754%**. Four completed session returns produce an annualized Sharpe of **−1.90**, but that figure is not statistically meaningful and is not used as a strategy claim. The current broker NAV of $99,958.28 is $8.43 above the last runner mark, consistent with normal mark-to-market drift. See [session_performance.json](moomoo-dual-strategy/reports/competition/submission_assets/session_performance.json).
+The maximum observed drawdown in the archived risk snapshots was **−1.5754%**. Across 2,761 risk snapshots, the agent was exposed **93.65%** of observed time; duration-weighted average gross exposure was **27.24% of NAV** and peak gross exposure was **82.42% ($81,263.60)**. The worst current open lot is the 15-share QQQ lot at $639.784, marked $633.93, for **−$87.81 gross**. Four completed session returns produce an annualized Sharpe of **−1.90**, but that figure is not statistically meaningful and is not used as a strategy claim. The current broker NAV of $99,958.28 is $8.43 above the last runner mark, consistent with normal mark-to-market drift. See [session_performance.json](moomoo-dual-strategy/reports/competition/submission_assets/session_performance.json).
 
 ![Live equity](moomoo-dual-strategy/reports/competition/submission_assets/equity_curve.svg)
 

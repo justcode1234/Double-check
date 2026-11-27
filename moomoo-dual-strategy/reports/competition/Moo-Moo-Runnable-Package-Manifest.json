@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T09:00:42.538878+00:00",
+  "generated_at": "2026-11-27T09:28:20.321892+00:00",
   "package": "Moo-Moo-Runnable-Package.zip",
   "includes": [
     "README.md",
@@ -56,8 +56,8 @@
     },
     {
       "path": "COMPETITION_SUBMISSION_DRAFT.md",
-      "bytes": 33234,
-      "sha256": "9926c1dcec704c98f4319bb52fb74d830a5f47f6aa3234116fb520a5d83e5143"
+      "bytes": 33655,
+      "sha256": "0f413e528efb2c81b9a84d8c44f31ad8ec4cb3ec55ff25859cf192d1a1e2998f"
     },
     {
       "path": "README.md",
@@ -1496,13 +1496,13 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
-      "bytes": 280667,
-      "sha256": "3588c03b71fc23bd35b13efc7a9f9eed64d45f5ae648b1e456064105e7d81453"
+      "bytes": 281142,
+      "sha256": "429dbe90783f69bac9c0aa744c77c0c22fd34b0b41a10a124aaf8bb5230f919d"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
-      "bytes": 281112,
-      "sha256": "b773d391166c1e07d780965e20e27ce47d8825215286941b862adf78c9c0546c"
+      "bytes": 281585,
+      "sha256": "42806eee07fe5234062c126df72c7aa407225ea4493fb8c20f3751c5f7b9cbae"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md",
@@ -1541,8 +1541,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/refresh_html.py",
-      "bytes": 13715,
-      "sha256": "ef0e1d8780f73cd87ecc4c501d69a4057fa54953a9da91d05e45f646627b16bc"
+      "bytes": 13813,
+      "sha256": "d2ae896fda3cb5a5cbd59c5e70b3b8710c54f333333dc8f612d78c0349a823b2"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/backtest_expectancy.png",
@@ -1556,8 +1556,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.csv",
-      "bytes": 15656,
-      "sha256": "04e9e0a5581d0afe1d054500b2e91abc1cc15e039dac1e3788676c99607bf931"
+      "bytes": 15782,
+      "sha256": "8fb5d08eca2ada4808b12650af06ff92f16caec80644c5137fd0a066565dc787"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.json",
@@ -1626,8 +1626,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/html_report_qa.json",
-      "bytes": 2720,
-      "sha256": "3c42739f862696d9a15e2b2fb4ba01cc5a264e8fbdf3c68293df21ee866f6126"
+      "bytes": 3015,
+      "sha256": "120a4e700083ef1fe47398d461b6e0a483a70b240529907027d1be7fa30283a6"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.json",
@@ -1686,8 +1686,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/session_performance.json",
-      "bytes": 1381,
-      "sha256": "ab733b7b81e64e5cb2343c08554235323f1ae5e5f21431be85b7d00fb903e0c7"
+      "bytes": 2752,
+      "sha256": "67bf20b813ba339ee5ddd6ffad83a7e09f3443e8921675b8dc8d02f7147b1b2e"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_decision_log.csv",

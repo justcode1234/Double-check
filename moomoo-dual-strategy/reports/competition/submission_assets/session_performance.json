@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T08:08:23Z",
+  "generated_at": "2026-11-27T09:23:29Z",
   "source": "moomoo-dual-strategy/reports/competition/submission_assets/submission_equity.csv",
   "initial_nav": 100000.0,
   "completed_sessions": 4,
@@ -36,5 +36,28 @@
   "current_broker_nav": 99958.28,
   "last_runner_mark": 99949.85,
   "broker_minus_last_runner_mark": 8.43,
+  "worst_open_lot": {
+    "symbol": "US.QQQ",
+    "shares": 15,
+    "entry_price": 639.784,
+    "mark_price": 633.93,
+    "unrealized_gross": -87.81,
+    "lot_id": "2026-11-24/8afe92dc711f4800879540c076b9c7ee:2026-11-24-two_vote-e37-QQQ-BUY"
+  },
+  "exposure_metrics": {
+    "risk_snapshots": 2761,
+    "observed_seconds": 87849.8,
+    "exposure_time_pct": 93.65,
+    "duration_weighted_avg_gross_exposure_pct_of_nav": 27.244,
+    "max_gross_exposure_pct_of_nav": 82.422,
+    "max_gross_exposure_usd": 81263.6,
+    "sessions": [
+      {"session": "2026-11-20", "exposure_time_pct": 99.78, "duration_weighted_avg_gross_exposure_pct_of_nav": 3.876, "max_gross_exposure_pct_of_nav": 3.912},
+      {"session": "2026-11-23", "exposure_time_pct": 100.0, "duration_weighted_avg_gross_exposure_pct_of_nav": 25.069, "max_gross_exposure_pct_of_nav": 32.845},
+      {"session": "2026-11-24", "exposure_time_pct": 75.66, "duration_weighted_avg_gross_exposure_pct_of_nav": 13.743, "max_gross_exposure_pct_of_nav": 28.474},
+      {"session": "2026-11-25", "exposure_time_pct": 100.0, "duration_weighted_avg_gross_exposure_pct_of_nav": 64.526, "max_gross_exposure_pct_of_nav": 82.422}
+    ],
+    "method": "Duration-weighted intervals between EXECUTE risk snapshots; gross exposure is absolute quoted position value divided by broker NAV. Intervals over 300 seconds are excluded."
+  },
   "final_session": "2026-11-27 half-day pending"
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T11:39:26.420760+00:00",
+  "generated_at": "2026-11-27T12:58:51.183274+00:00",
   "package": "Moo-Moo-Runnable-Package.zip",
   "includes": [
     "README.md",
@@ -1632,7 +1632,7 @@
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/html_report_qa.json",
       "bytes": 3063,
-      "sha256": "94270fecfae334fbff8804399d44e70361bc27cd07f0c8cca688f69a22bbfdba"
+      "sha256": "8c2dbbcd957a1761a97882c3b045738a10449f3b241d489052db95e78076c210"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.json",
@@ -1716,8 +1716,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_form_manifest.json",
-      "bytes": 7768,
-      "sha256": "323126cc3aae87361373c5cd44d4ac1d1928eb94a3648fa7e6a6c3ccd64ddb05"
+      "bytes": 6475,
+      "sha256": "f577cd044dcddac9a96552c22c44ea3a584ac1bcf0d2a5aede9b7b333e0f6269"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_results.json",

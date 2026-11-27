@@ -151,7 +151,8 @@ dashboard service (read-only) ─▶ http://127.0.0.1:8876  votes · positions �
 ## 6. Reproduce
 
 ```bash
-git clone https://github.com/justcode1234/Moo-Moo.git && cd Moo-Moo
+unzip Moo-Moo-Runnable-Package.zip -d Moo-Moo
+cd Moo-Moo
 python3 start.py                                   # builds the venv, opens the dashboard
 cd moomoo-dual-strategy
 .venv/bin/python -m pytest                         # 1,248 passed; one Node-environment DOM failure

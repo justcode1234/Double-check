@@ -23,7 +23,7 @@ Qoder Desktop built the code, tests, dashboard, report and deck. Read-only Cloud
 - **Full evidence package:** `moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.zip`
 - **Package manifest:** `moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json`
 - **Checksum:** `moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256`
-- **GitHub:** https://github.com/justcode1234/Moo-Moo
+- **Public runnable package:** `moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package.zip`
 
 ## User-completed fields
 

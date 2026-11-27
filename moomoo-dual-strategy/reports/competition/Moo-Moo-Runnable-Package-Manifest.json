@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T11:21:08.140950+00:00",
+  "generated_at": "2026-11-27T11:39:26.420760+00:00",
   "package": "Moo-Moo-Runnable-Package.zip",
   "includes": [
     "README.md",
@@ -51,18 +51,18 @@
   "files": [
     {
       "path": "COMPETITION.md",
-      "bytes": 18876,
-      "sha256": "fc351e454c1f5d568958eb4c541b4766808bde8bbb90bb8fe80f7b84e8a9da8f"
+      "bytes": 18865,
+      "sha256": "d2a856f423901e47ca5befdd0adc5f736dd598f58cbf809a4f3522dd976b9262"
     },
     {
       "path": "COMPETITION_SUBMISSION_DRAFT.md",
-      "bytes": 34293,
-      "sha256": "e9b7ec3fcdf84756b9ee2cb9e71d385dbf53368f6e898859741f08882847a97b"
+      "bytes": 34398,
+      "sha256": "6fa2e63b4959a1be0a45216e9ec341b8a047ca44ee90c1abcf0a9cfa17f5ba06"
     },
     {
       "path": "README.md",
-      "bytes": 2844,
-      "sha256": "e392a41fa5e39fc0397bb53e61087ec535bc059245abf62ec1b2fda043073a66"
+      "bytes": 2989,
+      "sha256": "08ea7e23f27287b3671c04e0a84460c859ab503a7427f1b3f234bcb8ab18c32f"
     },
     {
       "path": "moomoo-dual-strategy/.env.example",
@@ -1496,18 +1496,18 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
-      "bytes": 281851,
-      "sha256": "9d433dd6e416063330d94eab8f7926393be05bca0620476dd53a52afe714696c"
+      "bytes": 281978,
+      "sha256": "cac9ef3e29ea62a7d6707ea9b7a6c3ed30355cc7c106557d79f20213445fb332"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
-      "bytes": 282292,
-      "sha256": "11cb3d95b0c64a9842496292d976bfba8950ca6fdf3ee59d02626a46f3d8dcb4"
+      "bytes": 282402,
+      "sha256": "cf7f5ce799076e4666b6facc6280dfad330e1036e79bcbae4ba777e8d7b4a5dc"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md",
-      "bytes": 3899,
-      "sha256": "5d8800b03a6a17a1f221d4b6ab4f4bd554c5db8a6b9544977353205de3afc699"
+      "bytes": 4114,
+      "sha256": "dac1c7a2457af96ed1ea55d8182899e0860f15d84b43ed1fb0e2e85483769e84"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/backtest_preview.json",
@@ -1541,8 +1541,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/refresh_html.py",
-      "bytes": 14217,
-      "sha256": "82ac8d4c8ae0ba7a1a6faebecb794670135ee7debbfa673a2ef76dbfe4e13512"
+      "bytes": 14234,
+      "sha256": "5f49e40b24f2f575eeec895c9e555c7a14a5ca9ca2999ec3827f52e58155a6b5"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/refresh_submission_assets.py",
@@ -1632,7 +1632,7 @@
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/html_report_qa.json",
       "bytes": 3063,
-      "sha256": "cc8607618d51cd0e15ad0fbd83760cdc473c3755ecbe9f1806a4a057a82200c6"
+      "sha256": "94270fecfae334fbff8804399d44e70361bc27cd07f0c8cca688f69a22bbfdba"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.json",
@@ -1716,8 +1716,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_form_manifest.json",
-      "bytes": 7477,
-      "sha256": "ea417af4382832b1fdbbd6e2e39249467bb99cdabd3cd05674ad0884fafed5ee"
+      "bytes": 7768,
+      "sha256": "323126cc3aae87361373c5cd44d4ac1d1928eb94a3648fa7e6a6c3ccd64ddb05"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_results.json",
@@ -2382,7 +2382,8 @@
   ],
   "notes": [
     "Lightweight public package for judges: source, config, tests, documentation, deck/PDF, redacted evidence and submission assets.",
-    "The normalized 5-minute CSV, regime research cache, complete SPY 1-minute history, SPY daily raw/adjusted and actions fixtures required by the test suite are included; the remaining large historical cache stays in GitHub and the full evidence package.",
+    "The normalized 5-minute CSV, regime research cache, complete SPY 1-minute history, SPY daily raw/adjusted and actions fixtures required by the test suite are included; the remaining large historical cache stays in the full evidence package.",
+    "The source repository is private; this public package is the self-contained judging path.",
     "Live trading still requires the authenticated Moomoo CLI and competition paper account; no credentials or private state are included."
   ]
 }

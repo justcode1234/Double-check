@@ -6,10 +6,12 @@ Updated 23 November 2026. Run the H ETF and Two-vote dashboard locally on Linux,
 
 ## Install on a new device
 
-Install Git and Python 3.12 or later with `venv` support. On Debian or Ubuntu, add the matching `python3-venv` package if Python reports that `ensurepip` is missing.
+Install Python 3.12 or later with `venv` support. On Debian or Ubuntu, add the matching `python3-venv` package if Python reports that `ensurepip` is missing.
+
+Download `Moo-Moo-Runnable-Package.zip` from the public submission page and extract it. The source repository is private; the public package is self-contained.
 
 ```text
-git clone https://github.com/justcode1234/Moo-Moo.git
+unzip Moo-Moo-Runnable-Package.zip -d Moo-Moo
 cd Moo-Moo
 ```
 

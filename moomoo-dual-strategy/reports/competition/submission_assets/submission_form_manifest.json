@@ -49,8 +49,9 @@
     {
       "name": "Github Link",
       "required": false,
-      "status": "ready",
-      "value": "https://github.com/justcode1234/Moo-Moo"
+      "status": "not_used_private_repository",
+      "value": "",
+      "instructions": "The source repository is private. Judges should use the public Presentation Link and its self-contained runnable package."
     },
     {
       "name": "Consent to share project details with judges",

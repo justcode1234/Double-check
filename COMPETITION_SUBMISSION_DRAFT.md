@@ -339,10 +339,12 @@ Account IDs, OAuth tokens, private account files and credentials are excluded.
 ### 8.1 One-command local start
 
 ```bash
-git clone https://github.com/justcode1234/Moo-Moo.git
+unzip Moo-Moo-Runnable-Package.zip -d Moo-Moo
 cd Moo-Moo
 python3 start.py
 ```
+
+The public lightweight package is self-contained; the source repository is private and is not required for judging.
 
 The launcher builds/reuses the Python environment and opens the read-only dashboard at `http://127.0.0.1:8876/`.
 
@@ -389,7 +391,7 @@ No numeric “100/100” claim is made before the final session and package audi
 
 ## 10. Finalization checklist
 
-- [x] Commit and push the code/tests/backtest/submission assets, merge `main` to the verified commit, and re-verify every matrix locator against the public repository.
+- [x] Commit and push the code/tests/backtest/submission assets, merge `main` to the verified commit, and re-verify every matrix locator against the pushed commit.
 - [x] Publish the presentation and verify the public URL: https://moo-moo-competition-7amelju7q1y.qoder.website
 - [x] Complete independent Windows rubric audit and local evidence watchdog; incorporate fixable findings.
 - [x] Incorporate Claude's final source/report diff without overwriting unrelated work; commit `6b3ffa7` is public and `main` is aligned.

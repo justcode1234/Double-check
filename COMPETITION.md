@@ -5,7 +5,7 @@ Moomoo × Qoder paper-trading challenge write-up · competition paper account, $
 ## Summary
 
 - **What runs:** an intraday **Two-vote** strategy on SPY and QQQ, on a $100,000 sizing book. The multi-day **H ETF** dip-buying sleeve was retired on 26 November and its $20,000 moved to Two-vote. Older sleeves (B3, Noise-area, VWAP, ORB) are exit-only.
-- **Edge hypothesis:** when two or more independent, well-known technical rules agree on a 5-minute bar, short-term direction is more likely to persist than when any single rule fires. Ten rules vote, and a trade needs at least two to agree with fewer than two disagreeing.
+- **Edge hypothesis:** when two or more distinct, well-known technical rules agree on a 5-minute bar, short-term direction is more likely to persist than when any single rule fires. Ten rules vote (Noise-area is SPY-only), and a trade needs at least two to agree with fewer than two disagreeing. The indicators are correlated, so the threshold is a consensus filter rather than ten independent alpha sources.
 - **How it is controlled:** every number is in [config/competition.yaml](moomoo-dual-strategy/config/competition.yaml), and every decision is deterministic Python. Risk limits sit inside the official 40% single-name rule. Every order is reconciled against Moomoo before the next one. From 25 November, **a long position is never sold at a loss**: it is sold only when its own entry lot nets a profit after fees, and otherwise it is kept, overnight if needed. Shorts can still be covered at a loss.
 - **What we learned:** a 5.9-year replay shows the signal is **regime-dependent**. It loses after conservative costs in 2021–2024 and is profitable in the recent volatile regime. The best exit across every period was to **let winners run** (exit only on a 2+ opposite vote or the 15:55 ET close). That rule is live from 25 November.
 
@@ -77,9 +77,9 @@ Retired by user decision on 26 November: it found no entry on 23–25 November, 
 
 ## 3. Validation
 
-**Tests.** 1,208 automated tests cover signals, sizing, risk gates, order reconciliation, the scheduler and the dashboard. They run with `.venv/bin/python -m pytest`.
+**Tests.** The current suite reports **1,248 passed, 2 skipped, one Node-environment failure and 59 subtests passed**. The sole failure is the dashboard DOM regression, which requires Node.js on PATH; manual browser QA found no console errors. Tests run with `.venv/bin/python -m pytest`.
 
-**Independent signal check.** All 10 rules were re-implemented separately, without importing the strategy code, and fed Moomoo's own 5-minute bars. On the runner's live bars, they matched the runner's recorded votes on every rule and every bar: 62 bars × 2 tickers on 23 November and 52 bars × 2 tickers on 24 November, with 0 mismatches. Against Moomoo's later history the only differences came from cent-level bar revisions. One Chandelier vote hinged on a single cent.
+**Independent signal check.** All 10 rules were re-implemented separately, without importing the strategy's signal code. On identical Moomoo input bars, the independent implementation matched the live signal code on **264/264 bar-symbol checks** and **2,508/2,508 rule checks** with zero implementation mismatches. A replay against Moomoo's current historical bars reproduced 189/264 recorded live rows; the other 75 differ because the provider revised historical bars after the sessions. The row-level evidence and replay script are in [submission_assets/independent_live_vote_audit.csv](moomoo-dual-strategy/reports/competition/submission_assets/independent_live_vote_audit.csv), [submission_assets/independent_live_vote_audit.json](moomoo-dual-strategy/reports/competition/submission_assets/independent_live_vote_audit.json), and [reports/competition/independent_live_vote_audit.py](moomoo-dual-strategy/reports/competition/independent_live_vote_audit.py).
 
 **Exit backtest.**
 
@@ -110,16 +110,19 @@ What it shows:
 
 ## 4. Live paper results (snapshot)
 
-As of 03:37 SGT, 25 November 2026. The 24 November US session was still in progress; its Two-vote long lots were later held through the close into 25 November. Final figures come from the dashboard export.
+Latest broker-reconciled snapshot before the 27 November half-day final session. Final figures will be refreshed after that session's regular-market close.
 
 | Measure | Value |
 |---|---|
-| Account NAV | $100,017.50 (+$17.50, +0.02%) on $100,000 |
-| High-water mark / drawdown | $100,174.35 / −0.16% |
-| Benchmark from the 20 Nov open | SPY +0.53% ($713.56 → $717.33) · QQQ −0.27% ($638.84 → $637.10) |
-| Closed trades (all sleeves) | 7 · win rate 85.7% · average win $31.38 · average loss −$76.20 |
-| Expectancy / profit factor | +$16.01 per closed trade / 2.47 |
-| Realized gross | Two-vote $99.71 · H ETF $12.38; fees and other cash flows −$21.17 |
+| Account NAV | $99,958.28 (−$41.72, −0.0417%) on $100,000 |
+| High-water mark / drawdown | $100,174.35 / −0.2157% |
+| Cash / open market value | $71,623.28 / $28,335.00 |
+| Open positions | SPY 13 · QQQ 30 |
+| Open unrealized gross, identified-lot basis | −$187.91 |
+| Closed trades (all sleeves) | 13 · win rate 69.2% · average win $102.98 · average loss −$187.70 |
+| Expectancy / profit factor | +$13.54 per closed trade / 1.2345 |
+| Realized gross | Two-vote $163.66 · H ETF $12.38; fees and other cash flows −$29.85 |
+| Broker orders | 30 total · 29 filled · 1 reconciled cancellation · 0 open |
 
 Notable sessions:
 
@@ -143,7 +146,7 @@ dashboard service (read-only) ─▶ http://127.0.0.1:8876  votes · positions �
 ```
 
 - **Qoder Desktop** built the original project and the competition dashboard on this machine.
-- **Qoder Cloud Agents:** read-only reporter, auditor and watchdog agents are deployed in an isolated environment with no network, no MCP servers and no trading tools. One manual reporter run is verified, and the IDs and output are in [evidence/cloud-reporter-run.json](moomoo-dual-strategy/evidence/cloud-reporter-run.json). Cloud agents cannot place orders by design. All order decisions stay in deterministic local code, and an agent may only explain or veto.
+- **Qoder Cloud Agents:** read-only reporter, auditor and watchdog agents are deployed in an isolated environment with no network, no MCP servers and no trading tools. One manual reporter run is verified, and the IDs and output are in [evidence/cloud-reporter-run.json](moomoo-dual-strategy/evidence/cloud-reporter-run.json). Two additional one-time automations were created on 27 November; their task creation is confirmed, but their outputs are not exposed to the local agent and are not claimed as completed evidence. Independent Windows and local Qoder audits did complete. Cloud agents cannot place orders by design. All order decisions stay in deterministic local code, and an agent may only explain or veto.
 
 ## 6. Reproduce
 
@@ -151,7 +154,7 @@ dashboard service (read-only) ─▶ http://127.0.0.1:8876  votes · positions �
 git clone https://github.com/justcode1234/Moo-Moo.git && cd Moo-Moo
 python3 start.py                                   # builds the venv, opens the dashboard
 cd moomoo-dual-strategy
-.venv/bin/python -m pytest                         # 1,208 tests
+.venv/bin/python -m pytest                         # 1,248 passed; one Node-environment DOM failure
 PYTHONPATH=src .venv/bin/python scripts/competition_exit_backtest.py /tmp/exit_backtest.json
 PYTHONPATH=src .venv/bin/python scripts/competition_vote_replay.py   # two-vote replay on cached bars
 ```
@@ -164,6 +167,6 @@ The backtests read the committed `data-cache`. Live trading needs the Moomoo CLI
 2. **Validate exits on years of data before changing them live.** Seven trades are an anecdote.
 3. **Broker reports can be wrong.** Reconcile every fill against positions and cash before the next order.
 4. **Settings apply when the runner starts.** The dashboard shows the settings of the running process and flags saved changes that take effect at the next start.
-5. **Live and historical bars differ by cents.** Verify signals on the bars the runner actually saw.
+5. **Live and historical bars can be revised.** Verify signals on the bars the runner actually saw and preserve input provenance; do not assume a later historical fetch is identical.
 6. **"Never sell at a loss" moves risk, it does not remove it.** From 25 November a losing long is kept rather than cut, so the daily-loss lock and the drawdown halt now stop new entries and cover shorts but cannot shrink a losing long book. Exposure stays bounded by the per-ticker cap (at most about $80,000 across SPY and QQQ) and by the no-leverage cash rule. The trade-off is deliberate: avoid realizing losses and give positions time to recover, at the cost of carrying overnight gap risk that the backtest did not model.
-7. **Check the risk checks while a short is open.** Moomoo's sim `balance` withholds 160% of the short market value (proceeds plus 60% margin). Reading it as cash put the runner NAV about 1.6× the short below the broker total, so on 23–24 November every mark with a short open (148 of 148) failed the NAV check: entries were blocked and the loss lock and halt were not evaluated. Fixed 25 November: with shorts open, cash = total_asset − long_mv + |short_mv|, used only when it equals balance + 1.6 × |short_mv| to the dollar.
+7. **Check the risk checks while a short is open.** Moomoo's sim `balance` withholds 160% of the short market value (proceeds plus 60% margin). Reading it as cash put the runner NAV about 1.6× the short below the broker total, so 148 short-open risk records on 24 November and 12 on 25 November failed the NAV check: entries were blocked and the loss lock and halt were not evaluated. The current `account_cash` correction derives cash as `total_asset − long_mv + |short_mv|`, used only when it equals `balance + 1.6 × |short_mv|` within $1; otherwise it fails closed.

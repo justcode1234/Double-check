@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-26T05:19:28.005324+00:00",
+  "generated_at": "2026-11-27T08:11:19Z",
   "scope": "Moomoo x Qoder competition paper account; public/redacted submission snapshot",
   "account": {
     "initial_nav": 100000.0,
@@ -76,8 +76,11 @@
   },
   "known_issues": [
     {
-      "issue": "2026-11-25 native scheduler recorded unexpected_exit (-15) at 10:57 ET although execution evidence continues to 15:55 ET; process-supervision history needs final reconciliation.",
-      "source": "private/competition/scheduler/2026-11-25.json"
+      "issue": "2026-11-25 native scheduler recorded unexpected_exit (-15) at 10:57 ET. The runner restarted twice after source edits, leaving 48.8s and 40.7s audit-telemetry gaps; no outbox event or broker order occurred in either gap, all 11 session fills reconcile, and the daily report completed.",
+      "source": "private/competition/scheduler/2026-11-25.json",
+      "evidence": "moomoo-dual-strategy/reports/competition/submission_assets/scheduler_reconciliation_2026-11-25.json",
+      "status": "operationally_reconciled_with_disclosed_gaps",
+      "residual_limitation": "The restart initiator is not recorded in available journal or shell-history evidence."
     },
     {
       "issue": "Short-open NAV mismatch affected 148 risk records on 24 Nov and 12 on 25 Nov; entries and loss-lock/halt evaluation were blocked until the account_cash correction in the current working tree.",
@@ -95,7 +98,9 @@
   "limitations": [
     "Paper fills do not predict live returns.",
     "The 27 November half-day session is not yet included.",
+    "Independent rule implementation matches live signal code on 264 identical-input checks; current Moomoo historical bars reproduce 189/264 recorded rows, with 75 provider-revision differences disclosed in independent_live_vote_audit.json.",
     "Last verified 17 Nov: Cloud auditor/watchdog deployments had no schedule and zero runs; no Moomoo Vault was attached.",
+    "Two one-time Cloud automations were created on 27 Nov; task creation is confirmed, but execution outputs are not exposed to the local agent and are not claimed as completed evidence.",
     "The 27 November final settlement will use regular-market closing prices."
   ],
   "position_cost_method": "Identified entry-lot cost basis from the runner ledger; Moomoo cumulative position cost/profit fields are not used as open unrealized P&L.",
@@ -107,7 +112,7 @@
     "implied_fees_and_other_cash_flows_usd": -29.85
   },
   "test_summary": {
-    "run_at": "2026-11-26T05:42:49+08:00",
+    "run_at": "2026-11-27T08:11:19Z",
     "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider",
     "passed": 1248,
     "skipped": 2,

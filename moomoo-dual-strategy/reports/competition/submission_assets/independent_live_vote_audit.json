@@ -1,0 +1,814 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-27T02:59:45.488777-05:00",
+  "method": "Independent rule implementation; shared read-only Moomoo market transport; optional identical-input parity check against live signal code.",
+  "required_votes": 2,
+  "sessions": [
+    {
+      "session": "2026-11-23",
+      "recorded_bars": 62,
+      "bar_checks": 124,
+      "rule_checks": 1178,
+      "mismatches": 30,
+      "symbols": {
+        "US.SPY": {
+          "bar_checks": 62,
+          "rule_checks": 620,
+          "mismatches": 29,
+          "input_bars_sha256": "3a9eb4231e2dd390e74b1de5f3864a372c1e3123c4d7a20a0dc8cd0403adfc33"
+        },
+        "US.QQQ": {
+          "bar_checks": 62,
+          "rule_checks": 558,
+          "mismatches": 1,
+          "input_bars_sha256": "e0f59356ba4040e1464ad5f82c626c82ba08c758141e4cf89ee17babb8f18018"
+        }
+      }
+    },
+    {
+      "session": "2026-11-24",
+      "recorded_bars": 70,
+      "bar_checks": 140,
+      "rule_checks": 1330,
+      "mismatches": 45,
+      "symbols": {
+        "US.SPY": {
+          "bar_checks": 70,
+          "rule_checks": 700,
+          "mismatches": 0,
+          "input_bars_sha256": "dfd6fc4cae632b643e43dfbf5a7c2b21099d6f928e794f8a9e8af0d95175ebc4"
+        },
+        "US.QQQ": {
+          "bar_checks": 70,
+          "rule_checks": 630,
+          "mismatches": 45,
+          "input_bars_sha256": "62301e9fba201dcd941a77f40a31ff36c936c0808c7d88fdca78df689edf63c8"
+        }
+      }
+    }
+  ],
+  "total_bar_checks": 264,
+  "total_rule_checks": 2508,
+  "total_mismatches": 75,
+  "implementation_parity": {
+    "checks": 264,
+    "mismatches": 0,
+    "first_mismatches": [],
+    "status": "PASS"
+  },
+  "first_mismatches": [
+    {
+      "session": "2026-11-23",
+      "slot": 47,
+      "bar_end": "2026-11-23T13:25:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 48,
+      "bar_end": "2026-11-23T13:30:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 49,
+      "bar_end": "2026-11-23T13:35:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 50,
+      "bar_end": "2026-11-23T13:40:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 51,
+      "bar_end": "2026-11-23T13:45:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 52,
+      "bar_end": "2026-11-23T13:50:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 53,
+      "bar_end": "2026-11-23T13:55:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 54,
+      "bar_end": "2026-11-23T14:00:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 55,
+      "bar_end": "2026-11-23T14:05:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 56,
+      "bar_end": "2026-11-23T14:10:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 57,
+      "bar_end": "2026-11-23T14:15:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 58,
+      "bar_end": "2026-11-23T14:20:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 59,
+      "bar_end": "2026-11-23T14:25:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 60,
+      "bar_end": "2026-11-23T14:30:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 61,
+      "bar_end": "2026-11-23T14:35:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 62,
+      "bar_end": "2026-11-23T14:40:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 63,
+      "bar_end": "2026-11-23T14:45:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 64,
+      "bar_end": "2026-11-23T14:50:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 65,
+      "bar_end": "2026-11-23T14:55:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 66,
+      "bar_end": "2026-11-23T15:00:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 67,
+      "bar_end": "2026-11-23T15:05:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 68,
+      "bar_end": "2026-11-23T15:10:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 69,
+      "bar_end": "2026-11-23T15:15:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 70,
+      "bar_end": "2026-11-23T15:20:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 72,
+      "bar_end": "2026-11-23T15:30:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 73,
+      "bar_end": "2026-11-23T15:35:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 74,
+      "bar_end": "2026-11-23T15:40:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 75,
+      "bar_end": "2026-11-23T15:45:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 76,
+      "bar_end": "2026-11-23T15:50:00-05:00",
+      "symbol": "US.SPY",
+      "match": false,
+      "mismatched_fields": "buy;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"Noise-area\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-23",
+      "slot": 48,
+      "bar_end": "2026-11-23T13:30:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 1, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 31,
+      "bar_end": "2026-11-24T12:05:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 3, \"signal\": -1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 32,
+      "bar_end": "2026-11-24T12:10:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 2, \"signal\": -1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 33,
+      "bar_end": "2026-11-24T12:15:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 2, \"signal\": -1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 34,
+      "bar_end": "2026-11-24T12:20:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "rules",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 35,
+      "bar_end": "2026-11-24T12:25:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "rules",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 36,
+      "bar_end": "2026-11-24T12:30:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 37,
+      "bar_end": "2026-11-24T12:35:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 38,
+      "bar_end": "2026-11-24T12:40:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": -1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 3, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 39,
+      "bar_end": "2026-11-24T12:45:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 2, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 40,
+      "bar_end": "2026-11-24T12:50:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 41,
+      "bar_end": "2026-11-24T12:55:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 42,
+      "bar_end": "2026-11-24T13:00:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 43,
+      "bar_end": "2026-11-24T13:05:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 44,
+      "bar_end": "2026-11-24T13:10:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 45,
+      "bar_end": "2026-11-24T13:15:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 46,
+      "bar_end": "2026-11-24T13:20:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 47,
+      "bar_end": "2026-11-24T13:25:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 48,
+      "bar_end": "2026-11-24T13:30:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 49,
+      "bar_end": "2026-11-24T13:35:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 50,
+      "bar_end": "2026-11-24T13:40:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 51,
+      "bar_end": "2026-11-24T13:45:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": -1, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 52,
+      "bar_end": "2026-11-24T13:50:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 3, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 53,
+      "bar_end": "2026-11-24T13:55:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 2, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 1, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 4, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 1, \"Donchian\": 1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 1, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 54,
+      "bar_end": "2026-11-24T14:00:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules;signal",
+      "expected_json": "{\"buy\": 2, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 1, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 2, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 1, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 55,
+      "bar_end": "2026-11-24T14:05:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules;signal",
+      "expected_json": "{\"buy\": 2, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 1, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 2, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 1, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 56,
+      "bar_end": "2026-11-24T14:10:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 57,
+      "bar_end": "2026-11-24T14:15:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 58,
+      "bar_end": "2026-11-24T14:20:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 59,
+      "bar_end": "2026-11-24T14:25:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 60,
+      "bar_end": "2026-11-24T14:30:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules;signal",
+      "expected_json": "{\"buy\": 2, \"entry_window\": true, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 1, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 2, \"entry_window\": true, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 1, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 1}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 61,
+      "bar_end": "2026-11-24T14:35:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules;signal",
+      "expected_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 1, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 62,
+      "bar_end": "2026-11-24T14:40:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 63,
+      "bar_end": "2026-11-24T14:45:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 64,
+      "bar_end": "2026-11-24T14:50:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 65,
+      "bar_end": "2026-11-24T14:55:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 66,
+      "bar_end": "2026-11-24T15:00:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "buy;sell;rules;signal",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": -1}, \"sell\": 2, \"signal\": -1}",
+      "recorded_json": "{\"buy\": 1, \"entry_window\": false, \"rules\": {\"Chandelier\": 1, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 67,
+      "bar_end": "2026-11-24T15:05:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 68,
+      "bar_end": "2026-11-24T15:10:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 69,
+      "bar_end": "2026-11-24T15:15:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 70,
+      "bar_end": "2026-11-24T15:20:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 71,
+      "bar_end": "2026-11-24T15:25:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 72,
+      "bar_end": "2026-11-24T15:30:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 73,
+      "bar_end": "2026-11-24T15:35:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 74,
+      "bar_end": "2026-11-24T15:40:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    },
+    {
+      "session": "2026-11-24",
+      "slot": 75,
+      "bar_end": "2026-11-24T15:45:00-05:00",
+      "symbol": "US.QQQ",
+      "match": false,
+      "mismatched_fields": "sell;rules",
+      "expected_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": -1, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 1, \"signal\": 0}",
+      "recorded_json": "{\"buy\": 0, \"entry_window\": false, \"rules\": {\"Chandelier\": 0, \"DMI/ADX\": 0, \"Donchian\": 0, \"Keltner\": 0, \"MACD\": 0, \"NR7\": 0, \"RSI(2)\": 0, \"Stochastic\": 0, \"Turtle Soup\": 0}, \"sell\": 0, \"signal\": 0}"
+    }
+  ],
+  "recorded_replay_status": "FAIL",
+  "status": "PASS_WITH_DATA_REVISIONS",
+  "source_script_sha256": "af5437f7a93b68bf51f56acf90a6407ddc21c85334cacb82d14245180e63aca3"
+}

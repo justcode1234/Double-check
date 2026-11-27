@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T07:42:20.309007+00:00",
+  "generated_at": "2026-11-27T09:05:44.699584+00:00",
   "package": "Moo-Moo-Submission-Draft-Package.zip",
-  "source_head": "6b3ffa7c40908889a43f57df292ad1f4dfdd05da",
-  "working_tree_entries": 11,
+  "source_head": "b80dca96e1b9960fbafae0d242b233ce1ea0d762",
+  "working_tree_entries": 29,
   "draft": true,
   "includes": [
     "README.md",
@@ -35,25 +35,26 @@
     ".pytest_cache/",
     "node_modules/",
     ".qoder-office-pptx-locks/",
+    ".qoder.site descriptors",
     "AppleDouble ._* files",
     "unrelated reports/ research outputs",
     "the package zip itself",
     "this manifest file",
     "the external package checksum file"
   ],
-  "payload_file_count": 839,
-  "total_zip_file_count": 840,
+  "payload_file_count": 853,
+  "total_zip_file_count": 854,
   "manifest_included": true,
   "files": [
     {
       "path": "COMPETITION.md",
-      "bytes": 17634,
-      "sha256": "b9c8a77e0eec564e39bd8a3a6a70a0039e0d2ddc6cd79dc0c52c3454a5ea5f92"
+      "bytes": 18876,
+      "sha256": "fc351e454c1f5d568958eb4c541b4766808bde8bbb90bb8fe80f7b84e8a9da8f"
     },
     {
       "path": "COMPETITION_SUBMISSION_DRAFT.md",
-      "bytes": 30616,
-      "sha256": "281cb013f8f6d3743df2bb07292ce9b776fa491d9bf8fd7a81a56ba567addb3e"
+      "bytes": 33354,
+      "sha256": "7b5f2201ef76aef97a7cce61f2f437d2a42be7744d8245a1b84015851dab8ec2"
     },
     {
       "path": "README.md",
@@ -3386,29 +3387,44 @@
       "sha256": "7d1db0e1a8651a6109467cd6d6f22b59d24d3b0421a138bf8f169fa2dadfc4d4"
     },
     {
+      "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Runnable-Package-Manifest.json",
+      "bytes": 93777,
+      "sha256": "1aaee5329419e58c97472b4e3d5c9f9b9c8d33af9251f5d2c28f98600ae2f62a"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Runnable-Package.sha256",
+      "bytes": 95,
+      "sha256": "b7fd709c526b1ddae2a646dbc5a1c1db74cc4b42be41e84003f6452adcd1d667"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Runnable-Package.zip",
+      "bytes": 27163521,
+      "sha256": "edf72968c410224f1fffd89eaaa9fc39a98fbffc63d2575c139b044563fe311f"
+    },
+    {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf",
-      "bytes": 296509,
-      "sha256": "7cc8fd403159fbf45563117e63e37ac277d26f28eb6266fb1b709df9ddd7d76d"
+      "bytes": 297354,
+      "sha256": "4d85ca3f6ac67a7ead2dd9bddebb6a7bba99face5dae11e3b7536b19c64d9df5"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pptx",
-      "bytes": 203260,
-      "sha256": "0b8459b6a0e963da470631717fe49ecb252e3b0d8b4281fc10165ec393b719b5"
+      "bytes": 203273,
+      "sha256": "bda2fc693dc444da82467850d6a1a3add4a2c85623eb75ca27ea027e46c87a7a"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
-      "bytes": 277088,
-      "sha256": "195628c34ab9227f81c581d7d0924f509102388a951f4d3d26a6d0c846d7a65d"
+      "bytes": 280789,
+      "sha256": "e8775a3b57e0b0a30669a8ed0e76acd0266df5bb9fb09fb82322d0107f158368"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
-      "bytes": 277924,
-      "sha256": "60c93731827446e9e51a235185ebd05d97f97a01204ec9ffd7f0cd68c4ecd899"
+      "bytes": 281232,
+      "sha256": "ee850b8c6ba63ca784496557b280ab25e25315b408f8fbb00e792f807c5f99a7"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md",
-      "bytes": 3177,
-      "sha256": "ad128ad2228ccd8e839708b4c522bbe9b51d2d5b048656f0cb737eeb8d64b18a"
+      "bytes": 3899,
+      "sha256": "5d8800b03a6a17a1f221d4b6ab4f4bd554c5db8a6b9544977353205de3afc699"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/backtest_preview.json",
@@ -3416,9 +3432,34 @@
       "sha256": "53cb5ea5dddbbb4c4ed82fd3471cc66d13b0a55345087e215310f18286a6bccf"
     },
     {
+      "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package-Manifest.json",
+      "bytes": 93777,
+      "sha256": "1aaee5329419e58c97472b4e3d5c9f9b9c8d33af9251f5d2c28f98600ae2f62a"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package.sha256",
+      "bytes": 95,
+      "sha256": "b7fd709c526b1ddae2a646dbc5a1c1db74cc4b42be41e84003f6452adcd1d667"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package.zip",
+      "bytes": 27163521,
+      "sha256": "edf72968c410224f1fffd89eaaa9fc39a98fbffc63d2575c139b044563fe311f"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Submission-Draft.pdf",
+      "bytes": 297354,
+      "sha256": "4d85ca3f6ac67a7ead2dd9bddebb6a7bba99face5dae11e3b7536b19c64d9df5"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Submission-Draft.pptx",
+      "bytes": 203273,
+      "sha256": "bda2fc693dc444da82467850d6a1a3add4a2c85623eb75ca27ea027e46c87a7a"
+    },
+    {
       "path": "moomoo-dual-strategy/reports/competition/dist/index.html",
-      "bytes": 277088,
-      "sha256": "195628c34ab9227f81c581d7d0924f509102388a951f4d3d26a6d0c846d7a65d"
+      "bytes": 280789,
+      "sha256": "e8775a3b57e0b0a30669a8ed0e76acd0266df5bb9fb09fb82322d0107f158368"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/exit_backtest/fees_only.json",
@@ -3436,14 +3477,19 @@
       "sha256": "cbb3feba7bf429042c7fca24c14d12bc03438191e420b62a0d30d2010422599b"
     },
     {
+      "path": "moomoo-dual-strategy/reports/competition/independent_live_vote_audit.py",
+      "bytes": 17345,
+      "sha256": "af5437f7a93b68bf51f56acf90a6407ddc21c85334cacb82d14245180e63aca3"
+    },
+    {
       "path": "moomoo-dual-strategy/reports/competition/parity_regime.json",
       "bytes": 899,
       "sha256": "0583e2e196e328200b759b3422c7f9783b4c245caad05ccfcc11617ed6176928"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/refresh_html.py",
-      "bytes": 12053,
-      "sha256": "440a75a63c66f37017bb0d2bef03abc8ed2cd975fa537ee60ad4626849871517"
+      "bytes": 13813,
+      "sha256": "d2ae896fda3cb5a5cbd59c5e70b3b8710c54f333333dc8f612d78c0349a823b2"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/backtest_expectancy.png",
@@ -3457,18 +3503,18 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.csv",
-      "bytes": 14349,
-      "sha256": "6bc57d64d9d728cc0bebb9fb0ea3966ece64e53e2b45a9244560cf8e69742d45"
+      "bytes": 15656,
+      "sha256": "04e9e0a5581d0afe1d054500b2e91abc1cc15e039dac1e3788676c99607bf931"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.json",
-      "bytes": 2294,
-      "sha256": "c7f370eb380844349971e550b4cb4a891ac1d54f199395b8c23f5c2aa99355b4"
+      "bytes": 2145,
+      "sha256": "058c51ce155d48f4b113d9edb465685d4fdcc1ec3c82b5dd2a2b22e7c18f630b"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/cloud_audit_runs.json",
-      "bytes": 2953,
-      "sha256": "b13085d80a9bbc97ba7d433695c77010fe76268d1e97e9705c806ca94d8fe393"
+      "bytes": 3320,
+      "sha256": "cc81a2bab9194dddfb56da38cffb2f2bbd7d0ec13244149a2689c77d5a6c23ec"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/dashboard-current.png",
@@ -3527,8 +3573,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/html_report_qa.json",
-      "bytes": 1926,
-      "sha256": "1708bc641f6ffc8e919f8ee983de19aa4d427770ba0ef676bfbbc1fd84123a64"
+      "bytes": 2974,
+      "sha256": "f59b9e4b1ac8409074783a059724eee6e040f7ef28b5175562f082f46f582523"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.json",
@@ -3547,8 +3593,18 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.md",
-      "bytes": 2134,
-      "sha256": "82b6583cb70c801047de5a5732fc84fecfa040bdb2cba6791d66218b25f26136"
+      "bytes": 2132,
+      "sha256": "a2ad8034b5798a7e507e81b30a1802afe8a96df24b34b02c6277011cc1068f2f"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_live_vote_audit.csv",
+      "bytes": 140832,
+      "sha256": "4e9098de49945b1396eedfa46a65429bb6a1cbc3731f85c60b7ce9751231a82c"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_live_vote_audit.json",
+      "bytes": 55824,
+      "sha256": "65b5fcfd9f3516c270204cae69067eef3a9f03a4b21f20c1bb27a62e439931cb"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md",
@@ -3566,6 +3622,21 @@
       "sha256": "a6b187b0d21bde123003f35641f4e193502ba25ed1f8b9a07d2975fcd6b6ff94"
     },
     {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/scheduler_reconciliation_2026-11-25.json",
+      "bytes": 1858,
+      "sha256": "64f78638592f914794267f6e3773871f4c724497f9f160b5f4f280d8ded33c22"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/scheduler_reconciliation_2026-11-25.md",
+      "bytes": 3080,
+      "sha256": "8b8bbbbc4458dc4f09f72e867c8bb2f431ed784852bad214e41c61fd379271a9"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/session_performance.json",
+      "bytes": 1381,
+      "sha256": "ab733b7b81e64e5cb2343c08554235323f1ae5e5f21431be85b7d00fb903e0c7"
+    },
+    {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_decision_log.csv",
       "bytes": 29951,
       "sha256": "7ad08ab4454e3cc067b485731188d64e76ac77c0a3450a0d331c49e31fd0b9f4"
@@ -3577,13 +3648,13 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_form_manifest.json",
-      "bytes": 6224,
-      "sha256": "9474febaeed09374b0e4e2d7df13c9c21b4a4ffae3c74f8073fdb5dc6680ad2c"
+      "bytes": 7210,
+      "sha256": "accfd1ca3699425b3207dfd18a377b5a3c96bc3c30d12d5695afd095b289349d"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_results.json",
-      "bytes": 4827,
-      "sha256": "00a114d938db042b9d4599b16be05bd3ef4af24150136335adeaa987c408b935"
+      "bytes": 5654,
+      "sha256": "2ac37fad0ad0ade57553c74cc290f66674a0dc05954f4d93c2bec7825baa053c"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_trade_log.csv",
@@ -4242,7 +4313,7 @@
     }
   ],
   "test_summary": {
-    "run_at": "2026-11-26T05:42:49+08:00",
+    "run_at": "2026-11-27T08:11:19Z",
     "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider",
     "passed": 1248,
     "skipped": 2,
@@ -4254,15 +4325,14 @@
   },
   "claim_matrix": {
     "schema_version": 1,
-    "generated_at": "2026-11-27T03:45:00Z",
+    "generated_at": "2026-11-27T08:10:06Z",
     "claim_count": 51,
     "status_counts": {
       "verified": 43,
-      "documented": 1,
       "verified_manual": 1,
       "verified_historical": 1,
       "peer_attested": 2,
-      "verified_unresolved": 1,
+      "verified_with_disclosed_gaps": 2,
       "pending_final_session": 1,
       "partial": 1
     },
@@ -4274,30 +4344,20 @@
       "Qoder & Cloud Agent usage": 4
     },
     "unresolved": [
-      "C35",
-      "C43",
       "C45",
       "C49"
     ],
     "notes": [
       "Matrix distinguishes code/config verification, broker/test evidence, official rules, peer attestation and documented session evidence.",
-      "Pending/unresolved items are intentionally not marked complete."
+      "Pending/unresolved items are intentionally not marked complete.",
+      "C43 is operationally reconciled with two disclosed audit gaps and an unknown restart initiator.",
+      "C35 has exact identical-input implementation parity; 75 recorded rows differ only after provider historical-bar revisions."
     ],
     "pending_source_updates": [
       {
         "file": "COMPETITION.md",
-        "locator": "80,154",
-        "issue": "Test count is 1,208; current verified suite is 1,248 passed plus one Node-environment failure."
-      },
-      {
-        "file": "COMPETITION.md",
-        "locator": "169",
-        "issue": "Short-cash section says 23-24 Nov; audit shows 148 mismatched records on 24 Nov and 12 on 25 Nov."
-      },
-      {
-        "file": "COMPETITION.md",
         "locator": "111-122",
-        "issue": "Live-results snapshot is dated 25 Nov and must be refreshed after the 27 Nov final session."
+        "issue": "Live-results snapshot is current before the final session and must be refreshed after the 27 Nov final session."
       }
     ],
     "critical_submission_blockers": [
@@ -4320,17 +4380,23 @@
   },
   "html_report_qa": {
     "schema_version": 1,
-    "checked_at": "2026-11-27T06:42:41Z",
+    "checked_at": "2026-11-27T09:04:36Z",
     "report": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
     "method": "Local file opened in the in-app browser; HTMLParser link validation; accessibility snapshot; console inspection; mobile and forced-desktop captures.",
     "results": {
-      "local_links": 57,
+      "local_links": 66,
       "missing_local_links": 0,
+      "h1_count": 1,
       "tables": 9,
       "embedded_svg_charts": 3,
       "embedded_dashboard_images": 1,
       "console_errors": 0,
       "console_warnings": 0,
+      "scheduler_reconciliation_visible": true,
+      "rule_independence_wording_corrected": true,
+      "independent_replay_visible": true,
+      "session_performance_visible": true,
+      "stale_repository_push_wording": false,
       "mobile": {
         "viewport": "525x553",
         "document_scroll_width": 510,
@@ -4357,6 +4423,26 @@
       "console_errors": 0,
       "console_warnings": 0,
       "hosting_badge": true,
+      "public_downloads": {
+        "editable_pptx": "Moo-Moo-Submission-Draft.pptx",
+        "pdf": "Moo-Moo-Submission-Draft.pdf",
+        "runnable_package": "Moo-Moo-Runnable-Package.zip",
+        "runnable_package_bytes": 27163521,
+        "runnable_package_sha256": "edf72968c410224f1fffd89eaaa9fc39a98fbffc63d2575c139b044563fe311f",
+        "clean_room_test": {
+          "passed": 1248,
+          "skipped": 2,
+          "failed": 1,
+          "subtests_passed": 59,
+          "failure": "Node is required for the competition DOM regression test",
+          "status": "MATCHES_LOCAL_SUITE"
+        },
+        "manifest": "Moo-Moo-Runnable-Package-Manifest.json",
+        "checksum": "Moo-Moo-Runnable-Package.sha256",
+        "github": "https://github.com/justcode1234/Moo-Moo",
+        "http_status": 200,
+        "status": "PASS"
+      },
       "screenshots": [
         "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-mobile.png",
         "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-badge.png"
@@ -4398,20 +4484,20 @@
         "name": "One sentence about your project",
         "required": true,
         "status": "ready",
-        "value": "Moo-Moo is a deterministic two-vote SPY/QQQ paper-trading agent with ten independent signals, per-lot profit-only exits, twin-ETF shorts, and broker-reconciled risk controls."
+        "value": "Moo-Moo is a deterministic two-vote SPY/QQQ paper-trading agent with ten technical signals, per-lot profit-only exits, twin-ETF shorts, and broker-reconciled risk controls."
       },
       {
         "name": "Presentation Link",
         "required": true,
         "status": "ready",
         "value": "https://moo-moo-competition-7amelju7q1y.qoder.website",
-        "instructions": "Public Qoder Site URL verified in browser with no console errors."
+        "instructions": "Public Qoder Site URL verified in browser; the page provides direct downloads for the editable deck, PDF, lightweight runnable package, manifest and checksum."
       },
       {
         "name": "Project Description",
         "required": true,
         "status": "ready",
-        "value": "Moo-Moo is a Qoder-built, deterministic paper-trading agent for the Moomoo \u00d7 Qoder challenge. Ten independent technical rules vote on each completed five-minute SPY/QQQ bar; the agent acts only when at least two agree and fewer than two oppose. Entries use $20,000 lots inside a $100,000 book, a $40,000/39.5%-of-NAV single-name cap, no leverage, a 2.5% daily loss lock, 4% reduced sizing and a 7% terminal drawdown halt. Long lots are never sold at a loss; short exposure uses IVV/QQQM when the primary ETF is already long and is always covered by the close, lock or halt.\n\nEvery order is persisted as intent \u2192 acknowledgement \u2192 outcome and reconciled against Moomoo before the next order. The current broker snapshot is NAV $99,958.28, drawdown -0.2157%, with SPY 13 and QQQ 30, 30/30 broker orders matched, no open orders, no halt and no daily lock. The submission includes the strategy and invalidation rules, risk/compliance matrix, 1,477-session exit research, 1,479-session parity evidence, 1,248 passing tests plus one disclosed Node-environment failure, a 51-claim evidence matrix, redacted decision/fill logs, dashboard captures, and a runnable package with SHA-256 manifest.\n\nQoder Desktop built the code, tests, dashboard, report and deck. Read-only Cloud reporter/auditor/watchdog deployments are documented with their limits: one reporter run is verified; auditor/watchdog have zero runs and the 17 November evidence shows no Cloud schedule or Vault. The report explicitly covers what worked, what failed and why, including the 23 November partial-fill anomaly, 24\u201325 November short-cash NAV bug, and 25 November scheduler process-history discrepancy. Final 27 November settlement refresh is pending."
+        "value": "Moo-Moo is a Qoder-built, deterministic paper-trading agent for the Moomoo \u00d7 Qoder challenge. Ten technical rules vote on each completed five-minute SPY/QQQ bar (Noise-area is SPY-only); the agent acts only when at least two agree and fewer than two oppose. The indicators are correlated, so the threshold is a consensus filter rather than ten independent alpha sources. Entries use $20,000 lots inside a $100,000 book, a $40,000/39.5%-of-NAV single-name cap, no leverage, a 2.5% daily loss lock, 4% reduced sizing and a 7% terminal drawdown halt. Long lots are never sold at a loss; short exposure uses IVV/QQQM when the primary ETF is already long and is always covered by the close, lock or halt.\n\nEvery order is persisted as intent \u2192 acknowledgement \u2192 outcome and reconciled against Moomoo before the next order. The current broker snapshot is NAV $99,958.28, drawdown -0.2157%, with SPY 13 and QQQ 30, 30/30 broker orders matched, no open orders, no halt and no daily lock. The submission includes the strategy and invalidation rules, risk/compliance matrix, 1,477-session exit research, 1,479-session parity evidence, 1,248 passing tests plus one disclosed Node-environment failure, a 51-claim evidence matrix, redacted decision/fill logs, dashboard captures, and a runnable package with SHA-256 manifest.\n\nQoder Desktop built the code, tests, dashboard, report and deck. Read-only Cloud reporter/auditor/watchdog deployments are documented with their limits: one reporter run is verified; the 17 November auditor/watchdog deployments had zero runs and no Vault. Two additional one-time Cloud automations were created on 27 November, but their outputs are not exposed to the local agent and are not claimed as completed evidence. Independent Windows and local Qoder audits did complete. The report explicitly covers what worked, what failed and why, including the 23 November partial-fill anomaly, 24\u201325 November short-cash NAV bug, and 25 November scheduler/restart incident. Final 27 November settlement refresh is pending."
       },
       {
         "name": "Github Link",
@@ -4437,6 +4523,11 @@
       "presentation_pptx": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pptx",
       "presentation_pdf": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf",
       "runnable_package": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.zip",
+      "runnable_package_public": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package.zip",
+      "runnable_package_public_manifest": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package-Manifest.json",
+      "runnable_package_public_checksum": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package.sha256",
+      "presentation_pptx_public": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Submission-Draft.pptx",
+      "presentation_pdf_public": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Submission-Draft.pdf",
       "package_manifest": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json",
       "package_checksum": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256"
     },
@@ -4497,6 +4588,13 @@
     "location": "cloud",
     "output_mode": "independent",
     "purpose": "Strengthen Qoder Cloud Agent usage evidence with bounded read-only rubric auditing and evidence watchdog checks.",
+    "output_access_check": {
+      "checked_at": "2026-11-27T08:03:16Z",
+      "endpoint": "https://api.qoder.com/api/v1/cloud/automations/{task_id}",
+      "http_status": 401,
+      "result": "TOKEN_INVALID: missing authorization token",
+      "conclusion": "Cloud task creation is confirmed, but execution output is not retrievable through the available local interface."
+    },
     "runs": [
       {
         "name": "Moo-Moo Rubric Auditor",
@@ -4558,8 +4656,9 @@
   "notes": [
     "Draft package reflects the current Linux working tree, including uncommitted final changes.",
     "Refresh after the 27 November final session and final source review.",
-    "No account IDs, OAuth tokens, private account files or private competition state are included.",
+    "No account IDs, OAuth tokens, private account files, private competition state or Qoder Site descriptors are included.",
     "The zip checksum is stored in the adjacent .sha256 file to avoid a circular manifest hash.",
-    "Public hosting of the presentation link is verified; update the same project after final report changes."
+    "Public hosting of the presentation link is verified with direct deck, PDF and lightweight runnable-package downloads.",
+    "The lightweight public package reproduces the local suite exactly: 1,248 passed, 2 skipped, 1 Node-environment failure, 59 subtests passed."
   ]
 }

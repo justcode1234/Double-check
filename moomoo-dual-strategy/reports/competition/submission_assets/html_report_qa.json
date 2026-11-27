@@ -1,16 +1,22 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-11-27T06:42:41Z",
+  "checked_at": "2026-11-27T09:04:36Z",
   "report": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
   "method": "Local file opened in the in-app browser; HTMLParser link validation; accessibility snapshot; console inspection; mobile and forced-desktop captures.",
   "results": {
-    "local_links": 57,
+    "local_links": 66,
     "missing_local_links": 0,
+    "h1_count": 1,
     "tables": 9,
     "embedded_svg_charts": 3,
     "embedded_dashboard_images": 1,
     "console_errors": 0,
     "console_warnings": 0,
+    "scheduler_reconciliation_visible": true,
+    "rule_independence_wording_corrected": true,
+    "independent_replay_visible": true,
+    "session_performance_visible": true,
+    "stale_repository_push_wording": false,
     "mobile": {
       "viewport": "525x553",
       "document_scroll_width": 510,
@@ -37,6 +43,26 @@
     "console_errors": 0,
     "console_warnings": 0,
     "hosting_badge": true,
+    "public_downloads": {
+      "editable_pptx": "Moo-Moo-Submission-Draft.pptx",
+      "pdf": "Moo-Moo-Submission-Draft.pdf",
+      "runnable_package": "Moo-Moo-Runnable-Package.zip",
+      "runnable_package_bytes": 27163521,
+      "runnable_package_sha256": "edf72968c410224f1fffd89eaaa9fc39a98fbffc63d2575c139b044563fe311f",
+      "clean_room_test": {
+        "passed": 1248,
+        "skipped": 2,
+        "failed": 1,
+        "subtests_passed": 59,
+        "failure": "Node is required for the competition DOM regression test",
+        "status": "MATCHES_LOCAL_SUITE"
+      },
+      "manifest": "Moo-Moo-Runnable-Package-Manifest.json",
+      "checksum": "Moo-Moo-Runnable-Package.sha256",
+      "github": "https://github.com/justcode1234/Moo-Moo",
+      "http_status": 200,
+      "status": "PASS"
+    },
     "screenshots": [
       "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-mobile.png",
       "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-badge.png"

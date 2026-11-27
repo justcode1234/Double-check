@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-27T07:50:00Z",
+  "session": "2026-11-25",
+  "status": "operationally_reconciled_with_disclosed_gaps",
+  "scheduler": {
+    "status": "unexpected_exit",
+    "returncode": -15,
+    "ended_at_et": "2026-11-25T10:57:04.845140-05:00",
+    "source": "private/competition/scheduler/2026-11-25.json"
+  },
+  "runner_lifetimes": [
+    {
+      "provenance_id": "provenance/44cd7db2edfd44068915d4bb3113494b",
+      "first_audit_at": "2026-11-25T14:00:38.599189+00:00",
+      "last_audit_at": "2026-11-25T15:56:33.375199+00:00",
+      "audit_records": 198
+    },
+    {
+      "provenance_id": "provenance/2006674bbb104c2f951987d4f3d2f66d",
+      "first_audit_at": "2026-11-25T15:57:22.194232+00:00",
+      "last_audit_at": "2026-11-25T16:05:47.470305+00:00",
+      "audit_records": 27
+    },
+    {
+      "provenance_id": "provenance/e7cd253a2a78419e998287637605019e",
+      "first_audit_at": "2026-11-25T16:06:28.176800+00:00",
+      "last_audit_at": "2026-11-25T21:15:29.394820+00:00",
+      "audit_records": 733
+    }
+  ],
+  "audit_gaps_seconds": [48.819033, 40.706495],
+  "outbox_events_during_gaps": 0,
+  "session_orders": 11,
+  "session_order_errors": 0,
+  "session_runner_errors": 0,
+  "daily_report_generated_at": "2026-11-25T21:20:06.901200+00:00",
+  "closeout": "loop: session over",
+  "source_hash_changes": {
+    "restart_1": [
+      "scripts/run_competition.py",
+      "src/dual_strategy/competition/planner.py"
+    ],
+    "restart_2": [
+      "src/dual_strategy/competition/broker.py"
+    ]
+  },
+  "service_kill_mode": "process",
+  "restart_initiator": "not_recorded_in_available_evidence",
+  "conclusion": "The scheduler wrapper died and the runner restarted twice after source edits. No broker order is missing and the session closed normally, but two short risk-audit telemetry gaps remain disclosed."
+}

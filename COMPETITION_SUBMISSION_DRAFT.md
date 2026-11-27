@@ -4,19 +4,19 @@
 
 **Generated with Qoder Desktop · competition paper account · USD 100,000 initial assets**
 
-**Draft v0.2 · 27 November 2026, 14:40 SGT · pending the 27 November half-day final session and final repository push**
+**Draft v0.3 · 27 November 2026, 15:52 SGT · pending the 27 November half-day final-session refresh**
 
-> This is a working submission draft, not the final artifact. It separates broker-reconciled results from hypothetical research, records failures as well as successes, and leaves `COMPETITION.md` and trading source untouched while final changes are completed elsewhere.
+> This working submission draft separates broker-reconciled results from hypothetical research and records failures as well as successes. The current trading source is committed and public; final-session results, deck and package refresh remain.
 
 **Live presentation:** https://moo-moo-competition-7amelju7q1y.qoder.website
 
-**Draft deliverables:** [hosting-ready HTML report](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html) · [standalone HTML report](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html) · [editable PowerPoint](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pptx) · [rendered PDF](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf) · [submission cover note](moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md) · [form manifest](moomoo-dual-strategy/reports/competition/submission_assets/submission_form_manifest.json) · draft runnable package (submitted separately; 124 MB) · [package manifest](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json) · [package checksum](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256) · [redacted peer-evidence manifest](moomoo-dual-strategy/reports/competition/submission_assets/peer_evidence_manifest.json)
+**Draft deliverables:** [hosting-ready HTML report](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html) · [standalone HTML report](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html) · [editable PowerPoint](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pptx) · [rendered PDF](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf) · [submission cover note](moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md) · [form manifest](moomoo-dual-strategy/reports/competition/submission_assets/submission_form_manifest.json) · draft runnable package (submitted separately) · [package manifest](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json) · [package checksum](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256) · [redacted peer-evidence manifest](moomoo-dual-strategy/reports/competition/submission_assets/peer_evidence_manifest.json)
 
 ---
 
 ## Executive summary
 
-Moo-Moo is a deterministic, event-driven paper-trading agent for SPY and QQQ. Ten independent technical rules vote on each completed five-minute bar; the agent acts only when at least two rules agree and fewer than two disagree. Every order passes account, attribution, quote-freshness, exposure, cash, loss-limit and reconciliation gates before it can reach Moomoo's competition paper account.
+Moo-Moo is a deterministic, event-driven paper-trading agent for SPY and QQQ. Ten technical rules vote on each completed five-minute bar (Noise-area is SPY-only); the agent acts only when at least two rules agree and fewer than two disagree. The indicators are correlated, so the threshold is a consensus filter—not ten independent alpha sources. Every order passes account, attribution, quote-freshness, exposure, cash, loss-limit and reconciliation gates before it can reach Moomoo's competition paper account.
 
 The strategy evolved during the competition from a five-sleeve portfolio into a focused Two-vote book:
 
@@ -24,7 +24,7 @@ The strategy evolved during the competition from a five-sleeve portfolio into a 
 - **23 Nov:** Two-vote execution went live; a broker partial-fill/cancellation anomaly forced a safe halt and manual reconciliation.
 - **24 Nov:** losing long lots were deliberately carried instead of being sold at a loss; an exit backtest removed profit targets and tight stops.
 - **25 Nov:** $20,000 lots, add/re-entry, doubled loss limits, twin-ETF shorts and the per-lot “never sell a long at a loss” guard were activated.
-- **26 Nov:** H ETF was retired after producing no new plan; its $20,000 moved to the Two-vote book, now **$100,000**. A short-cash NAV correction is in Claude's final working-tree diff.
+- **26 Nov:** H ETF was retired after producing no new plan; its $20,000 moved to the Two-vote book, now **$100,000**. The short-cash NAV correction is implemented, tested and committed.
 
 ### Broker-reconciled snapshot
 
@@ -54,7 +54,7 @@ The account is slightly below its starting balance while remaining far inside ev
 
 ### 1.1 Edge hypothesis
 
-When several independent, well-known technical rules agree on the same completed five-minute bar, short-term directional persistence is more likely than when a single rule fires. The agent therefore trades **agreement**, not any one indicator.
+When several distinct, well-known technical rules agree on the same completed five-minute bar, short-term directional persistence is more likely than when a single rule fires. The agent therefore trades **agreement**, not any one indicator. The rules are correlated; the hypothesis is that consensus filters noise, not that each rule contributes independent alpha.
 
 The hypothesis is explicitly regime-dependent. A 5.9-year replay loses money after conservative costs over 2021–2026, loses less in 2025–2026, and is profitable in the most recent three-month regime. The submission does not claim a proven all-weather edge.
 
@@ -238,15 +238,13 @@ The correct conclusion is not “the strategy is proven.” It is: **the signal 
 
 ### 5.2 Independent signal verification
 
-All ten rules were independently re-implemented without importing the live strategy code and fed Moomoo's five-minute bars. On the runner's actual live bars:
+All ten rules were independently re-implemented without importing the live strategy's signal code. On identical Moomoo input bars, the independent implementation matched the live signal code on **264/264 bar-symbol checks** and **2,508/2,508 rule checks** with zero implementation mismatches.
 
-- 23 Nov: 62 bars × 2 tickers, 0 rule mismatches.
-- 24 Nov: 52 bars × 2 tickers, 0 rule mismatches.
-- Later historical revisions differed only at cent-level bar updates; one Chandelier vote depended on a single cent.
+A separate replay against Moomoo's current historical bars reproduced **189/264** recorded live rows. The remaining **75** rows differ because the provider revised historical bars after the live sessions: 29 SPY Chandelier rows and one QQQ Turtle Soup row on 23 Nov, plus 45 QQQ rows on 24 Nov. The original live-time check reported zero mismatches on the bars then available; the public artifact now preserves both the exact implementation parity and the provider-revision limitation. See [audit JSON](moomoo-dual-strategy/reports/competition/submission_assets/independent_live_vote_audit.json), [row-level CSV](moomoo-dual-strategy/reports/competition/submission_assets/independent_live_vote_audit.csv), and [replay script](moomoo-dual-strategy/reports/competition/independent_live_vote_audit.py).
 
 ### 5.3 Tests and browser QA
 
-The current full suite on 26 November, including Claude's final short-cash/twin-short working-tree changes, reported:
+The current full suite on 27 November, including Claude's final short-cash/twin-short changes, reported:
 
 - **1,248 passed**
 - **2 skipped**
@@ -258,7 +256,7 @@ Manual browser verification of the current competition dashboard found no consol
 
 ### 5.4 Claim-to-evidence audit
 
-Fifty-one material report/deck claims are mapped in the [claim matrix](moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.csv) and [machine-readable summary](moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.json): 43 verified directly, one verified manually, one verified historically, two peer-attested, and four explicitly unresolved/partial (independent replay artifact, scheduler process history, final session, Cloud orchestration).
+Fifty-one material report/deck claims are mapped in the [claim matrix](moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.csv) and [machine-readable summary](moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.json): 43 verified directly, one verified manually, one verified historically, two peer-attested, two verified with disclosed gaps, and two unresolved/partial (final session, Cloud orchestration).
 
 ### 5.5 Broker reconciliation
 
@@ -275,6 +273,15 @@ Fifty-one material report/deck claims are mapped in the [claim matrix](moomoo-du
 ### 6.1 Equity and drawdown
 
 The evidence package contains **2,601 EXECUTE risk snapshots** across the competition sessions.
+
+| Session | Last runner NAV | Session return | End drawdown |
+|---|---:|---:|---:|
+| 20 Nov | $99,966.67 | −0.0333% | −0.0648% |
+| 23 Nov | $100,105.43 | +0.1388% | −0.0357% |
+| 24 Nov | $100,005.70 | −0.0996% | −0.1684% |
+| 25 Nov | $99,949.85 | −0.0559% | −0.2241% |
+
+The maximum observed drawdown in the archived risk snapshots was **−1.5754%**. Four completed session returns produce an annualized Sharpe of **−1.90**, but that figure is not statistically meaningful and is not used as a strategy claim. The current broker NAV of $99,958.28 is $8.43 above the last runner mark, consistent with normal mark-to-market drift. See [session_performance.json](moomoo-dual-strategy/reports/competition/submission_assets/session_performance.json).
 
 ![Live equity](moomoo-dual-strategy/reports/competition/submission_assets/equity_curve.svg)
 
@@ -308,7 +315,7 @@ Account IDs, OAuth tokens, private account files and credentials are excluded.
 
 ### What worked
 
-1. **Deterministic agreement signals** matched an independent implementation on every checked live bar.
+1. **Deterministic agreement signals** matched the live signal code on 264/264 identical-input checks and 2,508/2,508 rule checks.
 2. **Fail-closed reconciliation** prevented a broker partial-fill/cancellation anomaly from becoming a duplicate or oversized order.
 3. **Per-lot accounting** allowed old $10k and new $20k lots to coexist and be judged independently.
 4. **Long-sale guard** enforced the user's “never sell a long at a loss” rule across votes, flatten, lock, halt and manual paths.
@@ -321,9 +328,9 @@ Account IDs, OAuth tokens, private account files and credentials are excluded.
 1. **23 Nov partial-fill/cancellation anomaly:** Moomoo reported a 20-share partial fill as a cancellation with zero fills. The runner halted; positions were manually closed and reconciled. The fix added per-lot share tracking and position/cash cross-checks.
 2. **24 Nov QQQ short loss:** a −$76.20 vote-flip exit showed that a $50 target was not the main problem. The exit backtest led to no target/no stop and winners-run exits.
 3. **24–25 Nov short-cash NAV mismatch:** with a short open, sim `balance` withheld 160% of short market value. The audit contains **148 mismatched short-open risk records on 24 Nov and 12 on 25 Nov**; entries were blocked and loss-lock/halt evaluation was suppressed. Claude's current `account_cash` correction derives cash only when the broker identity reconciles within $1; otherwise it fails closed.
-4. **25 Nov process-supervision inconsistency:** the native scheduler records `unexpected_exit` (−15) at 10:57 ET, while execution evidence continues to 15:55 ET. This does not indicate an unresolved order, but the process history must be reconciled before final submission.
+4. **25 Nov process-supervision inconsistency — reconciled with disclosed gaps:** the native scheduler recorded `unexpected_exit` (−15) at 10:57 ET. Provenance proves the runner restarted twice after source edits, with **48.8 s** and **40.7 s** audit-telemetry gaps. No outbox event or broker order occurred in either gap; all 11 session fills reconcile and the daily report completed. The restart initiator is not recorded, so the report does not claim gap-free unattended supervision. See the [reconciliation](moomoo-dual-strategy/reports/competition/submission_assets/scheduler_reconciliation_2026-11-25.md).
 5. **Test environment gap:** Node is absent from PATH, so one DOM regression cannot run. The browser itself renders cleanly.
-6. **Cloud orchestration gap:** reporter/auditor/watchdog exist, but auditor/watchdog have no runs and no Cloud schedule/Vault. This is a scoring limitation, not hidden execution.
+6. **Cloud output gap:** two one-time read-only Cloud automations were created, but their execution outputs are not exposed to the local agent; no completed Cloud output is claimed. Independent Windows and local Qoder audits did complete and are included.
 
 ---
 
@@ -362,7 +369,7 @@ The full DOM regression additionally requires Node.js on PATH.
 
 ### 8.4 Package contents
 
-The draft runnable package (submitted separately; 124 MB) contains source, config, tests, README, `AGENTS.md`, HTML/PPTX/PDF reports, redacted logs, relevant research outputs, cached bars and evidence. It excludes `.venv`, caches, `private/`, account files, tokens, credentials and unrelated heavy research outputs. The [manifest](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json) is included inside the zip and records every payload file's size and SHA-256; the separate [package checksum](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256) records the zip hash without a circular dependency. The package will be refreshed after Claude's final diff and the 27 Nov results.
+The draft runnable package (submitted separately) contains source, config, tests, README, `AGENTS.md`, HTML/PPTX/PDF reports, redacted logs, relevant research outputs, cached bars and evidence. It excludes `.venv`, caches, `private/`, account files, tokens, credentials and unrelated heavy research outputs. The [manifest](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json) is included inside the zip and records every payload file's size and SHA-256; the separate [package checksum](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256) records the zip hash without a circular dependency. An **approximately 27 MB lightweight public package** is linked directly from the hosted report; it includes the source, tests, deck/PDF, redacted evidence and the cache fixtures required to reproduce the local suite. The largest historical cache remains in GitHub and the full evidence package. The package will be refreshed after Claude's final diff and the 27 Nov results.
 
 ---
 
@@ -371,7 +378,7 @@ The draft runnable package (submitted separately; 124 MB) contains source, confi
 | Rubric category | Weight | Coverage | Strongest evidence | Remaining gap before final |
 |---|---:|---|---|---|
 | Risk-adjusted return | 25% | **Partial** | Broker NAV, high-water/drawdown, 30 reconciled orders, low observed drawdown, honest backtest regime split | 27 Nov final close; still a very short live sample. |
-| Qoder & Cloud Agent usage | 30% | **Partial** | Qoder Desktop built code/dashboard/report; native automation; 3 read-only Cloud deployments; 1 verified reporter run | No Cloud schedule, auditor/watchdog runs or Vault; multi-agent orchestration is not live. |
+| Qoder & Cloud Agent usage | 30% | **Partial** | Qoder Desktop built code/dashboard/report; native automation; 3 read-only Cloud deployments; 1 verified reporter run; 2 one-time Cloud automations created | Cloud run outputs are not exposed and no Vault is attached; multi-agent orchestration is not live. |
 | Strategy & risk design | 30% | **Strong** | Exact ten-rule thesis, invalidation, sizing formula, 39.5% cap, loss ladder, kill switch, fail-closed reconciliation, per-lot guard | Final source diff and test rerun; 27 Nov behavior. |
 | Reusability & documentation | 15% | **Strong, package pending** | Runnable repo, config, tests, dashboard, redacted logs, charts, report/deck, safety contract | Final PPTX, package zip and checksum manifest. |
 
@@ -384,14 +391,14 @@ No numeric “100/100” claim is made before the final session and package audi
 - [x] Commit and push the code/tests/backtest/submission assets, merge `main` to the verified commit, and re-verify every matrix locator against the public repository.
 - [x] Publish the presentation and verify the public URL: https://moo-moo-competition-7amelju7q1y.qoder.website
 - [x] Complete independent Windows rubric audit and local evidence watchdog; incorporate fixable findings.
-- [ ] Incorporate Claude's final source/report diff without overwriting unrelated work.
-- [ ] Reconcile Claude's `COMPETITION.md` stale items: 1,208 test count vs current 1,248; short-cash session dates vs audit (24–25 Nov); live-results snapshot after the final session.
-- [ ] Re-run the full suite and record the exact final count; resolve or explicitly disclose the Node-dependent DOM test.
-- [ ] Reconcile the 25 Nov scheduler/process-history inconsistency.
+- [x] Incorporate Claude's final source/report diff without overwriting unrelated work; commit `6b3ffa7` is public and `main` is aligned.
+- [x] Correct `COMPETITION.md` stale test count, replay evidence, Cloud wording and short-cash dates; the final live-results refresh remains pending.
+- [x] Re-run the full suite and record the exact count: 1,248 passed, 2 skipped, 1 Node-environment failure, 59 subtests passed; the DOM limitation remains explicitly disclosed.
+- [x] Reconcile the 25 Nov scheduler/process-history inconsistency; retain the two disclosed audit gaps and unknown restart initiator.
 - [ ] Run and reconcile the 27 Nov 13:00 ET final session.
 - [ ] Refresh NAV, positions, P&L, equity curve, trade log and deck from final regular-market closes.
-- [ ] Fold in Windows and Mac evidence manifests.
-- [ ] Build and visually inspect the final PowerPoint.
+- [x] Fold in the redacted Windows and Mac evidence manifests; Linux remains the sole execution host.
+- [x] Build and visually inspect the current 13-slide PowerPoint and rendered PDF; final-session numbers remain pending.
 - [ ] Refresh the draft runnable package zip and SHA-256 manifest after final changes; verify no private material is included.
 - [ ] Submit through the official Luma link before **30 Nov 2026, 23:59 SGT**.
 
@@ -407,7 +414,7 @@ No numeric “100/100” claim is made before the final session and package audi
 
 ### Repository evidence
 
-- `COMPETITION.md` — Claude's current narrative draft; left untouched by this report.
+- `COMPETITION.md` — current competition narrative, corrected for the verified test count, replay evidence, Cloud limits, broker snapshot and short-cash incident dates.
 - `moomoo-dual-strategy/config/competition.yaml` — frozen parameters and risk gates.
 - `moomoo-dual-strategy/scripts/run_competition.py` — deterministic execution loop and send guard.
 - `moomoo-dual-strategy/scripts/schedule_competition.py` — native startup and preflight.

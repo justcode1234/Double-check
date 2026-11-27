@@ -3,6 +3,7 @@ import html
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -77,6 +78,9 @@ def parse_markdown(md):
         if heading:
             level = len(heading.group(1))
             text = heading.group(2).strip()
+            if level == 1 and not body:
+                i += 1
+                continue
             hid = slug(text)
             headings.append((level, text, hid))
             body.append(f'<h{level} id="{hid}">{inline(text)}</h{level}>')
@@ -140,6 +144,7 @@ main{min-width:0}h1{font-size:44px;line-height:1.08;margin:10px 0 18px}h2{font-s
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;margin:18px 0}table{border-collapse:collapse;width:100%;min-width:640px;background:var(--panel)}th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#0F172A;color:#CBD5E1;font-size:12px;letter-spacing:.03em}tr:last-child td{border-bottom:0}
 figure{margin:24px 0;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}figcaption{color:var(--muted);font-size:12px;margin-bottom:10px}.chart-frame svg{display:block;width:100%;height:auto}figure img,.proof img{display:block;width:100%;height:auto;border-radius:10px}.proof{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:24px 0}.proof p{color:var(--muted)}
 .footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.downloads{margin:26px 0;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px}.downloads h2{margin:0 0 8px;padding:0;border:0;font-size:24px}.downloads p{color:var(--muted);margin:0 0 16px}.download-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.download-grid a{display:block;padding:12px 14px;background:#0B1220;border:1px solid var(--line);border-radius:10px;color:var(--teal);font-weight:700}.download-grid a:hover{border-color:var(--teal);text-decoration:none}@media(max-width:640px){.download-grid{grid-template-columns:1fr}}
 @media(max-width:980px){.layout{grid-template-columns:1fr;padding:20px}nav{position:static;max-height:260px;overflow:auto}.kpis{grid-template-columns:repeat(2,1fr)}h1{font-size:36px}}
 @media print{body{background:white;color:#111827}.layout{display:block;padding:0}nav{display:none}.hero,figure,.proof,blockquote,.table-wrap{break-inside:avoid}.hero,figure,.proof,blockquote{background:white;border-color:#CBD5E1}a{color:#0F766E}.kpi{background:white;border-color:#CBD5EE}.chart-frame svg{background:#0B1220}h2{break-after:avoid}}
 """
@@ -148,7 +153,7 @@ figure{margin:24px 0;background:var(--panel);border:1px solid var(--line);border
 def render(body, headings, results):
     nav = "".join(f'<a class="toc-l{level}" href="#{hid}">{html.escape(text)}</a>' for level, text, hid in headings if level <= 3)
     account = results["account"]
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Moo-Moo Competition Submission Report</title><style>{CSS}</style></head><body><div class="layout"><nav><div class="brand">MOO-MOO / QODER</div>{nav}</nav><main><section class="hero" id="moo-moo-adaptive-two-vote-etf-agent"><div class="eyebrow">Moomoo × Qoder AI Trading Agent Challenge</div><h1>Moo-Moo<br>Adaptive Two-Vote ETF Agent</h1><div class="badge">Draft v0.2 · final 27 Nov session pending</div><p>Ten independent rules. One deterministic decision. Every order reconciled before the next.</p><div class="kpis"><div class="kpi"><span>CURRENT NAV</span><strong>${account['nav']:,.2f}</strong></div><div class="kpi"><span>NET CHANGE</span><strong class="negative">−${abs(account['net_change_usd']):,.2f}</strong></div><div class="kpi"><span>DRAWDOWN</span><strong>{account['drawdown_pct']:.4f}%</strong></div><div class="kpi"><span>ORDERS MATCHED</span><strong>30 / 30</strong></div></div></section>{''.join(body)}<div class="footer">Generated with Qoder Desktop · broker-reconciled paper-trading evidence · no live capital · report and package remain draft until the 27 November 2026 final session is reconciled.</div></main></div></body></html>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Moo-Moo Competition Submission Report</title><style>{CSS}</style></head><body><div class="layout"><nav><div class="brand">MOO-MOO / QODER</div>{nav}</nav><main><section class="hero" id="moo-moo-adaptive-two-vote-etf-agent"><div class="eyebrow">Moomoo × Qoder AI Trading Agent Challenge</div><h1>Moo-Moo<br>Adaptive Two-Vote ETF Agent</h1><div class="badge">Draft v0.3 · final 27 Nov session pending</div><p>Ten technical rules. One deterministic decision. Every order reconciled before the next.</p><div class="kpis"><div class="kpi"><span>CURRENT NAV</span><strong>${account['nav']:,.2f}</strong></div><div class="kpi"><span>NET CHANGE</span><strong class="negative">−${abs(account['net_change_usd']):,.2f}</strong></div><div class="kpi"><span>DRAWDOWN</span><strong>{account['drawdown_pct']:.4f}%</strong></div><div class="kpi"><span>ORDERS MATCHED</span><strong>30 / 30</strong></div></div></section>{''.join(body)}<div class="footer">Generated with Qoder Desktop · broker-reconciled paper-trading evidence · no live capital · report and package remain draft until the 27 November 2026 final session is reconciled.</div></main></div></body></html>'''
 
 
 def main():
@@ -157,10 +162,14 @@ def main():
     page = render(body, headings, results)
     (OUT / "Moo-Moo-Submission-Report.html").write_text(page, encoding="utf-8")
     hosted = re.sub(r'<a href="(?!https?:|#)[^"]+"[^>]*>(.*?)</a>', r"\1", page)
-    hosted = hosted.replace("</section>", "</section><div class=\"badge\">Hosting-ready report · editable deck, PDF and runnable package supplied separately</div>", 1)
+    package_mb = (OUT / "Moo-Moo-Runnable-Package.zip").stat().st_size / 1_000_000
+    downloads = f'''<section class="downloads"><h2>Submission downloads</h2><p>Editable deck, rendered PDF, lightweight runnable source package and public repository. The lightweight package omits the largest historical cache; the full cache remains in GitHub.</p><div class="download-grid"><a href="./Moo-Moo-Submission-Draft.pptx" download>Editable PowerPoint deck</a><a href="./Moo-Moo-Submission-Draft.pdf" download>Rendered PDF deck</a><a href="./Moo-Moo-Runnable-Package.zip" download>Runnable source package · {package_mb:.1f} MB</a><a href="./Moo-Moo-Runnable-Package-Manifest.json" download>Package manifest</a><a href="./Moo-Moo-Runnable-Package.sha256" download>Package SHA-256</a><a href="https://github.com/justcode1234/Moo-Moo" target="_blank" rel="noopener noreferrer">GitHub repository + full cache</a></div></section>'''
+    hosted = hosted.replace("</section>", "</section>" + downloads, 1)
     (OUT / "Moo-Moo-Submission-Report-Hosted.html").write_text(hosted, encoding="utf-8")
     (OUT / "dist").mkdir(exist_ok=True)
     (OUT / "dist" / "index.html").write_text(hosted, encoding="utf-8")
+    for name in ("Moo-Moo-Submission-Draft.pptx", "Moo-Moo-Submission-Draft.pdf", "Moo-Moo-Runnable-Package.zip", "Moo-Moo-Runnable-Package-Manifest.json", "Moo-Moo-Runnable-Package.sha256"):
+        shutil.copy2(OUT / name, OUT / "dist" / name)
     print(json.dumps({"headings": len(headings), "figures": page.count("<figure"), "html_bytes": len(page.encode()), "hosted_bytes": len(hosted.encode())}, indent=2))
 
 

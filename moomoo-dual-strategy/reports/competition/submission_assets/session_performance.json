@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-27T08:08:23Z",
+  "source": "moomoo-dual-strategy/reports/competition/submission_assets/submission_equity.csv",
+  "initial_nav": 100000.0,
+  "completed_sessions": 4,
+  "sessions": [
+    {
+      "session": "2026-11-20",
+      "last_runner_nav": 99966.675,
+      "session_return_pct": -0.033325,
+      "end_drawdown_pct": -0.06478850205280384
+    },
+    {
+      "session": "2026-11-23",
+      "last_runner_nav": 100105.428,
+      "session_return_pct": 0.13879925485169586,
+      "end_drawdown_pct": -0.03572954702122377
+    },
+    {
+      "session": "2026-11-24",
+      "last_runner_nav": 100005.704,
+      "session_return_pct": -0.09961897370840411,
+      "end_drawdown_pct": -0.16835048429764132
+    },
+    {
+      "session": "2026-11-25",
+      "last_runner_nav": 99949.85,
+      "session_return_pct": -0.055850814269542415,
+      "end_drawdown_pct": -0.22410727345087977
+    }
+  ],
+  "max_observed_drawdown_pct": -1.5753973262696008,
+  "annualized_sharpe_four_returns": -1.8977276947841875,
+  "sharpe_caveat": "Only four completed session returns are available; the annualized figure is computable but not statistically meaningful and is not used as a strategy claim.",
+  "current_broker_nav": 99958.28,
+  "last_runner_mark": 99949.85,
+  "broker_minus_last_runner_mark": 8.43,
+  "final_session": "2026-11-27 half-day pending"
+}

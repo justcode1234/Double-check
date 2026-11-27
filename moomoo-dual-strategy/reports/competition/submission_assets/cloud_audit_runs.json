@@ -4,6 +4,13 @@
   "location": "cloud",
   "output_mode": "independent",
   "purpose": "Strengthen Qoder Cloud Agent usage evidence with bounded read-only rubric auditing and evidence watchdog checks.",
+  "output_access_check": {
+    "checked_at": "2026-11-27T08:03:16Z",
+    "endpoint": "https://api.qoder.com/api/v1/cloud/automations/{task_id}",
+    "http_status": 401,
+    "result": "TOKEN_INVALID: missing authorization token",
+    "conclusion": "Cloud task creation is confirmed, but execution output is not retrievable through the available local interface."
+  },
   "runs": [
     {
       "name": "Moo-Moo Rubric Auditor",

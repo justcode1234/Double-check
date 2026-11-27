@@ -49,8 +49,8 @@
       "editable_pptx": "Moo-Moo-Submission-Draft.pptx",
       "pdf": "Moo-Moo-Submission-Draft.pdf",
       "runnable_package": "Moo-Moo-Runnable-Package.zip",
-      "runnable_package_bytes": 27175412,
-      "runnable_package_sha256": "8c07a7c6faf9df6f137b22509380fcc750e7e18a4f39b46811ac262b43d7576f",
+      "runnable_package_bytes": 27175504,
+      "runnable_package_sha256": "8af4ce55e2d9bb73da194c4a153a3585d0879413a9f8b1ae29c1727ef552cb5d",
       "clean_room_test": {
         "passed": 1248,
         "skipped": 2,

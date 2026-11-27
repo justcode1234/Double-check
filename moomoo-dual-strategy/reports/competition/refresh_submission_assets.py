@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,6 +24,15 @@ def load(path: Path):
 
 def write_json(path: Path, value) -> None:
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+
+def redact(value):
+    if not isinstance(value, str):
+        return value
+    text = value.replace(str(ROOT), "<workspace>").replace(str(Path.home()), "<home>")
+    text = text.replace(str(Path.home() / ".moomoo" / "bin" / "moomoo"), "<moomoo-cli>")
+    text = re.sub(r"C:\\Users\\[^\\\s]+", "<user>", text)
+    return re.sub(r"/home/[^/\s]+", "<home>", text)
 
 
 def outbox_rows():
@@ -168,8 +178,8 @@ def main() -> None:
                 "symbol": row.get("symbol"),
                 "side": row.get("side"),
                 "qty": row.get("qty", row.get("shares")),
-                "reason": row.get("reason", row.get("source", row.get("step"))),
-                "detail": json.dumps({key: value for key, value in row.items() if key not in ("logged_at", "created_at", "event", "audit_id", "intent_id", "sleeve", "symbol", "side", "qty", "shares", "reason", "source", "step")}, sort_keys=True),
+                "reason": redact(row.get("reason", row.get("source", row.get("step")))),
+                "detail": redact(json.dumps({key: value for key, value in row.items() if key not in ("logged_at", "created_at", "event", "audit_id", "intent_id", "sleeve", "symbol", "side", "qty", "shares", "reason", "source", "step")}, sort_keys=True)),
             })
     for decision in state.get("intraday", {}).get("decisions", []):
         decision_rows.append({
@@ -180,8 +190,8 @@ def main() -> None:
             "symbol": decision.get("symbol"),
             "side": decision.get("side"),
             "qty": None,
-            "reason": decision.get("action"),
-            "detail": json.dumps({key: value for key, value in decision.items() if key not in ("at", "sleeve", "symbol", "side", "action")}, sort_keys=True),
+            "reason": redact(decision.get("action")),
+            "detail": redact(json.dumps({key: value for key, value in decision.items() if key not in ("at", "sleeve", "symbol", "side", "action")}, sort_keys=True)),
         })
     decision_rows.sort(key=lambda row: (row["session"], row["at"] or ""))
     with (OUT / "submission_decision_log.csv").open("w", newline="", encoding="utf-8") as handle:

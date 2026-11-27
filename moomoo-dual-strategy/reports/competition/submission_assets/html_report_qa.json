@@ -16,7 +16,6 @@
     "rule_independence_wording_corrected": true,
     "independent_replay_visible": true,
     "session_performance_visible": true,
-    "session_performance_visible": true,
     "clean_room_reproducibility_visible": true,
     "stale_repository_push_wording": false,
     "mobile": {
@@ -49,19 +48,18 @@
       "editable_pptx": "Moo-Moo-Submission-Draft.pptx",
       "pdf": "Moo-Moo-Submission-Draft.pdf",
       "runnable_package": "Moo-Moo-Runnable-Package.zip",
-      "runnable_package_bytes": 27175541,
-      "runnable_package_sha256": "ceff76b44ce9f059c8f989c254bea6e187c8feca42fb315998430296f9ea4f18",
       "clean_room_test": {
-        "passed": 1248,
+        "passed": 1251,
         "skipped": 2,
-        "failed": 1,
+        "failed": 0,
         "subtests_passed": 59,
-        "failure": "Node is required for the competition DOM regression test",
+        "warnings": 4,
+        "node_runtime": "Qoder Electron v24.22.1 via ELECTRON_RUN_AS_NODE=1",
         "status": "MATCHES_LOCAL_SUITE"
       },
       "manifest": "Moo-Moo-Runnable-Package-Manifest.json",
       "checksum": "Moo-Moo-Runnable-Package.sha256",
-      "github": "https://github.com/justcode1234/Moo-Moo",
+      "github": "https://github.com/justcode1234/Double-check",
       "http_status": 200,
       "status": "PASS"
     },

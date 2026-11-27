@@ -250,7 +250,7 @@ def main() -> None:
         })
     nav = float(funds["total_asset"])
     cash = account_cash(funds)
-    high_water = float(state["high_water"])
+    high_water = max(float(state["high_water"]), nav)
     day_start = float(state["day_start_nav"])
     open_unrealized = round(sum(position["unrealized_gross"] for position in public_positions), 2)
     daily_orders = Counter(datetime.fromtimestamp(int(order["create_time"]) / 1e6, tz=timezone.utc).astimezone(NY).date().isoformat() for order in orders)
@@ -318,10 +318,6 @@ def main() -> None:
                 "issue": "Short-open NAV mismatch affected 148 risk records on 24 Nov and 12 on 25 Nov; entries and loss-lock/halt evaluation were blocked until the account_cash correction in the current working tree.",
                 "source": "src/dual_strategy/competition/broker.py account_cash; 2026-11-25 decision log",
                 "evidence": {"2026-11-24_mismatched_risk_records": 148, "2026-11-25_mismatched_risk_records": 12},
-            },
-            {
-                "issue": "Full local suite has one Node-dependent dashboard DOM test failure because node is absent from PATH; browser manual checks have no console errors.",
-                "source": "tests/test_dashboard.py:1004",
             },
             {
                 "issue": "Cloud automation task creation is confirmed, but execution outputs are not exposed to either the Linux or Windows agent; no completed Cloud output is claimed.",

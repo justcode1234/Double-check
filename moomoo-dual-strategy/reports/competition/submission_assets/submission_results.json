@@ -89,10 +89,6 @@
         "2026-11-24_mismatched_risk_records": 148,
         "2026-11-25_mismatched_risk_records": 12
       }
-    },
-    {
-      "issue": "Full local suite currently has one Node-dependent dashboard DOM test failure because node is absent from PATH; browser manual check has no console errors.",
-      "source": "tests/test_dashboard.py:1004"
     }
   ],
   "limitations": [
@@ -112,14 +108,14 @@
     "implied_fees_and_other_cash_flows_usd": -29.85
   },
   "test_summary": {
-    "run_at": "2026-11-27T08:11:19Z",
+    "run_at": "2026-11-27T13:17:35Z",
     "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider",
-    "passed": 1248,
+    "passed": 1251,
     "skipped": 2,
-    "failed": 1,
+    "failed": 0,
     "subtests_passed": 59,
     "warnings": 4,
-    "failure": "tests/test_dashboard.py:1004 requires node, which is absent from PATH",
+    "node_runtime": "Qoder Electron v24.22.1 via ELECTRON_RUN_AS_NODE=1",
     "functional_failures": 0
   },
   "order_reconciliation": {

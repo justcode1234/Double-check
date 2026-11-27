@@ -77,7 +77,7 @@ Retired by user decision on 26 November: it found no entry on 23–25 November, 
 
 ## 3. Validation
 
-**Tests.** The current suite reports **1,248 passed, 2 skipped, one Node-environment failure and 59 subtests passed**. The sole failure is the dashboard DOM regression, which requires Node.js on PATH; manual browser QA found no console errors. Tests run with `.venv/bin/python -m pytest`.
+**Tests.** The current suite reports **1,251 passed, 2 skipped, 0 failures and 59 subtests passed** using Qoder's bundled Node v24.22.1 runtime for the dashboard DOM regression. Four pandas deprecation warnings remain. Tests run with `.venv/bin/python -m pytest` when Node is available on PATH.
 
 **Independent signal check.** All 10 rules were re-implemented separately, without importing the strategy's signal code. On identical Moomoo input bars, the independent implementation matched the live signal code on **264/264 bar-symbol checks** and **2,508/2,508 rule checks** with zero implementation mismatches. A replay against Moomoo's current historical bars reproduced 189/264 recorded live rows; the other 75 differ because the provider revised historical bars after the sessions. The row-level evidence and replay script are in [submission_assets/independent_live_vote_audit.csv](moomoo-dual-strategy/reports/competition/submission_assets/independent_live_vote_audit.csv), [submission_assets/independent_live_vote_audit.json](moomoo-dual-strategy/reports/competition/submission_assets/independent_live_vote_audit.json), and [reports/competition/independent_live_vote_audit.py](moomoo-dual-strategy/reports/competition/independent_live_vote_audit.py).
 
@@ -155,7 +155,7 @@ unzip Moo-Moo-Runnable-Package.zip -d Moo-Moo
 cd Moo-Moo
 python3 start.py                                   # builds the venv, opens the dashboard
 cd moomoo-dual-strategy
-.venv/bin/python -m pytest                         # 1,248 passed; one Node-environment DOM failure
+.venv/bin/python -m pytest                         # 1,251 passed; 0 failures; 59 subtests passed
 PYTHONPATH=src .venv/bin/python scripts/competition_exit_backtest.py /tmp/exit_backtest.json
 PYTHONPATH=src .venv/bin/python scripts/competition_vote_replay.py   # two-vote replay on cached bars
 ```

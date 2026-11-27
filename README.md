@@ -8,7 +8,7 @@ Updated 23 November 2026. Run the H ETF and Two-vote dashboard locally on Linux,
 
 Install Python 3.12 or later with `venv` support. On Debian or Ubuntu, add the matching `python3-venv` package if Python reports that `ensurepip` is missing.
 
-Download `Moo-Moo-Runnable-Package.zip` from the public submission page and extract it. The source repository is private; the public package is self-contained.
+Download `Moo-Moo-Runnable-Package.zip` from the public submission page and extract it. The source repository is public at [github.com/justcode1234/Double-check](https://github.com/justcode1234/Double-check); the package remains the self-contained judging path.
 
 ```text
 unzip Moo-Moo-Runnable-Package.zip -d Moo-Moo

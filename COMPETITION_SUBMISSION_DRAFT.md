@@ -244,15 +244,15 @@ A separate replay against Moomoo's current historical bars reproduced **189/264*
 
 ### 5.3 Tests and browser QA
 
-The current full suite on 27 November, including Claude's final short-cash/twin-short changes, reported:
+The current full suite on 27 November, including Claude's final short-cash/twin-short changes, reports:
 
-- **1,248 passed**
+- **1,251 passed**
 - **2 skipped**
-- **1 failed**: the competition DOM regression requires `node`, which is absent from PATH.
+- **0 failures**
 - **59 subtests passed**
-- Four pandas deprecation warnings, no functional failures.
+- Four pandas deprecation warnings.
 
-Manual browser verification of the current competition dashboard found no console errors. A fresh screenshot is included in the evidence assets. The final rerun will either use an available Node runtime or retain this explicit environment limitation.
+The dashboard DOM regression was run with Qoder's bundled Node v24.22.1 runtime through a temporary PATH wrapper; no repository code or test was changed. Manual browser verification of the current competition dashboard also found no console errors, and a fresh screenshot is included in the evidence assets.
 
 ### 5.4 Claim-to-evidence audit
 
@@ -329,8 +329,7 @@ Account IDs, OAuth tokens, private account files and credentials are excluded.
 2. **24 Nov QQQ short loss:** a −$76.20 vote-flip exit showed that a $50 target was not the main problem. The exit backtest led to no target/no stop and winners-run exits.
 3. **24–25 Nov short-cash NAV mismatch:** with a short open, sim `balance` withheld 160% of short market value. The audit contains **148 mismatched short-open risk records on 24 Nov and 12 on 25 Nov**; entries were blocked and loss-lock/halt evaluation was suppressed. Claude's current `account_cash` correction derives cash only when the broker identity reconciles within $1; otherwise it fails closed.
 4. **25 Nov process-supervision inconsistency — reconciled with disclosed gaps:** the native scheduler recorded `unexpected_exit` (−15) at 10:57 ET. Provenance proves the runner restarted twice after source edits, with **48.8 s** and **40.7 s** audit-telemetry gaps. No outbox event or broker order occurred in either gap; all 11 session fills reconcile and the daily report completed. The restart initiator is not recorded, so the report does not claim gap-free unattended supervision. See the [reconciliation](moomoo-dual-strategy/reports/competition/submission_assets/scheduler_reconciliation_2026-11-25.md).
-5. **Test environment gap:** Node is absent from PATH, so one DOM regression cannot run. The browser itself renders cleanly.
-6. **Cloud output gap:** two one-time read-only Cloud automations were created, but their execution outputs are not exposed to the local agent; no completed Cloud output is claimed. Independent Windows and local Qoder audits did complete and are included.
+5. **Cloud output gap:** two one-time read-only Cloud automations were created, but their execution outputs are not exposed to the local agent; no completed Cloud output is claimed. Independent Windows and local Qoder audits did complete and are included.
 
 ---
 
@@ -344,7 +343,7 @@ cd Moo-Moo
 python3 start.py
 ```
 
-The public lightweight package is self-contained; the source repository is private and is not required for judging.
+The public lightweight package is self-contained; the public source repository at [github.com/justcode1234/Double-check](https://github.com/justcode1234/Double-check) is provided as supplementary evidence and is not required for judging.
 
 The launcher builds/reuses the Python environment and opens the read-only dashboard at `http://127.0.0.1:8876/`.
 
@@ -357,7 +356,7 @@ PYTHONPATH=src .venv/bin/python scripts/competition_exit_backtest.py /tmp/exit_b
 PYTHONPATH=src .venv/bin/python scripts/competition_vote_replay.py
 ```
 
-The full DOM regression additionally requires Node.js on PATH. The public lightweight package was extracted into a clean temporary directory and reproduced the local suite exactly: **1,248 passed, 2 skipped, one Node-environment failure and 59 subtests passed**.
+The full DOM regression requires Node.js on PATH; the verified local and clean-room runs used Qoder's bundled Node v24.22.1 through a temporary wrapper. The exact public lightweight package was extracted into a fresh directory and virtual environment and reproduced the local suite: **1,251 passed, 2 skipped, 0 failures and 59 subtests passed**.
 
 ### 8.3 Reusable components
 
@@ -382,7 +381,7 @@ The draft runnable package (submitted separately) contains source, config, tests
 |---|---:|---|---|---|
 | Risk-adjusted return | 25% | **Partial** | Broker NAV, high-water/drawdown, 30 reconciled orders, low observed drawdown, honest backtest regime split | 27 Nov final close; still a very short live sample. |
 | Qoder & Cloud Agent usage | 30% | **Partial** | Qoder Desktop built code/dashboard/report; native automation; 3 read-only Cloud deployments; 1 verified reporter run; 2 one-time Cloud automations created | Cloud run outputs are not exposed and no Vault is attached; multi-agent orchestration is not live. |
-| Strategy & risk design | 30% | **Strong** | Exact ten-rule thesis, invalidation, sizing formula, 39.5% cap, loss ladder, kill switch, fail-closed reconciliation, per-lot guard | 27 Nov behavior; Node DOM environment test remains disclosed. |
+| Strategy & risk design | 30% | **Strong** | Exact ten-rule thesis, invalidation, sizing formula, 39.5% cap, loss ladder, kill switch, fail-closed reconciliation, per-lot guard | 27 Nov behavior. |
 | Reusability & documentation | 15% | **Strong, package pending** | Runnable repo, config, tests, dashboard, redacted logs, charts, report/deck, safety contract | Final-session package/deck refresh. |
 
 No numeric “100/100” claim is made before the final session and package audit. The scorecard is used to drive the remaining work. The latest independent Windows follow-up verified commit `dbdaa26`, all public downloads, 463/463 package payload hashes, the scheduler reconciliation, replay parity, correlated-rule wording and exposure metrics. It scored the submission **6.4/10** (5.0 risk-adjusted return, 5.0 Qoder/Cloud usage, 8.5 strategy/risk design, 7.5 reusability/documentation), up from 6.2/10; the full report is [independent_audit_windows_final.md](moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_final.md).
@@ -396,7 +395,7 @@ No numeric “100/100” claim is made before the final session and package audi
 - [x] Complete independent Windows rubric audit and local evidence watchdog; incorporate fixable findings.
 - [x] Incorporate Claude's final source/report diff without overwriting unrelated work; commit `6b3ffa7` is public and `main` is aligned.
 - [x] Correct `COMPETITION.md` stale test count, replay evidence, Cloud wording and short-cash dates; the final live-results refresh remains pending.
-- [x] Re-run the full suite and record the exact count: 1,248 passed, 2 skipped, 1 Node-environment failure, 59 subtests passed; the DOM limitation remains explicitly disclosed.
+- [x] Re-run the full suite and record the exact count: 1,251 passed, 2 skipped, 0 failures, 59 subtests passed, using Qoder's bundled Node v24.22.1 for the DOM regression.
 - [x] Reconcile the 25 Nov scheduler/process-history inconsistency; retain the two disclosed audit gaps and unknown restart initiator.
 - [ ] Run and reconcile the 27 Nov 13:00 ET final session.
 - [ ] Refresh NAV, positions, P&L, equity curve, trade log and deck from final regular-market closes.

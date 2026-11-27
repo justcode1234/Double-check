@@ -29,6 +29,7 @@
     const vote = data.vote_signals || {}, current = vote.status === "current";
     const threshold = vote.required_votes || 2;
     const sizing = data.config.two_vote;
+    set("vote-book", finite(sizing?.initial_allocation_usd) ? `${money(sizing.initial_allocation_usd).replace(/\.00$/, "")} sizing book` : "Sizing book unverified");
     const profitCounts = data.live?.take_profit_counts?.two_vote || {};
     const saved = data.config_pending?.two_vote;
     const lots = c => c.max_lots_per_symbol == null ? "positions added up to the per-ticker cap"
@@ -222,8 +223,8 @@
     const r = data.runtime, st = data.live, process = r.process.status;
     renderMarketCountdown(data);
     const exitOnly = data.config.risk.legacy_exit_only;
-    const hActive = exitOnly && data.config.risk.entry_sleeves?.includes("h_etf");
-    set("mode-badge", hActive && data.config.execution_enabled ? "H entries enabled in config" :
+    const entrySleeves = exitOnly ? (data.config.risk.entry_sleeves || []).map(s => ({ h_etf: "H", two_vote: "Two-vote" })[s] || s) : [];
+    set("mode-badge", entrySleeves.length && data.config.execution_enabled ? `${entrySleeves.join(" + ")} entries enabled in config` :
       exitOnly ? "Legacy exit-only config" : data.config.execution_enabled ? "Paper runner enabled" : "Paper runner disabled");
     byId("mode-badge").className = `badge ${data.config.execution_enabled ? "good" : "warning"}`;
     const titles = { stopped: "Stopped · no runner on this host", unknown: "Runner status unverified", multiple: "Multiple loops detected" };

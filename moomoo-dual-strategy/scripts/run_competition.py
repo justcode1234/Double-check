@@ -286,6 +286,11 @@ class Runner:
         return acct
 
     # ------------------------------------------------------------------ commands
+    def h_live(self) -> bool:
+        """H runs only while it may enter or still holds shares. Retired 2026-11-26 (user decision): no nightly plan
+        and no open orders while it is out of risk.entry_sleeves with an empty book."""
+        return not planner.entries_disabled(self.cfg, "h_etf") or any(self.state["sleeves"].get("h_etf", {}).values())
+
     def plan_h(self, asof: date | None = None):
         asof = asof or last_completed_session(datetime.now(timezone.utc))
         c = self.cfg["h_etf"]
@@ -620,7 +625,8 @@ class Runner:
         agreement holds, every bar may open one more lot in that direction, 10:00-14:30 ET, within the name cap (and
         two_vote.max_lots_per_symbol when set; null = dollar cap only, user decision 2026-11-25), including re-entry
         after an exit. Never on the bar an opposite agreement closed the symbol, and never while that symbol's profit
-        exit is still working."""
+        exit is still working. A short signal on a ticker held long trades its twin ETF (two_vote.short_twins: SPY ->
+        IVV, QQQ -> QQQM), keeping the long lots; the twin short follows its signal ticker's votes."""
         now = datetime.now(NY)
         ctx = self._day(now.date())
         if not ctx:
@@ -642,9 +648,12 @@ class Runner:
         sides = {sym: row["signal"] for sym, row in report["tickers"].items()}
         pending_profit = self.state.get("take_profit_pending", {}).get("two_vote", {})
         held = self.state["sleeves"].get("two_vote", {})
+        twins = planner.short_twins(self.cfg)
+        signal_of = {twin: sym for sym, twin in twins.items()}
         closed_now, acct = set(), None
         for sym, q in sorted(held.items()):
-            if sides.get(sym) == -(1 if q > 0 else -1):
+            signal_sym = signal_of.get(sym, sym)                 # a twin short follows its signal ticker's votes
+            if q and sides.get(signal_sym) == -(1 if q > 0 else -1):
                 acct = acct or self.risk(sorted(set(held) | set(SYMBOLS)))
                 if q > 0 and planner.loss_guard(self.cfg):
                     # Longs: sell only the lots that would sell at a profit after fees; losing lots are kept.
@@ -659,27 +668,33 @@ class Runner:
                                     lot_id=sell.take_profit_lot_id, lot_qty=sell.qty)
                 else:
                     self._close("two_vote", sym, "two_vote_opposite_agreement", acct, session, day)
-                closed_now.add(sym)
+                closed_now.update({sym, signal_sym})
                 acct = None
         held = self.state["sleeves"].get("two_vote", {})
         if k <= last_entry(n):
-            eligible = [sym for sym in SYMBOLS if sides.get(sym) and sym not in closed_now
-                        and sym not in pending_profit and held.get(sym, 0) * sides[sym] >= 0]   # flat or same side
+            # Moomoo holds one net position per ticker, so a short signal on a ticker held long is traded in its twin
+            # ETF (two_vote.short_twins, user decision 2026-11-25): the long lots are kept, the short is independent.
+            trade = {sym: planner.twin_for(sym, sides.get(sym) or 0, held, twins) for sym in SYMBOLS}
+            eligible = [sym for sym in SYMBOLS if sides.get(sym) and trade[sym] not in closed_now
+                        and trade[sym] not in pending_profit
+                        and held.get(trade[sym], 0) * sides[sym] >= 0]                 # flat or same side
             eligible.sort(key=lambda sym: -report["tickers"][sym]["buy" if sides[sym] > 0 else "sell"])
             for sym in eligible:
-                acct = acct or self.risk(list(SYMBOLS))
+                tsym = trade[sym]
+                acct = acct or self.risk(sorted(set(SYMBOLS) | {trade[s] for s in eligible}))
                 performance = self.attribute_capital(acct)["sleeves"]["two_vote"]
                 max_lots = c.get("max_lots_per_symbol")
-                if max_lots is not None and performance["open_entry_lots"].get(sym, 0) >= max_lots:
+                if max_lots is not None and performance["open_entry_lots"].get(tsym, 0) >= max_lots:
                     intents, why = [], "entry blocked: maximum open lots"
                 else:
-                    intents, why = planner.plan_vote_entry(self.state, acct, session, sym, sides[sym], self.cfg, now, f"e{k}")
+                    intents, why = planner.plan_vote_entry(self.state, acct, session, tsym, sides[sym], self.cfg, now, f"e{k}")
                 row = report["tickers"][sym]
+                extra = {"traded": tsym} if tsym != sym else {}
                 self._decide(day, "two_vote", symbol=sym, slot=k, action=why, side=sides[sym],
-                             buy=row["buy"], sell=row["sell"])
+                             buy=row["buy"], sell=row["sell"], **extra)
                 if intents:
                     audit_id = self.audit(session, "two_vote_entry", state=self.state, account=asdict(acct),
-                                          intents=[i.to_dict() for i in intents])
+                                          intents=[i.to_dict() for i in intents], signal_symbol=sym)
                     self.send(intents, session, audit_id)
                     acct = None
         day["vote_sides"] = sides
@@ -1034,7 +1049,7 @@ class Runner:
             now = datetime.now(NY)
             bounds = session_bounds(now.date())
             if not bounds or now >= bounds[1] + timedelta(minutes=20):
-                if bounds and f"plan-h-{now.date()}" not in done:
+                if bounds and f"plan-h-{now.date()}" not in done and self.h_live():
                     self.guarded("plan-h", self.plan_h, now.date())
                     done.add(f"plan-h-{now.date()}")
                 if bounds:
@@ -1046,14 +1061,16 @@ class Runner:
             plan = self.state.get("h_plan") or {}
             # Rebuild only a plan OLDER than the prior close (first live day or a missed evening). Today's own
             # evening plan is newer than `prior` and must never be overwritten by a stale one.
-            if f"plan-h-prior-{now.date()}" not in done and (plan.get("asof") or "") < prior.isoformat():
+            if (f"plan-h-prior-{now.date()}" not in done and (plan.get("asof") or "") < prior.isoformat()
+                    and self.h_live()):
                 self.guarded("plan-h-prior", self.plan_h, prior)
                 done.add(f"plan-h-prior-{now.date()}")
             if now < opened:
                 time.sleep(min(30, (opened - now).total_seconds() + 1))
                 continue
             if f"h-open-{now.date()}" not in done and now >= opened + timedelta(seconds=10):
-                self.guarded("h-open", self.h_open)
+                if self.h_live():
+                    self.guarded("h-open", self.h_open)
                 done.add(f"h-open-{now.date()}")
             for t in b3_decision_times(opened, closed, self.cfg["b3"]["decision_times"]):
                 if f"b3-{t}" not in done and t + timedelta(seconds=15) <= now < t + timedelta(minutes=4):
@@ -1093,7 +1110,7 @@ class Runner:
             if now < closed and time.monotonic() - last_risk >= 30:
                 self.guarded("risk", self.risk)
                 last_risk = time.monotonic()
-            if closed + timedelta(minutes=15) <= now and f"plan-h-{now.date()}" not in done:
+            if closed + timedelta(minutes=15) <= now and f"plan-h-{now.date()}" not in done and self.h_live():
                 self.guarded("plan-h", self.plan_h, now.date())
                 done.add(f"plan-h-{now.date()}")
             time.sleep(5)

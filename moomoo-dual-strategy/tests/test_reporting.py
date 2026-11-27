@@ -712,8 +712,21 @@ def _mark_sleeves(store, sleeves, quotes, cash=96000):
         'state_after': state})
 
 
+def _h_active_config(root):
+    """These cases replay the 2026-11-20 H trades, when H had its $20,000 sleeve. H was retired on 2026-11-26 (live
+    allocation 0, its $20,000 moved to the Two-vote book), so restore the pre-retirement setting in the copied config."""
+    import yaml
+    path = root / 'config/competition.yaml'
+    cfg = yaml.safe_load(path.read_text())
+    cfg['allocation']['h_etf'] = 0.20
+    cfg['h_etf']['initial_allocation_usd'] = 20000
+    cfg['risk']['entry_sleeves'] = ['h_etf', *cfg['risk']['entry_sleeves']]
+    path.write_text(yaml.safe_dump(cfg))
+
+
 def test_competition_profit_belongs_to_h_not_shared_nav_allocation(competition_report, tmp_path):
     report, store = competition_report
+    _h_active_config(tmp_path)
     _record_sleeve_fill(store, '2026-11-20', 'xlv-buy', 'h_etf', 'US.XLV', 'BUY', 11, 178.95)
     _record_sleeve_fill(store, '2026-11-20', 'xlp-buy', 'h_etf', 'US.XLP', 'BUY', 21, 91.02)
     _mark_sleeves(store, {'b3': {}, 'h_etf': {'US.XLV': 11, 'US.XLP': 21}},
@@ -774,6 +787,7 @@ def test_competition_exit_history_counts_closed_lots_once_without_current_quotes
 
 def test_competition_same_symbol_sleeves_and_realized_profit_stay_separate(competition_report, tmp_path):
     report, store = competition_report
+    _h_active_config(tmp_path)
     _record_sleeve_fill(store, '2026-11-20', 'h-spy', 'h_etf', 'US.SPY', 'BUY', 2, 100)
     _record_sleeve_fill(store, '2026-11-20', 'b-spy', 'b3', 'US.SPY', 'BUY', 10, 110)
     _record_sleeve_fill(store, '2026-11-20', 'b-add', 'b3', 'US.SPY', 'BUY', 10, 120)
@@ -872,6 +886,7 @@ def test_malformed_receipt_cannot_certify_sizing_capital(competition_report, tmp
 
 def test_competition_closed_trade_keeps_profit_and_plan_never_contributes(competition_report, tmp_path):
     report, store = competition_report
+    _h_active_config(tmp_path)
     _record_sleeve_fill(store, '2026-11-20', 'b-buy', 'b3', 'US.SPY', 'BUY', 5, 100)
     _record_sleeve_fill(store, '2026-11-20', 'b-sell', 'b3', 'US.SPY', 'SELL', 5, 103)
     store.append('2026-11-23', {'event': 'intent', 'mode': 'PLAN', 'sleeve': 'h_etf', 'symbol': 'US.XLV', 'qty': 999})

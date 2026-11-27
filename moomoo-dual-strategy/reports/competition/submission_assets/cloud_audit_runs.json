@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-11-27T05:57:22Z",
+  "location": "cloud",
+  "output_mode": "independent",
+  "purpose": "Strengthen Qoder Cloud Agent usage evidence with bounded read-only rubric auditing and evidence watchdog checks.",
+  "runs": [
+    {
+      "name": "Moo-Moo Rubric Auditor",
+      "task_id": "ca_DQX2IB2YMQTANCHT3UMXWJUMHH",
+      "schedule": {
+        "kind": "at",
+        "at": "2026-11-27T06:10:00Z"
+      },
+      "status": "scheduled_outputs_not_exposed",
+      "tools": "none",
+      "credentials": "none",
+      "prompt_summary": "Independently score the supplied Moo-Moo evidence against the official 25/30/30/15 rubric, identify gaps, and recommend the five highest-impact improvements. No tools, network, accounts, files, orders, or trades.",
+      "output_status": "Cloud task creation confirmed; local agent cannot read Cloud execution output through available tools."
+    },
+    {
+      "name": "Moo-Moo Evidence Watchdog",
+      "task_id": "ca_3ZAAPYHV6L3IV5BB5WAFBDHU5Y",
+      "schedule": {
+        "kind": "at",
+        "at": "2026-11-27T06:10:00Z"
+      },
+      "status": "scheduled_outputs_not_exposed",
+      "tools": "none",
+      "credentials": "none",
+      "prompt_summary": "Check the supplied artifact manifest and claims for consistency, missing evidence, private-data redaction risk, and unsupported statements. Return PASS/FAIL/REVIEW and remediation. No tools, network, accounts, files, orders, or trades.",
+      "output_status": "Cloud task creation confirmed; local agent cannot read Cloud execution output through available tools."
+    }
+  ],
+  "notes": [
+    "Task creation is not evidence of completed work; outputs must be captured after execution.",
+    "The runs use the Qoder Cloud default environment and do not inherit local files, tools, connectors, credentials, or the current model.",
+    "The existing 17 November reporter/auditor/watchdog deployment evidence remains separate from these new automation runs."
+  ],
+  "independent_peer_audits": [
+    {
+      "name": "Windows Rubric Auditor",
+      "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+      "completed_at": "2026-11-27T06:25:20Z",
+      "status": "completed",
+      "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md"
+    },
+    {
+      "name": "Local Evidence Watchdog",
+      "session_id": "4a884e65-eea4-5317-adea-f98aa44f25aa",
+      "completed_at": "2026-11-27T06:28:00Z",
+      "status": "completed",
+      "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md"
+    }
+  ]
+}

@@ -397,9 +397,9 @@ def capital_limits(sleeve: str, capital: float | None, cfg: dict, reduced: bool)
     elif sleeve == "orb":                                  # the reference's 10% cap per trade, within the sleeve
         limits["per_trade_notional"] = min(available, cfg["orb"]["max_notional"]) * factor
         limits["aggregate_limit"] = available
-    elif sleeve == "two_vote":                             # fixed two_vote.entry_usd lots; book capped at 2 x the per-name cap
+    elif sleeve == "two_vote":                             # fixed two_vote.entry_usd lots within the sleeve's book
         limits["per_trade_notional"] = min(available, cfg["two_vote"]["entry_usd"]) * factor
-        limits["aggregate_limit"] = min(available, 2 * cfg["risk"]["name_cap_usd"])
+        limits["aggregate_limit"] = available              # $100k (incl. retired H's $20k); each ticker <= name_cap
     else:                                                  # vwap: one trade's notional never exceeds the sleeve
         limits["per_trade_notional"] = available * factor
         limits["aggregate_limit"] = available
@@ -556,9 +556,29 @@ def plan_entry(state: dict, account: Account, session: str, sleeve: str, symbol:
     return [i], "entry"
 
 
+def short_twins(cfg: dict) -> dict:
+    """two_vote.short_twins {signal ticker: twin ETF on the same index}; only distinct U.S. tickers, else none."""
+    twins = (cfg.get("two_vote") or {}).get("short_twins") or {}
+    if not isinstance(twins, dict):
+        return {}
+    ok = {s: t for s, t in twins.items() if isinstance(s, str) and isinstance(t, str) and s.startswith("US.")
+          and t.startswith("US.") and s != t}
+    return ok if len(set(ok.values())) == len(ok) and not set(ok.values()) & set(ok) else {}
+
+
+def twin_for(symbol: str, side: int, held: dict, twins: dict) -> str:
+    """The ticker a two-vote lot is traded in. A short signal on a ticker the sleeve holds long goes to its twin ETF
+    (Moomoo nets one position per ticker, so shorting the ticker itself would first sell the long lots); a short that
+    already lives in the twin keeps stacking there. Everything else trades the signal ticker."""
+    twin = twins.get(symbol)
+    if side < 0 and twin and (held.get(symbol, 0) > 0 or held.get(twin, 0) < 0):
+        return twin
+    return symbol
+
+
 def plan_vote_entry(state: dict, account: Account, session: str, symbol: str, side: int, cfg: dict,
                     now: datetime, tag: str) -> tuple[list[Intent], str]:
-    """One two-vote lot: two_vote.entry_usd (half size when reduced), within the sleeve's $80k book, the cross-sleeve per-symbol
+    """One two-vote lot: two_vote.entry_usd (half size when reduced), within the sleeve's book, the cross-sleeve per-symbol
     cap (name_cap) and cash; a top-up below two_vote.min_lot_usd is skipped. Several lots of the same symbol may be open;
     the runner enforces two_vote.max_lots_per_symbol when it is set (null: the dollar cap alone, user decision 2026-11-25)."""
     if side < 0 and not shorts_allowed("two_vote", cfg):

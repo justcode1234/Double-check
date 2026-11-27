@@ -1,0 +1,4533 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-27T06:43:37.030642+00:00",
+  "package": "Moo-Moo-Submission-Draft-Package.zip",
+  "source_head": "a4d9cadb0d7282a9f000a716e683fe257c208afc",
+  "working_tree_entries": 52,
+  "draft": true,
+  "includes": [
+    "README.md",
+    "COMPETITION.md",
+    "COMPETITION_SUBMISSION_DRAFT.md",
+    "start.py",
+    "moomoo-dual-strategy/AGENTS.md",
+    "moomoo-dual-strategy/PROMPT.md",
+    "moomoo-dual-strategy/pyproject.toml",
+    "moomoo-dual-strategy/requirements.lock",
+    "moomoo-dual-strategy/.env.example",
+    "moomoo-dual-strategy/.gitignore",
+    "moomoo-dual-strategy/config",
+    "moomoo-dual-strategy/scripts",
+    "moomoo-dual-strategy/src",
+    "moomoo-dual-strategy/tests",
+    "moomoo-dual-strategy/evidence",
+    "moomoo-dual-strategy/data-cache",
+    "moomoo-dual-strategy/reports/competition"
+  ],
+  "excludes": [
+    "private/",
+    "account.json",
+    "token.json",
+    "credentials.json",
+    ".venv/",
+    ".git/",
+    "__pycache__/",
+    ".pytest_cache/",
+    "node_modules/",
+    ".qoder-office-pptx-locks/",
+    "AppleDouble ._* files",
+    "unrelated reports/ research outputs",
+    "the package zip itself",
+    "this manifest file",
+    "the external package checksum file"
+  ],
+  "payload_file_count": 837,
+  "total_zip_file_count": 838,
+  "manifest_included": true,
+  "files": [
+    {
+      "path": "COMPETITION.md",
+      "bytes": 17634,
+      "sha256": "b9c8a77e0eec564e39bd8a3a6a70a0039e0d2ddc6cd79dc0c52c3454a5ea5f92"
+    },
+    {
+      "path": "COMPETITION_SUBMISSION_DRAFT.md",
+      "bytes": 30353,
+      "sha256": "6c598006128a64c4146c4cd1ee00c60a55b5b0c15b24219ea366a508a27a8437"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2844,
+      "sha256": "e392a41fa5e39fc0397bb53e61087ec535bc059245abf62ec1b2fda043073a66"
+    },
+    {
+      "path": "moomoo-dual-strategy/.env.example",
+      "bytes": 94,
+      "sha256": "ea7021de734f03796964ae8410b0889e70a744006f0e73b2fc96279a3cf0423f"
+    },
+    {
+      "path": "moomoo-dual-strategy/.gitignore",
+      "bytes": 312,
+      "sha256": "bbba6432410e2f49466bdb0481e19359878fe87c8d160c0a08205e65257304cc"
+    },
+    {
+      "path": "moomoo-dual-strategy/AGENTS.md",
+      "bytes": 2213,
+      "sha256": "01950af1f7e5b8f3d1f8dc4f0c9b4435595b6aabbad6eb8c99c14c2f3e3f0b2e"
+    },
+    {
+      "path": "moomoo-dual-strategy/PROMPT.md",
+      "bytes": 2802,
+      "sha256": "da94d8effd1732414449faa9555bb317723fe9c6a353efb8096df1ae1a697b6c"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/accounts.example.yaml",
+      "bytes": 273,
+      "sha256": "5fcd0202ef8fcdc4849f5808e9cc3504d71449af650dc44cb03a8eb4bdec36d5"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/backtest.yaml",
+      "bytes": 2594,
+      "sha256": "aaa1c25a4364d16922cce49705d437ea6a4cbae24099a7bbb1a08809c73dc8ae"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/c_frozen.json",
+      "bytes": 4484,
+      "sha256": "dcab78d06a1bcd0307c30ba90425707be4b8ce6094ac0999accf76dea090180c"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/c_frozen_v1_pre_cutoff_fix.json",
+      "bytes": 4442,
+      "sha256": "b350d00dcfa8fdddba568ba72efa04d8e42af3a61b1bc56874d76cb935c56b2f"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/cloud_workflows.yaml",
+      "bytes": 4076,
+      "sha256": "8be920f8d3550c462e1ff76a0ed41cd98be342de5091de15009f4faca893be9e"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/competition.yaml",
+      "bytes": 9964,
+      "sha256": "76f9b513bb072603fe646fae9d9357a13abe33036400e51b409cbf72eadcbf2e"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/noise_area.yaml",
+      "bytes": 203,
+      "sha256": "e17e13ef7809f851f3a88e722af2cd2acccd11e5d783c9cfeb0042d1cfad6228"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/orb.yaml",
+      "bytes": 428,
+      "sha256": "96b5d337cf212351124b5ac43f532a300885d24c1f6c2a11c825d032c548b4c4"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/research_universe.json",
+      "bytes": 966,
+      "sha256": "5bcc47e775c58f36635aca4e58cb98cc4abe96e48274d80e9d19e73adf77ff57"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/risk.yaml",
+      "bytes": 453,
+      "sha256": "531d79ab321b620f09220c97016329f520cbc911770b868d07e99df6698511bd"
+    },
+    {
+      "path": "moomoo-dual-strategy/config/six_strategy_freeze.json",
+      "bytes": 1725,
+      "sha256": "59c792063e70eb8d34df805c3f23653734fd5798612b68a054b7f063e8ab2cf5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/DIA_1d.json.gz",
+      "bytes": 56781,
+      "sha256": "2a749fdad1e8b614034b6a8e78e46642bb046da9aa19cfa26bdcec5bb46da96f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/IWM_1d.json.gz",
+      "bytes": 56858,
+      "sha256": "007537ee5eea92449c62b79380efe6719af33efb953da904f774330f20290dc1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/QQQ_1d.json.gz",
+      "bytes": 58790,
+      "sha256": "7dc7a0822e90ce5cbfc66eb40e963c3a0f7ea18a5420bbc9ce2f6a4c60254338"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/QQQ_1h.json.gz",
+      "bytes": 82612,
+      "sha256": "22b87c63af7936decab7868339784a9d66b63188473276e683aab71dc9d5278e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/SPY_1d.json.gz",
+      "bytes": 58614,
+      "sha256": "3289a0470d0ccb58c6f1251f1a671c1e49485d1ba61e63fd50c1ed9a67c4f974"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/SPY_1h.json.gz",
+      "bytes": 78707,
+      "sha256": "de6dfa275033fd0a9a40eed084c96fee7f92642341dca7d54416203cbc73607e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLB_1d.json.gz",
+      "bytes": 55004,
+      "sha256": "fb31a45defb3eb3d36edc73e891dd428921a281c67998a755d8c3db0402b1ab7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLC_1d.json.gz",
+      "bytes": 56194,
+      "sha256": "6c3973f197431eb518a0393146089d436a95ac399417912133f9e5e671127004"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLE_1d.json.gz",
+      "bytes": 57453,
+      "sha256": "0990ee47833e0743f0b7240a03b76d1d2163a5964dbfd04451742db47e548017"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLF_1d.json.gz",
+      "bytes": 53740,
+      "sha256": "54c49325288e3419fae8e98c2de82839007c074c3c99af244e9235860dfa60b8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLI_1d.json.gz",
+      "bytes": 55425,
+      "sha256": "8f7c0a6316dfb45a6b4ce9010e7bfb359145ef72872410b3c216c088a48e44da"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLK_1d.json.gz",
+      "bytes": 59337,
+      "sha256": "b7f1d4c7032ae1b45270e67351764814cdfb4bdec6df802f702335d51b0e0e7c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLP_1d.json.gz",
+      "bytes": 52803,
+      "sha256": "5324d3f184e21d7d92c6d811122bf56493e1063c750c7de05071a3adc0c772cc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLRE_1d.json.gz",
+      "bytes": 53354,
+      "sha256": "2c9e8355f8187dc74c7bcd6ba6fe1950d856404e6f72967c3f73707a2bd7db3e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLU_1d.json.gz",
+      "bytes": 54891,
+      "sha256": "784d176b043fd5272936dfffdc7449e729bbb4f1cd5a873862f0c81321caa97f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLV_1d.json.gz",
+      "bytes": 54478,
+      "sha256": "913568e9e92d897477e0d9b90792fc0a49aafa5b143a2b46020552738f969001"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/XLY_1d.json.gz",
+      "bytes": 56674,
+      "sha256": "9f3a8ac1eb9af37361f89ad38f0e05a85b4c5af234b26a846b6108cdcb337dac"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/challenge_public_etfs/manifest.json",
+      "bytes": 9991,
+      "sha256": "6e668719c76192c9111c5d9963b2b0408b43f25fb6206c6f419def5be2158e3b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.AAPL.json",
+      "bytes": 25023,
+      "sha256": "11fc7d53ceff6568985e873c2666f91463da041c8b62e1e06cb4a6ac07ca354a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.AES.json",
+      "bytes": 24291,
+      "sha256": "83477eec983d4cf9cc00aac38bc2debd03e385a792b0162f1bc4f1a6ec39c224"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.AMD.json",
+      "bytes": 308,
+      "sha256": "e058c31f8ec16f0e4397f263f0d2cbd12e7a2c507b5c25c4a8ff910ce17797ac"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.AMZN.json",
+      "bytes": 812,
+      "sha256": "35ee77db39f82cd8f15dcc4bc5e7049aca8857e0ca231dc63a9d4537935562fd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.ASML.json",
+      "bytes": 16820,
+      "sha256": "83074f75a759979b7cd7f86e1d70056bd0f3e8d4b2c65bd3d0ea2f207950c112"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.AVGO.json",
+      "bytes": 26791,
+      "sha256": "82c260acdf22b72598e3682ef30b35d557c58c953486f8a9fd48d784a7c990bc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.BE.json",
+      "bytes": 101,
+      "sha256": "07dd552ed3eb3982bd47a3793882416c13c6066a78d4ff65387cb0b8cc503a4a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.BRK.B.json",
+      "bytes": 311,
+      "sha256": "92c015b0ad90f6fdc6384cd3b2a4559c4bd828fe706c3f64f41b6d9a85f19f85"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.CAT.json",
+      "bytes": 44863,
+      "sha256": "a67d521b86d6c15c81842449295004b0b75ffd5a53360fc1a8c913f2a01eb53a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.CRM.json",
+      "bytes": 4889,
+      "sha256": "83da87dc4eba114ee206cf60c1f1baf3028e6d764348851fd883ca672a4a0917"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.CRWD.json",
+      "bytes": 309,
+      "sha256": "59cf7282459eb3ebb0347e40c7f04cdc5015c7358ed3f0e1c6958122da650d16"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.CRWV.json",
+      "bytes": 101,
+      "sha256": "07dd552ed3eb3982bd47a3793882416c13c6066a78d4ff65387cb0b8cc503a4a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.DELL.json",
+      "bytes": 8243,
+      "sha256": "98edd6357b915573b0b60bbe9ed10b6f6092e1ed0c1714d6a02f182649e76a5f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.GEV.json",
+      "bytes": 3467,
+      "sha256": "32d9d593aa195f2020b620b7f283c12b9d04bdc93e1b6c7d88d6134a7f9ffb1b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.GOOGL.json",
+      "bytes": 5063,
+      "sha256": "193617af5ad8397a480bf4063021dbd25f6ff50cca7766c46f11d9c068449215"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.INTC.json",
+      "bytes": 44143,
+      "sha256": "6df93ae1fbe3c20c9e29a152b0c83eb193fa699b924dfa4003173c011a091682"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.LITE.json",
+      "bytes": 101,
+      "sha256": "07dd552ed3eb3982bd47a3793882416c13c6066a78d4ff65387cb0b8cc503a4a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.LLY.json",
+      "bytes": 44942,
+      "sha256": "2a8a55631e42eab3e5d22d2a4ed98b05d44672b902b1badd354a7f177adc5ec9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.MDLN.json",
+      "bytes": 101,
+      "sha256": "07dd552ed3eb3982bd47a3793882416c13c6066a78d4ff65387cb0b8cc503a4a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.META.json",
+      "bytes": 4730,
+      "sha256": "1ae78d5c42bd7c4b6872e22f8f235b61bd67c2d616490ccb7211747bb5be0dad"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.MRVL.json",
+      "bytes": 24515,
+      "sha256": "af128efff86e9cb443143464dad4126a0f9c37e9aafd5b80692a6f34ef97747f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.MSFT.json",
+      "bytes": 38978,
+      "sha256": "f44890d72e948296a4d88930e1f7a625d1666b33447b6f226a6cdafc4957e741"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.MSTR.json",
+      "bytes": 659,
+      "sha256": "150deab6c251c1f4c8c5472be67f0f1a3eed41487df559af012b990d0aab5794"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.MU.json",
+      "bytes": 9064,
+      "sha256": "daea328f960ed09992ff37c577ca0a0fa08f51755b437ad12c05527621192142"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.NBIS.json",
+      "bytes": 101,
+      "sha256": "07dd552ed3eb3982bd47a3793882416c13c6066a78d4ff65387cb0b8cc503a4a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.NVDA.json",
+      "bytes": 24414,
+      "sha256": "906e532b1a9ce1a60d5d55c170b75a009a10c41250423023c862c06e16086c98"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.PANW.json",
+      "bytes": 477,
+      "sha256": "87cae99497ddfe66a2c7d28f62cbda27917869b41c538412fb3481ce0ab1e9e4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.PLTR.json",
+      "bytes": 101,
+      "sha256": "07dd552ed3eb3982bd47a3793882416c13c6066a78d4ff65387cb0b8cc503a4a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.QQQ.json",
+      "bytes": 23601,
+      "sha256": "9c30adc2071afe36e0e56b482df9672e85666d49ab53a5d67ffe7e0757d5ff24"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.SKHY.json",
+      "bytes": 590,
+      "sha256": "6d592be01076dd5fe11c80d7f7a3f64c8f703a2ceab144896f129178aa60606a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.SNDK.json",
+      "bytes": 309,
+      "sha256": "6ebeaf29e116b2f597e7e32e97f9d8e116024be48b52133afd92dc6ed70c0cdf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.SPCX.json",
+      "bytes": 101,
+      "sha256": "07dd552ed3eb3982bd47a3793882416c13c6066a78d4ff65387cb0b8cc503a4a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.SPY.json",
+      "bytes": 12719,
+      "sha256": "c615963b122b5a746c84a3b4b43d398158aa95d85762abc7dad3139584361c8a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.STX.json",
+      "bytes": 36545,
+      "sha256": "83208a7dbee0b78ed657ac6748422be91a85492d7a05708e548743a0e7bfdc1e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.TGT.json",
+      "bytes": 45022,
+      "sha256": "2b1d253c916b4f3bfe0b338518e4a9f0ec037ba8795149cef5ff240d32d15553"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.TJX.json",
+      "bytes": 45115,
+      "sha256": "5dbfe1cfeaee2c49e23b48baab9995dde83ff07e96c468987153538cdc0966a7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.TSLA.json",
+      "bytes": 477,
+      "sha256": "1c31475971d3bfc28cfb7be38561955c742f038cf022767e401f7909a019e789"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.TSM.json",
+      "bytes": 21434,
+      "sha256": "9e12e10bf8467a9b3e677d1dee8c41b5e1cdfa5b3ab08fb5089cfd41b6b45474"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.TTWO.json",
+      "bytes": 755,
+      "sha256": "005a162aac45b91559530264cc5deb59c2f5c06f722d57922a5f34f3bf466b70"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.UNH.json",
+      "bytes": 34247,
+      "sha256": "202d75e06fe714f0baf046bb6b8b0f4bc3fc02c56722a468ec0ba4419556979b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.V.json",
+      "bytes": 31001,
+      "sha256": "5630d26215d8f9ed8170439954255b6c09ef06e64e6dbf8641b673c9e7575ca7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/actions/US.WMT.json",
+      "bytes": 45449,
+      "sha256": "0492f5538c98323bab49c2b742a5aa35ba9a2549891284a1bcd31926f8558690"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.AAPL.csv.gz",
+      "bytes": 49534,
+      "sha256": "2ea217034ddc6603d5520bf7eed71e5a8070e6d5907d486ef6f24bcf9a1620ed"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.AES.csv.gz",
+      "bytes": 41223,
+      "sha256": "7d9cb2f94f71594378125eaee141db5df47de5d458cce8f47191f20151d103d7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.AMD.csv.gz",
+      "bytes": 48632,
+      "sha256": "b1ee0dfa1a34713165078df241a0c06f415068826200186ade93da595a6e7732"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.AMZN.csv.gz",
+      "bytes": 50784,
+      "sha256": "f6370540b80fd61ffe303fa6ae1c931ba7b05d87998b61c7ea8e5395397f6a58"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.ASML.csv.gz",
+      "bytes": 48686,
+      "sha256": "2fbf0257bb54bece75d868dde3baf6408e13bf7b46442125007cbf31b30ba711"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.AVGO.csv.gz",
+      "bytes": 49327,
+      "sha256": "d0d1cf14e197ffc9e5da75094b267712118c5b5bccf640a368142718dda80f41"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.BE.csv.gz",
+      "bytes": 43071,
+      "sha256": "9e55f26a66ece086a9711b99773ea4d1c0b3c3d2b639ac1adbadaf0f8994b051"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.BRK.B.csv.gz",
+      "bytes": 47132,
+      "sha256": "73837668e94e8d83e55d1b393b1cbde6d2f73d21a839e8074b2be3eaf9953ae3"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.CAT.csv.gz",
+      "bytes": 47547,
+      "sha256": "a5f00ebd2295fefd9cc2c6cdb7d252d171eab56daf2eefd4d1738f5890586b37"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.CRM.csv.gz",
+      "bytes": 47827,
+      "sha256": "ebb5e570d97837309e87c97d2afa51013ca2c4b1191fb970737e8f815c9c9501"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.CRWD.csv.gz",
+      "bytes": 45235,
+      "sha256": "d9c006e232a27d58e27015387efcb4c81c3ddee45cd0bb42ed85b328c638550b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.CRWV.csv.gz",
+      "bytes": 10299,
+      "sha256": "684b62a5fbc65b05f54b899d25a69c7b6b4699251952d59253b051f2e9b02b7f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.DELL.csv.gz",
+      "bytes": 45384,
+      "sha256": "6eebfe37359145d1b9f459253295c5de664e6ead03f550623f9a392f853c223c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.GEV.csv.gz",
+      "bytes": 16628,
+      "sha256": "202a8a872d33bc4643c660b3af6ff006e62abb83d85b9ac98e45c8fae381c21e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.GOOGL.csv.gz",
+      "bytes": 50225,
+      "sha256": "e4fb0384383501c494701b04a9f360a238ea606b79d833f4f9432392f4cced8f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.INTC.csv.gz",
+      "bytes": 45648,
+      "sha256": "9f85591cd99e4a4baa9f3df55e63243d535e93e0a0fddd64ac88e917e718ae11"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.LITE.csv.gz",
+      "bytes": 44430,
+      "sha256": "7b1207a539dde96a406ce05ab080691b659e4fd5ab8adebcaa631f759bd8c958"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.LLY.csv.gz",
+      "bytes": 48117,
+      "sha256": "ff485eb83984ca150331e199791fef8b93a084e7dadecd2f9af69a34106646d0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.MDLN.csv.gz",
+      "bytes": 5165,
+      "sha256": "05886acf3f3c15d397146ea6b092b8fc49a3037580977f387a70522f21ce0e6b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.META.csv.gz",
+      "bytes": 50167,
+      "sha256": "440b3348f97b0294450e0c4db3cfb760dd32f11cf6f6556156f850d74b152a87"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.MRVL.csv.gz",
+      "bytes": 45524,
+      "sha256": "bbc6342e02db7d07dd757da539d4aa1c92f992a893912366b74eae0b3c316f53"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.MSFT.csv.gz",
+      "bytes": 49510,
+      "sha256": "8a4501f87851b1394e3687eb12d8f783a39bf23f2c1e7bd9e29733eb7fc00e02"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.MSTR.csv.gz",
+      "bytes": 47419,
+      "sha256": "8734e5646bb3477edca5867e9d541ec8f4e314fcd696b4effbec34531438a0cc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.MU.csv.gz",
+      "bytes": 47418,
+      "sha256": "071023cb86b2e399d445f277ff3172cc2ca367b60d2c253df8d95de9849b2d14"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.NBIS.csv.gz",
+      "bytes": 30180,
+      "sha256": "95f56d055167ac789cc04fe2bd7d18544f9ff416d0773f9ac23888a51e4144cc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.NVDA.csv.gz",
+      "bytes": 50747,
+      "sha256": "2ed73d66184c612d3e9ccfac8052022571b3a98d870efd87ed364567a300b1d8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.PANW.csv.gz",
+      "bytes": 47678,
+      "sha256": "f41cec4bec94b299e6474818d17fd8a5a2a4f35d66557cf1ef8a5599910a7111"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.PLTR.csv.gz",
+      "bytes": 35508,
+      "sha256": "20329e23867c82a8ba8254cc228c23cb0af783769de56c08a1dd3a83bf79ff37"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.QQQ.csv.gz",
+      "bytes": 50381,
+      "sha256": "f19607021dc9e2b5f8bbdbd29f4a3cc206ca828b6f0706e832cb283ef16fae90"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.SKHY.csv.gz",
+      "bytes": 2458,
+      "sha256": "6e8dd9eb79d94504556d45b960b6e68b6c6eff6fbbee1ed00278760f49202d75"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.SNDK.csv.gz",
+      "bytes": 11329,
+      "sha256": "ce6c3cff77dfbd2b7f74b2362b30f461e595b8c770c6ed29c7b0cc9e14c5ea76"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.SPCX.csv.gz",
+      "bytes": 2934,
+      "sha256": "07c593f2970b597315ace72b3deaf7e928cc9ccf7e5d56d4e58b7d9b27f2b66d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.SPY.csv.gz",
+      "bytes": 50701,
+      "sha256": "92757efe7c09bb039f195a92a21ef331284683ab21d0118f6eb1b3671f4ff8af"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.STX.csv.gz",
+      "bytes": 45155,
+      "sha256": "edaa4291d87e3b266908559ca06dd474b78d21e91f9a08744aeac84f67cf7db1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.TGT.csv.gz",
+      "bytes": 46324,
+      "sha256": "7726674d15f46229eefd2067bb3ba6ff89fe448646bbf056c18d7a659c3561ec"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.TJX.csv.gz",
+      "bytes": 44115,
+      "sha256": "d77254dd704a94a3e5c1da851fbe03002f81394b72ebd6bcf806af5462f64e8f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.TSLA.csv.gz",
+      "bytes": 51716,
+      "sha256": "4c2fdb2380ef0202ebd1611f736378624417924522c110b7ed18bd728db313f9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.TSM.csv.gz",
+      "bytes": 46695,
+      "sha256": "9e4c7cbdea296d51e9018116d9ca334b18e86480128b165a6d4493f34647f6de"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.TTWO.csv.gz",
+      "bytes": 45463,
+      "sha256": "f37cf5d5cfc9a2b475ff25e6d4393e3aa4ef0df527f179b224aaaa1826886c32"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.UNH.csv.gz",
+      "bytes": 48081,
+      "sha256": "31d73699844d305bf7663ac275a7768c2d268088153a587fc3ceb3b46c14a884"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.V.csv.gz",
+      "bytes": 47172,
+      "sha256": "67223d746cd001374c5ab1e480ddf15b31eda30bc5ae1b4b55621ce242993fbd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a0/US.WMT.csv.gz",
+      "bytes": 45964,
+      "sha256": "20017f32d26bb9f8c45464703b802b3106264f90f511a993d1f781b25ba60378"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.AAPL.csv.gz",
+      "bytes": 77462,
+      "sha256": "6f7f2047e35d456d2fbda5b239572323095b0cd9d55db461037f66be5f1533b7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.AES.csv.gz",
+      "bytes": 63384,
+      "sha256": "516c7c8b99edb7e92e28aaa8793a2a5151d27aade2856cf868df10c0c906eb25"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.AMD.csv.gz",
+      "bytes": 48632,
+      "sha256": "0ebf1265d0c1e315cd9d58f971b14467d001cb52455c743b647df2f7892abed0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.AMZN.csv.gz",
+      "bytes": 50834,
+      "sha256": "b9179b45f5bc5e283e092265bb04eafb440be595cf7e5e730b22a9692d9dc16e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.ASML.csv.gz",
+      "bytes": 77579,
+      "sha256": "66763b8e1b32521e8ff2ddb3157da41c7b01bd9bf8eba5dbcab677a266b8e8c3"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.AVGO.csv.gz",
+      "bytes": 74371,
+      "sha256": "70eb40bd711ea0833e7f3fa8b0b249ce75bc1e35fc2c520642d7f2252d20dfff"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.BE.csv.gz",
+      "bytes": 43071,
+      "sha256": "4f10faf9da000709e274aaf05c4d8e91a4f56eb80865417ed722c8b5caf186b8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.BRK.B.csv.gz",
+      "bytes": 47132,
+      "sha256": "ebea5a5906f37af4c22af5b99b0c24df19f95854b70acc701a0a37e8be6c23b0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.CAT.csv.gz",
+      "bytes": 75933,
+      "sha256": "97c21b2c1b9bb0215da53997823b300f90351c91b965ce4c50d970394ba35f25"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.CRM.csv.gz",
+      "bytes": 74667,
+      "sha256": "977d29e6e813e1401ef6befeced4d78522aa4d688fd645cb513d8924a6274d0b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.CRWD.csv.gz",
+      "bytes": 46270,
+      "sha256": "e7e2bf60b731d8cbaa20b32f57e4f44341a6f6fc9a03526834b8b3963995113f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.CRWV.csv.gz",
+      "bytes": 10299,
+      "sha256": "7f2f2e288d6b1e51e7092c29dac2454d7fdeb396c0e586dde4a2929b227fb7a6"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.DELL.csv.gz",
+      "bytes": 71253,
+      "sha256": "a6b9602bfa7af87a1dac731a12ac495c6b574dbf825afc54c6fe559f5ca220fd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.GEV.csv.gz",
+      "bytes": 26407,
+      "sha256": "36c066e734c1c4eea7a77c7222ff0d0f2c6363ca4f4b631470004ce8552930d6"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.GOOGL.csv.gz",
+      "bytes": 75047,
+      "sha256": "e1b041799e03655a29ce06acc192cc927a1eaa6f0907041aea167ebc9a48a9a0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.INTC.csv.gz",
+      "bytes": 64521,
+      "sha256": "3216c66d11f96b2e26a5f9d030da771feadf5f43905fe9bc944f53a627928370"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.LITE.csv.gz",
+      "bytes": 44430,
+      "sha256": "9fad4743ee1e08b93127e9d738da57b4058ab106ec5cce14291a31a8c65deea0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.LLY.csv.gz",
+      "bytes": 76719,
+      "sha256": "87e827956f83e27af91384c3b906ea91cdf07c7f213bfbdaef7e28af166f8056"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.MDLN.csv.gz",
+      "bytes": 5165,
+      "sha256": "c6356681ea63c187317f07c66f36583f02c40b12668664d1e27a83bdd2024627"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.META.csv.gz",
+      "bytes": 77812,
+      "sha256": "ca9eff0761a641da46d2e980249214f04821977e5f64770df27aa59ba6cf7aa8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.MRVL.csv.gz",
+      "bytes": 72090,
+      "sha256": "31dfd9577eeaa9d48664a19ec7ffcf30fc23b500516bff8131880f0e006fcda1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.MSFT.csv.gz",
+      "bytes": 77362,
+      "sha256": "bb3f50d89dd16bcc2442774b2d91e994884faa8273ae1735cf43c004e7bfbba5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.MSTR.csv.gz",
+      "bytes": 48359,
+      "sha256": "1c470132bbbfc2e348f9bc9c096bb9ae80ee6a621c9d68e70adc96852471caf6"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.MU.csv.gz",
+      "bytes": 73646,
+      "sha256": "8822589968a9248f05569a19616b055ddf9c405dbfa84e4e428506a6d16e622f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.NBIS.csv.gz",
+      "bytes": 30180,
+      "sha256": "0000c86141dc96dce150469efe9d5cffb50f1474536bd9c36e9c9b1bf22cd2d5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.NVDA.csv.gz",
+      "bytes": 75077,
+      "sha256": "42608f3ebb0e046ebc26953da602e745f6780f240523cfa9799c7f7babe04a92"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.PANW.csv.gz",
+      "bytes": 58823,
+      "sha256": "eacb5846fe3e0b95013de90d2494c455c844411275d38874cff1b48e6e988b10"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.PLTR.csv.gz",
+      "bytes": 35508,
+      "sha256": "e1982647c30a8792226875d0d879df99bab1a9f0b427331e89956f46b644b8ff"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.QQQ.csv.gz",
+      "bytes": 78524,
+      "sha256": "d18dfcb80cdfba23d8c4e6566b7d710988330e76b4f81e370cc7508ecbc5fa49"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.SKHY.csv.gz",
+      "bytes": 3027,
+      "sha256": "7a4d7dba07f4c4727c323231b4fe6a6fb44706e299b1bdcf068d5040640198a0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.SNDK.csv.gz",
+      "bytes": 11329,
+      "sha256": "523fce1ace5809301df74ef5417fe045c4b951698d21e5553062ef5b56c81efe"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.SPCX.csv.gz",
+      "bytes": 2934,
+      "sha256": "51670035b7f721d308edfbf5189056a3f969744b543e1fab3f2b6de0c1a23bfa"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.SPY.csv.gz",
+      "bytes": 78683,
+      "sha256": "78b124d173b67c5fa4d1c0dfd2ec47aba048586be24e6c761515e87f16060ed7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.STX.csv.gz",
+      "bytes": 72011,
+      "sha256": "48fe5b4984723c44e24f0072394158cab674beaa1363ff4edce320b67f757479"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.TGT.csv.gz",
+      "bytes": 73984,
+      "sha256": "629a8066c4e149892bbe0c369b819d0784c369accad0c9ffd1d02b4392e507e7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.TJX.csv.gz",
+      "bytes": 70563,
+      "sha256": "ae9ebd9e8e7629b35d2deeb0b500c3bfe574c0d915214b474ea1ed29c8364cf4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.TSLA.csv.gz",
+      "bytes": 60520,
+      "sha256": "2d8d0656d92a29cb838fda5e6c583b65d9c8343f1e8d53cccaac15156742e2e9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.TSM.csv.gz",
+      "bytes": 73449,
+      "sha256": "64e8e94f39b46c58e5f9bb538e4a156a4f7cd88b3e54d4ad4dc99119f2c1342f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.TTWO.csv.gz",
+      "bytes": 45463,
+      "sha256": "aa681e8f86ae31a9452e379d9e8662d610f126eb55267d735913ab32f4b151aa"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.UNH.csv.gz",
+      "bytes": 76157,
+      "sha256": "f05fbf1ac61eca4d0377407b3ab87e76d32e78ea15d1d5808af97a4ca79377b0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.V.csv.gz",
+      "bytes": 75423,
+      "sha256": "5ff150e9a7da9bc7133eb1ec6320f2a3e78cc9f4ae32fd4cd065059910c4868d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/daily_a1/US.WMT.csv.gz",
+      "bytes": 70983,
+      "sha256": "f3bd65536703e54655e0c1df5e8e6271962844fe586f66213b2a7df981a964d9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/fetch.log",
+      "bytes": 29113,
+      "sha256": "a0e778da34ec46e03c2bb734cbe6d115191d87a7b4a71c9d7a7f44310d133412"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/fetch.stdout",
+      "bytes": 29113,
+      "sha256": "a0e778da34ec46e03c2bb734cbe6d115191d87a7b4a71c9d7a7f44310d133412"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k1/US.SPY/2020.csv.gz",
+      "bytes": 348025,
+      "sha256": "d8d0a1e4d14619185d57e7bb53d340845cf56a3ee9373f35595fefeb1dbdcf41"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k1/US.SPY/2021.csv.gz",
+      "bytes": 2130363,
+      "sha256": "f11ef8ce7c95e6abeaffa971e4a2685aaa5c2a37f51621c715d867adffe08985"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k1/US.SPY/2022.csv.gz",
+      "bytes": 2206607,
+      "sha256": "f17b0368f5f7e26a2789c31d2065e9f6d22aef0dc6782bf94c038be2df68761e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k1/US.SPY/2023.csv.gz",
+      "bytes": 2152413,
+      "sha256": "f4719f2e450b6486367a1b74a184af5f1fa2eb68d09139a05af7df15c849093c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k1/US.SPY/2024.csv.gz",
+      "bytes": 2144014,
+      "sha256": "4d5dca07d2daaa7b150924235fb438a402902d5400a0e61fcdfc5a19f7af71c2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k1/US.SPY/2025.csv.gz",
+      "bytes": 2172440,
+      "sha256": "d1406651fe9f18a3c3af30abc19788c6493f89f2abed9fff23d38de36a28a088"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k1/US.SPY/2026.csv.gz",
+      "bytes": 1916384,
+      "sha256": "29af1272ddbdb04570f769059b52d200aec9e095b054e69b11e0f3cacd79ca26"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AAPL/2020.csv.gz",
+      "bytes": 76663,
+      "sha256": "eb9414bf566dd4e400cfe07b1306ddba8028ac5b98a12e2445aa73c24d527873"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AAPL/2021.csv.gz",
+      "bytes": 462631,
+      "sha256": "76bcc3b997ad55a23fb9d2dc1a87b4dc470fcaead3f47cd4f5d48778fd92bdc7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AAPL/2022.csv.gz",
+      "bytes": 467855,
+      "sha256": "63ef7a8db2e4660d34132704ad2d0cbfdec568590f122f44803c8216e8f180aa"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AAPL/2023.csv.gz",
+      "bytes": 454087,
+      "sha256": "73ac363b1237f12c7d9eca70edb7d45145fd070a0bde48c61be3ba4b21aaa209"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AAPL/2024.csv.gz",
+      "bytes": 458644,
+      "sha256": "65f717ab0764b822ba55dde8cf04ad4b5ee97526633898b1959f1b32a94ff94f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AAPL/2025.csv.gz",
+      "bytes": 459809,
+      "sha256": "294983e406f5c6b7cb62c045eca5efd1d493988adfbc9c17c841b720df12a3a9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AAPL/2026.csv.gz",
+      "bytes": 410083,
+      "sha256": "69c4829ed80490749e2676efdefb7d7c4f032c76cbd16b8dc2d8490a8407b734"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AES/2020.csv.gz",
+      "bytes": 61097,
+      "sha256": "608e5527f8c0572b713703777eecad73b7c3f52afde5edff0c40c63f83b3ce1c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AES/2021.csv.gz",
+      "bytes": 373123,
+      "sha256": "c623d053326e738969c1c5b4497b351c54fc526ef68a5f486bd5d6f3a873acc2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AES/2022.csv.gz",
+      "bytes": 375791,
+      "sha256": "9389235ae45131f82b9447826d354628076c52cff0a94945ebe9507880bac615"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AES/2023.csv.gz",
+      "bytes": 369399,
+      "sha256": "e2fff5e23005778fbe0147b61152470fb8cfa40bc6c325b353299e57ffd079b2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AES/2024.csv.gz",
+      "bytes": 374285,
+      "sha256": "9678a04be4c4997d3e427f11217ff2279cf4544471bccc03d4f740a9812826e3"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AES/2025.csv.gz",
+      "bytes": 372829,
+      "sha256": "7971d82402816fb899f60f489b057f7254b2473ebdb0a739cea7fa0bab01c7be"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AES/2026.csv.gz",
+      "bytes": 281982,
+      "sha256": "fe6e31a807eecae0b68d961287cd4f807a0ebe2ad5df8ad98a8d9c05ff2d40ed"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMD/2020.csv.gz",
+      "bytes": 73680,
+      "sha256": "c830773e32fbe0ce8bce27c8c1460983fda6a01ab42d937cbea04927838bb9a1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMD/2021.csv.gz",
+      "bytes": 455555,
+      "sha256": "988b6da94e769d6f30fd2d86b4155f2231a320008b281e49102af131a68cfb9c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMD/2022.csv.gz",
+      "bytes": 466075,
+      "sha256": "acbabfe599632eafb096d56b16792204e45d6f9a3f459f293c30aee5550916ac"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMD/2023.csv.gz",
+      "bytes": 459148,
+      "sha256": "fbcba9530f4eb8d1fd9848c691271e16f066453ce00920b209e67a361ac0fc76"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMD/2024.csv.gz",
+      "bytes": 473521,
+      "sha256": "5d1bfadba981cc8e7a21581355906a9181b3b245dcd6846484ea2e043334be89"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMD/2025.csv.gz",
+      "bytes": 463493,
+      "sha256": "7d720f2603706b0d87abf2f3adcdbd3c8dc4b79949e782641a8d3e324d3add41"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMD/2026.csv.gz",
+      "bytes": 431624,
+      "sha256": "9b694c74092eebc0f5e077cd2d030f05487872da22a88a0c6e43b21d332ab584"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMZN/2020.csv.gz",
+      "bytes": 83134,
+      "sha256": "986b49f3008ba27050ae42b60cb413bd3972cafc90c024e8c120c05c52d1ce15"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMZN/2021.csv.gz",
+      "bytes": 503007,
+      "sha256": "54d3549e228ca1d90a8212dbc73737e1c8a17ee1b37abc92b516e8ec4a7b1c7e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMZN/2022.csv.gz",
+      "bytes": 482590,
+      "sha256": "7cff7948cf20714f22aa941764ca0012f2b6829e9c582f1613017fecf3e06ae2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMZN/2023.csv.gz",
+      "bytes": 452502,
+      "sha256": "96d02ce1acb96dd665623a82fbe93d284b1ff037279d5bb9281f1f02926f083c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMZN/2024.csv.gz",
+      "bytes": 456352,
+      "sha256": "b2cdb628c58321e11c51721c93d12763608e80fc1454905a1c4759cfeb5718ad"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMZN/2025.csv.gz",
+      "bytes": 459290,
+      "sha256": "02326a20a1cd6022687cd9daf419ae1a7a98cd7007810ca4c27e2ecf71591a55"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AMZN/2026.csv.gz",
+      "bytes": 409279,
+      "sha256": "58a1a5a00053d54de8dd4445dca33ba462f762a3280f98ebcac34b558c1f7441"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.ASML/2020.csv.gz",
+      "bytes": 68397,
+      "sha256": "6c9f21c8d96384fbc31b8c8c5a7908cccff24500948715d4040dfbf9a5c0ae17"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.ASML/2021.csv.gz",
+      "bytes": 437859,
+      "sha256": "f7acd27356590b63656e85c981168bb1126c7a0038d8df180c3eeceec49d4d8c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.ASML/2022.csv.gz",
+      "bytes": 443395,
+      "sha256": "51f6a7f27616a6fa54ca71bfe8250a42c8dc1f20e93d2835e8860e4727ec8708"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.ASML/2023.csv.gz",
+      "bytes": 434760,
+      "sha256": "f812c3a011b06a6c5132e435ab0f8de337e354e997b290a4d9735eb285056f8a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.ASML/2024.csv.gz",
+      "bytes": 451117,
+      "sha256": "8c86c3c5ced3230f032f1abb78c5fa488b5367a2770ecdc0bed2e909e8e2febc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.ASML/2025.csv.gz",
+      "bytes": 452201,
+      "sha256": "ec6ecfc2e7a3caeaa49278d7fadcadfa10fa57a9e9d80481c0731f824b6eab69"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.ASML/2026.csv.gz",
+      "bytes": 429252,
+      "sha256": "667bf1ac48adeb42ae322d44f4fafdccc8d611521cf831a2d7c2d25825a317e2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AVGO/2020.csv.gz",
+      "bytes": 72031,
+      "sha256": "1104bfc8e917413049673aa3aa01a41902ede6cd5d26a6de033d7886ebe32381"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AVGO/2021.csv.gz",
+      "bytes": 438876,
+      "sha256": "c001fe03da94a8625a0ecd9997eff2aa1950d426f877822110532236d1de7283"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AVGO/2022.csv.gz",
+      "bytes": 450060,
+      "sha256": "15b56b18465517bd9685f17299938db7075dfc8d173ac8484a6c3bc2117bc45b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AVGO/2023.csv.gz",
+      "bytes": 456461,
+      "sha256": "c53e9e800c49a8160809d5e4485573d82a222ab463aeb33cf75a53a5158ee3ef"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AVGO/2024.csv.gz",
+      "bytes": 473293,
+      "sha256": "c374c39348cf2578db788f65200cb636de9c03bf9dc2f4fcbb6e6e219885b7d8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AVGO/2025.csv.gz",
+      "bytes": 466897,
+      "sha256": "15128cae1ef2820e63eda9434f845c372430aefeaa747ff2c86365d7a1b15e07"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.AVGO/2026.csv.gz",
+      "bytes": 418301,
+      "sha256": "fcdceb49669dbeca447fc8bba1807324ab977a40c7cdb564dd7aae8f5b107437"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BE/2020.csv.gz",
+      "bytes": 67336,
+      "sha256": "6df61010866051f4d74c34c1c14a80e03c962038d8a1b2d7634e3548c9e06730"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BE/2021.csv.gz",
+      "bytes": 393667,
+      "sha256": "de5d9e7a90062f4c23f5374b26d862df11befae28abb78703582b13668e98196"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BE/2022.csv.gz",
+      "bytes": 382646,
+      "sha256": "0fe5940721be6db2327208f2bef002c7ef0143257bb3ae7f2d7a373848370149"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BE/2023.csv.gz",
+      "bytes": 374161,
+      "sha256": "37ed3a479df11b77ddb6f391241b2157ecf0cf73ba207685e80a9bda23be15bd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BE/2024.csv.gz",
+      "bytes": 380156,
+      "sha256": "a48cccbf419b326a332cf03e2d9573f9544ab6efc5a86ff3dfb5fd4cda4253dd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BE/2025.csv.gz",
+      "bytes": 414620,
+      "sha256": "f71092225732b5187067c5188f1cdca54f1e23956687950f7a7ea96e6d1abd08"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BE/2026.csv.gz",
+      "bytes": 416681,
+      "sha256": "a26cf1840ba3289fc146168efdacacd7445ea29aac0b804455e13512c29669cf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BRK.B/2020.csv.gz",
+      "bytes": 70446,
+      "sha256": "32162023f79ce725622ee9274d0defdce4f896729a52fc50931587e78ab81a29"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BRK.B/2021.csv.gz",
+      "bytes": 426454,
+      "sha256": "95b8f778f96f1728993c6516711ba72901f688661ae9a7d622c28b27a3fef1c0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BRK.B/2022.csv.gz",
+      "bytes": 440139,
+      "sha256": "627880e3d3490f4a64e2e56d2dbd50374be14e9455a95fb65ce285e89836eac5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BRK.B/2023.csv.gz",
+      "bytes": 428497,
+      "sha256": "9fc64aef54d73652943450cb629407799c9e4f313b0cc1e7d6341f4773b8d10b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BRK.B/2024.csv.gz",
+      "bytes": 441467,
+      "sha256": "e0af00f2d217ecfaef02f3189d7df92bb74e4a1985227819f47201cc1a1c85ac"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BRK.B/2025.csv.gz",
+      "bytes": 448951,
+      "sha256": "2a941417ad273a4f2d8ceafbe133629501903adde2b435b0a7cc2c5fd0922e20"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.BRK.B/2026.csv.gz",
+      "bytes": 395026,
+      "sha256": "6aa3e9aacc66fbf1bfac7c3f2e2d519b7081ec90a4be1444bff57f9235b64fd4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CAT/2020.csv.gz",
+      "bytes": 69159,
+      "sha256": "1e7df21598185ef9cad5cd1b5e2c789e04e457fda0b803c9fb332dd135566a71"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CAT/2021.csv.gz",
+      "bytes": 428010,
+      "sha256": "191c67e6fcc6e9fda342081d7fe9b588f5e82175dcb734d1f57db9f4c881f20b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CAT/2022.csv.gz",
+      "bytes": 428645,
+      "sha256": "8cf18dac44b57bb8016cb193c97e97406239dab35a827674aeb239bbadc98a6c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CAT/2023.csv.gz",
+      "bytes": 428117,
+      "sha256": "2e605ce869cc22e8147394b8db66737543db594b8f0394b1aac0152178c8b640"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CAT/2024.csv.gz",
+      "bytes": 434968,
+      "sha256": "9be96d5ff6760a72f1096cd0212092d44dde69d7a1ee8517361d7ea154c3faea"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CAT/2025.csv.gz",
+      "bytes": 440443,
+      "sha256": "df8fc5bac124d2fe0a7850867fde2d45271bbdd3fadd04452e3cb99061d1b285"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CAT/2026.csv.gz",
+      "bytes": 413253,
+      "sha256": "d5835832065afbb87770faf212a701c1f110bc5fbad32d2ef28e72cbb246526f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRM/2020.csv.gz",
+      "bytes": 74041,
+      "sha256": "1ecca4b3082e5500e2ce88d87136490a17dbdf0a65a8621ca34fea3ee4729dc7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRM/2021.csv.gz",
+      "bytes": 437342,
+      "sha256": "9a62fd8905b4e21e9fb08508172cf5ca44ec5b2f205d9577353b6410d9f27384"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRM/2022.csv.gz",
+      "bytes": 440918,
+      "sha256": "2ec0c57021609e7e0725b374e6f27d713612cd5127e980003442dafae93c2ffc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRM/2023.csv.gz",
+      "bytes": 429678,
+      "sha256": "0ac57af27e982f9d522c8bfa83a52b1c602ed9b013ce09ffd283f5cbe1c2dddf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRM/2024.csv.gz",
+      "bytes": 441087,
+      "sha256": "a487e2396e49e17b61aa741af78b8e92446c86fc31f4052dfebf8a0f293f24b4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRM/2025.csv.gz",
+      "bytes": 444605,
+      "sha256": "4102e1d714c41e2020872a22f3d480ece34aad7bcd8a504805f51baf5ff4384b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRM/2026.csv.gz",
+      "bytes": 397035,
+      "sha256": "661e996bdfc4ddb96a5647fda2837e1a43baf8d13463032ee22f854709bcad40"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWD/2020.csv.gz",
+      "bytes": 74326,
+      "sha256": "b74c74d62313312849afdacbd03eae5334a36ce653728f6af535ec0d8b63e53d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWD/2021.csv.gz",
+      "bytes": 448767,
+      "sha256": "a57d02c4080896ab62634d9382b43a3ea1baa938e6e84919106a285518bf74df"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWD/2022.csv.gz",
+      "bytes": 446802,
+      "sha256": "3b71111fdc8b64935e113b3c4567441efcb5bb8c3886840e2fc7c8823d5e75cf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWD/2023.csv.gz",
+      "bytes": 431698,
+      "sha256": "c904d5dc11c61b50413d53523db1d0dda854e17855249c758d1bd76f79fe4f82"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWD/2024.csv.gz",
+      "bytes": 456028,
+      "sha256": "445ea17fc8ad383655b3a1324623997f92e471a1ded0a0be0fa0a3c8d7e84324"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWD/2025.csv.gz",
+      "bytes": 457927,
+      "sha256": "7464a20d12a76efc6ac474f7f4619f7faf494bde2ded6c2fde25b0dba624d5c7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWD/2026.csv.gz",
+      "bytes": 408787,
+      "sha256": "5d036ee09cb5e776256388dcf275a31aa8850a214981ad589310d10f62227ecf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWV/2020.csv.gz",
+      "bytes": 82,
+      "sha256": "4d9889b354b089842037c724faad6bd1f1d0c81a65921c9c98219ed1f41b4f4d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWV/2021.csv.gz",
+      "bytes": 82,
+      "sha256": "102e85b1925a2acb8973be05bc6c9ca8aa12fc86a22e6d3929222fc905b0e412"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWV/2022.csv.gz",
+      "bytes": 82,
+      "sha256": "99f37ce8394da0c44d242be28a6bbcd48403599fb769df93df0768327fa07980"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWV/2023.csv.gz",
+      "bytes": 82,
+      "sha256": "d1f0bb801a34f1c7585e8900cb737bee00249a0c1df8a31b570a1d7a397cacfc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWV/2024.csv.gz",
+      "bytes": 82,
+      "sha256": "dcffc2c2d87a75ec6afe40ab1d7f56009c6aa25632b17342e7c2443a8a1aaaec"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWV/2025.csv.gz",
+      "bytes": 351070,
+      "sha256": "feeb3acd51958ac5195a5113ca6596adf69e46e9930b3caa9c06df295f279af2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.CRWV/2026.csv.gz",
+      "bytes": 401608,
+      "sha256": "a96d645de0fb7ed254588b4259d97dee05843b7d9036be54117338416bbbeadb"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.DELL/2020.csv.gz",
+      "bytes": 63418,
+      "sha256": "faba533fdc4c540a213fbd6667cf9a3c66df74b1307c22ff09252397001fe633"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.DELL/2021.csv.gz",
+      "bytes": 391976,
+      "sha256": "8363c782e46591ae57269930245db21b276a534c6a3f27ecf4f549c994705bef"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.DELL/2022.csv.gz",
+      "bytes": 389792,
+      "sha256": "a4ecaa67f6f002a6fa946c9b833d7fbeb1752756012fac99c505996e706ff5a2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.DELL/2023.csv.gz",
+      "bytes": 389115,
+      "sha256": "c4ab0d20698664f0e436fa536d672e975a977c07337da153758e8316cb5a8927"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.DELL/2024.csv.gz",
+      "bytes": 435635,
+      "sha256": "34c0ab5e9fff503eb850e9920fa2d0a8347cc50232e59539953c11dbcbb6714e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.DELL/2025.csv.gz",
+      "bytes": 429600,
+      "sha256": "8a35aec76b0c3ffab2e4b62c0c4ef7409a270e7901ac1dbfa36a7efa6ed3daf7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.DELL/2026.csv.gz",
+      "bytes": 409877,
+      "sha256": "298136867925a76e2d491a959ba97062a9ba19c2f94d7ee151345bd4f45ee2fd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GEV/2020.csv.gz",
+      "bytes": 82,
+      "sha256": "10d88c03947281ad853c57a9d84826545f98149f0e1f428b72162cf43da07d34"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GEV/2021.csv.gz",
+      "bytes": 82,
+      "sha256": "fadb6ae967c450d9420ec0649e480ee87d9e0f88b7ab3c97010511be4ee53aa7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GEV/2022.csv.gz",
+      "bytes": 82,
+      "sha256": "f624115d228f3d33ba9e296126eef413737c6552d60169b172b23ff9208cd9e3"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GEV/2023.csv.gz",
+      "bytes": 82,
+      "sha256": "982fe1a61039ee253cdbe613c134e3998491fa6585f0fe2e7dfdad5457c4f69f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GEV/2024.csv.gz",
+      "bytes": 333529,
+      "sha256": "165a26efb7fa4b1431e7bfbc2fa5fe32e332f2e9f6c78cbb6d4df6788d83ab8c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GEV/2025.csv.gz",
+      "bytes": 462719,
+      "sha256": "0ce1107e8800391ba325c41800ceb9b4968ddf32bd5c8ef6c05453fbe3e9ebba"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GEV/2026.csv.gz",
+      "bytes": 422654,
+      "sha256": "d098c608ad8fff9904b90fd767ae4bf125d63f169447b05c5af21a305ec9c29b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GOOGL/2020.csv.gz",
+      "bytes": 77527,
+      "sha256": "00de89a949a5e0a7f7f5bfcb401ae30f178938157534d7ae9e12293a94214000"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GOOGL/2021.csv.gz",
+      "bytes": 477320,
+      "sha256": "2dfd736f6b563ee39946c62c9f6c737ca10b136238cd1b1a673f8bbe9265d588"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GOOGL/2022.csv.gz",
+      "bytes": 467204,
+      "sha256": "eb11a952cdb78695c7d1b4e8d56c1496e89e80af23359a25382609a582326f3c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GOOGL/2023.csv.gz",
+      "bytes": 438210,
+      "sha256": "767445d7aab32d361084790b36d499c068233684f07a556595a4283c70e18d80"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GOOGL/2024.csv.gz",
+      "bytes": 443158,
+      "sha256": "4e99060cbc23f97705f4f62d0ec21a7870ac7ff4c5c95c25566e79df43744e7b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GOOGL/2025.csv.gz",
+      "bytes": 453004,
+      "sha256": "c047a66c34676c4f933a2952d41bdcbe171d1a790ccce493e88059ff45f5a370"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.GOOGL/2026.csv.gz",
+      "bytes": 411581,
+      "sha256": "92f475dab079de9be868a896e4b4b502ff7c13661819b2089965aea0eecfa2e0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.INTC/2020.csv.gz",
+      "bytes": 68879,
+      "sha256": "e09f2d3ae8bf0b2ca14b9a76676ea04abf6cc80db16a7e1fa9f823050489d36d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.INTC/2021.csv.gz",
+      "bytes": 418974,
+      "sha256": "d5302bdf49e92777ed14f8904b6e398f4e944c3a70e8aeb7f797687387f917ff"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.INTC/2022.csv.gz",
+      "bytes": 419941,
+      "sha256": "1f83ceeb63dce87e92a684590b4630500f3a6cefb66a1896a4a9bdfab80713e8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.INTC/2023.csv.gz",
+      "bytes": 414348,
+      "sha256": "3fdebf44b36676ce0fb035d4c88302f9b78ca28f0ae90076dd8565ff59675d2d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.INTC/2024.csv.gz",
+      "bytes": 418999,
+      "sha256": "93cada4382ac2d67f1b9c144b240046a294178264d4fe4f7dda16ef5599718fa"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.INTC/2025.csv.gz",
+      "bytes": 423866,
+      "sha256": "f6fdadd9e1a85f1a61ba540f918b6db188871c5d16d85fa6ce04a82e011a02dc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.INTC/2026.csv.gz",
+      "bytes": 409969,
+      "sha256": "7a332ad20221799548dbc93ae1277f896df1d4833b4df69ca2cdf52f1a56db76"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LITE/2020.csv.gz",
+      "bytes": 64794,
+      "sha256": "93e786164642a1310574fbc3f75026b5714c3ad2e63b4e61f3968bf78a90ed9f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LITE/2021.csv.gz",
+      "bytes": 386294,
+      "sha256": "f1e529798f0bb4c2a5a1100f770b0edc878ab0f6595d0c836c2149825407bca2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LITE/2022.csv.gz",
+      "bytes": 384765,
+      "sha256": "ee2b807abcf67701b12452b77a243e5d22309b4c0bd19f8e893a35943588b35f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LITE/2023.csv.gz",
+      "bytes": 374857,
+      "sha256": "3a48cde3bc4887c1d0adc12f04e20e5e9f0847441b93324087afbea23d347626"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LITE/2024.csv.gz",
+      "bytes": 383563,
+      "sha256": "aec3bdf5a46723ea49688cf48ca7830934f43b55d7b16094dd974ffd2d66cae9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LITE/2025.csv.gz",
+      "bytes": 420602,
+      "sha256": "1e0d920cdbc8913e44ca5a39a4e6354074edd1ff528b5f5a14fbb2284cd09a31"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LITE/2026.csv.gz",
+      "bytes": 432075,
+      "sha256": "ecc46f098e8327f55a5f0fed03d0a4af8c002e83c45d1f77cfe721be22f60539"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LLY/2020.csv.gz",
+      "bytes": 69065,
+      "sha256": "85f9311423b847bd40639de8effefcc0d91b1cc9c1c21f99a295cd18ce9c9926"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LLY/2021.csv.gz",
+      "bytes": 425118,
+      "sha256": "101d92748ec324301c1201b496f5148ddcfc33690674e5b6d44808868538cb57"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LLY/2022.csv.gz",
+      "bytes": 435678,
+      "sha256": "9801fc604a06e4a9c5fe45ee629580efacfd2be871ab24169a53e507aaf1ba6d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LLY/2023.csv.gz",
+      "bytes": 445311,
+      "sha256": "3133eeea7f458805168aae109c3a952202fe05b8f8f4b104a8ba1e4173d0b631"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LLY/2024.csv.gz",
+      "bytes": 465070,
+      "sha256": "d5d710dadd647ea5d2877ba537f7dbebab84be0b67bb8aef8936284ccdbaa837"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LLY/2025.csv.gz",
+      "bytes": 470430,
+      "sha256": "10441f5ad5aa23bfc6fe12b126bbfd9b49f4fa194e75a7597a4eeb994554bdfb"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.LLY/2026.csv.gz",
+      "bytes": 422131,
+      "sha256": "3c4ba871976d3d83f2638d64a1d1706422299014ae2e92b0514a0cefea76b9b4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MDLN/2020.csv.gz",
+      "bytes": 82,
+      "sha256": "9d949d9ce8104217d6e6a039a793009f0149f4963e4fec5756e9b5a7f4757d5c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MDLN/2021.csv.gz",
+      "bytes": 82,
+      "sha256": "59bba3405a12a3adbb4b10732cfb7f1edafb2d978cb9762b348da2c8bce67391"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MDLN/2022.csv.gz",
+      "bytes": 82,
+      "sha256": "f7d33a4ca158c3d0f10775ead6d6f0524fed99972788c14436ad3bd435159d50"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MDLN/2023.csv.gz",
+      "bytes": 82,
+      "sha256": "f5f77700eb793444b66fc90130b9fe57f78d9519954ba4c0149c67a865ad514f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MDLN/2024.csv.gz",
+      "bytes": 82,
+      "sha256": "55075980bee883c9318d776fc96231b9e77c12d1992c60bb2907a88f06df4b9c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MDLN/2025.csv.gz",
+      "bytes": 15261,
+      "sha256": "369b75d6af2eb75baad269558a884852a35b45d9a4dfe5a881b1127e869fc692"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MDLN/2026.csv.gz",
+      "bytes": 347840,
+      "sha256": "c8dfc4a21d4a91120cbe4befd107805c7cc4115fe1d8d02e22327449055ced93"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.META/2020.csv.gz",
+      "bytes": 76100,
+      "sha256": "fa4791925f54ddec7725a047454f1ca88f4dba5548bd40f6a02bda7c50e9b3d5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.META/2021.csv.gz",
+      "bytes": 464844,
+      "sha256": "dcd0756c074f11775de717819bd069c6228337cea544bbf38797c7ec99367245"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.META/2022.csv.gz",
+      "bytes": 466650,
+      "sha256": "0c039d0cc32adf0a973e06ce977ffd2fdf137c12d7ddb0e85a74baf3c9071e63"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.META/2023.csv.gz",
+      "bytes": 464365,
+      "sha256": "7767a0d7f17eb81463c58a8a42efb0e52409dd1e4db4604fd1266d3df6c0c785"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.META/2024.csv.gz",
+      "bytes": 475439,
+      "sha256": "17603ea372342370376eea0ba2d63d7850dce635e2364b0f7972a36389d46522"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.META/2025.csv.gz",
+      "bytes": 479709,
+      "sha256": "deca99848c04d1f9b6f216fb19eeb6c77704ef69767be873e536e7c419a2fb8e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.META/2026.csv.gz",
+      "bytes": 425345,
+      "sha256": "bbc3f7c2a9146102a9fbda6bb0ae675a78e323d691657e638118df7c27311690"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MRVL/2020.csv.gz",
+      "bytes": 66937,
+      "sha256": "4ca9a8a1bce7a442c683880b58bad994f539ac83863c912a1e61dace73fdeaae"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MRVL/2021.csv.gz",
+      "bytes": 408079,
+      "sha256": "cbe9b072503e0ffa5489400417ec2676d17544a8012d45e25ef3c9ce12e99d06"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MRVL/2022.csv.gz",
+      "bytes": 416732,
+      "sha256": "a72917871d4daa4f8f7c9881cc934ad7958a837adf348618a8ccaf671888a38c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MRVL/2023.csv.gz",
+      "bytes": 409055,
+      "sha256": "7399395b51b1f462dcd3658638900217e4d2257201df76e1f91cfe0de9fbf9f1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MRVL/2024.csv.gz",
+      "bytes": 419646,
+      "sha256": "f80f2fbbca840e562d2efe383d5f517a01334c8713ce32e71aab765f5c492a12"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MRVL/2025.csv.gz",
+      "bytes": 431473,
+      "sha256": "a31fdecc7200484396cc035a6b803261a82d7a0f3a287ccfec854b86482cb599"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MRVL/2026.csv.gz",
+      "bytes": 410085,
+      "sha256": "78720ca2ae30914841e9f1201388a92b5d2a111bdcf305358f5f3a32747ddea5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSFT/2020.csv.gz",
+      "bytes": 74115,
+      "sha256": "7626380b646330ca4ceda150055035ff33ccee457b394cee426a1df07cbfee5e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSFT/2021.csv.gz",
+      "bytes": 452300,
+      "sha256": "5a1c736719db6dfdabd488ca38b588f5a2ff38e265f01b6ad31e1eed2f460df1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSFT/2022.csv.gz",
+      "bytes": 463215,
+      "sha256": "126f4753983d77c9b8853657beb7d8ef6a4429db7c0f4083b22f4f342f696484"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSFT/2023.csv.gz",
+      "bytes": 457579,
+      "sha256": "a024e23c771c12956c596c94f762b42b69c2d6c4377e3853e41b55bfb7a3a66e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSFT/2024.csv.gz",
+      "bytes": 461365,
+      "sha256": "781874dde214f17b5beda8626bea2ad6815a132472df9b6f887f87066ddec039"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSFT/2025.csv.gz",
+      "bytes": 461756,
+      "sha256": "a565a8ca1ae13190e56fb39435f12aa17a04e77db949336efd6bab9f07d82bec"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSFT/2026.csv.gz",
+      "bytes": 418779,
+      "sha256": "f26d8b5dd7243b49497226bd25c55fcea32d827569d85c0c2bf20a5c2888c168"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSTR/2020.csv.gz",
+      "bytes": 68902,
+      "sha256": "ea794ca0775922550bdce9370ab6eb06399abc9358ad7f116220c5459e1dd044"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSTR/2021.csv.gz",
+      "bytes": 452071,
+      "sha256": "1b7ca27bfc9e17efc0aae61ed9eb0370ce93d456b2ebcd378636b9edb018eaca"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSTR/2022.csv.gz",
+      "bytes": 431218,
+      "sha256": "97bef6fa4e1242f12453bfc285363e9c38bf62c67c4525d06ebf259dcbbb4d2e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSTR/2023.csv.gz",
+      "bytes": 439839,
+      "sha256": "58a068afe6cb69676ff21884b82c26e117ebc5202fcf7ab979bf9955da371214"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSTR/2024.csv.gz",
+      "bytes": 482924,
+      "sha256": "1f0e80b34479cbeb10c3d7f1c4b4e5e61a4943ab9c8009da957bfad554d74edc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSTR/2025.csv.gz",
+      "bytes": 478744,
+      "sha256": "66ae4b257c2c0a98929810de6c0a6fefff412589852e714579b7841362c68380"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MSTR/2026.csv.gz",
+      "bytes": 406506,
+      "sha256": "d3bed096080b77e192ab173ace0db1d00c15aafa769b6e83b20cf9b66c1cfc5f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MU/2020.csv.gz",
+      "bytes": 69749,
+      "sha256": "51502b0b5d559df0d69d458f2f8d4d2cad475f52ed8c86ff0fed851ec90fe960"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MU/2021.csv.gz",
+      "bytes": 429576,
+      "sha256": "a11ff6380b4d4b7bb6bf0c1929e28fe7fec88f6ce6f87fa67eedf9806fa4337d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MU/2022.csv.gz",
+      "bytes": 427132,
+      "sha256": "3de22c1d94c1d5128742efe75772ed74204340125bd58c5b31a573d5bc2c4f49"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MU/2023.csv.gz",
+      "bytes": 415168,
+      "sha256": "f415572c94baddced4c84dfa45a59b6bdad54e73f3ed212e8c75949793e21d28"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MU/2024.csv.gz",
+      "bytes": 441152,
+      "sha256": "0441b98ce52172f2026f475a2042077e406b83cf969d80f90acc48445d90da7e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MU/2025.csv.gz",
+      "bytes": 449156,
+      "sha256": "68e638c81740083610c3f600397e027099a5ca8edb5999cff92fb2f89c0ec25c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.MU/2026.csv.gz",
+      "bytes": 449180,
+      "sha256": "0f4005f9c6221f04263c5d554b4e007efcb0ed2cbfcb2ec6099d7d8448874f03"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NBIS/2020.csv.gz",
+      "bytes": 82,
+      "sha256": "b349b84c16f7b37d495ec466ed9a1010f370e04308bd379daec0352d655e3b66"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NBIS/2021.csv.gz",
+      "bytes": 82,
+      "sha256": "eaa0522c719bbd33436310428a90b2eab79e2a6c977bd1f8b34cd412f52ab5aa"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NBIS/2022.csv.gz",
+      "bytes": 82,
+      "sha256": "b511377dda3018d3d2c0e118e27ae5da6b548e4741f1ddbced8ec8a0dd78db65"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NBIS/2023.csv.gz",
+      "bytes": 82,
+      "sha256": "081313b3660104000d4fd661a324ce321e06977156570c8d088acdbf82fe501c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NBIS/2024.csv.gz",
+      "bytes": 79157,
+      "sha256": "8c50080660f82541e1f983e99f8ed4e751cf9f347b2b826d90fffe8439da8cd1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NBIS/2025.csv.gz",
+      "bytes": 433557,
+      "sha256": "7b6c338c52d8372bb63b821bef0f5eee3cd80afe9430a8fab277760dcec80ec6"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NBIS/2026.csv.gz",
+      "bytes": 415081,
+      "sha256": "55dabe3e58d740f657da42b9a4da9ddea6fb8b1f00a98ed3f5e9365ba062174c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NVDA/2020.csv.gz",
+      "bytes": 78167,
+      "sha256": "a5f2a888c3dc18be0b0935738c3efc87b6159af9533d9ee62d2d325cf2eed8fd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NVDA/2021.csv.gz",
+      "bytes": 481281,
+      "sha256": "ccf6f8f05d629ca671aca9b213314054e4183ba2e5f67ec871f78d05537185b4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NVDA/2022.csv.gz",
+      "bytes": 483232,
+      "sha256": "6358439db902fc97bdee61faffa2c20b291b046ed0532209867557e057b907f7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NVDA/2023.csv.gz",
+      "bytes": 489250,
+      "sha256": "c56376507fcea0faf3e6df062797bc975d2c49a0b5c5a46a851e30655a5a20f3"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NVDA/2024.csv.gz",
+      "bytes": 497160,
+      "sha256": "e276c61cd976cfae4f1461c3dc99d25d462582ff9ee6e1f3ca68f91fd4191b5a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NVDA/2025.csv.gz",
+      "bytes": 478338,
+      "sha256": "b7ff024b4b9c1f6b3f79fb1b722a3102df2b083a7433d4c489fea0f43d9e1bfd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.NVDA/2026.csv.gz",
+      "bytes": 422904,
+      "sha256": "c155b22ce507ac1da9a8e64a2d958ef3d917c1899e846d61362853647400768b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PANW/2020.csv.gz",
+      "bytes": 70541,
+      "sha256": "f667a9f39f3d0b728d7fbba6275f201059c1122967167d38b45afd522cbb192d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PANW/2021.csv.gz",
+      "bytes": 431266,
+      "sha256": "a660dd28ca5ecad7b53d076e05b92c682d170661c3d6b3a38e2aa31c506e001b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PANW/2022.csv.gz",
+      "bytes": 446274,
+      "sha256": "6bb42b9d6e813459d4a673a5ade828475f900b03468fe4c6f2826bc9f2adc082"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PANW/2023.csv.gz",
+      "bytes": 434161,
+      "sha256": "a3d93de5378b7c34c473eb5143988077c133d4861cc727e11bc303a3f79b3d08"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PANW/2024.csv.gz",
+      "bytes": 446581,
+      "sha256": "30bdfc89a30ae2a42af7dd4e7ef38c98387ac7ca9e40a04c2831f22b5745b510"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PANW/2025.csv.gz",
+      "bytes": 434475,
+      "sha256": "0b4092990c5aeb46db11c43fd9022eb4f6ef279648a3943f67856803a95863a8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PANW/2026.csv.gz",
+      "bytes": 402832,
+      "sha256": "94a80754f0760ec82945f5f1ff328b9c6841d15451f6ece4855ab3c16750773c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PLTR/2020.csv.gz",
+      "bytes": 71601,
+      "sha256": "2ee4d372644ee37f08bbe05f4a935ce831152abad57d0f3a2d0422a133f88f18"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PLTR/2021.csv.gz",
+      "bytes": 425208,
+      "sha256": "83a2ecbc3399759ee06cb5f8b274464568e4399fca16b08855f023eedb99fdaa"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PLTR/2022.csv.gz",
+      "bytes": 399366,
+      "sha256": "ab8aec358feca0f486560b0f804be698d2275fd7ed025548813504c88f6c955b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PLTR/2023.csv.gz",
+      "bytes": 405369,
+      "sha256": "b5458973f11dc0c6e78136ce2ba95d5967a0e60d7e4962744be3460b94bf1650"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PLTR/2024.csv.gz",
+      "bytes": 429541,
+      "sha256": "df57ecf7aa25ddc50afc555d910998e029dc71e6864b609ba48bfb0468e2645c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PLTR/2025.csv.gz",
+      "bytes": 470011,
+      "sha256": "76f14fe801f6aecdc5fbfb73473fbaff4454db9dcf48fedf1ffcdc8bf03d58ef"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.PLTR/2026.csv.gz",
+      "bytes": 410170,
+      "sha256": "d9399ee1ca1dbc1798f23792aee22b901186f48a315d099b8eae34ea2cf2975e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SKHY/2020.csv.gz",
+      "bytes": 82,
+      "sha256": "3d9ef47197b851592662330d3d6cd480591040919ceedf154333d14b0b81db99"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SKHY/2021.csv.gz",
+      "bytes": 82,
+      "sha256": "80d5d9c779f68807f29c14302398b73213f51bdc89f2ec8bc9aa65fd377ebe82"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SKHY/2022.csv.gz",
+      "bytes": 82,
+      "sha256": "c289cf7300048dca187cf706580b8fe9837516ba351af337245aac10a4650af5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SKHY/2023.csv.gz",
+      "bytes": 82,
+      "sha256": "7a9d48014b70ee86f96401314e1961571520e7e90a249f440f063973f9fcfe47"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SKHY/2024.csv.gz",
+      "bytes": 82,
+      "sha256": "d93f116f0202caac58eb19d135cc867cbf2d8c77dfb6da689343b2d083a9f12d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SKHY/2025.csv.gz",
+      "bytes": 82,
+      "sha256": "0bd9a4ebf7e06b9a09cc435de0d034ec942cdb2cd314cd495b541e7fdbac1375"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SKHY/2026.csv.gz",
+      "bytes": 169969,
+      "sha256": "c2afb247e0aa4b47d65500ae34881963389b31b86feb380d3861000b2cba231b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SNDK/2020.csv.gz",
+      "bytes": 82,
+      "sha256": "f4c784f71d06a6f351eaa858c51b86710393c65e4609d6845e951653432ba32f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SNDK/2021.csv.gz",
+      "bytes": 82,
+      "sha256": "49d892827d6973e86477127e8b27307ad5dd9a74a03bfe31a0a5cd849151ebf2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SNDK/2022.csv.gz",
+      "bytes": 82,
+      "sha256": "5f45ad22ae58347264448a4b78fab6ae936e5b42b17e5a80047a0e507af49328"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SNDK/2023.csv.gz",
+      "bytes": 82,
+      "sha256": "3c52b4c5290f90fa0e91a455e5ed1c011f97bf062337521d482863951e05caa1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SNDK/2024.csv.gz",
+      "bytes": 82,
+      "sha256": "4c7044f0f73b825f320a6e63283ec016b97538324872c6389d80084523e896d1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SNDK/2025.csv.gz",
+      "bytes": 366449,
+      "sha256": "79c72f2a2f23320078fb8f553214b00a144136d4c97c4a049896298bb058b091"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SNDK/2026.csv.gz",
+      "bytes": 452390,
+      "sha256": "f8e8f4d959288d2529f3897fc58b056db11da22caf666be67ed3f1cb3b47811e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SPCX/2020.csv.gz",
+      "bytes": 82,
+      "sha256": "a898354f34f16e98966522fe3f1bff0dbe845c0e792428b5ab55ceed30901458"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SPCX/2021.csv.gz",
+      "bytes": 82,
+      "sha256": "06fa96875542559d700447cc83e8c3a294cb22a08d6d63156eb59c984a13754e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SPCX/2022.csv.gz",
+      "bytes": 82,
+      "sha256": "2f5ed8294bba7f4e6171dca7fb67503c80f0e13762b6d6c52f2f6388681ff2b0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SPCX/2023.csv.gz",
+      "bytes": 82,
+      "sha256": "62824012dc1bd472e4bfa07cd8517b994c7f5c46fd30bbe7c45da4eb0fbfede9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SPCX/2024.csv.gz",
+      "bytes": 82,
+      "sha256": "53b96e8d895629fd485c93302006f71a0e209a2ffeb4ed6b75ade6423e93befc"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SPCX/2025.csv.gz",
+      "bytes": 82,
+      "sha256": "928e3b9baf02b25220991448802156ac39a0e8627596fad53ca5bdb191f0c23e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.SPCX/2026.csv.gz",
+      "bytes": 209227,
+      "sha256": "7f4457b1bcbbea21170b069fce98c6754d0a39bf31bd9b6927aa88eb6142fac7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.STX/2020.csv.gz",
+      "bytes": 64267,
+      "sha256": "30ddf24a0fc59065e3891e01234d389e07d29fcbcb98129d25e012270d412d9e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.STX/2021.csv.gz",
+      "bytes": 403170,
+      "sha256": "391c7d71dda1fba25dfbdeb3ad53901c7e3f2c571e4e883b199056499d74c47f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.STX/2022.csv.gz",
+      "bytes": 400544,
+      "sha256": "bf4c4ba0f9c784a211d5f092d98a29a8e8d624e2eebdd5562dd707a6ffa4d043"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.STX/2023.csv.gz",
+      "bytes": 387115,
+      "sha256": "96b5669d7b648bab91f5a532db0844c1aff23b6f285e017e3ccf4ec20557cae9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.STX/2024.csv.gz",
+      "bytes": 400071,
+      "sha256": "83aaa0ef4df1dab7fe9e3092f9a86a43215f44eec851db060f1ebb3b46013ca7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.STX/2025.csv.gz",
+      "bytes": 423481,
+      "sha256": "9dce885498da41f7835fee59e0c1a98f178e4d4f63b89feaba51a63550a6d072"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.STX/2026.csv.gz",
+      "bytes": 425344,
+      "sha256": "f3508039b2a48431a7e169886da6686d54bb7681a35422a2e3046a59c44a731a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TGT/2020.csv.gz",
+      "bytes": 69635,
+      "sha256": "9fd52bf86fdb739e89755a872ac064bcdc011c28785c12f05b51066e527feae0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TGT/2021.csv.gz",
+      "bytes": 426387,
+      "sha256": "56eb5c830946f1dc2ffe64990abcefec923e9f65ef1a0bbbb65837348b0e2029"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TGT/2022.csv.gz",
+      "bytes": 432557,
+      "sha256": "db2c83d98f7a0cdf3cd22223885bace474385a2c0acbec1317d10fe9a53ecf55"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TGT/2023.csv.gz",
+      "bytes": 418249,
+      "sha256": "f6e38ef3dcc3c95094c1704abaf0eefb1be73530d236e270bdb7f11407e0deaf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TGT/2024.csv.gz",
+      "bytes": 419227,
+      "sha256": "1a53653d3284f41ea86f7ab8306a4d5efadbea3d63e22600bbaf491f04f6b636"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TGT/2025.csv.gz",
+      "bytes": 418377,
+      "sha256": "ed0bf13cfda1af5d4ceb3ae2cfc0cc979b7b7771ddbaecc8101b267e82ca8042"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TGT/2026.csv.gz",
+      "bytes": 370969,
+      "sha256": "3b6ed6608c351dc371154b4e39ab5b032cc91c16e027b8be2f8b66a7ee4edb0c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TJX/2020.csv.gz",
+      "bytes": 65849,
+      "sha256": "10b90a412ebe4ef231799663d319074623937112b093a5bf7042a34b2e421e8f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TJX/2021.csv.gz",
+      "bytes": 399657,
+      "sha256": "87e2882c241d8347f21cb7fae40f85c43a9627c5595843763529731653e79141"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TJX/2022.csv.gz",
+      "bytes": 401329,
+      "sha256": "6665a143fe2fcd10d4f5b98e15efe962d0841eabdcab67d484274fa2dd48f1fb"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TJX/2023.csv.gz",
+      "bytes": 391347,
+      "sha256": "6e5b3bff13c0383597ccdd9f6b1774234ea6346a0b64be185a5a07d4f3d91b74"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TJX/2024.csv.gz",
+      "bytes": 398438,
+      "sha256": "746aa1ba12e209b98d87d924988dfa06720aeeda412b56a470c0d76b517bc994"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TJX/2025.csv.gz",
+      "bytes": 407934,
+      "sha256": "f2e95b859d540e5b6f1c0c579189e7ce3f7a3c3496c8c1378c64339951a96aeb"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TJX/2026.csv.gz",
+      "bytes": 371253,
+      "sha256": "5550518e749e02b7a579fd53669eabf4541d062c0bce6581b3adc54d4f58df63"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSLA/2020.csv.gz",
+      "bytes": 83847,
+      "sha256": "aa934907aeca34461878630e2e035e6284786ae5eb4192c978e7aa93e5b82c51"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSLA/2021.csv.gz",
+      "bytes": 509274,
+      "sha256": "dca9d05b8f675dd9e9d96d48d797629ae2c374ba0b572f879321d057b7ca4a1e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSLA/2022.csv.gz",
+      "bytes": 508394,
+      "sha256": "8a7f9b46425f8fe505cea539652c317f5329619e328c663bd2f97e439bbd5d8e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSLA/2023.csv.gz",
+      "bytes": 494097,
+      "sha256": "75ea2e865f02654c0f052aaf27785e39e19f50ffe02cad6879f4c87c1554035f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSLA/2024.csv.gz",
+      "bytes": 491789,
+      "sha256": "d464bd1bb0f3129eb9d9c84121b0f894923cccede82a5fc92892194a3f559c7d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSLA/2025.csv.gz",
+      "bytes": 499446,
+      "sha256": "08c5f00dabb8931a213d4e15a58318ce4a7d189d5f76883d9beb9099de87e154"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSLA/2026.csv.gz",
+      "bytes": 431050,
+      "sha256": "b4273e18a4ad088cba851f494b87739b4399ac77298c48443025cdfd32559f90"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSM/2020.csv.gz",
+      "bytes": 68593,
+      "sha256": "9864e8969ff013894e52c8c41ed4deb1d51e9071dbdcce0e4bf17e021d201721"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSM/2021.csv.gz",
+      "bytes": 425414,
+      "sha256": "dd8d0851150742686ae49ae075327c9d611c78545d0f24b7228cb41a73910545"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSM/2022.csv.gz",
+      "bytes": 420893,
+      "sha256": "3653f64094e99a4be5fa16151982bb45ea8f0a8ae4779a3bf01341759614b2ec"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSM/2023.csv.gz",
+      "bytes": 413603,
+      "sha256": "a044d97443ddd80836a0ab7bb1b82448a6cfa6171359e33898224d28fa2a9ceb"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSM/2024.csv.gz",
+      "bytes": 443027,
+      "sha256": "57a879408231d5f3dbcebea8c6fbdd26a91803d3818137d7c73cdb95066207b4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSM/2025.csv.gz",
+      "bytes": 449811,
+      "sha256": "0ae08a7b0475d767105b8555736d7c9de8f14fb86b8596a7ab2ddeeeb3bf6eae"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TSM/2026.csv.gz",
+      "bytes": 414090,
+      "sha256": "c5298b9146536c1210fd873837f9e19eba1a57437b78bfdc0d7e3ceef68217c1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TTWO/2020.csv.gz",
+      "bytes": 68337,
+      "sha256": "1e5cf829d76b089828c919f1721995066afd0a15b155c559ca2415db0369ebd2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TTWO/2021.csv.gz",
+      "bytes": 408607,
+      "sha256": "2767baaf03af8dbc2d0f04b03f20cf390d5511c77afeb7b4620ac442b45c3900"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TTWO/2022.csv.gz",
+      "bytes": 413131,
+      "sha256": "1c6f41a23296eeb28ecaa60a16153ea2ff163565b567b193853ad95fdeac4bda"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TTWO/2023.csv.gz",
+      "bytes": 397154,
+      "sha256": "bce1afeafa07b6e71a442c9ef5de6adc76d453e5c2fbd70e33aa6ccfaeb1177f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TTWO/2024.csv.gz",
+      "bytes": 402329,
+      "sha256": "d31b39585b109eff46d2bd226565c3cbb4a72a92350c07bbac6c8b1ab3e0e212"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TTWO/2025.csv.gz",
+      "bytes": 413244,
+      "sha256": "3dd0a75eb1fdc286da8348303a18d01141cd86161e24faf6a97b8f1d2ae13d1b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.TTWO/2026.csv.gz",
+      "bytes": 377454,
+      "sha256": "38bb7e535355160d042353c9156fcb9861d88e04ac7381a2a4db125ea7705ee6"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.UNH/2020.csv.gz",
+      "bytes": 72029,
+      "sha256": "5b14a5719b9db764d1437857bd9030e33ed6aabfdaec0700cb51607714525a08"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.UNH/2021.csv.gz",
+      "bytes": 436882,
+      "sha256": "c0ee24744f4b75e7fd38cafebe42a07cf521ab3073f8d093ec09c5ff75ce66e5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.UNH/2022.csv.gz",
+      "bytes": 448441,
+      "sha256": "27dafc731300b0eb0b5169e068dea153c03ce692bc722005177c128aa6758c05"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.UNH/2023.csv.gz",
+      "bytes": 441214,
+      "sha256": "e9678e4f63474e78d1105be7310097dcdb29870c2e98d81cc3c6633eedf97e02"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.UNH/2024.csv.gz",
+      "bytes": 449794,
+      "sha256": "f17e1246800675e0ed2cdd4547c5a701960ca741573eecdf21704114c6928f03"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.UNH/2025.csv.gz",
+      "bytes": 462378,
+      "sha256": "4cd3b7dddab0ec4927ebda08d42c966f9df89ab1e9599a6e8669fb6ce4d68c49"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.UNH/2026.csv.gz",
+      "bytes": 398727,
+      "sha256": "7045299bb629e90c3e3374268e5cdd1819de9b84a8157b6b3042148682740457"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.V/2020.csv.gz",
+      "bytes": 70773,
+      "sha256": "be83a1d70e595a1495254f9f3169132ff843bd38f42a7c1fbba0cb39108294d8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.V/2021.csv.gz",
+      "bytes": 433020,
+      "sha256": "257f0a51230c521350e817edcf86a6fda96e376d753ca467194bbb6c4d378e32"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.V/2022.csv.gz",
+      "bytes": 435258,
+      "sha256": "4f42cdbb071b17ed41392fe7a8126436c222eeb4672d63ce97ffea328f38bd7a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.V/2023.csv.gz",
+      "bytes": 420728,
+      "sha256": "4e4f905d11fc057c15edabcf64a48ef4fd6b5f907e9f3ad603248fc569b9e1d8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.V/2024.csv.gz",
+      "bytes": 428060,
+      "sha256": "ecebc513e764eaa821361796b34ce307dd20b28214cda1060b2d900e4729bdc4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.V/2025.csv.gz",
+      "bytes": 439555,
+      "sha256": "09418ffb0c0af3befad4d7754b823292f61587a3d511b45900a3cfbedcced550"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.V/2026.csv.gz",
+      "bytes": 393062,
+      "sha256": "7d8413a502f90bcb3b29cce1783c7ce6f58ee5192b176aa8857a4b6618d3d569"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.WMT/2020.csv.gz",
+      "bytes": 69710,
+      "sha256": "452165dbc6011475622518b3f3088c4b2607d5ab771fe05b7c68f881bd1063ed"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.WMT/2021.csv.gz",
+      "bytes": 418054,
+      "sha256": "02854a5b86f8717fa2480f797e8a14baf0caa9d0d34dcf9f9fc5dcf14286d66d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.WMT/2022.csv.gz",
+      "bytes": 421124,
+      "sha256": "45315890866325e61ab6a488d2b21a783201fc3f52505b882fae636d47982457"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.WMT/2023.csv.gz",
+      "bytes": 410034,
+      "sha256": "e4ad601805082b0af9221fd4d7b3f1e2eb2ea3aa25ad3934084c4e5fe946b00b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.WMT/2024.csv.gz",
+      "bytes": 409027,
+      "sha256": "0686c63f149551a6614fd5833402888534f587e234c4219da09c6a4d270828ef"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.WMT/2025.csv.gz",
+      "bytes": 423408,
+      "sha256": "49d346890be88aee1753abd2c87e9839e126aba41948a3b22331cc642b54cf74"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/k6/US.WMT/2026.csv.gz",
+      "bytes": 380559,
+      "sha256": "b2ef9b90c4e18f860df0306082d368f153663082a5fa7001f9b19dad23a89f5e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/manifest.json",
+      "bytes": 39955,
+      "sha256": "c68c60d5b8fb8b3aac5edb490633932e3789a9ffde496fff5026dbff2564742e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/run.log",
+      "bytes": 2174,
+      "sha256": "b3b9c98275a12723518fac95162f42a9af51259e853d495c4e66fee40f605389"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/sectors.json",
+      "bytes": 2028,
+      "sha256": "6d7fa924fc7ee0ee2ecf695223f21b8deea32be46917f4335783e455ea741434"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history/universe_fetch_noqqq.json",
+      "bytes": 707,
+      "sha256": "72762fd0b198f337b08564d8f3c2f43fa6afad5fea4179ecaf11a71946e7c1e8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history_extra/US..VIX_daily.csv.gz",
+      "bytes": 21452,
+      "sha256": "d2d0d5f4702a78a20d2bf7b7470d1d2d9826bc895b2e3dbb6ceb18c8ae195136"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history_extra/US.SPY_moomoo_iv_hv_260.json",
+      "bytes": 41185,
+      "sha256": "85536044f23d8cb0b31e7e3d284f065e315e62a4e1b8eadfa0d6d83ce104e6ad"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history_extra/gdelt_econ_stockmarket_tone_1530ET.csv",
+      "bytes": 99893,
+      "sha256": "fc97fb1ea03329ef41980269c0115d198aa471f94884edf257a17556f8380458"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history_extra/gdelt_files_manifest.json",
+      "bytes": 141156,
+      "sha256": "14fa2ca1bc4f3d1b120c76807274cbc3755338704d389fb2c7ce32ef671b5aee"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/history_extra/manifest.json",
+      "bytes": 549,
+      "sha256": "042059252bf5a6a7d5a5795ff291faaa0c16dcb2a46583227d4d561b5554375a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/normalized/daily.csv",
+      "bytes": 9085,
+      "sha256": "d004f06129779eef2de300bb66ed9ad8a08d28c99f5637cb80a4532dd5ea83f1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/normalized/intraday_5m.csv",
+      "bytes": 567043,
+      "sha256": "313786d0e6efc51874d2fb16caede90d8595b81848cfdfa54308be98700269fd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US..VIX.csv.gz",
+      "bytes": 16603,
+      "sha256": "b395bb60014f2bfb63cf210ed3bbaf0456f1ce86af11e048f9e107b7d3c7c5be"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.AAPL.csv.gz",
+      "bytes": 1010,
+      "sha256": "2f5f8ecbd5f0ca49405fd7c6a36135df7a62a376cf5a3e99e829d922210045d4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.AES.csv.gz",
+      "bytes": 736,
+      "sha256": "2fe0b7453e22dd6819215b0e0ad2aacccf7b7a0f15ac0eedee9cc5a0130883b2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.AMD.csv.gz",
+      "bytes": 1104,
+      "sha256": "05aea03ee3243a60311cf15f5f793a5575a53e5652e59b994565b6684e66430d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.AMZN.csv.gz",
+      "bytes": 1031,
+      "sha256": "1b57ab007b9b2978348d2318dcd9fdd007ffbe4a0ff6df2c79643ada4ac15339"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.ASML.csv.gz",
+      "bytes": 1105,
+      "sha256": "5bd0164f20cabaf14d74501c598e255324a08411233a7c7026fa4a036e3ae224"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.AVGO.csv.gz",
+      "bytes": 1049,
+      "sha256": "8270e69aedbb4d34ab5da75d335bddaef19d1e36098e4d8967198c4750be319e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.BE.csv.gz",
+      "bytes": 1045,
+      "sha256": "9940c248aaf64f4d5ecb4032a9cc66f7ae643ae7ce252a29a40cf9695d7c5fb2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.BRK.B.csv.gz",
+      "bytes": 1018,
+      "sha256": "deacf82e6348b421278c440bd8f17a07bc00e83c32b262e4457a6300bb754ab0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.CAT.csv.gz",
+      "bytes": 1042,
+      "sha256": "fa20aec50f95ce1899d9dbcfe3019fe9e985c3dd711fc8d7656fb8a3500c19b4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.CRM.csv.gz",
+      "bytes": 999,
+      "sha256": "ac3c4b2e2cef209e5afd4c106535e783aa03656ed1f6291012b75adedc406203"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.CRWD.csv.gz",
+      "bytes": 1019,
+      "sha256": "64254b80ab489da521de0b2d0f56e899a97a1aecc8788f74b75ec004104360d4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.CRWV.csv.gz",
+      "bytes": 1009,
+      "sha256": "4654124fd968c6ff350dd6e13d1ce2b4bed6d6b23941472ae753740dea144fa4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.DELL.csv.gz",
+      "bytes": 1051,
+      "sha256": "54284c5aae60f18aa3ffdcc19c92a88c59df4e3f8a4d547d729c704bbe447f83"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.GEV.csv.gz",
+      "bytes": 1027,
+      "sha256": "687e8fa8c3be9fdafaa50335b0692d1082ce76d8fb33cc036a7a8d12ffb9dc40"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.GOOGL.csv.gz",
+      "bytes": 1049,
+      "sha256": "299ae6c4084068c64d0a84b430dd1f699db670866a1f72e9e2b44060ec3a2051"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.INTC.csv.gz",
+      "bytes": 1037,
+      "sha256": "ef636b103491feb1ff5c4284d30b6e5b13766f7e3b02419ed99051b2b30adb2f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.IWM.csv.gz",
+      "bytes": 37230,
+      "sha256": "3cd5c952a1e176bed78ce1dd890af4cb7c3d0defd7547dff6d724a4bbcd52a79"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.LITE.csv.gz",
+      "bytes": 1082,
+      "sha256": "9e99a8f49f4d5bb504c1ba3ba29932ed67c091ace0b19ea361cd7c29fca592af"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.LLY.csv.gz",
+      "bytes": 1079,
+      "sha256": "69dc4acd51e5cef9f898a6e729b9afdca97c5f645ea16908d98fd9a0187a5fda"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.MDLN.csv.gz",
+      "bytes": 900,
+      "sha256": "e0c76b66b00b504110aba636f9c1cca4f3bce585baff119d55606df189c387b9"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.META.csv.gz",
+      "bytes": 1075,
+      "sha256": "c8e1c27b459362dbbb9b70730f547ca43d51245c1a02da521c9b25bf51385861"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.MRVL.csv.gz",
+      "bytes": 1082,
+      "sha256": "a9105e07e4cc333a2a3e6d9b552d0d3a3ee8bbaf9fa21513552d089483d2bc2c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.MSFT.csv.gz",
+      "bytes": 1055,
+      "sha256": "d65b588aff5608151ca61655defa82a93dcc0859ed7d3092af3f5a1b9a94ae12"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.MSTR.csv.gz",
+      "bytes": 1029,
+      "sha256": "825ee3903b7a6e55e532690a173c09656a69d8ca99ccc3c338e1548def51c47f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.MU.csv.gz",
+      "bytes": 1116,
+      "sha256": "5c9bd3725ba1bec8d71acaf90bca008f92492a9e64a2dfd9e491ad5af44a3670"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.NBIS.csv.gz",
+      "bytes": 1060,
+      "sha256": "3c1d79d352ec77924a3209fd4b2a0dc098e8ee8fd915a8edf0d0e65e3b9e6126"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.NVDA.csv.gz",
+      "bytes": 1080,
+      "sha256": "39b7109b5426260cdd8413c12528cf40d2ee4fa23277ffa79dc4f2ca83b93a25"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.PANW.csv.gz",
+      "bytes": 1038,
+      "sha256": "c1574f18c7f2a335f660313accdd8e7f866c0a2ffdd663bffe26d214198fd583"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.PLTR.csv.gz",
+      "bytes": 1018,
+      "sha256": "328852ec8c0cc622ee6d6cb655f9e821c7bc1928f2fe5e28ad79ca33074f8629"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.QQQ.csv.gz",
+      "bytes": 38979,
+      "sha256": "33e29ad08f83a0c9b047e4169f0b039c5e8f3c44e265e72c8bc2d0bf33bcaa4a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.SKHY.csv.gz",
+      "bytes": 1033,
+      "sha256": "b14515781380821fa9cfa5db92b8fc0f0ea8cad0f7f31a423da448a77a1d8997"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.SNDK.csv.gz",
+      "bytes": 1122,
+      "sha256": "31aa853e32cd1ad035b3c4d0cf2fe5aec73854b5af25c4018e7a07712ace5a14"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.SPCX.csv.gz",
+      "bytes": 1036,
+      "sha256": "d43ea922a46cfd9d8240cca6bcfd70ff0303e8be56e52d9d815188835a659f74"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.SPY.csv.gz",
+      "bytes": 39040,
+      "sha256": "1f29ee104b38dad6b2e4008a94082f89e722fa6b0809b414c0f6544bd1e59f5e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.STX.csv.gz",
+      "bytes": 1071,
+      "sha256": "c0a8519a3fba087e1fb53f3eede867187c1d10e1ddbe1883374b319dbfdf0f3a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.TGT.csv.gz",
+      "bytes": 948,
+      "sha256": "82e0a2190217abde563b649d6cd02bf0eccf9431bc702edd41d5ee145d7c9e86"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.TJX.csv.gz",
+      "bytes": 953,
+      "sha256": "2ae468526b27094bbe0ac6d0a18ec4e533e636996c7fb031a24b1f9a9546078c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.TSLA.csv.gz",
+      "bytes": 1059,
+      "sha256": "6f1950884c9c6df340601e6b3113c06b78cc2889d7f4d251a4e65aff2c647af0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.TSM.csv.gz",
+      "bytes": 1062,
+      "sha256": "686ea4d738200840b35f3f93f4dfcef04d204dbe0a8e5b08aaf2d9b0084acfa0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.TTWO.csv.gz",
+      "bytes": 973,
+      "sha256": "ea37d81d92727a7e7833bc90b00e51d1db5765498262fad37669b6354a7dfcd3"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.UNH.csv.gz",
+      "bytes": 1010,
+      "sha256": "e1efc4f2da16b6f42287f2df70874ec57d2322fc87e41e571e3c255f6cb0a83a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.V.csv.gz",
+      "bytes": 1016,
+      "sha256": "77d665679bd387b7bd821bd9ad2417ecdea5b66d099b103f860be0513b7ca97c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a0/US.WMT.csv.gz",
+      "bytes": 981,
+      "sha256": "12147ee774c2cc845dbcfdb420fc7be3168812fa8ff0d62ae3c6a306b70dda6c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a1/US.IWM.csv.gz",
+      "bytes": 58509,
+      "sha256": "6eeae8ca98b7e40ca2caabb88e3ae145422fdbfb9ae59edeee4e2037d9e4d5db"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a1/US.QQQ.csv.gz",
+      "bytes": 60441,
+      "sha256": "f57bb906cfb92b1b7f26bfbbbff33f294fbe18f8280c5ffdfb2b235d10ee4ccd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/daily_a1/US.SPY.csv.gz",
+      "bytes": 60392,
+      "sha256": "8d2f4d9f57ea8c4ebc3d8dabc019865cbdc337fe9d8041349d24fc0648f7fef8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k1/US.SPY/2026.csv.gz",
+      "bytes": 28226,
+      "sha256": "3ae3b9d8a325d2780d65717a84750b133ba64fbb12153e3f667df33cb3afcd7e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.AAPL/2026.csv.gz",
+      "bytes": 5821,
+      "sha256": "8d850abb04ea330c089c43de551b568226c92d7e47a4157875254b033940acf8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.AES/2026.csv.gz",
+      "bytes": 3688,
+      "sha256": "ff2738dfc184eff1fc5cad7e25a999cd4bb17cd4d6e4a4adb71e20fa02bf3ee0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.AMD/2026.csv.gz",
+      "bytes": 6531,
+      "sha256": "033f72c59396011f4fa105cbbd8b8da5ae3a909d08e7f3b13bf689104a2987e5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.AMZN/2026.csv.gz",
+      "bytes": 6046,
+      "sha256": "862fde3103b09635bc0763abe81a82763c935476363154b04b1d971cde035fdf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.ASML/2026.csv.gz",
+      "bytes": 6122,
+      "sha256": "a96562f3e86461ed6eed21f917e8e0a96ff6b16efdfdcd67ff60a3af72922487"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.AVGO/2026.csv.gz",
+      "bytes": 6183,
+      "sha256": "1ac75331499641872e486c89ef3816bf37f299de0d071c18809cff87fac1202f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.BE/2026.csv.gz",
+      "bytes": 5934,
+      "sha256": "bb0e70185401034f487b2d0178d9c0122900ef7c5a8e439f3d3cce536632676f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.BRK.B/2026.csv.gz",
+      "bytes": 5734,
+      "sha256": "0fe83b0ca7f6005a6a91cd75390d69bb4b5caf5a70c3cf856498b7a202a5163c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.CAT/2026.csv.gz",
+      "bytes": 5922,
+      "sha256": "5c3c10b42fd672d6403996f874a394b44101c542956e8b851f3d1bb3b7dcf840"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.CRM/2026.csv.gz",
+      "bytes": 5633,
+      "sha256": "1f77e9175aa937fea086696fd009842063a8213e75e8791d9dbda6389376e777"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.CRWD/2026.csv.gz",
+      "bytes": 5947,
+      "sha256": "9e2d2b0a44de28e2194cacd30299c94abbbb5baa11fb339dfc830d32022a89c8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.CRWV/2026.csv.gz",
+      "bytes": 5701,
+      "sha256": "a58d2fd8a6447a5fce6029a5c232aaf39fa5eec19b65f441fb4952894fb39710"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.DELL/2026.csv.gz",
+      "bytes": 6016,
+      "sha256": "29df146315e80129267f6aa521db0752dc27b6ee99977b2a719a1b62eb062f01"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.GEV/2026.csv.gz",
+      "bytes": 6071,
+      "sha256": "9f4a923dff02814379669279c5541b2941d5b3331d5b3c7f4b15e2038cce2383"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.GOOGL/2026.csv.gz",
+      "bytes": 6016,
+      "sha256": "96b4c156c933a238af1d8ab666c7b36dd637a129cdf25ca1976b8b1c53d9527a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.INTC/2026.csv.gz",
+      "bytes": 5746,
+      "sha256": "0f2259dddcdc60c6a5876a41cd48406ee2fb91628a399146eb3feb90b7f16907"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.IWM/2020.csv.gz",
+      "bytes": 72746,
+      "sha256": "558f1a4194369072e28e4c56005c872439ab2129049f39b01935a2083f564346"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.IWM/2021.csv.gz",
+      "bytes": 448488,
+      "sha256": "ff4ad534a6250c8e827678afa0eda0d557c5c3248eb21a98f882260234023964"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.IWM/2022.csv.gz",
+      "bytes": 445734,
+      "sha256": "10cd0f73a458970f4d31b81061d8ddea3779e79de9eaf0d24e41efd6a251c0bf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.IWM/2023.csv.gz",
+      "bytes": 440085,
+      "sha256": "13256b5a38a6002780cd4f49e12697b962d716c1b4d08bfc4bfeab02a429bbf5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.IWM/2024.csv.gz",
+      "bytes": 446691,
+      "sha256": "310d2f713f0aa7fb1bc4c5e130a43159582317e02eca192b1722b6d59e2a9707"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.IWM/2025.csv.gz",
+      "bytes": 446628,
+      "sha256": "2feaff665b60d2b4e61dacf04c14c016f722a4b40abb28e9c00f634a30decff5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.IWM/2026.csv.gz",
+      "bytes": 402640,
+      "sha256": "22b4c2e7f5084d51e2e7442f922103142abaa8ff4c05fbaa6b75ca0a979a2b2a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.LITE/2026.csv.gz",
+      "bytes": 6127,
+      "sha256": "05e366f2dbc0f61e563bc965d144bbbc5ed1541f9e1091ccc891c8f23f2d0655"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.LLY/2026.csv.gz",
+      "bytes": 5996,
+      "sha256": "812185dd2293e8b296e080fb386742a1d80f75291ca28aa01c2dfff437e9d095"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.MDLN/2026.csv.gz",
+      "bytes": 5041,
+      "sha256": "1225fdecc69a430f80c4f80d826bdb9ca0b32d0d6e963e4b7fab1742d28f5f7f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.META/2026.csv.gz",
+      "bytes": 6063,
+      "sha256": "3393f7985b3be6ad9250839c832de2d7edf14cd367e9bee735b9ff0ca1263770"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.MRVL/2026.csv.gz",
+      "bytes": 5964,
+      "sha256": "24dd61e710efa147c0e091a1688d1c0a7ce97213e2c5967354107ada9e81984b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.MSFT/2026.csv.gz",
+      "bytes": 6015,
+      "sha256": "a4d9d9a10f6f30097d6c51928e6124a9a48cf7872addb427af9199f959b57123"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.MSTR/2026.csv.gz",
+      "bytes": 5711,
+      "sha256": "23453400825683b0cb07e70aee2777412e30208982f727cc9e9225cbf5e4c6ed"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.MU/2026.csv.gz",
+      "bytes": 6498,
+      "sha256": "bbd8998ecd704a570b45f943b5a20c911821bda3c745195cee897fe1010c4907"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.NBIS/2026.csv.gz",
+      "bytes": 5937,
+      "sha256": "b45fba0cd7c132e84edcbf52af8d1fe04e6765a66c6fce1832179b4c2b585ed4"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.NVDA/2026.csv.gz",
+      "bytes": 6217,
+      "sha256": "887e60f159442ec4bd56e26af7749dded2e387bdde9bbfff17f3d86e05bb9c23"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.PANW/2026.csv.gz",
+      "bytes": 6128,
+      "sha256": "1856c963dde740013060071461670c06c576ae05aea81d55b625e11efdbd47b1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.PLTR/2026.csv.gz",
+      "bytes": 5858,
+      "sha256": "ae1569cb9b14569f4ed0dfade793a50d08f65a3a6c4b7334861abfaac36dbf89"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.QQQ/2020.csv.gz",
+      "bytes": 75525,
+      "sha256": "0e9645c6c476aa902b0cc3d59262dfc164e60c35f3fb3aef75f468d66d761ead"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.QQQ/2021.csv.gz",
+      "bytes": 465402,
+      "sha256": "db1149a257234e2a3a14b9a85c9df1671a9371dbdbcfe5b82259b9f63a534ef1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.QQQ/2022.csv.gz",
+      "bytes": 479160,
+      "sha256": "d485ca13285c9a6aafca67c840ed7adbec51d7930d62805fabdae3d14b1afec1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.QQQ/2023.csv.gz",
+      "bytes": 467198,
+      "sha256": "d282228741ccc470dec2f146de003d6779a0b3e8878def457aeaaedad8f333f0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.QQQ/2024.csv.gz",
+      "bytes": 470255,
+      "sha256": "24507881ec632cec5ffc8bbbda5813ab2f2026ec17277f5e70618cda0dea9d48"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.QQQ/2025.csv.gz",
+      "bytes": 473286,
+      "sha256": "fc5ec3b4a6a6d18d5f2c590b1a397d11b407df30a8e080dc36c0eb9dd135ab63"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.QQQ/2026.csv.gz",
+      "bytes": 431322,
+      "sha256": "6966293ae3c4441ec495e3888aec4442f723f0eafbd77c04ad3d127a4f253c55"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.SKHY/2026.csv.gz",
+      "bytes": 5779,
+      "sha256": "6da9c03f9f234fd5a4f88c890e3e6e23ccd523da216bef73762c85ad71e34848"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.SNDK/2026.csv.gz",
+      "bytes": 6202,
+      "sha256": "f6b5ffa66afe93d187fb0461d7ce153db1caf7dff74fdd916906280fed15b868"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.SPCX/2026.csv.gz",
+      "bytes": 5979,
+      "sha256": "3938332fb4ea0b8bd5aecf3142a8e596e8c0fa3be769a5bf1401d026b6783424"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.STX/2026.csv.gz",
+      "bytes": 6186,
+      "sha256": "2ea79b379d14c20fdeb22dbab1651d48f3758775a9d34db2beeb3139e6ac9856"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.TGT/2026.csv.gz",
+      "bytes": 5464,
+      "sha256": "1150b73319ef1287df3398c6d7cb440ff4f8ec66a7f150ed9ed7c4283c8bc667"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.TJX/2026.csv.gz",
+      "bytes": 5396,
+      "sha256": "8cf01823421d35573c32cdbd0cc103d02c5a9fe9beb0b5299d7b2b8f5aec2fc8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.TSLA/2026.csv.gz",
+      "bytes": 6103,
+      "sha256": "62ad711047e85b0e535e5420cfab1ca12bf5684071a63a14123c51bbc13ca451"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.TSM/2026.csv.gz",
+      "bytes": 6056,
+      "sha256": "120dd20db14330e70ccaedc7bb72e41959f4324aace775ab7026089ee9239236"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.TTWO/2026.csv.gz",
+      "bytes": 5836,
+      "sha256": "ae8dbf7b34dee7a7e38ef1a64aa1c6837a3c762b01a7f913b6863cfcd9a2e93b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.UNH/2026.csv.gz",
+      "bytes": 6050,
+      "sha256": "ee876376ef40d7c297900ec1bdb5cf6a9a81bec501e218038d8c2ade1f0721a0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.V/2026.csv.gz",
+      "bytes": 5710,
+      "sha256": "41000e39a0145c8e3edb2a93a5fed566ba5fede86d73f994e3a3d2d5567d83ce"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k6/US.WMT/2026.csv.gz",
+      "bytes": 5511,
+      "sha256": "cf598006017c5241fc1cca63977aea95a6fc12e8fe8524e2807a63aba9425c2b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.SPY/2020.csv.gz",
+      "bytes": 8011,
+      "sha256": "3a3de102fbb8f1fbbb41f7f35b3ef28d005a5481ed36be9f3aed1ee0dfd27fd5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.SPY/2021.csv.gz",
+      "bytes": 47915,
+      "sha256": "86ce17a60211c0913232009193ae4f3e03759477c9f8fd43a262344098f59790"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.SPY/2022.csv.gz",
+      "bytes": 48898,
+      "sha256": "65a85f91d152571c664c7f9d5792a38662e0273fc8ec452d670fede311cac3ab"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.SPY/2023.csv.gz",
+      "bytes": 48140,
+      "sha256": "338ff5dab0b13dd839817e6ec7549d897a43278feb7206a31af875f268dd050a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.SPY/2024.csv.gz",
+      "bytes": 48149,
+      "sha256": "e821a5dd44eb67721682025f091d591e9dc5ce34a743baf625d7c669a400820b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.SPY/2025.csv.gz",
+      "bytes": 48403,
+      "sha256": "204c847868b5722383c0d79418a31a65a67264a9bb0a6ebd6de1231dc7d156dd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.SPY/2026.csv.gz",
+      "bytes": 43228,
+      "sha256": "ee1e24bf3760627affdcc2299890870e2a7718e814fdfe025b6df529005dc92b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLB/2020.csv.gz",
+      "bytes": 6894,
+      "sha256": "3deea1c1db31bde1a7cbf103a5117b963c97a68f9920bd21a2ed1be69c7ff16c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLB/2021.csv.gz",
+      "bytes": 41888,
+      "sha256": "b780e0d29842a7f1a492352923c94ff9ff32d159c4954b38be480f3f02279948"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLB/2022.csv.gz",
+      "bytes": 42043,
+      "sha256": "21277301c3d0d7992656774587adefcd4f516efdddbd64395f7ef039dd3c309f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLB/2023.csv.gz",
+      "bytes": 41242,
+      "sha256": "061c288579ff1f4ff10485d40e285db47e7e1a34d8977005394c3b812937abab"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLB/2024.csv.gz",
+      "bytes": 41212,
+      "sha256": "c9674192c3decbe9c833845f632c1dcd6bdf56e8257d48ced0f0fbdbb9b5cf6a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLB/2025.csv.gz",
+      "bytes": 41413,
+      "sha256": "ad14f876fe0a0f98ce923ccc2bd0a31843640bd596146c7528ada36d934eae3c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLB/2026.csv.gz",
+      "bytes": 37360,
+      "sha256": "46a4ee081e6dc3b9260deb4e29669e49f2cf5f28fcdce5d7ef838f29da30be6a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLC/2020.csv.gz",
+      "bytes": 6789,
+      "sha256": "e6f0cb1e82291868a3378ca0fd487c15e5bfc219657167041b5fd54878490646"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLC/2021.csv.gz",
+      "bytes": 41300,
+      "sha256": "c7aaf14566598f4fbd337deacfbe7f79d63fe58e41e139e9f1452b67cabd690c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLC/2022.csv.gz",
+      "bytes": 41774,
+      "sha256": "54381ee402c43c3a095316c40159c0ea82f67c2f64baa10c59e813623717c316"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLC/2023.csv.gz",
+      "bytes": 41345,
+      "sha256": "aff950bea24bd89e36146c9e88643ab295e242736fd3cea495f55a3967f233a7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLC/2024.csv.gz",
+      "bytes": 41603,
+      "sha256": "9f4ef096f0d19567a995c9a3224ce651ec16ae0f663b2487b4c0115c8261d42e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLC/2025.csv.gz",
+      "bytes": 42448,
+      "sha256": "56dda0a3ae8a3dc0d566245dd3d0dbddae98d18665b27989fd324bb3bf965d85"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLC/2026.csv.gz",
+      "bytes": 38358,
+      "sha256": "90e3c1e6c3d83086cd302df24e66fecf7ed7aa2d94a08417ee38add2f6d8dd21"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLE/2020.csv.gz",
+      "bytes": 7287,
+      "sha256": "f0ed720c0cbcf3ed923c1e6bdbe1c859bc033ddbb944ba20296ad9de5f21e483"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLE/2021.csv.gz",
+      "bytes": 43526,
+      "sha256": "362e154c88f280fbd5b14b4a3a968b67be5e0b915f8d9644de1a3f92b02b2e1c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLE/2022.csv.gz",
+      "bytes": 44468,
+      "sha256": "0bcf30b9437ff4d861d8f672ee0e2374a8968ccec66ed81f5e894623efce57f5"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLE/2023.csv.gz",
+      "bytes": 43274,
+      "sha256": "43f97bfc2a76e6a2f25d6f93d064ff489abf7d89d691a8df21824ab34a115c3e"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLE/2024.csv.gz",
+      "bytes": 43296,
+      "sha256": "18b805f591c19178a7bb19833d1e9c42687c862e6ff71c92cc1b3540d1765c7f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLE/2025.csv.gz",
+      "bytes": 42982,
+      "sha256": "fdc4371ca05356c3c65e22a2ab116b6508cecdd095e415fc65805bc2f237016a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLE/2026.csv.gz",
+      "bytes": 39318,
+      "sha256": "debb39655c45f730cf78a30caab60724c34a51da807c793574a70d53a9582a01"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLF/2020.csv.gz",
+      "bytes": 7059,
+      "sha256": "96d0f4c04d8b0f2f560a9ab5c06b64c8fa84e0de92764b08c6958192d7e288aa"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLF/2021.csv.gz",
+      "bytes": 42460,
+      "sha256": "20d7e44e8149400cc9284718533a9201f1c5486de10d55b45e6e3dda0b3aeff8"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLF/2022.csv.gz",
+      "bytes": 42894,
+      "sha256": "1b27c9230c395385b8c4794290ff071baaba654bea6c443f7bfc319cd2d55f29"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLF/2023.csv.gz",
+      "bytes": 41821,
+      "sha256": "0d712cd16c56d6e657b3ba6be4852505599aee37c30faecf4ec1858607b2f313"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLF/2024.csv.gz",
+      "bytes": 42465,
+      "sha256": "eb11ca0120c4b572f9b499bc0bf6b2a3e48bc2da8d594a3f7b65ba36091e0eee"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLF/2025.csv.gz",
+      "bytes": 42643,
+      "sha256": "5648c364638d44bc8267c260bd066bc1702261ee1e3d99478dfe2b4f9572c0ba"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLF/2026.csv.gz",
+      "bytes": 38356,
+      "sha256": "8b7fb26ab047e7aa582c9a23d672e1e1e65956d5a7db466a5d86f8fd4a0eefaf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLI/2020.csv.gz",
+      "bytes": 7079,
+      "sha256": "80a1cf078e8f93e8ad439f8ac8e8eae906ef061a53d0ff17862b43a98565e894"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLI/2021.csv.gz",
+      "bytes": 42773,
+      "sha256": "2cee3476c0f20855598dc3c82b89fd739d9fa9cad2f7759cd1acc64fe6c72029"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLI/2022.csv.gz",
+      "bytes": 42836,
+      "sha256": "23570a8de7bf6a5b3f0d83c77ea41ba17b5d14bd14f17d6b8af3ae2f097aba5c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLI/2023.csv.gz",
+      "bytes": 42594,
+      "sha256": "cd7a3b0c29cd610b0a6e33e4dc9fbf7f6ab784004aee49350657a5cfabb7f561"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLI/2024.csv.gz",
+      "bytes": 43355,
+      "sha256": "b9627bb4f9c06fd322756ea3983477de2efd6bb0d72d0833a84f1bd91ffa3f47"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLI/2025.csv.gz",
+      "bytes": 43346,
+      "sha256": "b43246ca2a8719120696ec2401ed8d592dc26839e42eafd216704a286a24a138"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLI/2026.csv.gz",
+      "bytes": 39465,
+      "sha256": "c02c7172da687135e2fa4cf5c5e34eee11b0078f4812d8bd49672c0cd56ce190"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLK/2020.csv.gz",
+      "bytes": 7323,
+      "sha256": "f6044387191f6f3f8d1bc3c997655dccc5c6d6e2edbaad3aee48919a56937150"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLK/2021.csv.gz",
+      "bytes": 43844,
+      "sha256": "a4c3674bf961b56e077a519728b1c4d037a05e4f1fb84ed2889db20aa42b225d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLK/2022.csv.gz",
+      "bytes": 44372,
+      "sha256": "cedbf6215baec4ba50c3d055875ff73054d817611f9c35abe52346f6f1f65892"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLK/2023.csv.gz",
+      "bytes": 43676,
+      "sha256": "57b61197e0b71ffb64a124ca6cf3ae4dd5d23bd86a02ab5a6568985458ad8995"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLK/2024.csv.gz",
+      "bytes": 44323,
+      "sha256": "e1e424acace6939cfde426b30c4894013797bf777d767c99c67a2c819997539c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLK/2025.csv.gz",
+      "bytes": 45042,
+      "sha256": "e67832c11d1d945bf0dfce57ca07a0b63f0d7e5538f2b135116cde0897d844af"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLK/2026.csv.gz",
+      "bytes": 40479,
+      "sha256": "0d4bd8da767128e74ac45bd3a8204e8af353c5400bfe0ddc24a3aa65e75e77f1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLP/2020.csv.gz",
+      "bytes": 6876,
+      "sha256": "9826ddee0c1a16327ad8a4e5c55437358336c4e1d539900286e7153fdaea08fd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLP/2021.csv.gz",
+      "bytes": 41435,
+      "sha256": "6956847cbc30410d59947fbb0411e3fc5788cb30755efaee3e35cc564e7a105f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLP/2022.csv.gz",
+      "bytes": 42187,
+      "sha256": "03c43c3f0549a6a2f0f32116188ae42ca9cac2b73ca82bd3677ff194a2f134e3"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLP/2023.csv.gz",
+      "bytes": 41508,
+      "sha256": "deebebb3175ddc008ea2a360c0e479dc86b77f67d88d19173869bafcf6919d87"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLP/2024.csv.gz",
+      "bytes": 41614,
+      "sha256": "8190b834029674cf7af6d5cda76ad1596ca4ecf5cd2f88dd557b21ec482663d1"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLP/2025.csv.gz",
+      "bytes": 41626,
+      "sha256": "0057eb46b74f88047dac71dbfbb990e6a01cf30fee81da063ee7cde65c22f3fb"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLP/2026.csv.gz",
+      "bytes": 38239,
+      "sha256": "4d64d99fb42e0eadacd60bac5dedbc85ff01a0543f436195dc9b9b0670b8699f"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLRE/2020.csv.gz",
+      "bytes": 6651,
+      "sha256": "5b3f02a6e4dc507f7fee1ce45a96007c3eaa78864851832232235ce740197cc0"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLRE/2021.csv.gz",
+      "bytes": 40480,
+      "sha256": "25119a81ffefcbdbd34e68a6e33db639aaf505e637aa8e8b8ba4b65c51f6dfaf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLRE/2022.csv.gz",
+      "bytes": 41141,
+      "sha256": "6a0231c5bf9fe44c006dcfe3c04c890412f47ac2f07ee9f00da516d42b88a46a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLRE/2023.csv.gz",
+      "bytes": 40562,
+      "sha256": "e20a05449f79e3f064eb0e90ae60aa5a8489eeb3fadd51dba70403c3f3e457cf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLRE/2024.csv.gz",
+      "bytes": 41005,
+      "sha256": "4e7466bcbc2e598fd79f1b8795a619187d5351ea5f37a8ee13104931073c4a64"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLRE/2025.csv.gz",
+      "bytes": 40088,
+      "sha256": "63974254c4340ac8ac142f782e787c43bb305eceafdba470c13ed65878ab6640"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLRE/2026.csv.gz",
+      "bytes": 36570,
+      "sha256": "2e7f1a3c1b96309d28564223b3f45d4865f3759240bdad3b062b6e734f36e7a7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLU/2020.csv.gz",
+      "bytes": 7042,
+      "sha256": "ec7edc0e678a0569cd7bdd349376a7cc03aea0442a67e3ee9368a34120816b56"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLU/2021.csv.gz",
+      "bytes": 41841,
+      "sha256": "c9567bfdc1f4e68cb6c413636702c01b139cc6671e6f953952496bbb4d861bcf"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLU/2022.csv.gz",
+      "bytes": 42819,
+      "sha256": "58b69efc3f990127e701e58d16f2ff300886eff1ecbc1ba62ba2d84639069381"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLU/2023.csv.gz",
+      "bytes": 42017,
+      "sha256": "562d1eebde51de68da78ed28f0959aece1537fd9bffd70852e6baefa66629cae"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLU/2024.csv.gz",
+      "bytes": 42550,
+      "sha256": "707bed417a9d75a974e05978e83055a7aacc9d90e89513e1805bbbc2b3f092c7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLU/2025.csv.gz",
+      "bytes": 42212,
+      "sha256": "245ad84a9741d5d9b594bd0a741755829cd30afcfede973b32b13cf775d31301"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLU/2026.csv.gz",
+      "bytes": 37928,
+      "sha256": "78172fc8f9a78f9fe16fcee8ed95c41ebb159f8bf14316aa6e7cdb5eba36e6cd"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLV/2020.csv.gz",
+      "bytes": 7127,
+      "sha256": "fcec0656e9ef19c56e5c1fd8e4b2afb8e31981c12c24c47b36cc2e70c250a0fa"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLV/2021.csv.gz",
+      "bytes": 43202,
+      "sha256": "1a45ee1f3874d85093a557a31535f2d031611ade63c61fa0a7387d6c6911ecf7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLV/2022.csv.gz",
+      "bytes": 43401,
+      "sha256": "a1a1dda6282b8a4df7fa6ef13523dbdcde78811adc91a0ec2c87793a3f8332a2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLV/2023.csv.gz",
+      "bytes": 42855,
+      "sha256": "58dfac30827bfd6db432177b665e42744cd7ccfe7fe7976bee91bd7c24854ab7"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLV/2024.csv.gz",
+      "bytes": 43241,
+      "sha256": "fecebec940726230b849c4519b4529b68b37b6dbc850f497982728ba3e7ae87b"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLV/2025.csv.gz",
+      "bytes": 43639,
+      "sha256": "756a0e3b45537ddd3b5ef13778846163c66ab35d47e483426177ddf46fb67c4c"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLV/2026.csv.gz",
+      "bytes": 39849,
+      "sha256": "c2f8422ac881b316a25240edda2a61c65d8a415ae89dd9ad0244e18135371a68"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLY/2020.csv.gz",
+      "bytes": 7105,
+      "sha256": "48e666be987acc087902aa7c8f983cacc9ec3f5bb60b26f1e53b8947129623d2"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLY/2021.csv.gz",
+      "bytes": 43367,
+      "sha256": "856f72b46299dd33bb0731309f6709b17a0ff88575bbb4fc6e6dd98636da056d"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLY/2022.csv.gz",
+      "bytes": 44323,
+      "sha256": "cffef07bc3809497e6251d9e291169eca5bd20f86a43f0fe2747e50ee25d0f88"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLY/2023.csv.gz",
+      "bytes": 43194,
+      "sha256": "8e08ed6e0c6beab67d42e138b2c7a4d2dc48740d03cecdf0aec1189d736f5414"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLY/2024.csv.gz",
+      "bytes": 43134,
+      "sha256": "501737a3c05e724a04581f135c0d9b9dfb3ffdfa822d5cbaebfb85896d501994"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLY/2025.csv.gz",
+      "bytes": 43933,
+      "sha256": "0eb0921b2c761dabd428ee0e668918ead329ef02a1f449189c1469ca60e12c8a"
+    },
+    {
+      "path": "moomoo-dual-strategy/data-cache/regime_extra/k9/US.XLY/2026.csv.gz",
+      "bytes": 38791,
+      "sha256": "04f230a961233e7a141ec56c8a01ef1ea9a1cbf2a3e55d45934c6039a18575ba"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/broker-reject-probe.json",
+      "bytes": 2408,
+      "sha256": "6277e6c0f4cad44d65de2b5a69c6e42960c55901fb0101e066978d61455f8fc0"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/capabilities.json",
+      "bytes": 1876,
+      "sha256": "ce078ed20cac486d367248e193eb02f63324e57db0ece9fec409a3fba545d109"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/cloud-reporter-run.json",
+      "bytes": 6535,
+      "sha256": "a56e5b12931ba610a9c023756dd49cc97f00933f7b6fac9c915eb18651482a29"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/competition-dashboard-492px.png",
+      "bytes": 183501,
+      "sha256": "74fe3343bd9823487ad4cdf1d66fc201fa06823898594ed7f567300aa7e75943"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/competition-dashboard.png",
+      "bytes": 232237,
+      "sha256": "dfa760b128963e9db9473208a8e9a65839e186866c1b1a5151a07889ee98be9c"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/dashboard-full.png",
+      "bytes": 432423,
+      "sha256": "f53ff01db7e229fb44b023c86ba5934193d9851f3f3080be4456b2626fd2537a"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/dashboard-mobile.png",
+      "bytes": 146634,
+      "sha256": "2d557adff3f6a099e28b7a4527e4d731515b7e2aaec7b277ec29e3eda3fdb06c"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/dashboard-qa.json",
+      "bytes": 3080,
+      "sha256": "6e8ddb71dd02c25144ac33e16cb485ce674ca1815135c121c228f43a46ebff87"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/dashboard.png",
+      "bytes": 326998,
+      "sha256": "ed60096152afcdd69460db58e85e884d0a0ed4ee106294e1096d71db1d8c97ce"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/data_manifest.json",
+      "bytes": 58997,
+      "sha256": "589a53d3817f9ac29dfe43a6198096e34ade88816a980493af0f4d7491f2c17c"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/forward-browser-qa.json",
+      "bytes": 1971,
+      "sha256": "11fef4c96c13233de768ab794b9c2c97c4f99412d65c394b56d86ee4ae9ba557"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/forward-recorded-qa.json",
+      "bytes": 7083,
+      "sha256": "ef8b159353c69a041d84136b0d6987ec617720df57859c95c0edadb62a6f8e69"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/practice-lifecycle-cli.json",
+      "bytes": 2064,
+      "sha256": "1eb88b3df0faf837a709bb355f15686b95cf30a3c245d4908e1565d2fb3996d2"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/practice-lifecycle.json",
+      "bytes": 4872,
+      "sha256": "63c6feabaffc9d7ce7635a728db11891314390d3c728adf04aab4a446ed16dbd"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/research/rank_turnover_US_2026-11-18.json",
+      "bytes": 16149,
+      "sha256": "a9295b787bcdade7f6d7e6da7e5ffdfc92d0cef2dc7feb8d22fcb9d0e689ff45"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/sentinel-cli-run.json",
+      "bytes": 1506,
+      "sha256": "eb47d2baf42afba7d865d0c0866072038757476329623379f7947964c9ec8fe9"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/supervised-b-decisions.json",
+      "bytes": 2073,
+      "sha256": "b7ea16f0ab834a6f12ebc81f344db8129578ce06a23efb084019ff201ee5a7b9"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/supervised-dashboard-live.png",
+      "bytes": 317941,
+      "sha256": "3f60c512eb8587062d135568ae03707fdb820d505ddd67cfb6a72b1ec711cc6e"
+    },
+    {
+      "path": "moomoo-dual-strategy/evidence/test-results.txt",
+      "bytes": 2072,
+      "sha256": "921031ec3dd6423b3d61ee9a4f66d12fa71da4b4a9ac067fe9af5bb57e3e4679"
+    },
+    {
+      "path": "moomoo-dual-strategy/pyproject.toml",
+      "bytes": 685,
+      "sha256": "7d1db0e1a8651a6109467cd6d6f22b59d24d3b0421a138bf8f169fa2dadfc4d4"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf",
+      "bytes": 296509,
+      "sha256": "7cc8fd403159fbf45563117e63e37ac277d26f28eb6266fb1b709df9ddd7d76d"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pptx",
+      "bytes": 203260,
+      "sha256": "0b8459b6a0e963da470631717fe49ecb252e3b0d8b4281fc10165ec393b719b5"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
+      "bytes": 276913,
+      "sha256": "e9c8984030e35ea519ca7e9111f26bdb963e97f768b6358209e47dfd404e59be"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
+      "bytes": 277680,
+      "sha256": "1cb19bb7f329180e98d34b3fc6db3ad3681c24bfe1adff79ce206ac9f82c166e"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md",
+      "bytes": 3177,
+      "sha256": "ad128ad2228ccd8e839708b4c522bbe9b51d2d5b048656f0cb737eeb8d64b18a"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/backtest_preview.json",
+      "bytes": 156501,
+      "sha256": "53cb5ea5dddbbb4c4ed82fd3471cc66d13b0a55345087e215310f18286a6bccf"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/dist/index.html",
+      "bytes": 276913,
+      "sha256": "e9c8984030e35ea519ca7e9111f26bdb963e97f768b6358209e47dfd404e59be"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/exit_backtest/fees_only.json",
+      "bytes": 22580,
+      "sha256": "296f1617ac4b07179ad3bcf6bb6898603f6affadc0833e0a47306f72429244fd"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/exit_backtest/research_costs.json",
+      "bytes": 22658,
+      "sha256": "b417cce1b5de509072405589b2fb1a7116a53dcfdb8ef54d73131b1e096b7dbb"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/exit_backtest/votes3.json",
+      "bytes": 7494,
+      "sha256": "cbb3feba7bf429042c7fca24c14d12bc03438191e420b62a0d30d2010422599b"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/parity_regime.json",
+      "bytes": 899,
+      "sha256": "0583e2e196e328200b759b3422c7f9783b4c245caad05ccfcc11617ed6176928"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/refresh_html.py",
+      "bytes": 12053,
+      "sha256": "440a75a63c66f37017bb0d2bef03abc8ed2cd975fa537ee60ad4626849871517"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/backtest_expectancy.png",
+      "bytes": 34254,
+      "sha256": "89dd7201cedf9c8b6be8bd089694ccb8b7aa247799784857059318fda74547f7"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/backtest_expectancy.svg",
+      "bytes": 3997,
+      "sha256": "3f42bb5f21ac8ff28c86b9cf2a173d733b108db4a8443a2adcf44dd1ea6c72f7"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.csv",
+      "bytes": 14401,
+      "sha256": "33bc7647041394e87ce611e97ae00ec92b42da08faa690b7e51a900687fdf85b"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.json",
+      "bytes": 1860,
+      "sha256": "c57afd673af7be3805fb412f64b5d4dfdf5de229eb8d25697ddd20d9ec5904af"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/cloud_audit_runs.json",
+      "bytes": 2621,
+      "sha256": "12b218e228b21707267eb512add4424c20ce378ededc6508e3eefc94a72ee2ce"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/dashboard-current.png",
+      "bytes": 599198,
+      "sha256": "a66087280ceedcd467289546bf3a512a7e8260200a1196e05414b6a7b230b71e"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/dashboard-viewport.png",
+      "bytes": 87421,
+      "sha256": "43018204c75a2033dcdf2a5d9eed889c57b0b9c7deee7823c4fa8a63fcdc1086"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/drawdown_curve.png",
+      "bytes": 30283,
+      "sha256": "e576165256e44dc2a52c9fa3a30f3f291b7efe60af82064498f09ebe9d13267c"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/drawdown_curve.svg",
+      "bytes": 37684,
+      "sha256": "27c0947325553043720fc3f4345980a91bf403a62a750546ae5f1dc2b7a55f19"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/equity_curve.png",
+      "bytes": 39517,
+      "sha256": "e9d04f3fa54e1dcece0400781b4f563d921d8ad2911d6a503838e399baf864cd"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/equity_curve.svg",
+      "bytes": 74117,
+      "sha256": "9e58eed67666b938d995f96b4681e98e1d26887bce3018ddc51d19e06d8f3223"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/html-report-desktop.png",
+      "bytes": 218653,
+      "sha256": "09e9ef8507df6a4a3d5b58d932f28e0a94ad2ce099f670bbdc12920c7a7b9157"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-badge.png",
+      "bytes": 64543,
+      "sha256": "8658add3d0b0e6cf644f7a2eae9ba4273c44f57bc270f2a012b0b67e8a226779"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-mobile.png",
+      "bytes": 64328,
+      "sha256": "06be3d7d6a150312abebd6adc31065ce53254be17de891970c6fcd98ea641e99"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/html-report-mobile.png",
+      "bytes": 64328,
+      "sha256": "06be3d7d6a150312abebd6adc31065ce53254be17de891970c6fcd98ea641e99"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/html-report-viewport.png",
+      "bytes": 39342,
+      "sha256": "0f2906e45114144b82b03c20e795846bd339aa5f1c36bd75793bb31db9266fd3"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/html_report_qa.json",
+      "bytes": 1926,
+      "sha256": "1708bc641f6ffc8e919f8ee983de19aa4d427770ba0ef676bfbbc1fd84123a64"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.json",
+      "bytes": 1290,
+      "sha256": "669607f38714ccbe4ce20afe06924c8bfd86140445455dca6879c608413ed453"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md",
+      "bytes": 3964,
+      "sha256": "492484e20cc5c2aa19b6853524d648dfc7b82ee10dc5702680d9820fddef55dd"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md",
+      "bytes": 2948,
+      "sha256": "4c5f5ff9d3db83e4ed821517d4bd7f3915975ed5654807ac10f9247e35492e04"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/peer_evidence_manifest.json",
+      "bytes": 5467,
+      "sha256": "21c1faa20cb48f89891bedc2ee1d24de121ff890b421ac4f86ba80d986335da7"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/public-site-live.png",
+      "bytes": 116963,
+      "sha256": "a6b187b0d21bde123003f35641f4e193502ba25ed1f8b9a07d2975fcd6b6ff94"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_decision_log.csv",
+      "bytes": 30099,
+      "sha256": "dacb7e7eff003ef9a865cd38b17c03dde432b524e55091136616c9865b7440fd"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_equity.csv",
+      "bytes": 212888,
+      "sha256": "83fbce46b0298bdebf3e225af067646e1753885cb7576f9d6ee625ba23c2ee30"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_form_manifest.json",
+      "bytes": 5948,
+      "sha256": "225728a3559bde627f71e0fae6c5c383ea2cf2a6dd610b7af886fe1e50f5f80c"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_results.json",
+      "bytes": 4827,
+      "sha256": "00a114d938db042b9d4599b16be05bd3ef4af24150136335adeaa987c408b935"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_trade_log.csv",
+      "bytes": 6933,
+      "sha256": "47389d03c8380037045ed301cfa93d86e9681ff0193ca2e4f910e0678588e6f4"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/vote_replay.json",
+      "bytes": 5044,
+      "sha256": "a6245a9a0927d6bdb8db88ab35ce6de6fad1b928d49438a0161905352bd4b310"
+    },
+    {
+      "path": "moomoo-dual-strategy/requirements.lock",
+      "bytes": 257,
+      "sha256": "e685a34f6159ae2597eec6ecc74f0f2222284112103c4188d616eac08bfd9bed"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/competition_exit_backtest.py",
+      "bytes": 12109,
+      "sha256": "3fedfe62bdd956ed561b565a3146f1b092e84c3c30084274942ad7597a053e99"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/competition_parity.py",
+      "bytes": 5206,
+      "sha256": "76b09d7ec8a03b5af69d9ccbb893d82774d9394286dce0a554788f24569aa1e9"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/competition_parity_regime.py",
+      "bytes": 13839,
+      "sha256": "bf3c09b92cb11378f97f494f49c26738a90bfa2bfa51dc2f11eb2f4cd210391b"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/competition_preview.py",
+      "bytes": 4906,
+      "sha256": "4942258584367331e573536e35297bd84e62e2f31d265cfb3debbae9f0eaf59a"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/competition_vote_monitor.py",
+      "bytes": 1536,
+      "sha256": "67660a52e1db348e1a52075618f15fc29d2a463218b3366cae8889f078385b0e"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/competition_vote_replay.py",
+      "bytes": 13267,
+      "sha256": "55bbbd7d267ed49c37ce42c427518aa5da46db883140a338f6978ff78faeebc9"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/run_competition.py",
+      "bytes": 70339,
+      "sha256": "dc10e75313ef010341a0b716a024164f3737ce149836c3ebe1f596a9389bf2b8"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/run_sentinel_cli.py",
+      "bytes": 2737,
+      "sha256": "299ff6a1ab19a6d3f2d7bbf09908e3a71ce7308ee693dad88c54f2d7cc2d7f0d"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/run_supervised_b.py",
+      "bytes": 10276,
+      "sha256": "6e01c75bf7ff1d42200c8571e22097a7fcd2e2e8c3abd75f351ce6faaeccf4e4"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/schedule_competition.py",
+      "bytes": 17041,
+      "sha256": "13cf0d651db53c08553e28c6dbf292abac5ff06e71627a25e4f8e5638bccf588"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/supervised_b_signal.py",
+      "bytes": 4101,
+      "sha256": "e42a5d45ba46392ba9ab3a933988dad5852b42cf21d1999b590a2ceb0fb09c0d"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/supervised_lifecycle.py",
+      "bytes": 8273,
+      "sha256": "636370b678f5bf7c75a8e7fcc5c1d4ee951b7685244413e3434232374a442c69"
+    },
+    {
+      "path": "moomoo-dual-strategy/scripts/supervised_lifecycle_cli.py",
+      "bytes": 6579,
+      "sha256": "a4e72da5447384b05fadb7c88bc2bde019ad29f69af964784ee01cde12b2fbbd"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/__init__.py",
+      "bytes": 22,
+      "sha256": "91447944015cec709e8aa7655f7e9d64e1e4508e7023a57fe3746911c0fc6fed"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/agents/roles.yaml",
+      "bytes": 5093,
+      "sha256": "a89a1d3ee58af0d5a0468cb3c59d738eb3168414fcdf696fecec4981cd36ef11"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/agents/specs.py",
+      "bytes": 14930,
+      "sha256": "eaf2e680c7451dc75008279bb7faae606277b67235dff583c54d85b0653b1e9f"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/backtest/__init__.py",
+      "bytes": 155,
+      "sha256": "d9109076b4f99a8fa818f0b0144d58903cb6b9eb5eb8ceaafb7fe0c7d3c20d77"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/backtest/__main__.py",
+      "bytes": 948,
+      "sha256": "95e8477de7b0201a8fe1d27dba24aa1b987d8593673f26296aee642d656dd0bb"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/backtest/data.py",
+      "bytes": 9619,
+      "sha256": "1737cd6f287fc82b9eabd8a782aa869da4434cdf75914552a50f0ebd4287ab8b"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/backtest/execution.py",
+      "bytes": 12020,
+      "sha256": "952e388cb8687533664faf6fe04e7b88243b51f544d436bf01aeec18350c3a98"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/backtest/runner.py",
+      "bytes": 13149,
+      "sha256": "4a00e1f7f42bba79aba77b24dc36e273976bc5eb70119b6858a86f23fa110b86"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/backtest/simulation.py",
+      "bytes": 27734,
+      "sha256": "a0ccc3a2f9d6b8beea974f80d7ab59b9270eb40d46a2495f9f26ef18bf342534"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/cli.py",
+      "bytes": 8612,
+      "sha256": "a853323f4cb033b6d4a33825d8bb25460bb20cb40180e007868ea92429b46374"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/__init__.py",
+      "bytes": 95,
+      "sha256": "dbec7a1dce17e8ab071062186281b8e91a1a5d24c8a3a4b2b02dad901334a76e"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/broker.py",
+      "bytes": 15392,
+      "sha256": "21e2375ad710adff28f9a1e78b3feb3eb916edb72154478a328e20bf686e4799"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/intraday.py",
+      "bytes": 16291,
+      "sha256": "f560ff9f8f9e8dddaf149a9df43effab5eda5ac85ceb15fd33935bc83f0590ce"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/market.py",
+      "bytes": 8353,
+      "sha256": "8e38281b8197ee3f659a3b20ea0eb855f46b7bf211294aaa11dc01889e2c46f5"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/observation.py",
+      "bytes": 3344,
+      "sha256": "7f623d9aa56016e4710c912d81f66c5807e8e04ef6c8b3810f9fe90f17050361"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/planner.py",
+      "bytes": 35869,
+      "sha256": "7a57de336fdfbfe5678488820dd6507a6af06846132f0565a354cfa6389e4b2f"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/report.py",
+      "bytes": 29084,
+      "sha256": "470d842bac3447dd292a12ee6cba494ffe62e4a024feb29286b655e308887238"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/signals.py",
+      "bytes": 8245,
+      "sha256": "8a1f92290ade6d337a00c773c1ac339488a038e0ba6da4e27874908e0b5c3feb"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/store.py",
+      "bytes": 17644,
+      "sha256": "561ce3c310cad6a41ba5a87abb85a3337d73e8bc11148537ab71d819a1acc4e9"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/vote_live.py",
+      "bytes": 5785,
+      "sha256": "eaf7cd615b8dd719404e9e4e3dd0dec3dc354b1764323df4f257580c4d7e78eb"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/competition/vote_rules.py",
+      "bytes": 4406,
+      "sha256": "7e93af4f9a959ae47a716bd31ac99ccb76b7d0335579dcfb8b3aa36b7dbefe13"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/app.js",
+      "bytes": 27953,
+      "sha256": "00fc7e8ac7198357fba66fd4c6bb464292931de33f79a727bfc7c3effcd34f6a"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/backtest.css",
+      "bytes": 6983,
+      "sha256": "b7fab9e73233cba253151b5c95354943ccfe7f1f78500d0014d91912093120fa"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/backtest.html",
+      "bytes": 5909,
+      "sha256": "51c81973787f3406546530d31e0e41d35273a475511fe6da5c11f7f4d4027cde"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/backtest.js",
+      "bytes": 23080,
+      "sha256": "b5c514f7453ece7fe9c88d27e7bc1d6fa131095375a9c4ca198d3b90ff62174b"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/competition.css",
+      "bytes": 7777,
+      "sha256": "aad790914bf9cbe720fd01fa145d571f5cd012219836baad2dedabcaeac17397"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/competition.html",
+      "bytes": 12636,
+      "sha256": "4259f32a3a70f3c115cb17b1c2a7a07bf97a28239a021d1513e6bddb34e32346"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/competition.js",
+      "bytes": 54657,
+      "sha256": "b24e26b2b6d1cc66c5fec5e21eb0fa7a9d901744daaa23f2b8938ca93e36a201"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/index.html",
+      "bytes": 7170,
+      "sha256": "0a6abbba15e4956344ae0795cd064e0221f94527aabad36f8d9c28237b713dba"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/server.py",
+      "bytes": 8864,
+      "sha256": "0aa23cc80a8637eaace591f6e283caee7ca38986f08472edb90940c7a298128d"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/dashboard/style.css",
+      "bytes": 15496,
+      "sha256": "e83d7b5b59e8ca2961cf696d85bfc7caa7d784227c3c9e2b86a7be32380206b6"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/data/calendar.py",
+      "bytes": 3168,
+      "sha256": "8c7633c0670c3f0522fe291f767b1f5e527bcefed8ec2855e073f3ea1953ec41"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/data/evidence.py",
+      "bytes": 10609,
+      "sha256": "fb32d4bb813a04c24574866679e4d60114cb27bcf615c948fd090e2f8291b819"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/data/ingest.py",
+      "bytes": 9031,
+      "sha256": "67adff3999e3698f9d8a8c3861fbcebb43e9da743baef5417edca5bad20d81a5"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/data/validation.py",
+      "bytes": 4388,
+      "sha256": "b9aca9cc9503db0dad370357cbe74e1c1a8324b215d4d6d9f70485c5504ac1d4"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/execution/audit.py",
+      "bytes": 12815,
+      "sha256": "3a623d4a0c8b2b685ed8d8ed13c879a818f0f285fcd0632ca4e7383ae5ffb272"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/execution/broker_history.py",
+      "bytes": 11294,
+      "sha256": "8698fc863d295ef043c637bab6350073f56595eaa8bbd4de6a5afba942d0dc1e"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/execution/moomoo_cli.py",
+      "bytes": 9056,
+      "sha256": "8a8ec0eafb4a07382c7873eb873703f5515a892db70e9749a35e07d9eafa1331"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/execution/moomoo_paper.py",
+      "bytes": 9762,
+      "sha256": "02abfd6231925e306e67cd0629f0663623d768d8268e02a428c5ac857e9f2408"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/execution/reconciliation.py",
+      "bytes": 8996,
+      "sha256": "a2b75edb2b471d39703aaf2520ba5ac7a8e9c4208253cecf43c3e6df5f35c597"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/forward.py",
+      "bytes": 18220,
+      "sha256": "125a6f2f3ab4db44aec9de0961b3ddabd4d6ec899ea91cb5da59c7e4a5c51ef8"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/models.py",
+      "bytes": 2860,
+      "sha256": "4c6e6533b81b5507a6a35b99d9b72799ebf70601d46969c2a81503d738e413e6"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/portfolio/ledger.py",
+      "bytes": 14293,
+      "sha256": "d34f39aeebebdb017ad4f94ff9bd39d9401cae270b3d2c688ded9a3ab7f85a12"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/portfolio/runtime.py",
+      "bytes": 5728,
+      "sha256": "a2a66b4f0cb415be57b6080904188b28b1bc3ba2d288360516de1e2bb7653d20"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/reporting/metrics.py",
+      "bytes": 2437,
+      "sha256": "fd45f403f00371d2e8eee84ea36c50c740d9002966c060fb8a7e6e242aadaa60"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/reporting/service.py",
+      "bytes": 10398,
+      "sha256": "d736283bc4849ac6efd5214ae38044005e1030992357758d2cb1b035315a1497"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/__init__.py",
+      "bytes": 97,
+      "sha256": "2495495ce42f77388b2710025b4ef879169082e99df38cba06d6ae96c526f869"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/book.py",
+      "bytes": 7199,
+      "sha256": "eaec101a62f64570fe2887ae730a2813159973b201a161489651e2f46356277c"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/data.py",
+      "bytes": 8461,
+      "sha256": "2265c2ac6c9aac12a4a48f948df37c5c1b6ca525631e214d396e417b640b25ef"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/etf.py",
+      "bytes": 1886,
+      "sha256": "3d3d8647bc52c81d56fbed854aa1ff14f904eec9208927b3522e3548f6c3fc65"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/execution.py",
+      "bytes": 4645,
+      "sha256": "a306ae2669ca2a8e985015f3872f4d4d93dcaf921b988da9c83ea834bc05417c"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/features.py",
+      "bytes": 4500,
+      "sha256": "f5e19e0ff036ef2716b342fa17a7a3565a64dee0db8e46b2f24503a25b265247"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/fetch.py",
+      "bytes": 8906,
+      "sha256": "d28dfeb42cc6b2f4b021f3bb4ec9d7960f777cadb1870ffb91d76fe84a22fe8a"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/metrics.py",
+      "bytes": 9284,
+      "sha256": "0858b96ea11aab07e5d411ee996b42f88514d365d9610307b8aa5efd198340e9"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/__init__.py",
+      "bytes": 227,
+      "sha256": "139e8e731c1277ea7fdf48fd93876eed213bffe7006c0710abaae572ebd6f0cf"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/chain.py",
+      "bytes": 2502,
+      "sha256": "8c969a2ce44f2ecefb98222acfa9dd902b91f8ade950397ea6922bcfabfe25e7"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/d_sentiment.py",
+      "bytes": 4672,
+      "sha256": "449f4d9d83aeb829bb5b35d0655830d52472fb3ff972621008cf120ccf4cd0c6"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/ef_study.py",
+      "bytes": 29636,
+      "sha256": "6af5812adabf1f8e20deffc622c673e29d3a6597ff1819e1797a8041195d9897"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/eod_backtest.py",
+      "bytes": 32508,
+      "sha256": "f94bdc65865f5085bde5e1b5d3459c77e7441bc801b9bc25e5394ff85fff12d0"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/gdelt_tone.py",
+      "bytes": 6614,
+      "sha256": "15d42a6983353556e19b40821ce4fc5b1145cf0d45cb424f2db35791063e51e4"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/montecarlo.py",
+      "bytes": 4016,
+      "sha256": "48c0491d63c5d99b2150e3a0c262a11fc49a275d3da87889d0104bf5ba5aca96"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/pricing.py",
+      "bytes": 5226,
+      "sha256": "36c2fff38693aa65b4deb6803e1646994cf052f5b250cbb43dc10f04d91ddc29"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/strat_d.py",
+      "bytes": 3040,
+      "sha256": "0fd40eae5e6ef42551060b1542fb4f39823c6f9b1284505c6ff88d4e69ff78d8"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/strat_e.py",
+      "bytes": 6657,
+      "sha256": "b4104f6e7b23c7a6e0292e8fad583648a727f637079e572686f48e9f1dac6ae7"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/strat_f.py",
+      "bytes": 4432,
+      "sha256": "d75ea656f29a22b4b497ed51bad14721185813d06e5578e0131f385f34a5179e"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/options/validate_chains.py",
+      "bytes": 9712,
+      "sha256": "3176e578f5fbdde6fdf6e38598b279644ffee2d1c88fff1321938c2f34437c86"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/portfolio.py",
+      "bytes": 1654,
+      "sha256": "ca68c32099957019b000f922d7aa62c8a71784b8521112bc1df0c2cd605e098b"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/report.py",
+      "bytes": 36214,
+      "sha256": "bb8277648856bb9c02415d9ee171cb6efcbf772de4429343227c831f54115c20"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/run.py",
+      "bytes": 16718,
+      "sha256": "109a70f81405e17b924037cae8645a86a6b79fff607a8a54ddea5da1ff50720c"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/sectors.py",
+      "bytes": 1791,
+      "sha256": "28f1c5ca421fbf5d8ec88b63938471945e16f362a6c8a8b50ee4748702d5c778"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/six.py",
+      "bytes": 21787,
+      "sha256": "a6587e8a69a5aa5a383401bfffeae6a576c98a0efa62206e8242b82b3b1d051d"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/strat_a.py",
+      "bytes": 11716,
+      "sha256": "2c359fc25d88afeb3e75719d33520a0830d2348d83cdaa77589282d5c24b1a40"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/strat_b.py",
+      "bytes": 5797,
+      "sha256": "f097060311a7be0c1d36e5fcd510fe611d684579e1b923eba9c577e87205e610"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/research/strat_c.py",
+      "bytes": 6906,
+      "sha256": "58df8ca4e095afd6951722d2a5a9d36037f286c242eefdf5bb8948a69344b87e"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/risk/gate.py",
+      "bytes": 15047,
+      "sha256": "2e20f330965d29ed76bffa87a4fe455e402ff5f2308646ec0bf2b6e5fbcdbeab"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/risk/sentinel.py",
+      "bytes": 21445,
+      "sha256": "d5f7140eb4431af11dd8a110290d1f45276a980d58e9327c15ee9ef96e1ca464"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/risk/sentinel_service.py",
+      "bytes": 11002,
+      "sha256": "5ea2b98e36d615d80a0ca31e7e65d4cb1f25cc57f75ad1a869b0827f9ce25b2a"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/risk/state_machine.py",
+      "bytes": 11886,
+      "sha256": "2396c8c088f8de49c72f3a7857b08a6de09d20b2e1bfe6003cce46aa5b98a259"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/strategies/noise_area.py",
+      "bytes": 10433,
+      "sha256": "3a9817bd07a62ac0ab6666e2abaf8291cd6f915b6b87ad71dba1a30139d20634"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/dual_strategy/strategies/orb.py",
+      "bytes": 9885,
+      "sha256": "5c6dea5783dc89606a17e2a89678bb5e96970297d7b7e76c36253699b45cb8d6"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/moomoo_dual_strategy.egg-info/PKG-INFO",
+      "bytes": 339,
+      "sha256": "58ced740c633c6963a25e2162e500b1b2898f007695f5363d443fbbeb8974122"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/moomoo_dual_strategy.egg-info/SOURCES.txt",
+      "bytes": 4083,
+      "sha256": "ac0ced64aa091f435d38d4d4dd878e17d09cec517c8ba61b9c82948339cafe0f"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/moomoo_dual_strategy.egg-info/dependency_links.txt",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/moomoo_dual_strategy.egg-info/entry_points.txt",
+      "bytes": 57,
+      "sha256": "45c14bafe50fc6abdf11fad1245ba0ac7020b07593aa2250e12a3dbc46db920a"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/moomoo_dual_strategy.egg-info/requires.txt",
+      "bytes": 82,
+      "sha256": "c13d3627d276ceb9cbdf1f88b84aaeb97340f266941a565d09742dcbb27b00a6"
+    },
+    {
+      "path": "moomoo-dual-strategy/src/moomoo_dual_strategy.egg-info/top_level.txt",
+      "bytes": 14,
+      "sha256": "dc7f68ff073b9be686e5fd87cce9739109958b6955b18db2f7bca725bc4ad04b"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_audit.py",
+      "bytes": 17684,
+      "sha256": "5b5f4e7f4f5cd441e80439a46ba3a6220b57fabb779afe7245744e826ac28fe7"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_backtest.py",
+      "bytes": 18865,
+      "sha256": "5ebe602b73a09d7264007e209086555e8c0bb19d9efa3001212e1821f6b2e1a0"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_broker_history.py",
+      "bytes": 22390,
+      "sha256": "bed6a42a642912688511dade5d837ba450d7936ca5d0cf4b791aca24d7a5dff9"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_calendar.py",
+      "bytes": 4371,
+      "sha256": "a5e0835a413d9bb4687cac78b0c9636c4f6641ad73a635a98d601c478ad1a2a8"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_cloud_specs.py",
+      "bytes": 11239,
+      "sha256": "8c7da675ec83eebeb3224235d1a78c182e66c05254bc25acb57d676d6d6ea554"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_competition.py",
+      "bytes": 42202,
+      "sha256": "0ffc6f2ac51b72fc2645998ce50c323c989ff8eafec6a2318231c84df66d63db"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_competition_five.py",
+      "bytes": 63777,
+      "sha256": "30eb8c828b0fd170d36a3933c02f4ee5704285c7e62ca2a7aa05b4e6ab2cabab"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_competition_scheduler.py",
+      "bytes": 21686,
+      "sha256": "32b3a3431c963ab5144f1f5f3a381ed7d06f6b4d857a9660ce84a2fd8b4fa787"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_dashboard.py",
+      "bytes": 68183,
+      "sha256": "de38eebf8bf5e69779d8994b2c7f2cac888333e6d6e668fe2cadc510591d2fbe"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_dividends.py",
+      "bytes": 1357,
+      "sha256": "40c29bf3942ed005f0c39a243f5b4ba59fbc4d01d82ec4c4a6794851b39401ee"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_execution.py",
+      "bytes": 11287,
+      "sha256": "91d3fccd33604ff6bc0187a90280024e066fbe5bc6ddf9e5acb524a47b99c2ce"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_forward.py",
+      "bytes": 19403,
+      "sha256": "aced5836763421ec9b588f318ec425a34dca7d04ec88c6c42aeac9d571aa008b"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_launcher.py",
+      "bytes": 6729,
+      "sha256": "f607930729c69955d154e42c0b3d9ac9f30bfce46c430b1b1d77ad94ebe3ab1e"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_ledger.py",
+      "bytes": 6830,
+      "sha256": "50f6e47d4db09a3eb0f45d642ed7078c0f73c86e2f48bf4f778c1c774aec1010"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_long_sales_only_at_profit.py",
+      "bytes": 27462,
+      "sha256": "0e6fdd2d6234fcc2a1412795e79b31fd3341a3039edec6be0acb47f971c0bec3"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_market_evidence.py",
+      "bytes": 15791,
+      "sha256": "0891ce730776fc90d6a69114a74709fd410dd98b2479521f9dd06f85fd656d89"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_moomoo_cli.py",
+      "bytes": 10230,
+      "sha256": "1e851675f5e00dcf324901732440943a256650a87563704e23d7f83bbbc5d54a"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_options_ef.py",
+      "bytes": 6596,
+      "sha256": "e6927f8b851b6b9adc517e619fead1e1c29cd50ba6b5b08a7c86daa79a8c3053"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_options_eod_engine.py",
+      "bytes": 3498,
+      "sha256": "48058b3a90ca78523bf877a03baef1c4cef7e76af148d803de61b70eee91fd81"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_options_research.py",
+      "bytes": 9852,
+      "sha256": "7044d5f759103d04f4f40222e01be6c51085cb0809e69c3896b48154d7fc685a"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_reporting.py",
+      "bytes": 50759,
+      "sha256": "f4f93cde3520e1bdcd5d46d30cc57833ae314bf3dadd78467b1a8c5db343999d"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_research_engine.py",
+      "bytes": 23400,
+      "sha256": "74526c99262f9d6ccf00e41cf2d0080663f486c1bd07efeec6c5a9dff1ded929"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_risk.py",
+      "bytes": 20600,
+      "sha256": "aaeb73bed21d26e7b4957b3e1ed629f19545e36ee12d40539ba29298af9b69e4"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_runtime.py",
+      "bytes": 14593,
+      "sha256": "699cc78304dd8d6a99092613fc79a9cd4a2022febb85a78e19881d011d4a91de"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_sentinel.py",
+      "bytes": 19992,
+      "sha256": "00aa2f8384760324efb2d4626fd0982a03e3d2148d3e8df7f62842ab3e1b0a8b"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_sentinel_service.py",
+      "bytes": 3518,
+      "sha256": "ae37150d27d5328583fef5eb2c5ee51f5452cf1082d00f085debd1d626564de8"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_short_cash.py",
+      "bytes": 3417,
+      "sha256": "f073eea0716554cac4842750cd273e24fe3ada324ee07f08dac313c87b33780b"
+    },
+    {
+      "path": "moomoo-dual-strategy/tests/test_signals.py",
+      "bytes": 27014,
+      "sha256": "70bebe400638d6e4982b2f62f62ff0c7cc74d10953e4dfbcff468f9b532f55ab"
+    },
+    {
+      "path": "start.py",
+      "bytes": 14367,
+      "sha256": "289b3eca0c49d562055e13e8ec4f204f843b622d203b4791df9c2d287c81bf57"
+    }
+  ],
+  "test_summary": {
+    "run_at": "2026-11-26T05:42:49+08:00",
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider",
+    "passed": 1248,
+    "skipped": 2,
+    "failed": 1,
+    "subtests_passed": 59,
+    "warnings": 4,
+    "failure": "tests/test_dashboard.py:1004 requires node, which is absent from PATH",
+    "functional_failures": 0
+  },
+  "claim_matrix": {
+    "schema_version": 1,
+    "generated_at": "2026-11-27T03:45:00Z",
+    "claim_count": 51,
+    "status_counts": {
+      "verified": 43,
+      "documented": 1,
+      "verified_manual": 1,
+      "verified_historical": 1,
+      "peer_attested": 2,
+      "verified_unresolved": 1,
+      "pending_final_session": 1,
+      "partial": 1
+    },
+    "category_counts": {
+      "Reusability & documentation": 10,
+      "All categories": 1,
+      "Strategy & risk design": 29,
+      "Risk-adjusted return": 7,
+      "Qoder & Cloud Agent usage": 4
+    },
+    "unresolved": [
+      "C35",
+      "C43",
+      "C45",
+      "C49"
+    ],
+    "notes": [
+      "Matrix distinguishes code/config verification, broker/test evidence, official rules, peer attestation and documented session evidence.",
+      "Pending/unresolved items are intentionally not marked complete."
+    ],
+    "pending_source_updates": [
+      {
+        "file": "COMPETITION.md",
+        "locator": "80,154",
+        "issue": "Test count is 1,208; current verified suite is 1,248 passed plus one Node-environment failure."
+      },
+      {
+        "file": "COMPETITION.md",
+        "locator": "169",
+        "issue": "Short-cash section says 23-24 Nov; audit shows 148 mismatched records on 24 Nov and 12 on 25 Nov."
+      },
+      {
+        "file": "COMPETITION.md",
+        "locator": "111-122",
+        "issue": "Live-results snapshot is dated 25 Nov and must be refreshed after the 27 Nov final session."
+      }
+    ],
+    "critical_submission_blockers": [
+      {
+        "id": "B1",
+        "severity": "critical",
+        "issue": "Public repository does not yet contain the current Claude working-tree changes described by the submission.",
+        "evidence": "independent_audit_windows.json",
+        "required_action": "After Claude is confirmed finished, review and commit/push the code, tests, backtest, and submission assets; then re-verify matrix locators against the pushed commit."
+      }
+    ]
+  },
+  "html_report_qa": {
+    "schema_version": 1,
+    "checked_at": "2026-11-27T06:42:41Z",
+    "report": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
+    "method": "Local file opened in the in-app browser; HTMLParser link validation; accessibility snapshot; console inspection; mobile and forced-desktop captures.",
+    "results": {
+      "local_links": 57,
+      "missing_local_links": 0,
+      "tables": 9,
+      "embedded_svg_charts": 3,
+      "embedded_dashboard_images": 1,
+      "console_errors": 0,
+      "console_warnings": 0,
+      "mobile": {
+        "viewport": "525x553",
+        "document_scroll_width": 510,
+        "horizontal_overflow": false,
+        "navigation_max_height_px": 260,
+        "main_top_px": 314
+      },
+      "desktop": {
+        "capture_width_px": 1440,
+        "main_width_px": 1096,
+        "layout": "270px navigation + flexible report column",
+        "note": "Desktop capture used temporary QA-only CSS to force the desktop media layout; the saved HTML retains responsive CSS."
+      }
+    },
+    "screenshots": [
+      "moomoo-dual-strategy/reports/competition/submission_assets/html-report-mobile.png",
+      "moomoo-dual-strategy/reports/competition/submission_assets/html-report-desktop.png"
+    ],
+    "status": "PASS",
+    "hosted_variant": {
+      "file": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
+      "local_dependencies": 0,
+      "external_or_anchor_links": 45,
+      "console_errors": 0,
+      "console_warnings": 0,
+      "hosting_badge": true,
+      "screenshots": [
+        "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-mobile.png",
+        "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-badge.png"
+      ],
+      "status": "PASS",
+      "latest_visual_capture": "Prior mobile/desktop captures retained; latest screenshot retry was blocked because the in-app browser viewport was hidden. Accessibility snapshot and console check passed."
+    }
+  },
+  "submission_form": {
+    "schema_version": 1,
+    "form_url": "https://survey.alibabacloud.com/uone/sg/survey/Zd8GZRUDs?utm_source=luma",
+    "form_end_time": "2026-12-01 00:00:00 (form configuration; event deadline remains 30 Nov 2026 23:59 SGT)",
+    "fields": [
+      {
+        "name": "Full Name",
+        "required": true,
+        "status": "user_input",
+        "value": ""
+      },
+      {
+        "name": "Business Email",
+        "required": true,
+        "status": "user_input",
+        "value": ""
+      },
+      {
+        "name": "Country",
+        "required": true,
+        "status": "user_input",
+        "value": ""
+      },
+      {
+        "name": "Phone Number",
+        "required": true,
+        "status": "user_input",
+        "value": ""
+      },
+      {
+        "name": "One sentence about your project",
+        "required": true,
+        "status": "ready",
+        "value": "Moo-Moo is a deterministic two-vote SPY/QQQ paper-trading agent with ten independent signals, per-lot profit-only exits, twin-ETF shorts, and broker-reconciled risk controls."
+      },
+      {
+        "name": "Presentation Link",
+        "required": true,
+        "status": "ready",
+        "value": "https://moo-moo-competition-7amelju7q1y.qoder.website",
+        "instructions": "Public Qoder Site URL verified in browser with no console errors."
+      },
+      {
+        "name": "Project Description",
+        "required": true,
+        "status": "ready",
+        "value": "Moo-Moo is a Qoder-built, deterministic paper-trading agent for the Moomoo \u00d7 Qoder challenge. Ten independent technical rules vote on each completed five-minute SPY/QQQ bar; the agent acts only when at least two agree and fewer than two oppose. Entries use $20,000 lots inside a $100,000 book, a $40,000/39.5%-of-NAV single-name cap, no leverage, a 2.5% daily loss lock, 4% reduced sizing and a 7% terminal drawdown halt. Long lots are never sold at a loss; short exposure uses IVV/QQQM when the primary ETF is already long and is always covered by the close, lock or halt.\n\nEvery order is persisted as intent \u2192 acknowledgement \u2192 outcome and reconciled against Moomoo before the next order. The current broker snapshot is NAV $99,958.28, drawdown -0.2157%, with SPY 13 and QQQ 30, 30/30 broker orders matched, no open orders, no halt and no daily lock. The submission includes the strategy and invalidation rules, risk/compliance matrix, 1,477-session exit research, 1,479-session parity evidence, 1,248 passing tests plus one disclosed Node-environment failure, a 51-claim evidence matrix, redacted decision/fill logs, dashboard captures, and a runnable package with SHA-256 manifest.\n\nQoder Desktop built the code, tests, dashboard, report and deck. Read-only Cloud reporter/auditor/watchdog deployments are documented with their limits: one reporter run is verified; auditor/watchdog have zero runs and the 17 November evidence shows no Cloud schedule or Vault. The report explicitly covers what worked, what failed and why, including the 23 November partial-fill anomaly, 24\u201325 November short-cash NAV bug, and 25 November scheduler process-history discrepancy. Final 27 November settlement refresh is pending."
+      },
+      {
+        "name": "Github Link",
+        "required": false,
+        "status": "ready",
+        "value": "https://github.com/justcode1234/Moo-Moo"
+      },
+      {
+        "name": "Consent to share project details with judges",
+        "required": true,
+        "status": "user_consent",
+        "value": ""
+      },
+      {
+        "name": "Marketing contact consent",
+        "required": true,
+        "status": "user_consent",
+        "value": ""
+      }
+    ],
+    "deliverables": {
+      "presentation_hosted_html": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
+      "presentation_pptx": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pptx",
+      "presentation_pdf": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf",
+      "runnable_package": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.zip",
+      "package_manifest": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json",
+      "package_checksum": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256"
+    },
+    "notes": [
+      "Personal details and consent choices must be completed by the user.",
+      "The event deadline is 30 Nov 2026 23:59 SGT; the form configuration end time is 1 Dec 2026 00:00:00.",
+      "Public Qoder Site deployment verified; update the same project after final report changes."
+    ],
+    "site": {
+      "provider": "Qoder Sites",
+      "url": "https://moo-moo-competition-7amelju7q1y.qoder.website",
+      "access_mode": "public",
+      "published": true,
+      "browser_console_errors": 0
+    },
+    "cloud_audits": {
+      "evidence_file": "moomoo-dual-strategy/reports/competition/submission_assets/cloud_audit_runs.json",
+      "runs": [
+        {
+          "name": "Moo-Moo Rubric Auditor",
+          "task_id": "ca_DQX2IB2YMQTANCHT3UMXWJUMHH",
+          "scheduled_at": "2026-11-27T06:10:00Z",
+          "status": "scheduled_outputs_not_exposed"
+        },
+        {
+          "name": "Moo-Moo Evidence Watchdog",
+          "task_id": "ca_3ZAAPYHV6L3IV5BB5WAFBDHU5Y",
+          "scheduled_at": "2026-11-27T06:10:00Z",
+          "status": "scheduled_outputs_not_exposed"
+        }
+      ]
+    },
+    "independent_audits": {
+      "windows": {
+        "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+        "completed_at": "2026-11-27T06:25:20Z",
+        "weighted_score": 5.5,
+        "critical_finding": "Public repository did not yet contain the current Claude working-tree changes.",
+        "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md"
+      },
+      "local_watchdog": {
+        "session_id": "4a884e65-eea4-5317-adea-f98aa44f25aa",
+        "completed_at": "2026-11-27T06:28:00Z",
+        "status": "completed",
+        "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md"
+      }
+    }
+  },
+  "independent_audits": {
+    "schema_version": 1,
+    "created_at": "2026-11-27T05:57:22Z",
+    "location": "cloud",
+    "output_mode": "independent",
+    "purpose": "Strengthen Qoder Cloud Agent usage evidence with bounded read-only rubric auditing and evidence watchdog checks.",
+    "runs": [
+      {
+        "name": "Moo-Moo Rubric Auditor",
+        "task_id": "ca_DQX2IB2YMQTANCHT3UMXWJUMHH",
+        "schedule": {
+          "kind": "at",
+          "at": "2026-11-27T06:10:00Z"
+        },
+        "status": "scheduled_outputs_not_exposed",
+        "tools": "none",
+        "credentials": "none",
+        "prompt_summary": "Independently score the supplied Moo-Moo evidence against the official 25/30/30/15 rubric, identify gaps, and recommend the five highest-impact improvements. No tools, network, accounts, files, orders, or trades.",
+        "output_status": "Cloud task creation confirmed; local agent cannot read Cloud execution output through available tools."
+      },
+      {
+        "name": "Moo-Moo Evidence Watchdog",
+        "task_id": "ca_3ZAAPYHV6L3IV5BB5WAFBDHU5Y",
+        "schedule": {
+          "kind": "at",
+          "at": "2026-11-27T06:10:00Z"
+        },
+        "status": "scheduled_outputs_not_exposed",
+        "tools": "none",
+        "credentials": "none",
+        "prompt_summary": "Check the supplied artifact manifest and claims for consistency, missing evidence, private-data redaction risk, and unsupported statements. Return PASS/FAIL/REVIEW and remediation. No tools, network, accounts, files, orders, or trades.",
+        "output_status": "Cloud task creation confirmed; local agent cannot read Cloud execution output through available tools."
+      }
+    ],
+    "notes": [
+      "Task creation is not evidence of completed work; outputs must be captured after execution.",
+      "The runs use the Qoder Cloud default environment and do not inherit local files, tools, connectors, credentials, or the current model.",
+      "The existing 17 November reporter/auditor/watchdog deployment evidence remains separate from these new automation runs."
+    ],
+    "independent_peer_audits": [
+      {
+        "name": "Windows Rubric Auditor",
+        "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+        "completed_at": "2026-11-27T06:25:20Z",
+        "status": "completed",
+        "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md"
+      },
+      {
+        "name": "Local Evidence Watchdog",
+        "session_id": "4a884e65-eea4-5317-adea-f98aa44f25aa",
+        "completed_at": "2026-11-27T06:28:00Z",
+        "status": "completed",
+        "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md"
+      }
+    ]
+  },
+  "notes": [
+    "Draft package reflects the current Linux working tree, including uncommitted final changes.",
+    "Refresh after the 27 November final session and final source review.",
+    "No account IDs, OAuth tokens, private account files or private competition state are included.",
+    "The zip checksum is stored in the adjacent .sha256 file to avoid a circular manifest hash.",
+    "Public hosting of the presentation link is verified; update the same project after final report changes."
+  ]
+}

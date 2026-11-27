@@ -1,4 +1,5 @@
-"""User decision 2026-11-25: never sell a long at a loss; only shorts may be closed at a loss.
+"""User decision 2026-11-25: never sell a long at a loss; only shorts may be closed at a loss. A short signal on a
+ticker held long is traded in its twin ETF (SPY -> IVV, QQQ -> QQQM) so the long lots are kept (same decision).
 
 Every path that can sell a long is covered with the LIVE config: opposite votes, the scheduled flatten, the daily-loss
 lock and drawdown halt, the H exit at the open, a manual flatten, and the last-line guard inside Runner.send. Lots are
@@ -311,9 +312,9 @@ def _vote_report(opened, k, qqq):
             "tickers": {"US.SPY": row(0), "US.QQQ": row(qqq)}}
 
 
-def test_opposite_votes_sell_only_lots_in_profit_and_never_short_against_a_kept_long(runner, monkeypatch):
+def test_opposite_votes_sell_only_lots_in_profit_and_short_the_twin_against_a_kept_long(runner, monkeypatch):
     old, new = two_qqq_lots(runner)
-    runner.quotes["US.QQQ"] = 639.0
+    runner.quotes.update({"US.QQQ": 639.0, "US.QQQM": 250.0})
     monkeypatch.setattr(runner, "risk", runner.account)
     opened = NOW.replace(hour=9, minute=30)
 
@@ -322,21 +323,83 @@ def test_opposite_votes_sell_only_lots_in_profit_and_never_short_against_a_kept_
         monkeypatch.setitem(runner.monitor.__globals__, "datetime", _clock(opened + timedelta(minutes=5 * k, seconds=20)))
         runner.vote_step()
 
-    step(20, -1)                                                                 # 2+ sell votes against the longs
-    assert [(i.side, i.qty, i.take_profit_lot_id, i.reason) for i in runner.sent] == [
-        ("SELL", 15, new, "two_vote_opposite_agreement")]
+    step(20, -1)                                    # 2+ sell votes: the lot in profit sells, the loser is kept, and
+    assert [(i.side, i.symbol, i.qty, i.take_profit_lot_id, i.reason, i.opens_short) for i in runner.sent] == [
+        ("SELL", "US.QQQ", 15, new, "two_vote_opposite_agreement", False),          # the short opens in the twin ETF
+        ("SELL", "US.QQQM", 80, None, "two_vote_short", True)]
     kept = [d for d in runner.state["intraday"]["decisions"] if d["action"].startswith("kept")]
     assert [(d["lot"], d["break_even"]) for d in kept] == [(old, 640.24)]
-    step(21, -1)                                                                 # still 2+ sells: no short vs the long
-    assert len(runner.sent) == 1 and runner.state["sleeves"]["two_vote"] == {"US.QQQ": 15}
-    step(22, 1)                                                                  # buy votes again: add up to the cap
-    assert runner.sent[-1].side == "BUY" and not runner.sent[-1].close_only
+    entry, = [d for d in runner.state["intraday"]["decisions"] if d["action"] == "entry"]
+    assert (entry["symbol"], entry["traded"], entry["side"]) == ("US.QQQ", "US.QQQM", -1)
+    step(21, -1)                                    # still 2+ sells: the long stays, one more twin lot (within the cap)
+    assert [(i.side, i.symbol, i.qty) for i in runner.sent[2:]] == [("SELL", "US.QQQM", 78)]
+    assert runner.state["sleeves"]["two_vote"] == {"US.QQQ": 15, "US.QQQM": -158}
+    step(22, 1)                                     # buy votes: the twin short is covered, no flip on that bar
+    assert [(i.side, i.symbol, i.qty, i.close_only) for i in runner.sent[3:]] == [("BUY", "US.QQQM", 158, True)]
+    assert runner.state["sleeves"]["two_vote"] == {"US.QQQ": 15} and remaining_lots(runner) == [(15, 639.784)]
+    step(23, 1)                                     # buy votes again: add QQQ up to the cap
+    assert runner.sent[-1].side == "BUY" and runner.sent[-1].symbol == "US.QQQ" and not runner.sent[-1].close_only
     assert error_events(runner) == []
 
 
+def test_short_signal_on_a_flat_ticker_shorts_the_ticker_itself(runner, monkeypatch):
+    runner.quotes.update({"US.QQQ": 639.0, "US.QQQM": 250.0})
+    monkeypatch.setattr(runner, "risk", runner.account)
+    opened = NOW.replace(hour=9, minute=30)
+    runner._vote_monitor = SimpleNamespace(observe=lambda now: _vote_report(opened, 20, -1))
+    monkeypatch.setitem(runner.monitor.__globals__, "datetime", _clock(opened + timedelta(minutes=100, seconds=20)))
+    runner.vote_step()
+    assert [(i.side, i.symbol, i.opens_short) for i in runner.sent] == [("SELL", "US.QQQ", True)]
+
+
+def test_twin_short_is_covered_by_the_flatten_lock_and_halt_while_losing_longs_are_kept(runner):
+    two_qqq_lots(runner)
+    runner.quotes.update({"US.QQQ": 600.0, "US.QQQM": 250.0})
+    twin = planner.Intent(f"{SESSION}-two_vote-e20-QQQM-SELL", NOW.isoformat(), "two_vote", "US.QQQM", "SELL", 80,
+                          250.0, 250.0, "two_vote_short", False, opens_short=True)
+    runner.send([twin], SESSION)
+    runner.sent.clear()
+    runner.quotes["US.QQQM"] = 255.0                                             # the twin short is losing too
+    runner.flatten_sleeves(("two_vote",), "two_vote_scheduled_flatten")
+    assert [(i.side, i.symbol, i.qty, i.close_only) for i in runner.sent] == [("BUY", "US.QQQM", 80, True)]
+    assert runner.state["sleeves"]["two_vote"] == {"US.QQQ": 30} and error_events(runner) == []
+
+
+def test_twin_helpers_and_live_config():
+    twins = planner.short_twins(CFG)
+    assert twins == {"US.SPY": "US.IVV", "US.QQQ": "US.QQQM"}
+    assert planner.twin_for("US.SPY", -1, {"US.SPY": 13}, twins) == "US.IVV"
+    assert planner.twin_for("US.SPY", -1, {"US.IVV": -20}, twins) == "US.IVV"       # keeps stacking in the twin
+    assert planner.twin_for("US.SPY", -1, {}, twins) == "US.SPY"
+    assert planner.twin_for("US.SPY", 1, {"US.SPY": 13, "US.IVV": -20}, twins) == "US.SPY"
+    assert planner.twin_for("US.SPY", -1, {"US.SPY": 13}, {}) == "US.SPY"           # no twins configured
+    for bad in ({"US.SPY": "US.SPY"}, {"US.SPY": "US.QQQ", "US.QQQ": "US.QQQM"}, {"US.SPY": "IVV"}, ["US.IVV"],
+                {"US.SPY": "US.IVV", "US.QQQ": "US.IVV"}):
+        assert planner.short_twins({"two_vote": {"short_twins": bad}}) == {}
+    assert "US.IVV" not in CFG["h_etf"]["core"] + CFG["h_etf"]["sectors"]
+    assert "US.QQQM" not in CFG["h_etf"]["core"] + CFG["h_etf"]["sectors"]
+
+
+def test_broker_accepts_a_two_vote_twin_short_and_still_refuses_unmarked_sells():
+    b = CompetitionBroker.__new__(CompetitionBroker)
+    b.cfg, b.acc_id, calls = CFG, "acct", []
+    b.call = lambda tool, args, min_interval=1.0: calls.append(args) or {"data": {"order_id": "o1"}}
+    short = planner.Intent(f"{SESSION}-two_vote-e20-IVV-SELL", NOW.isoformat(), "two_vote", "US.IVV", "SELL", 20,
+                           700.0, 699.65, "two_vote_short", False, opens_short=True)
+    assert b.place(short) == "o1" and calls[-1]["symbol"] == "US.IVV" and calls[-1]["order_side"] == 2
+    with pytest.raises(Exception, match="close-only"):
+        b.place(planner.Intent(f"{SESSION}-two_vote-e21-IVV-SELL", NOW.isoformat(), "two_vote", "US.IVV", "SELL", 20,
+                               700.0, 699.65, "two_vote_short", False))
+
+
 @pytest.mark.parametrize("quote,sold", [(100.0, False), (100.06, False), (100.07, True)])
-def test_h_open_exit_runs_only_in_profit(runner, quote, sold):
+def test_retired_h_still_exits_a_held_position_only_in_profit(runner, quote, sold):
+    live = runner.cfg
+    assert not runner.h_live()                     # H retired 2026-11-26: no plan, no open orders with an empty book
+    runner.cfg = {**live, "risk": {**live["risk"], "entry_sleeves": ["h_etf", "two_vote"]}}   # a pre-retirement buy
     buy(runner, "h_etf", "US.XLP", 200, 100.0, "open")
+    runner.cfg = live
+    assert runner.h_live()                         # a held H position still follows its exit plan
     runner.state["h_entry_session"]["US.XLP"] = "2026-11-18"
     runner.state["h_plan"] = {"asof": "2026-11-20", "entries": [], "exits": {"US.XLP": "max_hold"}}
     runner.quotes["US.XLP"] = quote
@@ -378,3 +441,23 @@ def test_dashboard_lot_detail_without_quotes_never_unlocks_a_sale(tmp_path):
     marked = {**unmarked, "quotes": {"US.QQQ": 641.0}}
     basis = planner.basis_view(sleeve_performance(store, state, marked, CFG)["sleeves"])
     assert planner.long_sale_block(state, "two_vote", "US.QQQ", 30, 640.68, CFG, basis) is None
+
+
+def test_retired_h_20k_lets_a_twin_short_trade_beside_two_full_longs():
+    """User decision 2026-11-26: H retired, its $20,000 moved to the Two-vote book ($80,000 -> $100,000). With SPY and
+    QQQ longs near their caps, the old $80k book had no room for a twin short; the $100k book fits a full $20k lot."""
+    assert CFG["two_vote"]["initial_allocation_usd"] == 100_000 and planner.entries_disabled(CFG, "h_etf")
+    held = {"US.SPY": 79, "US.QQQ": 98}                                   # $39,500 + $39,200 long
+    for book, expected in ((100_000.0, 40), (80_000.0, None)):
+        st = planner.new_state()
+        st.update(initial_nav=100_000.0, high_water=100_000.0, day=SESSION, day_start_nav=100_000.0)
+        st["sleeves"]["two_vote"] = dict(held)
+        a = acct(held, {"US.QQQ": 400.0, "US.IVV": 500.0})
+        a.sleeve_capital["two_vote"] = book
+        assert planner.mark_risk(st, a, SESSION, CFG) is None
+        out, why = planner.plan_vote_entry(st, a, SESSION, "US.IVV", -1, CFG, NOW, "e1")
+        if expected:
+            assert why == "entry" and [(i.symbol, i.side, i.qty, i.opens_short) for i in out] == [
+                ("US.IVV", "SELL", expected, True)]
+        else:
+            assert out == [] and "below the $5,000 minimum lot" in why              # $1,300 left in an $80k book

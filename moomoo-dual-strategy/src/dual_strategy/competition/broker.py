@@ -37,6 +37,29 @@ def load_account(project: Path, cfg: dict) -> dict:
     return acct
 
 
+SHORT_WITHHELD = Decimal("1.6")      # sale proceeds + 60% initial short margin, withheld from the sim `balance`
+
+
+def account_cash(funds: dict) -> float:
+    """Cash for valuing the account (NAV = cash + signed positions at quotes). Without shorts: the sim `balance`.
+    With shorts open, `balance` withholds 160% of the short market value (the sale proceeds plus the 60% initial short
+    margin) while `total_asset` counts it, so cash = total_asset - long_mv + |short_mv|. Used only when that equals
+    balance + 1.6 x |short_mv| within $1 (observed exactly on 2026-11-25: 59,781.558 + 1.6 x 19,656 = 98,967.798 -
+    27,392.64 + 19,656); otherwise the plain balance, so the runner NAV check keeps blocking entries (fail closed)."""
+    balance = Decimal(str(funds["balance"]))
+    try:
+        short = abs(Decimal(str(funds.get("short_mv") or 0)))
+        if not short.is_finite() or short <= Decimal("0.005"):
+            return float(balance)
+        total, long_mv = Decimal(str(funds["total_asset"])), Decimal(str(funds.get("long_mv") or 0))
+        cash = total - long_mv + short
+        if cash.is_finite() and abs(cash - (balance + SHORT_WITHHELD * short)) <= 1:
+            return float(cash)
+    except (InvalidOperation, KeyError, TypeError, ValueError):
+        pass
+    return float(balance)
+
+
 def parse_positions(rows: list[dict], funds: dict, expected: dict[str, int] | None = None) -> dict[str, int]:
     """Signed positions. The sim position rows carry no side field: a short is a negative qty or a negative market
     value. Cross-checked against the funds call: shorts in the rows <=> short_mv > 0, else fail closed. If the rows
@@ -110,7 +133,7 @@ class CompetitionBroker:
 
     def account(self, quote, expected: dict[str, int] | None = None) -> Account:
         funds = self.call(CASH_INFO, {"acc_id": self.acc_id, "market": 100})["data"]
-        cash = float(funds["balance"])
+        cash = account_cash(funds)
         rows = self.call(POSITION_LIST, {"acc_id": self.acc_id, "market": 100})["data"]["positions"]
         positions = parse_positions(rows, funds, expected)
         quotes, ages = {}, {}
@@ -189,7 +212,7 @@ class CompetitionBroker:
             if any(Decimal(str(r.get("qty", r.get("quantity")))) % 1 for r in rows):
                 raise ValueError("non-integer position")
             positions = parse_positions(rows, funds, expected)
-            cash = Decimal(str(funds["balance"]))
+            cash = Decimal(str(account_cash(funds)))
 
             # Include orders which were already working before the close, and reject any overlapping activity.
             history = self._history(placed_at - timedelta(days=1))

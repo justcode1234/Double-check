@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-27T03:45:00Z",
+  "claim_count": 51,
+  "status_counts": {
+    "verified": 43,
+    "documented": 1,
+    "verified_manual": 1,
+    "verified_historical": 1,
+    "peer_attested": 2,
+    "verified_unresolved": 1,
+    "pending_final_session": 1,
+    "partial": 1
+  },
+  "category_counts": {
+    "Reusability & documentation": 10,
+    "All categories": 1,
+    "Strategy & risk design": 29,
+    "Risk-adjusted return": 7,
+    "Qoder & Cloud Agent usage": 4
+  },
+  "unresolved": [
+    "C35",
+    "C43",
+    "C45",
+    "C49"
+  ],
+  "notes": [
+    "Matrix distinguishes code/config verification, broker/test evidence, official rules, peer attestation and documented session evidence.",
+    "Pending/unresolved items are intentionally not marked complete."
+  ],
+  "pending_source_updates": [
+    {
+      "file": "COMPETITION.md",
+      "locator": "80,154",
+      "issue": "Test count is 1,208; current verified suite is 1,248 passed plus one Node-environment failure."
+    },
+    {
+      "file": "COMPETITION.md",
+      "locator": "169",
+      "issue": "Short-cash section says 23-24 Nov; audit shows 148 mismatched records on 24 Nov and 12 on 25 Nov."
+    },
+    {
+      "file": "COMPETITION.md",
+      "locator": "111-122",
+      "issue": "Live-results snapshot is dated 25 Nov and must be refreshed after the 27 Nov final session."
+    }
+  ],
+  "critical_submission_blockers": [
+    {
+      "id": "B1",
+      "severity": "critical",
+      "issue": "Public repository does not yet contain the current Claude working-tree changes described by the submission.",
+      "evidence": "independent_audit_windows.json",
+      "required_action": "After Claude is confirmed finished, review and commit/push the code, tests, backtest, and submission assets; then re-verify matrix locators against the pushed commit."
+    }
+  ]
+}

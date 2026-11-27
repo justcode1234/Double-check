@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-26T05:39:34Z",
+  "scope": "Read-only supporting evidence collected from the user's Windows and retired Mac Qoder sessions. No orders, runners, services, tests, code changes, or private-state writes were performed on either peer.",
+  "windows": {
+    "device": "Windows peer",
+    "checkout": "Redacted local checkout",
+    "observed_git": {
+      "branch": "main",
+      "head": "21cefb5",
+      "tree": "clean",
+      "ahead_behind_at_observation": "0 ahead / 1 behind origin/main 4172396",
+      "competition_orders_from_windows": 0
+    },
+    "evidence": [
+      {
+        "artifact": "moomoo-dual-strategy/reports/competition/parity_regime.json",
+        "date_or_commit": "2757d10 / 2026-11-21",
+        "proves": "1,479-session live-vs-reference parity with 0 mismatches; Noise 808 trades, VWAP 2,838, ORB 146; 575,010 slot checks.",
+        "limitation": "Historical five-sleeve parity, not the final Two-vote-only configuration."
+      },
+      {
+        "artifact": "moomoo-dual-strategy/reports/competition/vote_replay.json",
+        "date_or_commit": "c4b12aa / 2026-11-23",
+        "proves": "Two-vote replay foundation; recent 10 sessions short_only +$1,299 and long_short +$1,601 versus negative 2025-2026.",
+        "limitation": "Hypothetical replay, not broker fills."
+      },
+      {
+        "artifact": "moomoo-dual-strategy/evidence/test-results.txt",
+        "date_or_commit": "0088dd7 / 2026-11-18",
+        "proves": "Historical Windows suite: 842 passed plus 55 subtests.",
+        "limitation": "Stale relative to the final Linux tree."
+      },
+      {
+        "artifact": "moomoo-dual-strategy/evidence/dashboard-qa.json and dashboard screenshots",
+        "date_or_commit": "0088dd7 / 2026-11-17",
+        "proves": "Genuine headless Edge QA at 320-1440px, no document overflow, working exports and stop-lock semantics, zero console errors.",
+        "limitation": "Shadow/research dashboard, predates the Two-vote UI."
+      },
+      {
+        "artifact": "moomoo-dual-strategy/evidence/cloud-reporter-run.json",
+        "date_or_commit": "0088dd7 / 2026-11-17",
+        "proves": "One verified 28-second read-only Cloud reporter run; auditor and watchdog deployed but never run.",
+        "limitation": "Infrastructure evidence only; no network, MCP, Vault or trading tools."
+      },
+      {
+        "artifact": "practice-lifecycle, supervised-b, sentinel, broker-reject and capabilities evidence",
+        "date_or_commit": "2026-11-17/18",
+        "proves": "Ordinary practice-account lifecycle, close-only sentinel, rejection/unknown handling and tool discovery.",
+        "limitation": "Never the competition account; not competition performance."
+      }
+    ],
+    "gaps": [
+      "Windows had no current PPTX/PDF deck.",
+      "All Windows dashboard screenshots predate the Two-vote UI.",
+      "The latest Windows test artifact is historical; final counts must come from Linux.",
+      "The Codex Research worktree contains large untracked historical research not included in the submission package."
+    ]
+  },
+  "mac": {
+    "device": "Retired Mac peer",
+    "status": "Retired and passive; no trading automation re-enabled.",
+    "primary_checkout": "Redacted local checkout",
+    "cutover": {
+      "date": "2026-11-23 23:06:17 SGT",
+      "launchd": "Competition job persistently unloaded with unload -w; plist retained.",
+      "log_proof": "Scheduler log mtime frozen across a 70-second observation spanning two would-be 60-second fires.",
+      "state_transfer": "Risk state transferred to Linux and hash-verified before deletion; hash retained in private session evidence."
+    },
+    "evidence": [
+      {
+        "artifact": "private/competition/runner-2026-11-20.log and live/outbox/2026-11-20.jsonl",
+        "proves": "First authenticated EXECUTE session and XLV/XLP intent-to-fill chain behind the +$12.38 H ETF result.",
+        "limitation": "Historical H ETF only."
+      },
+      {
+        "artifact": "private/competition/live/audit/",
+        "proves": "711 JSON audit records, approximately 6.69 MB, with decision and source-hash provenance.",
+        "limitation": "Private historical evidence; not copied into the public package."
+      },
+      {
+        "artifact": "evidence/dashboard-qa.json and screenshots",
+        "proves": "Historical browser QA and five-strategy-era dashboard captures.",
+        "limitation": "Predates Two-vote."
+      },
+      {
+        "artifact": "QODER_COMPETITION.md, QODER_FIVE_STRATEGIES.md, claude_regime results and parity_regime.json",
+        "proves": "Strategy evolution and research lineage from B3/H and five sleeves to the later Two-vote pivot.",
+        "limitation": "Superseded configuration; Mac has no Two-vote code."
+      },
+      {
+        "artifact": "reports/presentation_outline.md and independent audit reports",
+        "proves": "Earlier deck outline and independent validation chain.",
+        "limitation": "Historical; final deck is generated on Linux."
+      }
+    ]
+  },
+  "linux": {
+    "role": "Sole execution host and source of current broker-reconciled results, final report, deck and package.",
+    "current_evidence": [
+      "30/30 broker order IDs reconciled to runner evidence.",
+      "Current dashboard capture and 2,601 EXECUTE risk snapshots.",
+      "Redacted trade and decision logs.",
+      "Current source, config, tests, backtest and submission artifacts."
+    ]
+  }
+}

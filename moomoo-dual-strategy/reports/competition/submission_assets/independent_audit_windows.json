@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "completed_at": "2026-11-27T06:25:20Z",
+  "auditor": "Qoder Windows/Fox session",
+  "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+  "mode": "read_only",
+  "scores": {
+    "risk_adjusted_return": {"weight": 0.25, "score": 4},
+    "qoder_cloud_usage": {"weight": 0.30, "score": 5},
+    "strategy_risk_design": {"weight": 0.30, "score": 7},
+    "reusability_documentation": {"weight": 0.15, "score": 6},
+    "weighted_total": 5.5
+  },
+  "critical_finding": "Public repository HEAD/origin did not contain Claude's uncommitted guard, twin-short, account_cash, sizing, risk-ladder, test, backtest, or submission-asset changes.",
+  "top_improvements": [
+    "Commit and push Claude's working tree, then re-verify all matrix locators against the pushed commit.",
+    "Capture completed Cloud auditor/watchdog outputs as usage evidence.",
+    "Reconcile the 25 Nov scheduler -15 process-history discrepancy and disclose the 160-record risk-evaluation blind window.",
+    "Complete the 27 Nov final-session refresh and rerun the full suite.",
+    "Add per-session NAV and computable risk metrics; disclose manual exits and loss deferral prominently."
+  ],
+  "full_report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md"
+}

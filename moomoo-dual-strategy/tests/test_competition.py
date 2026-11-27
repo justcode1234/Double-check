@@ -22,6 +22,19 @@ CFG["risk"]["legacy_exit_only"] = False  # Exercise the original entry and sizin
 CFG["risk"]["long_sales_only_at_profit"] = False
 
 
+def h_active(cfg: dict) -> dict:
+    """H was retired on 2026-11-26 (live: no allocation, not an entry sleeve; its $20k went to the Two-vote book). Its
+    code is kept for the 2026-11-20 history, so its mechanics are exercised with the pre-retirement settings."""
+    cfg["allocation"]["h_etf"] = 0.20
+    cfg["h_etf"]["initial_allocation_usd"] = 20000
+    cfg["risk"]["entry_sleeves"] = ["h_etf", *cfg["risk"]["entry_sleeves"]]
+    return cfg
+
+
+h_active(CFG)
+LIVE = load_config(PROJECT)
+
+
 def session(day, close_hour=16):
     o = datetime(day.year, day.month, day.day, 9, 30, tzinfo=NY)
     return o, datetime(day.year, day.month, day.day, close_hour, 0, tzinfo=NY)
@@ -500,7 +513,7 @@ def test_runner_attributes_capital_from_receipts_not_shared_cash(status_runner, 
     before = runner.store.outbox('2026-11-19')
     performance = runner.attribute_capital(account)
     assert account.sleeve_capital == {'b3': 20000, 'h_etf': capital, 'noise': 20000, 'vwap': 20000, 'orb': 20000,
-                                      'two_vote': 80000}
+                                      'two_vote': 100000}
     from dual_strategy.competition.store import sleeve_performance
     assert performance == sleeve_performance(runner.store, runner.state, asdict(account), runner.cfg)
     assert performance['sleeves']['b3']['limits']['target_before_cap'] == 20000
@@ -539,7 +552,7 @@ def test_h_open_audit_links_signal_account_intent_and_fill(status_runner, monkey
     saved, = audit_records(runner, "h_open")
     provenance, = audit_records(runner, "provenance")
     assert saved["signal_audit_id"] == signal_id
-    assert saved['account']['sleeve_capital'] == {**{s: 19500 for s in planner.SLEEVES}, 'h_etf': 20000, 'two_vote': 80000}
+    assert saved['account']['sleeve_capital'] == {**{s: 19500 for s in planner.SLEEVES}, 'h_etf': 20000, 'two_vote': 100000}
     assert saved['capital']['sleeves']['h_etf']['initial_capital'] == 20000
     assert saved['capital']['sleeves']['h_etf']['limits']['per_etf_budget'] == 10000
     intents, reason = planner.plan_h_open(saved["state"], restore_account(saved["account"]), saved["session"],
@@ -636,11 +649,13 @@ def test_missing_audit_write_prevents_order_submission(status_runner, monkeypatc
     assert submissions == [] and runner.store.outbox("2026-11-20") == []
 
 
-def test_config_five_sleeves_at_20pct_each():
+def test_config_h_retired_and_its_20k_moved_to_two_vote():
     # execution_enabled is the user's decision (true on the competition Mac since 2026-11-20), not asserted here
-    assert CFG["allocation"] == {"b3": 0.20, "h_etf": 0.20, "noise": 0.20, "vwap": 0.20, "orb": 0.20, "two_vote": 0.0}
-    assert set(CFG["allocation"]) == set(planner.SLEEVES)
-    assert CFG["risk"]["halt_drawdown_fraction"] == 0.07
+    assert LIVE["allocation"] == {"b3": 0.20, "h_etf": 0.0, "noise": 0.20, "vwap": 0.20, "orb": 0.20, "two_vote": 0.0}
+    assert set(LIVE["allocation"]) == set(planner.SLEEVES)
+    assert LIVE["h_etf"]["initial_allocation_usd"] == 0 and LIVE["two_vote"]["initial_allocation_usd"] == 100_000
+    assert LIVE["risk"]["entry_sleeves"] == ["two_vote"] and planner.entries_disabled(LIVE, "h_etf")
+    assert LIVE["risk"]["halt_drawdown_fraction"] == 0.07
 
 
 def test_store_is_atomic_and_append_only(tmp_path):

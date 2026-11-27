@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-27T06:42:41Z",
+  "report": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
+  "method": "Local file opened in the in-app browser; HTMLParser link validation; accessibility snapshot; console inspection; mobile and forced-desktop captures.",
+  "results": {
+    "local_links": 57,
+    "missing_local_links": 0,
+    "tables": 9,
+    "embedded_svg_charts": 3,
+    "embedded_dashboard_images": 1,
+    "console_errors": 0,
+    "console_warnings": 0,
+    "mobile": {
+      "viewport": "525x553",
+      "document_scroll_width": 510,
+      "horizontal_overflow": false,
+      "navigation_max_height_px": 260,
+      "main_top_px": 314
+    },
+    "desktop": {
+      "capture_width_px": 1440,
+      "main_width_px": 1096,
+      "layout": "270px navigation + flexible report column",
+      "note": "Desktop capture used temporary QA-only CSS to force the desktop media layout; the saved HTML retains responsive CSS."
+    }
+  },
+  "screenshots": [
+    "moomoo-dual-strategy/reports/competition/submission_assets/html-report-mobile.png",
+    "moomoo-dual-strategy/reports/competition/submission_assets/html-report-desktop.png"
+  ],
+  "status": "PASS",
+  "hosted_variant": {
+    "file": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
+    "local_dependencies": 0,
+    "external_or_anchor_links": 45,
+    "console_errors": 0,
+    "console_warnings": 0,
+    "hosting_badge": true,
+    "screenshots": [
+      "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-mobile.png",
+      "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-badge.png"
+    ],
+    "status": "PASS",
+    "latest_visual_capture": "Prior mobile/desktop captures retained; latest screenshot retry was blocked because the in-app browser viewport was hidden. Accessibility snapshot and console check passed."
+  }
+}

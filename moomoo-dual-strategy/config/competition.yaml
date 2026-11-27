@@ -1,5 +1,6 @@
 # Competition portfolio: B3, H, Noise-area, VWAP, ORB at $20,000 each (user decision 2026-11-21), plus the
-# Two-vote SPY/QQQ sleeve on a fixed $80,000 sizing book (user decision 2026-11-23; B3 entries retired, exit-only).
+# Two-vote SPY/QQQ sleeve (user decision 2026-11-23; B3 entries retired, exit-only). H was retired on 2026-11-26 (user
+# decision: no RSI-2 plan, no entries) and its $20,000 moved to the Two-vote book, now a fixed $100,000.
 # Spec: QODER_FIVE_STRATEGIES.md (commit eca98ae, archived); two-vote rules: src/dual_strategy/competition/vote_rules.py.
 # Parameters are the frozen research settings (Codex A-J freeze, verified by Claude's independent replay).
 # Every number below is applied by deterministic Python (src/dual_strategy/competition); agents never size or override.
@@ -19,11 +20,11 @@ state_dir: private/competition                      # persistent NAV/high-water/
 # --- capital split of the competition account NAV (re-evaluated at every decision) ----------------------------------
 allocation:                      # of the starting NAV; each sleeve's capital then moves only with its own P&L
   b3: 0.20
-  h_etf: 0.20
+  h_etf: 0.0                     # retired 2026-11-26; its $20,000 moved to two_vote
   noise: 0.20
   vwap: 0.20
   orb: 0.20
-  two_vote: 0.0                  # not a NAV fraction: fixed $80,000 sizing book below (user decision 2026-11-23)
+  two_vote: 0.0                  # not a NAV fraction: fixed $100,000 sizing book below (user decisions 2026-11-23/26)
 
 # --- Noise-area momentum (reports/claude_regime/rstrats.py s10_noise; settings picked on 2021-24) -------------------
 noise:
@@ -81,8 +82,9 @@ b3:
                                       # never above the remaining risk.name_cap_usd for SPY across all sleeves
   flatten_minutes_before_close: 5     # 15:55 ET; 12:55 ET on 13:00 half-days
 
-h_etf:
-  initial_allocation_usd: 20000  # fixed starting sleeve allocation; use its own P&L thereafter
+h_etf:                           # RETIRED 2026-11-26 (user decision): not an entry sleeve, no nightly plan, no open
+                                 # orders. Kept only so the 2026-11-20 XLV/XLP history still reports; holds nothing.
+  initial_allocation_usd: 0      # was 20000; moved to two_vote
   core: [US.SPY, US.QQQ, US.IWM, US.DIA]
   sectors: [US.XLB, US.XLC, US.XLE, US.XLF, US.XLI, US.XLK, US.XLP, US.XLRE, US.XLU, US.XLV, US.XLY]
   top_sectors: 5                 # by 20-session median dollar volume at the signal close
@@ -98,7 +100,8 @@ h_etf:
   legacy_take_profit_usd: 5
 
 two_vote:                        # live execution approved by the user 2026-11-23 (replaces B3 entries; B3 exit-only)
-  initial_allocation_usd: 80000  # sizing book = 2 symbols x risk.name_cap_usd; gains banked outside the budget
+  initial_allocation_usd: 100000 # sizing book (was 80000 = 2 x name cap; + H's $20,000, user decision 2026-11-26);
+                                 # gains banked outside the budget, losses reduce it. Each ticker stays <= name cap.
   required_votes: 2
   entry_usd: 20000                 # per entry lot (user decision 2026-11-25; was 10000)
   max_lots_per_symbol: null        # no lot count: add lots while the ticker stays within the name cap (user decision
@@ -110,12 +113,16 @@ two_vote:                        # live execution approved by the user 2026-11-2
                                    # User decision 2026-11-25 from the exit backtest (2021-2026 SPY/QQQ 5-min replay,
                                    # reports/competition/exit_backtest): best expectancy every period; was 100, then 50.
   shorts: true
+  short_twins: {US.SPY: US.IVV, US.QQQ: US.QQQM}   # user decision 2026-11-25: Moomoo nets one position per ticker
+                                   # (max_sell_short SPY = 0 while long), so a 2+ sell agreement on a ticker the sleeve
+                                   # holds long opens/adds the short in its twin ETF on the same index; the long lots are
+                                   # kept. The twin short is covered on 2+ buy votes, the flatten, a lock or a halt.
   flatten_minutes_before_close: 5    # 15:55 ET (12:55 on 13:00 half-days); entries end 14:30 ET (12:30 half-days).
                                      # Shorts are always covered; long lots in profit are sold, losing long lots carry.
 
 risk:                            # account level (all five sleeves)
   legacy_exit_only: true         # older deployments stay exit-only
-  entry_sleeves: [h_etf, two_vote]   # H entries plus the Two-vote sleeve (user decision 2026-11-23); B3 stays exit-only
+  entry_sleeves: [two_vote]      # the Two-vote sleeve only (user decisions 2026-11-23; H retired 2026-11-26)
   halt_drawdown_fraction: 0.07   # NAV <= 93% of high-water: cover shorts, sell longs in profit, block entries until a human clears
   daily_loss_fraction: 0.025     # NAV <= 97.5% of day-start NAV: same exits, no entries for the rest of the day
   reduce_drawdown_fraction: 0.04 # NAV <= 96% of high-water: new positions at half size (until back above 96.5%)

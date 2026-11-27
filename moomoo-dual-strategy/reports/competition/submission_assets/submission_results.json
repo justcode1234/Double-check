@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-26T05:19:28.005324+00:00",
+  "scope": "Moomoo x Qoder competition paper account; public/redacted submission snapshot",
+  "account": {
+    "initial_nav": 100000.0,
+    "nav": 99958.28,
+    "cash": 71623.28,
+    "market_value": 28335.0,
+    "net_change_usd": -41.72,
+    "net_change_pct": -0.0417,
+    "high_water": 100174.348,
+    "drawdown_pct": -0.2157,
+    "day_start_nav": 99228.128,
+    "day_change_pct": 0.7358,
+    "halted": null,
+    "locked_day": null
+  },
+  "positions": [
+    {
+      "symbol": "SPY",
+      "qty": 13,
+      "current_price": 716.7,
+      "market_value": 9317.1,
+      "cost_basis": 9355.19,
+      "unrealized_gross": -38.09
+    },
+    {
+      "symbol": "QQQ",
+      "qty": 30,
+      "current_price": 633.93,
+      "market_value": 19017.9,
+      "cost_basis": 19167.72,
+      "unrealized_gross": -149.82
+    }
+  ],
+  "open_unrealized_gross": -187.91,
+  "performance": {
+    "realized_gross": 176.04,
+    "closed_trade_count": 13,
+    "win_rate_pct": 69.23,
+    "average_win": 102.98,
+    "average_loss": -187.7,
+    "expectancy_dollars": 13.54,
+    "profit_factor": 1.2345,
+    "automatic_exits": 9,
+    "manual_exits": 5
+  },
+  "orders": {
+    "total": 30,
+    "status_counts": {
+      "4": 29,
+      "5": 1
+    },
+    "by_session_et": {
+      "2026-11-20": 2,
+      "2026-11-23": 9,
+      "2026-11-24": 8,
+      "2026-11-25": 11
+    },
+    "all_terminal": true
+  },
+  "config": {
+    "two_vote_initial_allocation_usd": 100000,
+    "entry_usd": 20000,
+    "name_cap_usd": 40000,
+    "name_cap_fraction_of_nav": 0.395,
+    "daily_loss_fraction": 0.025,
+    "reduce_drawdown_fraction": 0.04,
+    "halt_drawdown_fraction": 0.07,
+    "long_sales_only_at_profit": true,
+    "short_twins": {
+      "US.SPY": "US.IVV",
+      "US.QQQ": "US.QQQM"
+    }
+  },
+  "known_issues": [
+    {
+      "issue": "2026-11-25 native scheduler recorded unexpected_exit (-15) at 10:57 ET although execution evidence continues to 15:55 ET; process-supervision history needs final reconciliation.",
+      "source": "private/competition/scheduler/2026-11-25.json"
+    },
+    {
+      "issue": "Short-open NAV mismatch affected 148 risk records on 24 Nov and 12 on 25 Nov; entries and loss-lock/halt evaluation were blocked until the account_cash correction in the current working tree.",
+      "source": "src/dual_strategy/competition/broker.py account_cash; 2026-11-25 decision log",
+      "evidence": {
+        "2026-11-24_mismatched_risk_records": 148,
+        "2026-11-25_mismatched_risk_records": 12
+      }
+    },
+    {
+      "issue": "Full local suite currently has one Node-dependent dashboard DOM test failure because node is absent from PATH; browser manual check has no console errors.",
+      "source": "tests/test_dashboard.py:1004"
+    }
+  ],
+  "limitations": [
+    "Paper fills do not predict live returns.",
+    "The 27 November half-day session is not yet included.",
+    "Last verified 17 Nov: Cloud auditor/watchdog deployments had no schedule and zero runs; no Moomoo Vault was attached.",
+    "The 27 November final settlement will use regular-market closing prices."
+  ],
+  "position_cost_method": "Identified entry-lot cost basis from the runner ledger; Moomoo cumulative position cost/profit fields are not used as open unrealized P&L.",
+  "reconciliation": {
+    "realized_gross": 176.04,
+    "open_unrealized_gross": -187.91,
+    "gross_total": -11.87,
+    "account_net_change_usd": -41.72,
+    "implied_fees_and_other_cash_flows_usd": -29.85
+  },
+  "test_summary": {
+    "run_at": "2026-11-26T05:42:49+08:00",
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider",
+    "passed": 1248,
+    "skipped": 2,
+    "failed": 1,
+    "subtests_passed": 59,
+    "warnings": 4,
+    "failure": "tests/test_dashboard.py:1004 requires node, which is absent from PATH",
+    "functional_failures": 0
+  },
+  "order_reconciliation": {
+    "broker_orders": 30,
+    "ledger_orders": 30,
+    "matched_order_ids": 30,
+    "missing_from_broker": [],
+    "missing_from_ledger": [],
+    "status_legend": {
+      "4": "FILLED",
+      "5": "CANCELLED",
+      "7": "REJECTED"
+    },
+    "status_counts": {
+      "FILLED": 29,
+      "CANCELLED": 1
+    },
+    "open_orders": 0,
+    "attribution_errors": [],
+    "partial_fill_evidence": {
+      "session": "2026-11-23",
+      "broker_order_id": "3338963",
+      "reported_status": "CANCELLED",
+      "reported_cum_qty": 0,
+      "reconciled_filled": 20,
+      "resolution": "Runner halted; remaining shares manually sold; broker position and cash reconciled."
+    },
+    "trade_log_crosswalk": "submission_trade_log.csv broker_order_id",
+    "sources": [
+      "private/competition/live/outbox/*.jsonl",
+      "Moomoo sim order history",
+      "private/competition/live/state.json"
+    ]
+  }
+}

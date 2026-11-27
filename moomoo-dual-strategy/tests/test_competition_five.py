@@ -29,6 +29,18 @@ CFG["risk"]["legacy_exit_only"] = False  # Exercise the original entry and sizin
 # Exercise the original exit mechanics on positions set directly in state (no receipts). The live profit-only rule
 # (risk.long_sales_only_at_profit) has its own tests in test_long_sales_only_at_profit.py.
 CFG["risk"]["long_sales_only_at_profit"] = False
+
+
+def h_active(cfg: dict) -> dict:
+    """H was retired on 2026-11-26 (live: no allocation, not an entry sleeve; its $20k went to the Two-vote book). Its
+    code is kept for the 2026-11-20 history, so its mechanics are exercised with the pre-retirement settings."""
+    cfg["allocation"]["h_etf"] = 0.20
+    cfg["h_etf"]["initial_allocation_usd"] = 20000
+    cfg["risk"]["entry_sleeves"] = ["h_etf", *cfg["risk"]["entry_sleeves"]]
+    return cfg
+
+
+h_active(CFG)
 NOW = datetime(2026, 11, 23, 11, 0, tzinfo=NY)
 SESSION = "2026-11-23"
 
@@ -51,7 +63,8 @@ def state(**books):
 
 def test_five_sleeves_named_not_numbered():
     assert planner.SLEEVES == ("b3", "h_etf", "noise", "vwap", "orb", "two_vote")
-    assert CFG["allocation"] == {**{s: 0.20 for s in planner.SLEEVES if s != "two_vote"}, "two_vote": 0.0}
+    assert load_config(PROJECT)["allocation"] == {**{s: 0.20 for s in planner.SLEEVES if s not in ("h_etf", "two_vote")},
+                                                  "h_etf": 0.0, "two_vote": 0.0}          # H retired 2026-11-26
     assert CFG["risk"]["short_sleeves"] == ["noise", "vwap", "orb", "two_vote"] and CFG["risk"]["long_only"] is False
     assert "fbr" not in CFG and "pairs" not in CFG
 
@@ -59,9 +72,10 @@ def test_five_sleeves_named_not_numbered():
 # ------------------------------------------------------------------ $20,000 caps
 def test_each_sleeve_starts_at_20k_and_moves_only_with_its_own_pnl():
     st = {**state(), "initial_nav": 100_000.0}
-    perf = sleeve_performance(Store(PROJECT, {"state_dir": "nonexistent-state"}), st, asdict(acct()), CFG)
+    perf = sleeve_performance(Store(PROJECT, {"state_dir": "nonexistent-state"}), st, asdict(acct()), load_config(PROJECT))
+    # Live: H retired 2026-11-26 and its $20,000 moved to the Two-vote book ($80,000 -> $100,000).
     assert {s: v["initial_capital"] for s, v in perf["sleeves"].items()} == {
-        s: (80_000.0 if s == "two_vote" else 20_000.0) for s in planner.SLEEVES}
+        **{s: 20_000.0 for s in planner.SLEEVES}, "h_etf": 0.0, "two_vote": 100_000.0}
 
 
 def test_noise_area_trades_its_whole_20k_sleeve():
@@ -482,7 +496,7 @@ def test_daily_report_after_the_close(runner, tmp_path, monkeypatch):
     runner.daily_report(SESSION)
     rep = __import__("json").loads((runner.store.dir / "reports" / f"{SESSION}.json").read_text())
     assert rep["session"] == SESSION and rep["mode"] == "EXECUTE" and set(rep["sleeves"]) == set(planner.SLEEVES)
-    assert all(v["capital"] == (80_000.0 if s == "two_vote" else 20_000.0) for s, v in rep["sleeves"].items()) \
+    assert all(v["capital"] == (100_000.0 if s == "two_vote" else 20_000.0) for s, v in rep["sleeves"].items()) \
         and rep["halted"] is None
 
 
@@ -504,7 +518,7 @@ def test_legacy_exit_only_keeps_existing_h_exit_and_blocks_new_exposure(runner, 
 
 
 def test_h_entries_are_restored_without_enabling_other_legacy_entries(runner):
-    runner.cfg = load_config(PROJECT)
+    runner.cfg = h_active(load_config(PROJECT))
     runner.state["sleeves"]["h_etf"] = {"US.XLP": 2}
     account = acct(positions={"US.XLP": 2}, quotes={"US.XLP": 90.0})
     plan = {"entries": ["US.IWM"], "exits": {}}
@@ -521,7 +535,7 @@ def test_h_entries_are_restored_without_enabling_other_legacy_entries(runner):
 @pytest.mark.parametrize("sold,buys", [(0, []), (10, [("US.IWM", 4)]), (200, [("US.IWM", 49), ("US.QQQ", 24)])])
 def test_h_open_resizes_from_confirmed_exit_and_entry_fills(runner, monkeypatch, sold, buys):
     monkeypatch.delattr(runner, "audit")
-    runner.cfg = load_config(PROJECT)
+    runner.cfg = h_active(load_config(PROJECT))
     runner.cfg["risk"]["long_sales_only_at_profit"] = False   # resizing mechanics; exits at a loss are tested elsewhere
     runner.quotes["US.XLP"] = 100
     runner.state["sleeves"]["h_etf"] = {"US.XLP": 200}
@@ -698,7 +712,7 @@ def test_vote_lot_uses_configured_size_within_book_name_cap_and_cash():
     st["sleeves"]["vwap"] = {}                                                   # a lower NAV lowers the cap
     out, why = planner.plan_vote_entry(st, acct(nav=90_000, positions={"US.SPY": 39}), SESSION, "US.SPY", 1, CFG, NOW, "e8")
     assert why == "entry" and 39 * 500 + out[0].qty * out[0].limit_price <= 35_550 + 1e-6
-    st = state(two_vote={"US.SPY": 80, "US.QQQ": 100})                           # $80,000 book fully deployed
+    st = state(two_vote={"US.SPY": 80, "US.QQQ": 100})                           # SPY already at its $40,000 cap
     out, why = planner.plan_vote_entry(st, acct(positions={"US.SPY": 80, "US.QQQ": 100}), SESSION, "US.SPY", 1,
                                        CFG, NOW, "e9")
     assert out == [] and why == "entry size zero"
@@ -731,19 +745,19 @@ def test_vote_book_banks_gains_and_counts_losses(tmp_path):
     receipt("a", "BUY", 500.0)
     receipt("b", "SELL", 550.0)
     v = sleeve_performance(store, st, asdict(acct()), CFG)["sleeves"]["two_vote"]
-    assert v["status"] == "available" and v["gross_pnl"] == 500.0 and v["capital"] == 80_000.0
+    assert v["status"] == "available" and v["gross_pnl"] == 500.0 and v["capital"] == 100_000.0
     assert v["reserved_profit"] == 500.0
     receipt("c", "BUY", 500.0)
     receipt("d", "SELL", 400.0)
     v = sleeve_performance(store, st, asdict(acct()), CFG)["sleeves"]["two_vote"]
     assert v["realized_gross"] == -500.0 and v["reserved_profit"] == 500.0
-    assert v["capital"] == v["limits"]["allocation_budget"] == 79_000.0
+    assert v["capital"] == v["limits"]["allocation_budget"] == v["limits"]["aggregate_limit"] == 99_000.0
     receipt("e", "SELL", 600.0)
     receipt("f", "SELL", 450.0)
     receipt("g", "BUY", 500.0)
     st["sleeves"]["two_vote"] = {"US.SPY": -10}
     v = sleeve_performance(store, st, asdict(acct(positions={"US.SPY": -10})), CFG)["sleeves"]["two_vote"]
-    assert v["open_entry_lots"] == {"US.SPY": 1} and v["reserved_profit"] == 1_500.0 and v["capital"] == 79_000.0
+    assert v["open_entry_lots"] == {"US.SPY": 1} and v["reserved_profit"] == 1_500.0 and v["capital"] == 99_000.0
 
 
 def _vote_report(opened, k, spy, qqq=0):
@@ -789,7 +803,7 @@ def _profit_buy(runner, sleeve, symbol, qty, tag="buy"):
 
 
 def test_profit_exit_uses_legacy_h_target_and_remembers_new_h_target(runner):
-    runner.cfg = load_config(PROJECT)
+    runner.cfg = h_active(load_config(PROJECT))
     _profit_quotes(runner)
     _profit_buy(runner, "h_etf", "US.IWM", 10)
     runner.state.pop("h_take_profit_targets")  # Old $2,000 entry had no per-position target in its saved state.
@@ -901,7 +915,7 @@ def test_two_vote_short_lot_takes_profit_at_a_configured_target_when_price_falls
 
 def test_live_two_vote_has_no_profit_target_but_h_etf_keeps_its_target(runner):
     """Exit-backtest decision 2026-11-25: Two-vote lets winners run (vote flip or scheduled flatten only)."""
-    runner.cfg = load_config(PROJECT)
+    runner.cfg = h_active(load_config(PROJECT))
     assert runner.cfg["two_vote"]["take_profit_usd"] is None and runner.cfg["h_etf"]["take_profit_usd"] == 20
     _profit_quotes(runner)
     runner.quotes.update({"US.QQQ": 400.0, "US.IWM": 200.0})

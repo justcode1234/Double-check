@@ -914,6 +914,9 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   };
   await load({data:absent});
   assert.match(text('access-summary'), /Competition account verified/);
+  assert.equal(text('vote-book'), '$100,000 sizing book');                // H retired 2026-11-26: its $20k moved here
+  assert.ok(absent.config.execution_enabled);
+  assert.equal(text('mode-badge'), 'Two-vote entries enabled in config');
   assert.match(text('sleeves'), /XLP21 long.*XLV11 long/);
   assert.match(text('sleeves'), /Sleeve attribution unavailable/);
   assert.equal(text('nav-summary'), '$100,000.00');
@@ -922,7 +925,8 @@ COMPETITION_DOM = DOM_HARNESS.split('(async () => {')[0] + r'''
   await load({data:absent});
   assert.match(text('sleeves'), /Stale.*XLP21 long.*XLV11 long/);
   assert.match(text('access-summary'), /Competition broker read unavailable/);
-  absent.config.risk.entry_sleeves = ['h_etf'];
+  absent.config.risk.entry_sleeves = ['h_etf'];                          // the pre-retirement H sleeve
+  absent.config.h_etf.initial_allocation_usd = 20000;
   await load({data:absent});
   assert.match(text('sleeves'), /H ETF sleeve.*\$20,000.00 allocation/);
   assert.match(text('mode-badge'), /H entries enabled/);

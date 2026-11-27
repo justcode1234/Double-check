@@ -4,7 +4,7 @@ Moomoo × Qoder paper-trading challenge write-up · competition paper account, $
 
 ## Summary
 
-- **What runs:** an intraday **Two-vote** strategy on SPY and QQQ, plus a small multi-day **H ETF** dip-buying sleeve. Older sleeves (B3, Noise-area, VWAP, ORB) are exit-only.
+- **What runs:** an intraday **Two-vote** strategy on SPY and QQQ, on a $100,000 sizing book. The multi-day **H ETF** dip-buying sleeve was retired on 26 November and its $20,000 moved to Two-vote. Older sleeves (B3, Noise-area, VWAP, ORB) are exit-only.
 - **Edge hypothesis:** when two or more independent, well-known technical rules agree on a 5-minute bar, short-term direction is more likely to persist than when any single rule fires. Ten rules vote, and a trade needs at least two to agree with fewer than two disagreeing.
 - **How it is controlled:** every number is in [config/competition.yaml](moomoo-dual-strategy/config/competition.yaml), and every decision is deterministic Python. Risk limits sit inside the official 40% single-name rule. Every order is reconciled against Moomoo before the next one. From 25 November, **a long position is never sold at a loss**: it is sold only when its own entry lot nets a profit after fees, and otherwise it is kept, overnight if needed. Shorts can still be covered at a loss.
 - **What we learned:** a 5.9-year replay shows the signal is **regime-dependent**. It loses after conservative costs in 2021–2024 and is profitable in the recent volatile regime. The best exit across every period was to **let winners run** (exit only on a 2+ opposite vote or the 15:55 ET close). That rule is live from 25 November.
@@ -32,6 +32,7 @@ Each rule is defined for the short side and mirrored for the long side. A rule's
 
 **Entries (10:00–14:30 ET):**
 
+- $100,000 sizing book across all its tickers (it was $80,000 until H's $20,000 moved over on 26 November). Realized gains are banked outside the book; losses reduce it. No leverage: new positions must also fit in NAV minus open gross exposure.
 - $20,000 per entry lot. There is no fixed lot count: lots are added while the ticker stays within its cap, which is $40,000 and at most 39.5% of live NAV (just inside the official 40% single-name limit). A top-up smaller than $5,000 is skipped. Older $10,000 lots count toward the cap at their market value, so a ticker can hold $10k + $20k + a smaller top-up.
 - While an agreement holds, each completed bar may add one lot, and the strategy re-enters after an exit if the agreement still holds.
 - It never re-enters on the bar where an opposite agreement just closed the position, and never while an earlier exit order is still working.
@@ -39,11 +40,14 @@ Each rule is defined for the short side and mirrored for the long side. A rule's
 **Exits:**
 
 - When 2 or more rules agree on the opposite side, the strategy covers every short lot of that ticker, and sells each long lot only if that lot is in profit.
+- Moomoo holds one net position per ticker, so a ticker held long cannot also be shorted (its `max_sell_short` is 0). From 25 November, a 2-vote sell agreement on a ticker held long opens the short in a twin ETF on the same index instead: IVV for SPY, QQQM for QQQ. The long lots are kept. The twin short stacks like any lot, follows its ticker's votes and is covered on a 2-vote buy agreement, the 15:55 ET flatten, a lock or a halt.
 - A scheduled flatten at 15:55 ET covers every short and sells every long lot that is in profit. A long lot at a loss is kept overnight and exits under the same rules in a later session. The 24 November lots (SPY 13, QQQ 30) were the first carried this way. The scheduler lets Two-vote **long** lots carry; any other intraday sleeve, or any short, still blocks the next start.
 - **Long sales only at a profit.** Each entry lot is judged alone, at the worst possible fill (the sell limit, 5 bp under the quote), net of the $0.99 entry fee and the sale's $0.99 order fee plus the activity fee. Each lot therefore has its own sell floor: the old $10,000 lots need a slightly larger move per share than the $20,000 lots, because the fixed fees are spread over fewer shares. The rule is checked twice: when the exit is planned, and again in the order sender just before any order leaves, whatever asked for the sale. A sale it blocks is recorded as a decision (`long_sale_held`), not as an execution error.
 - There is no profit target and no stop-loss. That choice is backed by the exit backtest in section 3. That backtest closed every position at 15:55 ET; holding losing longs overnight was not backtested.
 
-### H ETF (multi-day)
+### H ETF (multi-day) — retired 26 November
+
+Retired by user decision on 26 November: it found no entry on 23–25 November, and its $20,000 moved to the Two-vote book. It holds nothing, makes no nightly plan and sends no orders. The rules below describe how it traded on 20 November (XLV and XLP, +$12.38 realized gross).
 
 - **Universe:** SPY, QQQ, IWM, DIA, plus the 5 most liquid sector ETFs.
 - **Entry:** RSI(2) ≤ 10 on daily adjusted closes, with the close above its 100-session mean.
@@ -61,7 +65,7 @@ Each rule is defined for the short side and mirrored for the long side. A rule's
 | Drawdown, halt (kill switch) | NAV ≤ 93% of the high-water mark | Cover shorts and sell longs in profit (a losing long is sold as soon as it turns profitable); entries stay blocked until a human clears the halt |
 | Orders | ≤ 200 per day (the official cap); 3 order errors in a day halt trading | Human reconciliation required |
 | Execution | Marketable limit at the quote ± 5 bp; quotes ≤ 15 s old; unfilled after 30 s → cancel and reconcile | Partial fills are verified against Moomoo positions and cash |
-| Shorts | Only in short-enabled sleeves; never overnight | A close-only buy covers, at a loss if needed |
+| Shorts | Only in short-enabled sleeves; never overnight. A Two-vote short against a held long goes to the twin ETF (IVV for SPY, QQQM for QQQ), which has its own 40% cap | A close-only buy covers, at a loss if needed |
 | Startup gates | Each session starts only between 09:00 and 09:25 ET, and only after read-only preflight: confirmed competition account, valid capital, no halt or lock, intraday sleeves flat (except Two-vote long lots), no shorts carried, prior sessions completed or reviewed, no unreviewed execution errors | The runner does not start |
 | Provenance | Every runner records the exact config and SHA-256 of its source files before its first decision | Each decision is traceable to the exact code that made it |
 
@@ -162,3 +166,4 @@ The backtests read the committed `data-cache`. Live trading needs the Moomoo CLI
 4. **Settings apply when the runner starts.** The dashboard shows the settings of the running process and flags saved changes that take effect at the next start.
 5. **Live and historical bars differ by cents.** Verify signals on the bars the runner actually saw.
 6. **"Never sell at a loss" moves risk, it does not remove it.** From 25 November a losing long is kept rather than cut, so the daily-loss lock and the drawdown halt now stop new entries and cover shorts but cannot shrink a losing long book. Exposure stays bounded by the per-ticker cap (at most about $80,000 across SPY and QQQ) and by the no-leverage cash rule. The trade-off is deliberate: avoid realizing losses and give positions time to recover, at the cost of carrying overnight gap risk that the backtest did not model.
+7. **Check the risk checks while a short is open.** Moomoo's sim `balance` withholds 160% of the short market value (proceeds plus 60% margin). Reading it as cash put the runner NAV about 1.6× the short below the broker total, so on 23–24 November every mark with a short open (148 of 148) failed the NAV check: entries were blocked and the loss lock and halt were not evaluated. Fixed 25 November: with shorts open, cash = total_asset − long_mv + |short_mv|, used only when it equals balance + 1.6 × |short_mv| to the dollar.

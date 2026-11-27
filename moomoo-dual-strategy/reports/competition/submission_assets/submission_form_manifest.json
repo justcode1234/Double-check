@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "form_url": "https://survey.alibabacloud.com/uone/sg/survey/Zd8GZRUDs?utm_source=luma",
+  "form_end_time": "2026-12-01 00:00:00 (form configuration; event deadline remains 30 Nov 2026 23:59 SGT)",
+  "fields": [
+    {
+      "name": "Full Name",
+      "required": true,
+      "status": "user_input",
+      "value": ""
+    },
+    {
+      "name": "Business Email",
+      "required": true,
+      "status": "user_input",
+      "value": ""
+    },
+    {
+      "name": "Country",
+      "required": true,
+      "status": "user_input",
+      "value": ""
+    },
+    {
+      "name": "Phone Number",
+      "required": true,
+      "status": "user_input",
+      "value": ""
+    },
+    {
+      "name": "One sentence about your project",
+      "required": true,
+      "status": "ready",
+      "value": "Moo-Moo is a deterministic two-vote SPY/QQQ paper-trading agent with ten independent signals, per-lot profit-only exits, twin-ETF shorts, and broker-reconciled risk controls."
+    },
+    {
+      "name": "Presentation Link",
+      "required": true,
+      "status": "ready",
+      "value": "https://moo-moo-competition-7amelju7q1y.qoder.website",
+      "instructions": "Public Qoder Site URL verified in browser with no console errors."
+    },
+    {
+      "name": "Project Description",
+      "required": true,
+      "status": "ready",
+      "value": "Moo-Moo is a Qoder-built, deterministic paper-trading agent for the Moomoo \u00d7 Qoder challenge. Ten independent technical rules vote on each completed five-minute SPY/QQQ bar; the agent acts only when at least two agree and fewer than two oppose. Entries use $20,000 lots inside a $100,000 book, a $40,000/39.5%-of-NAV single-name cap, no leverage, a 2.5% daily loss lock, 4% reduced sizing and a 7% terminal drawdown halt. Long lots are never sold at a loss; short exposure uses IVV/QQQM when the primary ETF is already long and is always covered by the close, lock or halt.\n\nEvery order is persisted as intent \u2192 acknowledgement \u2192 outcome and reconciled against Moomoo before the next order. The current broker snapshot is NAV $99,958.28, drawdown -0.2157%, with SPY 13 and QQQ 30, 30/30 broker orders matched, no open orders, no halt and no daily lock. The submission includes the strategy and invalidation rules, risk/compliance matrix, 1,477-session exit research, 1,479-session parity evidence, 1,248 passing tests plus one disclosed Node-environment failure, a 51-claim evidence matrix, redacted decision/fill logs, dashboard captures, and a runnable package with SHA-256 manifest.\n\nQoder Desktop built the code, tests, dashboard, report and deck. Read-only Cloud reporter/auditor/watchdog deployments are documented with their limits: one reporter run is verified; auditor/watchdog have zero runs and the 17 November evidence shows no Cloud schedule or Vault. The report explicitly covers what worked, what failed and why, including the 23 November partial-fill anomaly, 24\u201325 November short-cash NAV bug, and 25 November scheduler process-history discrepancy. Final 27 November settlement refresh is pending."
+    },
+    {
+      "name": "Github Link",
+      "required": false,
+      "status": "ready",
+      "value": "https://github.com/justcode1234/Moo-Moo"
+    },
+    {
+      "name": "Consent to share project details with judges",
+      "required": true,
+      "status": "user_consent",
+      "value": ""
+    },
+    {
+      "name": "Marketing contact consent",
+      "required": true,
+      "status": "user_consent",
+      "value": ""
+    }
+  ],
+  "deliverables": {
+    "presentation_hosted_html": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
+    "presentation_pptx": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pptx",
+    "presentation_pdf": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf",
+    "runnable_package": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.zip",
+    "package_manifest": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json",
+    "package_checksum": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256"
+  },
+  "notes": [
+    "Personal details and consent choices must be completed by the user.",
+    "The event deadline is 30 Nov 2026 23:59 SGT; the form configuration end time is 1 Dec 2026 00:00:00.",
+    "Public Qoder Site deployment verified; update the same project after final report changes."
+  ],
+  "site": {
+    "provider": "Qoder Sites",
+    "url": "https://moo-moo-competition-7amelju7q1y.qoder.website",
+    "access_mode": "public",
+    "published": true,
+    "browser_console_errors": 0
+  },
+  "cloud_audits": {
+    "evidence_file": "moomoo-dual-strategy/reports/competition/submission_assets/cloud_audit_runs.json",
+    "runs": [
+      {
+        "name": "Moo-Moo Rubric Auditor",
+        "task_id": "ca_DQX2IB2YMQTANCHT3UMXWJUMHH",
+        "scheduled_at": "2026-11-27T06:10:00Z",
+        "status": "scheduled_outputs_not_exposed"
+      },
+      {
+        "name": "Moo-Moo Evidence Watchdog",
+        "task_id": "ca_3ZAAPYHV6L3IV5BB5WAFBDHU5Y",
+        "scheduled_at": "2026-11-27T06:10:00Z",
+        "status": "scheduled_outputs_not_exposed"
+      }
+    ]
+  },
+  "independent_audits": {
+    "windows": {
+      "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+      "completed_at": "2026-11-27T06:25:20Z",
+      "weighted_score": 5.5,
+      "critical_finding": "Public repository did not yet contain the current Claude working-tree changes.",
+      "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md"
+    },
+    "local_watchdog": {
+      "session_id": "4a884e65-eea4-5317-adea-f98aa44f25aa",
+      "completed_at": "2026-11-27T06:28:00Z",
+      "status": "completed",
+      "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import argparse
 import base64
 import html
 import json
@@ -150,16 +151,21 @@ figure{margin:24px 0;background:var(--panel);border:1px solid var(--line);border
 """
 
 
-def render(body, headings, results):
+def render(body, headings, results, final=False):
     nav = "".join(f'<a class="toc-l{level}" href="#{hid}">{html.escape(text)}</a>' for level, text, hid in headings if level <= 3)
     account = results["account"]
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Moo-Moo Competition Submission Report</title><style>{CSS}</style></head><body><div class="layout"><nav><div class="brand">MOO-MOO / QODER</div>{nav}</nav><main><section class="hero" id="moo-moo-adaptive-two-vote-etf-agent"><div class="eyebrow">Moomoo × Qoder AI Trading Agent Challenge</div><h1>Moo-Moo<br>Adaptive Two-Vote ETF Agent</h1><div class="badge">Draft v0.3 · final 27 Nov session pending</div><p>Ten technical rules. One deterministic decision. Every order reconciled before the next.</p><div class="kpis"><div class="kpi"><span>CURRENT NAV</span><strong>${account['nav']:,.2f}</strong></div><div class="kpi"><span>NET CHANGE</span><strong class="negative">−${abs(account['net_change_usd']):,.2f}</strong></div><div class="kpi"><span>DRAWDOWN</span><strong>{account['drawdown_pct']:.4f}%</strong></div><div class="kpi"><span>ORDERS MATCHED</span><strong>30 / 30</strong></div></div></section>{''.join(body)}<div class="footer">Generated with Qoder Desktop · broker-reconciled paper-trading evidence · no live capital · report and package remain draft until the 27 November 2026 final session is reconciled.</div></main></div></body></html>'''
+    badge = "Final · 27 Nov 2026 session reconciled" if final else "Draft v0.3 · final 27 Nov session pending"
+    footer = "Generated with Qoder Desktop · broker-reconciled paper-trading evidence · no live capital · final submission." if final else "Generated with Qoder Desktop · broker-reconciled paper-trading evidence · no live capital · report and package remain draft until the 27 November 2026 final session is reconciled."
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Moo-Moo Competition Submission Report</title><style>{CSS}</style></head><body><div class="layout"><nav><div class="brand">MOO-MOO / QODER</div>{nav}</nav><main><section class="hero" id="moo-moo-adaptive-two-vote-etf-agent"><div class="eyebrow">Moomoo × Qoder AI Trading Agent Challenge</div><h1>Moo-Moo<br>Adaptive Two-Vote ETF Agent</h1><div class="badge">{badge}</div><p>Ten technical rules. One deterministic decision. Every order reconciled before the next.</p><div class="kpis"><div class="kpi"><span>CURRENT NAV</span><strong>${account['nav']:,.2f}</strong></div><div class="kpi"><span>NET CHANGE</span><strong class="negative">−${abs(account['net_change_usd']):,.2f}</strong></div><div class="kpi"><span>DRAWDOWN</span><strong>{account['drawdown_pct']:.4f}%</strong></div><div class="kpi"><span>ORDERS MATCHED</span><strong>30 / 30</strong></div></div></section>{''.join(body)}<div class="footer">{footer}</div></main></div></body></html>'''
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--final", action="store_true")
+    args = parser.parse_args()
     body, headings = parse_markdown(MARKDOWN.read_text(encoding="utf-8"))
     results = json.loads(RESULTS.read_text(encoding="utf-8"))
-    page = render(body, headings, results)
+    page = render(body, headings, results, final=args.final)
     (OUT / "Moo-Moo-Submission-Report.html").write_text(page, encoding="utf-8")
     hosted = re.sub(r'<a href="(?!https?:|#)[^"]+"[^>]*>(.*?)</a>', r"\1", page)
     package_mb = (OUT / "Moo-Moo-Runnable-Package.zip").stat().st_size / 1_000_000

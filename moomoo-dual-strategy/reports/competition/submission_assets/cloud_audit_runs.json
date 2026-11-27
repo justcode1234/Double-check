@@ -51,6 +51,14 @@
       "completed_at": "2026-11-27T06:28:00Z",
       "status": "completed",
       "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md"
+    },
+    {
+      "name": "Windows Rubric Re-Audit",
+      "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+      "completed_at": "2026-11-27T06:47:53Z",
+      "status": "completed",
+      "weighted_total": 6.2,
+      "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.md"
     }
   ]
 }

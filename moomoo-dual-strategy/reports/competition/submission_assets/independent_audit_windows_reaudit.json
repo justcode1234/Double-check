@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "completed_at": "2026-11-27T06:47:53Z",
+  "auditor": "Qoder Windows/Fox session",
+  "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+  "mode": "read_only",
+  "verified_commit": "6b3ffa7c40908889a43f57df292ad1f4dfdd05da",
+  "critical_public_repo_mismatch": "resolved_on_branch_then_main",
+  "scores": {
+    "risk_adjusted_return": {"weight": 0.25, "score": 4.5},
+    "qoder_cloud_usage": {"weight": 0.30, "score": 5.5},
+    "strategy_risk_design": {"weight": 0.30, "score": 8},
+    "reusability_documentation": {"weight": 0.15, "score": 7},
+    "weighted_total": 6.2
+  },
+  "remaining_gaps": [
+    "27 Nov final-session refresh",
+    "Cloud automation outputs not exposed",
+    "25 Nov scheduler -15 process-history discrepancy",
+    "Node-dependent DOM test failure",
+    "Six user-owned form fields and consents"
+  ],
+  "full_report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.md"
+}

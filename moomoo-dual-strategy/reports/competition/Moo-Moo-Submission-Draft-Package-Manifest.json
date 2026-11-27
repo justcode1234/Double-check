@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T06:43:37.030642+00:00",
+  "generated_at": "2026-11-27T07:42:20.309007+00:00",
   "package": "Moo-Moo-Submission-Draft-Package.zip",
-  "source_head": "a4d9cadb0d7282a9f000a716e683fe257c208afc",
-  "working_tree_entries": 52,
+  "source_head": "6b3ffa7c40908889a43f57df292ad1f4dfdd05da",
+  "working_tree_entries": 11,
   "draft": true,
   "includes": [
     "README.md",
@@ -41,8 +41,8 @@
     "this manifest file",
     "the external package checksum file"
   ],
-  "payload_file_count": 837,
-  "total_zip_file_count": 838,
+  "payload_file_count": 839,
+  "total_zip_file_count": 840,
   "manifest_included": true,
   "files": [
     {
@@ -52,8 +52,8 @@
     },
     {
       "path": "COMPETITION_SUBMISSION_DRAFT.md",
-      "bytes": 30353,
-      "sha256": "6c598006128a64c4146c4cd1ee00c60a55b5b0c15b24219ea366a508a27a8437"
+      "bytes": 30616,
+      "sha256": "281cb013f8f6d3743df2bb07292ce9b776fa491d9bf8fd7a81a56ba567addb3e"
     },
     {
       "path": "README.md",
@@ -3397,13 +3397,13 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
-      "bytes": 276913,
-      "sha256": "e9c8984030e35ea519ca7e9111f26bdb963e97f768b6358209e47dfd404e59be"
+      "bytes": 277088,
+      "sha256": "195628c34ab9227f81c581d7d0924f509102388a951f4d3d26a6d0c846d7a65d"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
-      "bytes": 277680,
-      "sha256": "1cb19bb7f329180e98d34b3fc6db3ad3681c24bfe1adff79ce206ac9f82c166e"
+      "bytes": 277924,
+      "sha256": "60c93731827446e9e51a235185ebd05d97f97a01204ec9ffd7f0cd68c4ecd899"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md",
@@ -3417,8 +3417,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/dist/index.html",
-      "bytes": 276913,
-      "sha256": "e9c8984030e35ea519ca7e9111f26bdb963e97f768b6358209e47dfd404e59be"
+      "bytes": 277088,
+      "sha256": "195628c34ab9227f81c581d7d0924f509102388a951f4d3d26a6d0c846d7a65d"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/exit_backtest/fees_only.json",
@@ -3457,18 +3457,18 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.csv",
-      "bytes": 14401,
-      "sha256": "33bc7647041394e87ce611e97ae00ec92b42da08faa690b7e51a900687fdf85b"
+      "bytes": 14349,
+      "sha256": "6bc57d64d9d728cc0bebb9fb0ea3966ece64e53e2b45a9244560cf8e69742d45"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.json",
-      "bytes": 1860,
-      "sha256": "c57afd673af7be3805fb412f64b5d4dfdf5de229eb8d25697ddd20d9ec5904af"
+      "bytes": 2294,
+      "sha256": "c7f370eb380844349971e550b4cb4a891ac1d54f199395b8c23f5c2aa99355b4"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/cloud_audit_runs.json",
-      "bytes": 2621,
-      "sha256": "12b218e228b21707267eb512add4424c20ce378ededc6508e3eefc94a72ee2ce"
+      "bytes": 2953,
+      "sha256": "b13085d80a9bbc97ba7d433695c77010fe76268d1e97e9705c806ca94d8fe393"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/dashboard-current.png",
@@ -3541,9 +3541,19 @@
       "sha256": "492484e20cc5c2aa19b6853524d648dfc7b82ee10dc5702680d9820fddef55dd"
     },
     {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.json",
+      "bytes": 968,
+      "sha256": "31505a34cf7670fd6d24c0dc34a273eb55756b9ad301869b3db52514682fb2e7"
+    },
+    {
+      "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.md",
+      "bytes": 2134,
+      "sha256": "82b6583cb70c801047de5a5732fc84fecfa040bdb2cba6791d66218b25f26136"
+    },
+    {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md",
-      "bytes": 2948,
-      "sha256": "4c5f5ff9d3db83e4ed821517d4bd7f3915975ed5654807ac10f9247e35492e04"
+      "bytes": 2946,
+      "sha256": "1262ebfdc89d1baa73348b4cfd49e75c38ba4625b3e979ec393d65fe879517cf"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/peer_evidence_manifest.json",
@@ -3557,18 +3567,18 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_decision_log.csv",
-      "bytes": 30099,
-      "sha256": "dacb7e7eff003ef9a865cd38b17c03dde432b524e55091136616c9865b7440fd"
+      "bytes": 29951,
+      "sha256": "7ad08ab4454e3cc067b485731188d64e76ac77c0a3450a0d331c49e31fd0b9f4"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_equity.csv",
-      "bytes": 212888,
-      "sha256": "83fbce46b0298bdebf3e225af067646e1753885cb7576f9d6ee625ba23c2ee30"
+      "bytes": 210286,
+      "sha256": "5224d355be2eb9cccbff63f07ff65c7eaa86a6e03ac318858a20fe3dd58c1e22"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_form_manifest.json",
-      "bytes": 5948,
-      "sha256": "225728a3559bde627f71e0fae6c5c383ea2cf2a6dd610b7af886fe1e50f5f80c"
+      "bytes": 6224,
+      "sha256": "9474febaeed09374b0e4e2d7df13c9c21b4a4ffae3c74f8073fdb5dc6680ad2c"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_results.json",
@@ -3577,8 +3587,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_trade_log.csv",
-      "bytes": 6933,
-      "sha256": "47389d03c8380037045ed301cfa93d86e9681ff0193ca2e4f910e0678588e6f4"
+      "bytes": 6902,
+      "sha256": "8a15af00991738e5946e6c9d52727c8c2bad211c198358f6a557b9042cd31449"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/vote_replay.json",
@@ -4296,7 +4306,15 @@
         "severity": "critical",
         "issue": "Public repository does not yet contain the current Claude working-tree changes described by the submission.",
         "evidence": "independent_audit_windows.json",
-        "required_action": "After Claude is confirmed finished, review and commit/push the code, tests, backtest, and submission assets; then re-verify matrix locators against the pushed commit."
+        "required_action": "After Claude is confirmed finished, review and commit/push the code, tests, backtest, and submission assets; then re-verify matrix locators against the pushed commit.",
+        "status": "resolved",
+        "resolution": "Commit 6b3ffa7 pushed to feature branch and fast-forwarded to main; independent Windows re-audit verified all locators."
+      },
+      {
+        "id": "B2",
+        "severity": "blocker",
+        "issue": "27 Nov final regular-close session is not yet included.",
+        "required_action": "Refresh results, logs, charts, report, deck, package, manifest, and checksum after the final session."
       }
     ]
   },
@@ -4457,7 +4475,13 @@
         "completed_at": "2026-11-27T06:25:20Z",
         "weighted_score": 5.5,
         "critical_finding": "Public repository did not yet contain the current Claude working-tree changes.",
-        "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md"
+        "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md",
+        "reaudit": {
+          "completed_at": "2026-11-27T06:47:53Z",
+          "weighted_total": 6.2,
+          "critical_public_repo_mismatch": "resolved",
+          "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.md"
+        }
       },
       "local_watchdog": {
         "session_id": "4a884e65-eea4-5317-adea-f98aa44f25aa",
@@ -4520,6 +4544,14 @@
         "completed_at": "2026-11-27T06:28:00Z",
         "status": "completed",
         "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md"
+      },
+      {
+        "name": "Windows Rubric Re-Audit",
+        "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+        "completed_at": "2026-11-27T06:47:53Z",
+        "status": "completed",
+        "weighted_total": 6.2,
+        "report": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.md"
       }
     ]
   },

@@ -52,7 +52,15 @@
       "severity": "critical",
       "issue": "Public repository does not yet contain the current Claude working-tree changes described by the submission.",
       "evidence": "independent_audit_windows.json",
-      "required_action": "After Claude is confirmed finished, review and commit/push the code, tests, backtest, and submission assets; then re-verify matrix locators against the pushed commit."
+      "required_action": "After Claude is confirmed finished, review and commit/push the code, tests, backtest, and submission assets; then re-verify matrix locators against the pushed commit.",
+      "status": "resolved",
+      "resolution": "Commit 6b3ffa7 pushed to feature branch and fast-forwarded to main; independent Windows re-audit verified all locators."
+    },
+    {
+      "id": "B2",
+      "severity": "blocker",
+      "issue": "27 Nov final regular-close session is not yet included.",
+      "required_action": "Refresh results, logs, charts, report, deck, package, manifest, and checksum after the final session."
     }
   ]
 }

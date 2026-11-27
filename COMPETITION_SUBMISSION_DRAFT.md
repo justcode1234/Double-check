@@ -375,13 +375,13 @@ The draft runnable package (submitted separately; 124 MB) contains source, confi
 | Strategy & risk design | 30% | **Strong** | Exact ten-rule thesis, invalidation, sizing formula, 39.5% cap, loss ladder, kill switch, fail-closed reconciliation, per-lot guard | Final source diff and test rerun; 27 Nov behavior. |
 | Reusability & documentation | 15% | **Strong, package pending** | Runnable repo, config, tests, dashboard, redacted logs, charts, report/deck, safety contract | Final PPTX, package zip and checksum manifest. |
 
-No numeric “100/100” claim is made before the final session and package audit. The scorecard is used to drive the remaining work.
+No numeric “100/100” claim is made before the final session and package audit. The scorecard is used to drive the remaining work. An independent Windows re-audit after the public repository fix scored the submission **6.2/10** (4.5 risk-adjusted return, 5.5 Qoder/Cloud usage, 8 strategy/risk design, 7 reusability/documentation), up from 5.5/10; the full report is [independent_audit_windows_reaudit.md](moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.md).
 
 ---
 
 ## 10. Finalization checklist
 
-- [ ] **Critical:** after Claude confirms the working tree is final, commit and push the code/tests/backtest/submission assets, then re-verify every matrix locator against the pushed commit. The independent Windows audit found the public repo does not yet match the submission.
+- [x] Commit and push the code/tests/backtest/submission assets, merge `main` to the verified commit, and re-verify every matrix locator against the public repository.
 - [x] Publish the presentation and verify the public URL: https://moo-moo-competition-7amelju7q1y.qoder.website
 - [x] Complete independent Windows rubric audit and local evidence watchdog; incorporate fixable findings.
 - [ ] Incorporate Claude's final source/report diff without overwriting unrelated work.

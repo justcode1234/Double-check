@@ -379,10 +379,10 @@ The draft runnable package (submitted separately) contains source, config, tests
 |---|---:|---|---|---|
 | Risk-adjusted return | 25% | **Partial** | Broker NAV, high-water/drawdown, 30 reconciled orders, low observed drawdown, honest backtest regime split | 27 Nov final close; still a very short live sample. |
 | Qoder & Cloud Agent usage | 30% | **Partial** | Qoder Desktop built code/dashboard/report; native automation; 3 read-only Cloud deployments; 1 verified reporter run; 2 one-time Cloud automations created | Cloud run outputs are not exposed and no Vault is attached; multi-agent orchestration is not live. |
-| Strategy & risk design | 30% | **Strong** | Exact ten-rule thesis, invalidation, sizing formula, 39.5% cap, loss ladder, kill switch, fail-closed reconciliation, per-lot guard | Final source diff and test rerun; 27 Nov behavior. |
-| Reusability & documentation | 15% | **Strong, package pending** | Runnable repo, config, tests, dashboard, redacted logs, charts, report/deck, safety contract | Final PPTX, package zip and checksum manifest. |
+| Strategy & risk design | 30% | **Strong** | Exact ten-rule thesis, invalidation, sizing formula, 39.5% cap, loss ladder, kill switch, fail-closed reconciliation, per-lot guard | 27 Nov behavior; Node DOM environment test remains disclosed. |
+| Reusability & documentation | 15% | **Strong, package pending** | Runnable repo, config, tests, dashboard, redacted logs, charts, report/deck, safety contract | Final-session package/deck refresh. |
 
-No numeric “100/100” claim is made before the final session and package audit. The scorecard is used to drive the remaining work. An independent Windows re-audit after the public repository fix scored the submission **6.2/10** (4.5 risk-adjusted return, 5.5 Qoder/Cloud usage, 8 strategy/risk design, 7 reusability/documentation), up from 5.5/10; the full report is [independent_audit_windows_reaudit.md](moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_reaudit.md).
+No numeric “100/100” claim is made before the final session and package audit. The scorecard is used to drive the remaining work. The latest independent Windows follow-up verified commit `dbdaa26`, all public downloads, 463/463 package payload hashes, the scheduler reconciliation, replay parity, correlated-rule wording and exposure metrics. It scored the submission **6.4/10** (5.0 risk-adjusted return, 5.0 Qoder/Cloud usage, 8.5 strategy/risk design, 7.5 reusability/documentation), up from 6.2/10; the full report is [independent_audit_windows_final.md](moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_final.md).
 
 ---
 
@@ -425,6 +425,7 @@ No numeric “100/100” claim is made before the final session and package audi
 - `moomoo-dual-strategy/reports/competition/submission_assets/` — redacted logs, results, charts and dashboard capture.
 - `moomoo-dual-strategy/evidence/cloud-reporter-run.json` — Cloud deployment/run evidence and limits.
 - `moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md` — completed independent Windows rubric audit.
+- `moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_final.md` — latest independent Windows follow-up at `dbdaa26`, weighted score 6.4/10.
 - `moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md` — completed local evidence watchdog and remediation record.
 
 ### Evidence boundaries

@@ -204,7 +204,7 @@
     ]
   },
   "research": {
-    "comparison_report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\comparison.json",
+    "comparison_report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\comparison.json",
     "conclusion": "No portfolio is eligible for activation from this sample. Strict A is blocked; technical A and B are short-sample, action-unverified research only. Do not select a competition strategy from these results.",
     "config_hash": "97f124f433515c84134a8d81145061bff5de4df70d2f27dc63fe95674b5b8546",
     "data_coverage": {
@@ -442,7 +442,7 @@
       }
     },
     "mode": "SHADOW / HYPOTHETICAL FILLS",
-    "output_directory": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84",
+    "output_directory": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84",
     "parameter_optimization": false,
     "primary_comparison": {
       "noise_target_40__normal": {
@@ -12423,7 +12423,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -24675,7 +24675,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_strict_constrained__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_strict_constrained__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -36927,7 +36927,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -60959,7 +60959,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\spy_buy_hold__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\spy_buy_hold__normal.json",
         "research_risk": {
           "daily_locked": true,
           "day": "2026-11-16",
@@ -73014,9 +73014,9 @@
         "status": "SHADOW"
       }
     },
-    "public_summary": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_comparison.json",
+    "public_summary": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_comparison.json",
     "release_validated": false,
-    "research_database": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\backtest-97f124f433515c84.sqlite",
+    "research_database": "<workspace>\\moomoo-dual-strategy\\data-cache\\backtest-97f124f433515c84.sqlite",
     "runs": {
       "noise_action_sensitivity_minus1pct__normal": {
         "label": "Hypothetical corporate-action band-input sensitivity -1%; NOT a verified action correction",
@@ -84996,7 +84996,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_action_sensitivity_minus1pct__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_action_sensitivity_minus1pct__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -109028,7 +109028,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_action_sensitivity_plus1pct__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_action_sensitivity_plus1pct__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -133060,7 +133060,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_author_vol__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_author_vol__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -157092,7 +157092,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_hold_40__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_hold_40__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -181124,7 +181124,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_ratcheting_40__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_ratcheting_40__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -205156,7 +205156,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_short_40__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_short_40__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -229188,7 +229188,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__delayed_orders.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__delayed_orders.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -252884,7 +252884,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__disconnection.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__disconnection.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -276580,7 +276580,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__missed_tick.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__missed_tick.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -300612,7 +300612,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -324644,7 +324644,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__overnight_holiday_failure.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__overnight_holiday_failure.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -348676,7 +348676,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__partial_fills.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__partial_fills.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -372372,7 +372372,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__sentinel_failure.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__sentinel_failure.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -395732,7 +395732,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__stale_data.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__stale_data.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -419428,7 +419428,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__stressed_slippage.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\noise_target_40__stressed_slippage.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -431680,7 +431680,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_published_baseline_blocked__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_published_baseline_blocked__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -432152,7 +432152,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_strict_constrained__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_strict_constrained__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -444404,7 +444404,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__delayed_orders.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__delayed_orders.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -468004,7 +468004,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__disconnection.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__disconnection.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -491604,7 +491604,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__missed_tick.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__missed_tick.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -515636,7 +515636,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -539668,7 +539668,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__overnight_holiday_failure.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__overnight_holiday_failure.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -563700,7 +563700,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__partial_fills.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__partial_fills.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -587300,7 +587300,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__sentinel_failure.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__sentinel_failure.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -610468,7 +610468,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__stale_data.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__stale_data.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -634068,7 +634068,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__stressed_slippage.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long__stressed_slippage.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -658100,7 +658100,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long_short__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\orb_technical_long_short__normal.json",
         "research_risk": {
           "daily_locked": false,
           "day": "2026-11-16",
@@ -682132,7 +682132,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\spy_buy_hold__normal.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\spy_buy_hold__normal.json",
         "research_risk": {
           "daily_locked": true,
           "day": "2026-11-16",
@@ -706164,7 +706164,7 @@
         },
         "mode": "SHADOW / HYPOTHETICAL FILLS",
         "release_validated": false,
-        "report": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\spy_buy_hold__stressed_slippage.json",
+        "report": "<workspace>\\moomoo-dual-strategy\\reports\\backtest_97f124f433515c84\\spy_buy_hold__stressed_slippage.json",
         "research_risk": {
           "daily_locked": true,
           "day": "2026-11-16",

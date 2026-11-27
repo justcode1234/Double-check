@@ -27,6 +27,6 @@
   "US..VIX_daily.csv.gz": "d2d0d5f4702a78a20d2bf7b7470d1d2d9826bc895b2e3dbb6ceb18c8ae195136",
   "US.SPY_moomoo_iv_hv_260.json": "85536044f23d8cb0b31e7e3d284f065e315e62a4e1b8eadfa0d6d83ce104e6ad"
  },
- "chain_status": "D/E/F BACKTEST BLOCKED - HISTORICAL OPTIONS CHAINS MISSING: no files under <user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\options_history\\US.SPY",
+ "chain_status": "D/E/F BACKTEST BLOCKED - HISTORICAL OPTIONS CHAINS MISSING: no files under <workspace>\\moomoo-dual-strategy\\data-cache\\options_history\\US.SPY",
  "command": "PYTHONUTF8=1 .venv/Scripts/python.exe -m dual_strategy.research.six"
 }

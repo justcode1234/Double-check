@@ -3,7 +3,7 @@
   "source": "Moomoo MCP quote_history_kline",
   "entries": [
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261001-20261015-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261001-20261015-5m.json",
       "request": {
         "symbol": "US.SPY",
         "start": "2026-10-01",
@@ -63,10 +63,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_8a79b026488a.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_8a79b026488a.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261001-20261015-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261001-20261015-5m.json",
       "request": {
         "symbol": "US.AAPL",
         "start": "2026-10-01",
@@ -126,10 +126,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_44a851435b60.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_44a851435b60.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261001-20261015-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261001-20261015-5m.json",
       "request": {
         "symbol": "US.NVDA",
         "start": "2026-10-01",
@@ -189,10 +189,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_ce5aee18d278.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_ce5aee18d278.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261015-20261029-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261015-20261029-5m.json",
       "request": {
         "symbol": "US.SPY",
         "start": "2026-10-15",
@@ -252,10 +252,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_79ab6902d5a4.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_79ab6902d5a4.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261015-20261029-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261015-20261029-5m.json",
       "request": {
         "symbol": "US.AAPL",
         "start": "2026-10-15",
@@ -315,10 +315,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_68fd1d75b73b.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_68fd1d75b73b.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261015-20261029-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261015-20261029-5m.json",
       "request": {
         "symbol": "US.NVDA",
         "start": "2026-10-15",
@@ -378,10 +378,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_627d033dffb8.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_627d033dffb8.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261029-20261112-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261029-20261112-5m.json",
       "request": {
         "symbol": "US.SPY",
         "start": "2026-10-29",
@@ -441,10 +441,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_696908810409.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_696908810409.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261029-20261112-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261029-20261112-5m.json",
       "request": {
         "symbol": "US.AAPL",
         "start": "2026-10-29",
@@ -504,10 +504,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_022815b97ba3.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_022815b97ba3.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261029-20261112-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261029-20261112-5m.json",
       "request": {
         "symbol": "US.NVDA",
         "start": "2026-10-29",
@@ -567,10 +567,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_8f6893ae3b7e.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_8f6893ae3b7e.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261112-20261117-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261112-20261117-5m.json",
       "request": {
         "symbol": "US.SPY",
         "start": "2026-11-12",
@@ -616,10 +616,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_458709ca8e5d.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_458709ca8e5d.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261112-20261117-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261112-20261117-5m.json",
       "request": {
         "symbol": "US.AAPL",
         "start": "2026-11-12",
@@ -665,10 +665,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_24075f305209.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_24075f305209.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261112-20261117-5m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261112-20261117-5m.json",
       "request": {
         "symbol": "US.NVDA",
         "start": "2026-11-12",
@@ -714,10 +714,10 @@
       ],
       "missing_bars": 0,
       "range_complete": true,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_c286afaf88b3.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_c286afaf88b3.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20260101-20261117-daily.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20260101-20261117-daily.json",
       "request": {
         "symbol": "US.SPY",
         "start": "2026-01-01",
@@ -976,10 +976,10 @@
       "invalid_raw_rows": [],
       "timestamp_semantics": "Local-midnight session label, not an intraday bar close.",
       "excluded_current_session_rows": 1,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_d4883dfa4f83.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_d4883dfa4f83.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20260101-20261117-daily.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20260101-20261117-daily.json",
       "request": {
         "symbol": "US.AAPL",
         "start": "2026-01-01",
@@ -1238,10 +1238,10 @@
       "invalid_raw_rows": [],
       "timestamp_semantics": "Local-midnight session label, not an intraday bar close.",
       "excluded_current_session_rows": 1,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_fb56fc559b43.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_fb56fc559b43.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20260101-20261117-daily.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20260101-20261117-daily.json",
       "request": {
         "symbol": "US.NVDA",
         "start": "2026-01-01",
@@ -1500,10 +1500,10 @@
       "invalid_raw_rows": [],
       "timestamp_semantics": "Local-midnight session label, not an intraday bar close.",
       "excluded_current_session_rows": 1,
-      "source_output_path": "<user>\\AppData\\Local\\Temp\\qoder-mcp-outputs\\moomoo_quote_history_kline_8bac2ce98dad.txt"
+      "source_output_path": "<temp>\\qoder-mcp-outputs\\moomoo_quote_history_kline_8bac2ce98dad.txt"
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261001-range.json",
       "origin": "preexisting_raw_file_from_main_task",
       "request": null,
       "request_known_fields": {
@@ -1540,7 +1540,7 @@
       "included_in_normalized_dataset": false
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261001-range.json",
       "origin": "preexisting_raw_file_from_main_task",
       "request": null,
       "request_known_fields": {
@@ -1577,7 +1577,7 @@
       "included_in_normalized_dataset": false
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261001-range.json",
       "origin": "preexisting_raw_file_from_main_task",
       "request": null,
       "request_known_fields": {
@@ -1614,7 +1614,7 @@
       "included_in_normalized_dataset": false
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261116-1m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261116-1m.json",
       "origin": "preexisting_raw_file_from_main_task",
       "request": null,
       "request_known_fields": {
@@ -1655,14 +1655,14 @@
   "preexisting_raw_file_count": 4,
   "normalized_artifacts": [
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\normalized\\intraday_5m.csv",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\normalized\\intraday_5m.csv",
       "kind": "normalized_intraday",
       "bytes": 567043,
       "sha256": "313786d0e6efc51874d2fb16caede90d8595b81848cfdfa54308be98700269fd",
       "rows": 7722
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\normalized\\daily.csv",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\normalized\\daily.csv",
       "kind": "normalized_daily",
       "bytes": 9085,
       "sha256": "d004f06129779eef2de300bb66ed9ad8a08d28c99f5637cb80a4532dd5ea83f1",
@@ -1670,7 +1670,7 @@
     }
   ],
   "coverage_artifact": {
-    "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\reports\\data_coverage.json",
+    "path": "<workspace>\\moomoo-dual-strategy\\reports\\data_coverage.json",
     "kind": "data_coverage_report",
     "bytes": 119647,
     "sha256": "8aca6b59b41c7bb4edee4c6cde1b18ee881edac9a84f79351c69a3b7f016deed"
@@ -1747,17 +1747,17 @@
   "release_validated": false,
   "failures_preserved": [
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261001-range.json",
       "status": "incomplete_silently_capped",
       "missing_bars": 11870
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261001-range.json",
       "status": "incomplete_silently_capped",
       "missing_bars": 11870
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261001-range.json",
       "status": "incomplete_silently_capped",
       "missing_bars": 11870
     }

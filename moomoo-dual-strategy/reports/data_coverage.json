@@ -5,7 +5,7 @@
   "release_validated": false,
   "strategy_backtests_run": false,
   "source": "mcp__moomoo__quote_history_kline",
-  "manifest_path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\evidence\\data_manifest.json",
+  "manifest_path": "<workspace>\\moomoo-dual-strategy\\evidence\\data_manifest.json",
   "calendar": {
     "library": "exchange_calendars",
     "version": "4.13.3",
@@ -19,7 +19,7 @@
     "bar_grid": "Session open + 5 minutes through close inclusive, every 5 minutes; exact set equality, uniqueness, valid OHLCV and closed session required."
   },
   "intraday": {
-    "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\normalized\\intraday_5m.csv",
+    "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\normalized\\intraday_5m.csv",
     "columns": [
       "symbol",
       "end",
@@ -1497,7 +1497,7 @@
     }
   },
   "daily": {
-    "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\normalized\\daily.csv",
+    "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\normalized\\daily.csv",
     "columns": [
       "symbol",
       "session",
@@ -1610,7 +1610,7 @@
   },
   "legacy_one_minute_failures_and_coverage": [
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\AAPL-20261001-range.json",
       "symbol": "US.AAPL",
       "status": "incomplete_silently_capped",
       "scope_start": "2026-10-01",
@@ -2244,7 +2244,7 @@
       "included_in_normalized_dataset": false
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\NVDA-20261001-range.json",
       "symbol": "US.NVDA",
       "status": "incomplete_silently_capped",
       "scope_start": "2026-10-01",
@@ -2878,7 +2878,7 @@
       "included_in_normalized_dataset": false
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261001-range.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261001-range.json",
       "symbol": "US.SPY",
       "status": "incomplete_silently_capped",
       "scope_start": "2026-10-01",
@@ -3512,7 +3512,7 @@
       "included_in_normalized_dataset": false
     },
     {
-      "path": "<user>\\Documents\\Life\\Coding\\github\\Moo Moo\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261116-1m.json",
+      "path": "<workspace>\\moomoo-dual-strategy\\data-cache\\raw\\SPY-20261116-1m.json",
       "symbol": "US.SPY",
       "status": "complete_single_symbol_session_not_shared",
       "scope_start": "2026-11-16",

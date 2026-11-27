@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T09:52:58.987360+00:00",
+  "generated_at": "2026-11-27T10:38:14.617497+00:00",
   "package": "Moo-Moo-Submission-Draft-Package.zip",
-  "source_head": "dbdaa26b6c977b9688b980277cf8c4ddf4ded1b3",
-  "working_tree_entries": 15,
+  "source_head": "9ac54d4c614c05fa02db212fdfc7354e1b61c456",
+  "working_tree_entries": 11,
   "draft": true,
   "includes": [
     "README.md",
@@ -42,8 +42,8 @@
     "this manifest file",
     "the external package checksum file"
   ],
-  "payload_file_count": 855,
-  "total_zip_file_count": 856,
+  "payload_file_count": 856,
+  "total_zip_file_count": 857,
   "manifest_included": true,
   "files": [
     {
@@ -53,8 +53,8 @@
     },
     {
       "path": "COMPETITION_SUBMISSION_DRAFT.md",
-      "bytes": 33983,
-      "sha256": "b2519ccf012c035ac63fe2ad727895d3c59ad1de4739ae5b5513fe45708c6e56"
+      "bytes": 34293,
+      "sha256": "e9b7ec3fcdf84756b9ee2cb9e71d385dbf53368f6e898859741f08882847a97b"
     },
     {
       "path": "README.md",
@@ -3388,18 +3388,18 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Runnable-Package-Manifest.json",
-      "bytes": 94235,
-      "sha256": "468cb703ffa21585cefc2198707c42ca76ce5195bff39ab1e848153d8aa82b0c"
+      "bytes": 94440,
+      "sha256": "f560eded98b7a13bf719adbf8b30eab9eb299e4e8e344c4afcdb20c58f32791d"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Runnable-Package.sha256",
       "bytes": 95,
-      "sha256": "5565ee79a826c4544aabf912be3d89521b4691032c2bbeda4e77482393042e7a"
+      "sha256": "f2e21e039b45cd13eb3baff30eba631b9eed97fa4c00c60b4561a4b33cd03686"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Runnable-Package.zip",
-      "bytes": 27168096,
-      "sha256": "8908ca6447e84dd664b195a0f53be1849ad8e229738de79e6557e23eb7da9350"
+      "bytes": 27175412,
+      "sha256": "8c07a7c6faf9df6f137b22509380fcc750e7e18a4f39b46811ac262b43d7576f"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf",
@@ -3413,13 +3413,13 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
-      "bytes": 281511,
-      "sha256": "6b1ae0e22d4d298a4d763af10ebd035cdb13e9f25a0e9acfd86fb8d25e33de12"
+      "bytes": 281851,
+      "sha256": "9d433dd6e416063330d94eab8f7926393be05bca0620476dd53a52afe714696c"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
-      "bytes": 281952,
-      "sha256": "0562878eda19f8480e5422b1c6a1e92a97b9d3cea3c2e2a10237e2f40a15a7ed"
+      "bytes": 282292,
+      "sha256": "11cb3d95b0c64a9842496292d976bfba8950ca6fdf3ee59d02626a46f3d8dcb4"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md",
@@ -3433,18 +3433,18 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package-Manifest.json",
-      "bytes": 94235,
-      "sha256": "468cb703ffa21585cefc2198707c42ca76ce5195bff39ab1e848153d8aa82b0c"
+      "bytes": 94440,
+      "sha256": "f560eded98b7a13bf719adbf8b30eab9eb299e4e8e344c4afcdb20c58f32791d"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package.sha256",
       "bytes": 95,
-      "sha256": "5565ee79a826c4544aabf912be3d89521b4691032c2bbeda4e77482393042e7a"
+      "sha256": "f2e21e039b45cd13eb3baff30eba631b9eed97fa4c00c60b4561a4b33cd03686"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Runnable-Package.zip",
-      "bytes": 27168096,
-      "sha256": "8908ca6447e84dd664b195a0f53be1849ad8e229738de79e6557e23eb7da9350"
+      "bytes": 27175412,
+      "sha256": "8c07a7c6faf9df6f137b22509380fcc750e7e18a4f39b46811ac262b43d7576f"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/dist/Moo-Moo-Submission-Draft.pdf",
@@ -3458,8 +3458,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/dist/index.html",
-      "bytes": 281511,
-      "sha256": "6b1ae0e22d4d298a4d763af10ebd035cdb13e9f25a0e9acfd86fb8d25e33de12"
+      "bytes": 281851,
+      "sha256": "9d433dd6e416063330d94eab8f7926393be05bca0620476dd53a52afe714696c"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/exit_backtest/fees_only.json",
@@ -3492,6 +3492,11 @@
       "sha256": "d2ae896fda3cb5a5cbd59c5e70b3b8710c54f333333dc8f612d78c0349a823b2"
     },
     {
+      "path": "moomoo-dual-strategy/reports/competition/refresh_submission_assets.py",
+      "bytes": 22330,
+      "sha256": "139ed9298fd64ac545fcbb5a2dd3a2636d825b3680da213d6329d0101c6ae3c8"
+    },
+    {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/backtest_expectancy.png",
       "bytes": 34254,
       "sha256": "89dd7201cedf9c8b6be8bd089694ccb8b7aa247799784857059318fda74547f7"
@@ -3513,8 +3518,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/cloud_audit_runs.json",
-      "bytes": 3686,
-      "sha256": "f1a261ab14ef2423a06893727a60193abd9e5ef10a8fab8bd61bb5029f3396e0"
+      "bytes": 4482,
+      "sha256": "e7f9f82a6b497b62aeb56fe389b84a3f84631d2d010f89e43754f83bccff8c34"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/dashboard-current.png",
@@ -3573,8 +3578,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/html_report_qa.json",
-      "bytes": 3015,
-      "sha256": "5019b1803da5045603ed379e2cc09d6cee1a7ee40f09d8d8ab4edbeee72a4c7b"
+      "bytes": 3063,
+      "sha256": "2ce25530e63e0b479c24ff657779fd0ca8868def75fd7fb9d2d4c6d213e0b178"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.json",
@@ -4390,7 +4395,7 @@
   },
   "html_report_qa": {
     "schema_version": 1,
-    "checked_at": "2026-11-27T09:51:10Z",
+    "checked_at": "2026-11-27T10:35:33Z",
     "report": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
     "method": "Local file opened in the in-app browser; HTMLParser link validation; accessibility snapshot; console inspection; mobile and forced-desktop captures.",
     "results": {
@@ -4406,6 +4411,7 @@
       "rule_independence_wording_corrected": true,
       "independent_replay_visible": true,
       "session_performance_visible": true,
+      "clean_room_reproducibility_visible": true,
       "stale_repository_push_wording": false,
       "mobile": {
         "viewport": "525x553",
@@ -4437,8 +4443,8 @@
         "editable_pptx": "Moo-Moo-Submission-Draft.pptx",
         "pdf": "Moo-Moo-Submission-Draft.pdf",
         "runnable_package": "Moo-Moo-Runnable-Package.zip",
-        "runnable_package_bytes": 27168096,
-        "runnable_package_sha256": "8908ca6447e84dd664b195a0f53be1849ad8e229738de79e6557e23eb7da9350",
+        "runnable_package_bytes": 27175412,
+        "runnable_package_sha256": "8c07a7c6faf9df6f137b22509380fcc750e7e18a4f39b46811ac262b43d7576f",
         "clean_room_test": {
           "passed": 1248,
           "skipped": 2,
@@ -4610,6 +4616,19 @@
       "http_status": 401,
       "result": "TOKEN_INVALID: missing authorization token",
       "conclusion": "Cloud task creation is confirmed, but execution output is not retrievable through the available local interface."
+    },
+    "windows_peer_output_check": {
+      "checked_at": "2026-11-27T10:00:51Z",
+      "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+      "result": "not_visible",
+      "checks": [
+        "qca list_forward_schedules: empty for this identity",
+        "qca list_forward_sessions: empty",
+        "qca list_sessions covering the 2026-11-27 06:10 UTC slot: empty",
+        "builtin qoder_cron list: cloud IDs not readable through this device route",
+        "automation.peerRead listTasks/listRuns: registered but agent-executable false; human-UI only"
+      ],
+      "conclusion": "No run IDs, statuses or outputs are exposed to the Windows agent either. Capture must occur from the creating device's Automations UI or owner session. No credentials were accessed and no automation was triggered or modified."
     },
     "runs": [
       {

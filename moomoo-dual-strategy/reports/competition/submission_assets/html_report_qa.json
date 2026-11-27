@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-11-27T09:51:10Z",
+  "checked_at": "2026-11-27T10:35:33Z",
   "report": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
   "method": "Local file opened in the in-app browser; HTMLParser link validation; accessibility snapshot; console inspection; mobile and forced-desktop captures.",
   "results": {
@@ -17,6 +17,7 @@
     "independent_replay_visible": true,
     "session_performance_visible": true,
     "session_performance_visible": true,
+    "clean_room_reproducibility_visible": true,
     "stale_repository_push_wording": false,
     "mobile": {
       "viewport": "525x553",
@@ -48,8 +49,8 @@
       "editable_pptx": "Moo-Moo-Submission-Draft.pptx",
       "pdf": "Moo-Moo-Submission-Draft.pdf",
       "runnable_package": "Moo-Moo-Runnable-Package.zip",
-      "runnable_package_bytes": 27168096,
-      "runnable_package_sha256": "8908ca6447e84dd664b195a0f53be1849ad8e229738de79e6557e23eb7da9350",
+      "runnable_package_bytes": 27175412,
+      "runnable_package_sha256": "8c07a7c6faf9df6f137b22509380fcc750e7e18a4f39b46811ac262b43d7576f",
       "clean_room_test": {
         "passed": 1248,
         "skipped": 2,

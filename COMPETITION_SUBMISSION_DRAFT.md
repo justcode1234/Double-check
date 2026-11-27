@@ -355,7 +355,7 @@ PYTHONPATH=src .venv/bin/python scripts/competition_exit_backtest.py /tmp/exit_b
 PYTHONPATH=src .venv/bin/python scripts/competition_vote_replay.py
 ```
 
-The full DOM regression additionally requires Node.js on PATH.
+The full DOM regression additionally requires Node.js on PATH. The public lightweight package was extracted into a clean temporary directory and reproduced the local suite exactly: **1,248 passed, 2 skipped, one Node-environment failure and 59 subtests passed**.
 
 ### 8.3 Reusable components
 
@@ -365,11 +365,12 @@ The full DOM regression additionally requires Node.js on PATH.
 - Append-only outbox/audit/provenance store.
 - Native scheduler with read-only preflight.
 - Read-only dashboard and redacted CSV/JSON exports.
+- `refresh_submission_assets.py` regenerates results, trade/decision logs, equity CSV and SVG charts from broker/dashboard snapshots.
 - `AGENTS.md` safety contract and independent verification prompt.
 
 ### 8.4 Package contents
 
-The draft runnable package (submitted separately) contains source, config, tests, README, `AGENTS.md`, HTML/PPTX/PDF reports, redacted logs, relevant research outputs, cached bars and evidence. It excludes `.venv`, caches, `private/`, account files, tokens, credentials and unrelated heavy research outputs. The [manifest](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json) is included inside the zip and records every payload file's size and SHA-256; the separate [package checksum](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256) records the zip hash without a circular dependency. An **approximately 27 MB lightweight public package** is linked directly from the hosted report; it includes the source, tests, deck/PDF, redacted evidence and the cache fixtures required to reproduce the local suite. The largest historical cache remains in GitHub and the full evidence package. The package will be refreshed after Claude's final diff and the 27 Nov results.
+The draft runnable package (submitted separately) contains source, config, tests, README, `AGENTS.md`, HTML/PPTX/PDF reports, redacted logs, relevant research outputs, cached bars and evidence. It excludes `.venv`, caches, `private/`, account files, tokens, credentials and unrelated heavy research outputs. The [manifest](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json) is included inside the zip and records every payload file's size and SHA-256; the separate [package checksum](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256) records the zip hash without a circular dependency. An **approximately 27 MB lightweight public package** is linked directly from the hosted report; it includes the source, tests, deck/PDF, redacted evidence and the cache fixtures required to reproduce the local suite. The largest historical cache remains in GitHub and the full evidence package. The package will be refreshed after the 27 Nov results.
 
 ---
 

@@ -11,6 +11,19 @@
     "result": "TOKEN_INVALID: missing authorization token",
     "conclusion": "Cloud task creation is confirmed, but execution output is not retrievable through the available local interface."
   },
+  "windows_peer_output_check": {
+    "checked_at": "2026-11-27T10:00:51Z",
+    "session_id": "6d2430d9-0252-5a11-acd3-56796d7b845a",
+    "result": "not_visible",
+    "checks": [
+      "qca list_forward_schedules: empty for this identity",
+      "qca list_forward_sessions: empty",
+      "qca list_sessions covering the 2026-11-27 06:10 UTC slot: empty",
+      "builtin qoder_cron list: cloud IDs not readable through this device route",
+      "automation.peerRead listTasks/listRuns: registered but agent-executable false; human-UI only"
+    ],
+    "conclusion": "No run IDs, statuses or outputs are exposed to the Windows agent either. Capture must occur from the creating device's Automations UI or owner session. No credentials were accessed and no automation was triggered or modified."
+  },
   "runs": [
     {
       "name": "Moo-Moo Rubric Auditor",

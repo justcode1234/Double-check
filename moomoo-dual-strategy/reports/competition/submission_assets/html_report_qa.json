@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-11-27T10:35:33Z",
+  "checked_at": "2026-11-27T17:10:00Z",
   "report": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
-  "method": "Local file opened in the in-app browser; HTMLParser link validation; accessibility snapshot; console inspection; mobile and forced-desktop captures.",
+  "method": "Local file opened in the in-app browser; HTMLParser link validation; accessibility snapshot; console inspection; mobile and forced-desktop captures. Final package audit extracted the lightweight ZIP and revalidated every packaged local link, README/COMPETITION link, manifest hash and forbidden-name/path leak checks.",
   "results": {
-    "local_links": 66,
+    "local_links": 18,
     "missing_local_links": 0,
+    "non_packaged_links_neutralized": 4,
     "h1_count": 1,
     "tables": 9,
     "embedded_svg_charts": 3,
@@ -37,6 +38,19 @@
     "moomoo-dual-strategy/reports/competition/submission_assets/html-report-desktop.png"
   ],
   "status": "PASS",
+  "package_link_check": {
+    "package": "Moo-Moo-Runnable-Package.zip",
+    "extraction_checked": true,
+    "history_md_present": true,
+    "readme_competition_missing_links": 0,
+    "packaged_html_missing_links": 0,
+    "payload_hash_mismatches": 0,
+    "external_sha256_matches": true,
+    "forbidden_entries": 0,
+    "private_path_leaks": 0,
+    "payload_file_count": 469,
+    "status": "PASS"
+  },
   "hosted_variant": {
     "file": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
     "local_dependencies": 0,
@@ -50,7 +64,7 @@
       "runnable_package": "Moo-Moo-Runnable-Package.zip",
       "clean_room_test": {
         "passed": 1251,
-        "skipped": 2,
+        "skipped": 0,
         "failed": 0,
         "subtests_passed": 59,
         "warnings": 4,

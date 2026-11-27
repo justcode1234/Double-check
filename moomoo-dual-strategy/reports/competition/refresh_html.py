@@ -12,6 +12,20 @@ PROJECT = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent
 MARKDOWN = ROOT / "COMPETITION_SUBMISSION_DRAFT.md"
 RESULTS = OUT / "submission_assets" / "submission_results.json"
+PACKAGE_INCLUDES = json.loads((OUT / "Moo-Moo-Runnable-Package-Manifest.json").read_text(encoding="utf-8"))["includes"]
+EXCLUDE_PARTS = {"private", ".venv", ".git", ".pytest_cache", "__pycache__", "node_modules", "dist", ".qoder-office-pptx-locks"}
+EXCLUDE_NAMES = {"account.json", "token.json", "credentials.json"}
+
+
+def packaged(path):
+    rel = os.path.relpath((ROOT / path).resolve(), ROOT.resolve())
+    parts = Path(rel).parts
+    if any(part in EXCLUDE_PARTS for part in parts):
+        return False
+    name = parts[-1]
+    if name in EXCLUDE_NAMES or name.endswith(".qoder.site") or name.startswith(("Moo-Moo-Runnable-Package", "Moo-Moo-Submission-Draft-Package")):
+        return False
+    return any(rel == inc or rel.startswith(inc.rstrip("/") + "/") for inc in PACKAGE_INCLUDES)
 
 
 def rewrite(path):
@@ -27,9 +41,11 @@ def inline(text):
 
     def link(match):
         label, url = match.group(1), match.group(2)
-        href = html.escape(rewrite(url), quote=True)
-        external = ' target="_blank" rel="noopener noreferrer"' if url.startswith(("http://", "https://")) else ""
-        return f'<a href="{href}"{external}>{label}</a>'
+        if url.startswith(("http://", "https://")):
+            return f'<a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{label}</a>'
+        if url.startswith(("#", "mailto:")) or packaged(url):
+            return f'<a href="{html.escape(rewrite(url), quote=True)}">{label}</a>'
+        return label
 
     return re.sub(r"\[([^\]]+)\]\(([^)]+)\)", link, text)
 

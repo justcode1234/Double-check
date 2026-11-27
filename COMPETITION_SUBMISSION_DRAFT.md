@@ -248,7 +248,7 @@ A separate replay against Moomoo's current historical bars reproduced **189/264*
 The current full suite on 27 November, including Claude's final short-cash/twin-short changes, reports:
 
 - **1,251 passed**
-- **2 skipped**
+- **0 skipped**
 - **0 failures**
 - **59 subtests passed**
 - Four pandas deprecation warnings.
@@ -358,7 +358,7 @@ PYTHONPATH=src .venv/bin/python scripts/competition_exit_backtest.py /tmp/exit_b
 PYTHONPATH=src .venv/bin/python scripts/competition_vote_replay.py
 ```
 
-The full DOM regression requires Node.js on PATH; the verified local and clean-room runs used Qoder's bundled Node v24.22.1 through a temporary wrapper. The exact public lightweight package was extracted into a fresh directory and virtual environment and reproduced the local suite: **1,251 passed, 2 skipped, 0 failures and 59 subtests passed**.
+The full DOM regression requires Node.js on PATH; the verified local and clean-room runs used Qoder's bundled Node v24.22.1 through a temporary wrapper. The exact public lightweight package was extracted into a fresh directory and virtual environment and reproduced the local suite: **1,251 passed, 0 skipped, 0 failures and 59 subtests passed**.
 
 ### 8.3 Reusable components
 
@@ -387,9 +387,9 @@ The public repository history was rewritten to remove private state and device p
 | Risk-adjusted return | 25% | **Partial** | Broker NAV, high-water/drawdown, 30 reconciled orders, low observed drawdown, honest backtest regime split | 27 Nov final close; still a very short live sample. |
 | Qoder & Cloud Agent usage | 30% | **Partial** | Qoder Desktop built code/dashboard/report; native automation; 3 read-only Cloud deployments; 1 verified reporter run; 2 one-time Cloud automations created | Cloud run outputs are not exposed and no Vault is attached; multi-agent orchestration is not live. |
 | Strategy & risk design | 30% | **Strong** | Exact ten-rule thesis, invalidation, sizing formula, 39.5% cap, loss ladder, kill switch, fail-closed reconciliation, per-lot guard | 27 Nov behavior. |
-| Reusability & documentation | 15% | **Strong, package pending** | Runnable repo, config, tests, dashboard, redacted logs, charts, report/deck, safety contract | Final-session package/deck refresh. |
+| Reusability & documentation | 15% | **Strong, package verified** | Runnable repo, config, tests, dashboard, redacted logs, charts, report/deck, safety contract | Final-session package/deck refresh complete; settlement only. |
 
-No numeric “100/100” claim is made before the final session and package audit. The scorecard is used to drive the remaining work. The latest independent Windows follow-up verified commit `dbdaa26`, all public downloads, 463/463 package payload hashes, the scheduler reconciliation, replay parity, correlated-rule wording and exposure metrics. It scored the submission **6.4/10** (5.0 risk-adjusted return, 5.0 Qoder/Cloud usage, 8.5 strategy/risk design, 7.5 reusability/documentation), up from 6.2/10; the full report is [independent_audit_windows_final.md](moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_final.md).
+No numeric “100/100” claim is made before the final session and package audit. The scorecard is used to drive the remaining work. The latest independent Windows follow-up verified the then-current public commit, all public downloads, 463/463 package payload hashes, the scheduler reconciliation, replay parity, correlated-rule wording and exposure metrics. It scored the submission **6.4/10** (5.0 risk-adjusted return, 5.0 Qoder/Cloud usage, 8.5 strategy/risk design, 7.5 reusability/documentation), up from 6.2/10; the full report is [independent_audit_windows_final.md](moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_final.md).
 
 ---
 
@@ -398,14 +398,14 @@ No numeric “100/100” claim is made before the final session and package audi
 - [x] Commit and push the code/tests/backtest/submission assets, merge `main` to the verified commit, and re-verify every matrix locator against the pushed commit.
 - [x] Publish the presentation and verify the public URL: https://moo-moo-competition-7amelju7q1y.qoder.website
 - [x] Complete independent Windows rubric audit and local evidence watchdog; incorporate fixable findings.
-- [x] Incorporate Claude's final source/report diff without overwriting unrelated work; commit `6b3ffa7` is public and `main` is aligned.
-- [x] Correct `COMPETITION.md` stale test count, replay evidence, Cloud wording and short-cash dates; the final live-results refresh remains pending.
-- [x] Re-run the full suite and record the exact count: 1,251 passed, 2 skipped, 0 failures, 59 subtests passed, using Qoder's bundled Node v24.22.1 for the DOM regression.
+- [x] Incorporate Claude's final source/report diff without overwriting unrelated work; current `main` is public and aligned.
+- [x] Correct `COMPETITION.md` stale test count, replay evidence, Cloud wording and short-cash dates; post-liquidation live results are refreshed and only final settlement remains pending.
+- [x] Re-run the full suite and record the exact count: 1,251 passed, 0 skipped, 0 failures, 59 subtests passed, using Qoder's bundled Node v24.22.1 for the DOM regression.
 - [x] Reconcile the 25 Nov scheduler/process-history inconsistency; retain the two disclosed audit gaps and unknown restart initiator.
 - [ ] Run and reconcile the 27 Nov 13:00 ET final session.
 - [ ] Refresh NAV, positions, P&L, equity curve, trade log and deck from final regular-market closes.
 - [x] Fold in the redacted Windows and Mac evidence manifests; Linux remains the sole execution host.
-- [x] Build and visually inspect the current 13-slide PowerPoint and rendered PDF; final-session numbers remain pending.
+- [x] Build and visually inspect the current 13-slide PowerPoint and rendered PDF with post-liquidation numbers; only final settlement remains pending.
 - [ ] Recreate the public `Double-check` repository from the sanitized history and verify old private objects are inaccessible.
 - [ ] Refresh the draft runnable package zip and SHA-256 manifest after final changes; verify no private material is included.
 - [ ] Submit through the official Luma link before **30 Nov 2026, 23:59 SGT**.
@@ -433,7 +433,7 @@ No numeric “100/100” claim is made before the final session and package audi
 - `moomoo-dual-strategy/reports/competition/submission_assets/` — redacted logs, results, charts and dashboard capture.
 - `moomoo-dual-strategy/evidence/cloud-reporter-run.json` — Cloud deployment/run evidence and limits.
 - `moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.md` — completed independent Windows rubric audit.
-- `moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_final.md` — latest independent Windows follow-up at `dbdaa26`, weighted score 6.4/10.
+- `moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows_final.md` — latest independent Windows follow-up, weighted score 6.4/10.
 - `moomoo-dual-strategy/reports/competition/submission_assets/independent_watchdog_local.md` — completed local evidence watchdog and remediation record.
 
 ### Evidence boundaries

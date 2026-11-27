@@ -112,10 +112,10 @@
     "implied_fees_and_other_cash_flows_usd": -32.85
   },
   "test_summary": {
-    "run_at": "2026-11-27T13:17:35Z",
+    "run_at": "2026-11-27T17:18:15Z",
     "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider",
     "passed": 1251,
-    "skipped": 2,
+    "skipped": 0,
     "failed": 0,
     "subtests_passed": 59,
     "warnings": 4,

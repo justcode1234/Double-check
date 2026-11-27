@@ -38,8 +38,8 @@ Qoder Desktop built the code, tests, dashboard, report and deck. Read-only Cloud
 ## Final pre-submit checks
 
 - [x] Host the presentation and paste the public URL: https://moo-moo-competition-7amelju7q1y.qoder.website
-- [x] Incorporate Claude's final source/report diff; commit `6b3ffa7` is public and `main` is aligned.
+- [x] Incorporate Claude's final source/report diff; current `main` is public and aligned.
 - [ ] Refresh after the 27 November regular-market close.
-- [x] Re-run tests and update the exact count: 1,251 passed, 2 skipped, 0 failures, 59 subtests passed.
-- [ ] Rebuild the package and verify its checksum.
+- [x] Re-run tests and update the exact count: 1,251 passed, 0 skipped, 0 failures, 59 subtests passed.
+- [x] Rebuild both packages, include HISTORY.md, verify every packaged link and SHA-256, and neutralize the four non-packaged HTML links.
 - [ ] Submit before **30 November 2026, 23:59 SGT**.

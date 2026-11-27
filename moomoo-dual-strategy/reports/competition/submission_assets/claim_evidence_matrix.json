@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T08:10:06Z",
+  "generated_at": "2026-11-27T17:22:00Z",
   "claim_count": 51,
   "status_counts": {
     "verified": 43,
@@ -32,7 +32,7 @@
     {
       "file": "COMPETITION.md",
       "locator": "111-122",
-      "issue": "Live-results snapshot is current before the final session and must be refreshed after the 27 Nov final session."
+      "issue": "Post-liquidation live-results snapshot is current; only the 27 Nov regular-close settlement remains pending."
     }
   ],
   "critical_submission_blockers": [
@@ -43,7 +43,7 @@
       "evidence": "independent_audit_windows.json",
       "required_action": "After Claude is confirmed finished, review and commit/push the code, tests, backtest, and submission assets; then re-verify matrix locators against the pushed commit.",
       "status": "resolved",
-      "resolution": "Commit 6b3ffa7 pushed to feature branch and fast-forwarded to main; independent Windows re-audit verified all locators."
+      "resolution": "Current main is public and aligned; independent Windows re-audit verified all locators."
     },
     {
       "id": "B2",

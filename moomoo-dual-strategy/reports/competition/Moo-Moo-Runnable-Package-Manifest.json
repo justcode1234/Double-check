@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T16:19:09.265221+00:00",
+  "generated_at": "2026-11-27T17:22:27.709698+00:00",
   "package": "Moo-Moo-Runnable-Package.zip",
   "includes": [
     "README.md",
     "COMPETITION.md",
     "COMPETITION_SUBMISSION_DRAFT.md",
+    "HISTORY.md",
     "start.py",
     "moomoo-dual-strategy/AGENTS.md",
     "moomoo-dual-strategy/PROMPT.md",
@@ -45,19 +46,24 @@
     "this manifest",
     "the external checksum"
   ],
-  "payload_file_count": 468,
-  "total_zip_file_count": 469,
+  "payload_file_count": 469,
+  "total_zip_file_count": 470,
   "manifest_included": true,
   "files": [
     {
       "path": "COMPETITION.md",
       "bytes": 19448,
-      "sha256": "bbcc971c72748b05737563e52f5c854239e7e3489c9d2c36284c62614f03846c"
+      "sha256": "bc17812d058e5df6ae57af774a17c874ca43550d41b7eb0185046604d32559ac"
     },
     {
       "path": "COMPETITION_SUBMISSION_DRAFT.md",
-      "bytes": 35538,
-      "sha256": "88b8f74fbbe70de6682c76fc91b53917aebb5107d847e0c4b762203e49c51a30"
+      "bytes": 35624,
+      "sha256": "fb904683556614bf6dff4957953afb014c6fbb90be280da36b00362b809397b7"
+    },
+    {
+      "path": "HISTORY.md",
+      "bytes": 845413,
+      "sha256": "7ed8e7fca8a2b0218180b7830daac976afaa682612e1c53793790e8cee405a2b"
     },
     {
       "path": "README.md",
@@ -1486,28 +1492,28 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pdf",
-      "bytes": 287780,
-      "sha256": "7a0b0929ccf4ea022e31b9ea81b4ad8f5c6181642dbabb6a115ad7eddd2e5224"
+      "bytes": 330415,
+      "sha256": "d32fb57688bb454d223370a0db51d7756f1b2f5e5dcb8de9c0d393357b280c54"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft.pptx",
-      "bytes": 200832,
-      "sha256": "f009fa5b9b619cba9f85320ac083895e7febfe773e1221685ac6d86cb2dc0e3c"
+      "bytes": 258219,
+      "sha256": "78eb20b2ed86d81e35d5473ba6b29ec75ea2f48d69e9dee6dc25c989e2813e9e"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report-Hosted.html",
-      "bytes": 289076,
-      "sha256": "113d5d87fcf25521973ee93d2c83ae79fd3ede1490a63885f11fb7dafbaa5462"
+      "bytes": 289129,
+      "sha256": "6dde9232e3a4959e38d3c47425ee15ccc8a261ffb94f655cb0050f9f4011123d"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Report.html",
-      "bytes": 289369,
-      "sha256": "2296006f6795a3c2e13ab810e0b16c6ac9c8f3a02336d76584ba48e16206c93c"
+      "bytes": 289192,
+      "sha256": "eb6191b184ad80f4f422f5cf9760aaff9304e601c9fe5e6bf1be3fee331c4d55"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/SUBMISSION_COVER_NOTE.md",
-      "bytes": 4275,
-      "sha256": "3fb03d0b2807ec069f68d0ca9efe7eb161ef394229ce5d726e2b950606563651"
+      "bytes": 4350,
+      "sha256": "2400cec94819badd42fb8505a8fed78f2bca1e5a63c6759af5050e40e7be7a14"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/backtest_preview.json",
@@ -1541,8 +1547,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/refresh_html.py",
-      "bytes": 14721,
-      "sha256": "dc6f1a74964db86b61bb0eafac30b36a8e5f69b8fbfe203d08e859187cbef31e"
+      "bytes": 15624,
+      "sha256": "631e9dd90ce4ca6ef81cfe1c4e12a6147fab6fbeda9bbdca68456a73be6102ba"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/refresh_session_performance.py",
@@ -1566,13 +1572,13 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.csv",
-      "bytes": 15977,
-      "sha256": "fa7db60966f7afc4d3bfe9656e8313bc860b0634999cd5d3e5d04d42b3cfc4de"
+      "bytes": 16061,
+      "sha256": "83d1963e81a24f4787e66ce65852bbbde5cfeedd8c85d7f6fb6e4ec15407c6af"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/claim_evidence_matrix.json",
-      "bytes": 2145,
-      "sha256": "058c51ce155d48f4b113d9edb465685d4fdcc1ec3c82b5dd2a2b22e7c18f630b"
+      "bytes": 2110,
+      "sha256": "07bdf3480e4f66cdbe67bc25c819c3a58d5468b1ca1eeee5d95501fde9f9b615"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/cloud_audit_runs.json",
@@ -1641,8 +1647,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/html_report_qa.json",
-      "bytes": 3026,
-      "sha256": "8a3cd3f2a13912b6066d036277b0e60f2779f1ddc0871968ee74a81425bc88df"
+      "bytes": 3639,
+      "sha256": "6fe5b73eda7f682ebdcb86be8be99020ff33dc014b969de303cd440db682cd83"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/independent_audit_windows.json",
@@ -1711,8 +1717,8 @@
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/session_performance.json",
-      "bytes": 2752,
-      "sha256": "67bf20b813ba339ee5ddd6ffad83a7e09f3443e8921675b8dc8d02f7147b1b2e"
+      "bytes": 2798,
+      "sha256": "904980de375aed0c263af1729012f5d14dd7e27c1ff5ff36e889afcbd239a63a"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_decision_log.csv",
@@ -1732,7 +1738,7 @@
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_results.json",
       "bytes": 5590,
-      "sha256": "18ef2802dc1f36c396aadbea964a00e7cebc1e7b78afac1fd2980702f5bd9890"
+      "sha256": "b1ee5652c44e0611634cfe54cb0d851f20ff97c4f22e821cb146e285cbf1a6a8"
     },
     {
       "path": "moomoo-dual-strategy/reports/competition/submission_assets/submission_trade_log.csv",
@@ -2396,12 +2402,12 @@
     "The source repository is private; this public package is the self-contained judging path.",
     "Live trading still requires the authenticated Moomoo CLI and competition paper account; no credentials or private state are included."
   ],
-  "source_head": "009fbd7227b65bd128d85c14ef7f21a8823ae54b",
+  "source_head": "6555b9c860c78f56901e65678cf941c2f91ef09c",
   "test_summary": {
-    "run_at": "2026-11-27T13:17:35Z",
+    "run_at": "2026-11-27T17:18:15Z",
     "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider",
     "passed": 1251,
-    "skipped": 2,
+    "skipped": 0,
     "failed": 0,
     "subtests_passed": 59,
     "warnings": 4,

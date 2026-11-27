@@ -65,9 +65,10 @@
     },
     "screenshots": [
       "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-mobile.png",
-      "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-badge.png"
+      "moomoo-dual-strategy/reports/competition/submission_assets/html-report-hosted-badge.png",
+      "moomoo-dual-strategy/reports/competition/submission_assets/dashboard-positive-2026-11-27.png"
     ],
     "status": "PASS",
-    "latest_visual_capture": "Prior mobile/desktop captures retained; latest screenshot retry was blocked because the in-app browser viewport was hidden. Accessibility snapshot and console check passed."
+    "latest_visual_capture": "Dashboard proof captured with Firefox at 15:21 UTC on 27 Nov 2026: NAV $100,213.59, high-water $100,414.86, cash $71,623.28, zero order errors. Prior mobile/desktop report captures retained."
   }
 }

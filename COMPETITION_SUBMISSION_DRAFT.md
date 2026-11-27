@@ -4,9 +4,9 @@
 
 **Generated with Qoder Desktop · competition paper account · USD 100,000 initial assets**
 
-**Draft v0.3 · 27 November 2026, 15:52 SGT · pending the 27 November half-day final-session refresh**
+**Submission snapshot · 27 November 2026, 16:00 UTC · post-liquidation, final 13:00 ET close pending**
 
-> This working submission draft separates broker-reconciled results from hypothetical research and records failures as well as successes. The current trading source is committed and public; final-session results, deck and package refresh remain.
+> This working submission draft separates broker-reconciled results from hypothetical research and records failures as well as successes. The current trading source is committed and public; the book is flat, the buying loop is stopped, and the final close is pending.
 
 **Live presentation:** https://moo-moo-competition-7amelju7q1y.qoder.website
 
@@ -25,28 +25,29 @@ The strategy evolved during the competition from a five-sleeve portfolio into a 
 - **24 Nov:** losing long lots were deliberately carried instead of being sold at a loss; an exit backtest removed profit targets and tight stops.
 - **25 Nov:** $20,000 lots, add/re-entry, doubled loss limits, twin-ETF shorts and the per-lot “never sell a long at a loss” guard were activated.
 - **26 Nov:** H ETF was retired after producing no new plan; its $20,000 moved to the Two-vote book, now **$100,000**. The short-cash NAV correction is implemented, tested and committed.
+- **27 Nov:** QQQ closed on vote exits; the user directed a full liquidation, and the deterministic flatten command sold SPY 13 at $725.466. The buying loop was stopped and the book ended flat at **$100,393.24 (+$393.24)**.
 
 ### Broker-reconciled snapshot
 
 | Measure | Current value |
 |---|---:|
 | Initial account NAV | $100,000.00 |
-| Current account NAV | **$99,958.28** |
-| Net account change | **−$41.72 (−0.0417%)** |
-| High-water mark | $100,174.35 |
-| Drawdown from high-water | **−0.2157%** |
-| 25 Nov day-start NAV | $99,228.13 |
-| Change from 25 Nov day start | +0.7358% |
-| Cash | $71,623.28 |
-| Open market value | $28,335.00 |
-| Open positions | SPY 13 · QQQ 30 |
-| Open unrealized gross, identified-lot basis | **−$187.91** |
-| Realized gross, 13 closed trades | **+$176.04** |
-| Implied fees and other broker cash flows | −$29.85 |
-| Broker orders | 30 total · 29 filled · 1 reconciled cancellation |
+| Current account NAV | **$100,393.24** |
+| Net account change | **+$393.24 (+0.3932%)** |
+| High-water mark | $100,463.97 |
+| Drawdown from high-water | **−0.0704%** |
+| 27 Nov day-start NAV | $100,414.86 |
+| Change from 27 Nov day start | −0.0215% |
+| Cash | $100,393.24 |
+| Open market value | $0.00 |
+| Open positions | None — fully flat |
+| Open unrealized gross, identified-lot basis | **$0.00** |
+| Realized gross, 16 closed trades | **+$426.09** |
+| Implied fees and other broker cash flows | −$32.85 |
+| Broker orders | 33 total · 32 filled · 1 reconciled cancellation |
 | Unresolved orders / attribution errors / halts / daily locks | **0 / 0 / 0 / 0** |
 
-The account is slightly below its starting balance while remaining far inside every risk threshold. The 27 November 13:00 ET close is not yet included; final competition settlement uses that session's regular-market closing prices.
+The account is **positive by $393.24 (+0.3932%)** in this post-liquidation snapshot. The buying loop is stopped, the book is flat, and no orders are working. The 27 November 13:00 ET close is still pending, but there are no positions to mark at settlement.
 
 ---
 
@@ -264,7 +265,7 @@ Fifty-one material report/deck claims are mapped in the [claim matrix](moomoo-du
 - Every order is terminal: 29 filled, one reconciled cancellation with partial-fill evidence.
 - Broker positions equal sleeve attribution: SPY 13 and QQQ 30.
 - No working orders, unresolved intents, attribution errors, order-error halt or daily lock.
-- Current NAV from Moomoo: $99,958.28; runner's last saved mark: $99,949.85; difference $8.43, well inside the 1% NAV check.
+- Current post-liquidation NAV from Moomoo: $100,393.24; runner's last saved mark: $100,388.05; difference $5.19, well inside the 1% NAV check.
 
 ---
 
@@ -272,7 +273,7 @@ Fifty-one material report/deck claims are mapped in the [claim matrix](moomoo-du
 
 ### 6.1 Equity and drawdown
 
-The evidence package contains **2,601 EXECUTE risk snapshots** across the competition sessions.
+The evidence package contains **2,753 EXECUTE risk snapshots so far**, including the live 27 November session.
 
 | Session | Last runner NAV | Session return | End drawdown |
 |---|---:|---:|---:|
@@ -281,7 +282,7 @@ The evidence package contains **2,601 EXECUTE risk snapshots** across the compet
 | 24 Nov | $100,005.70 | −0.0996% | −0.1684% |
 | 25 Nov | $99,949.85 | −0.0559% | −0.2241% |
 
-The maximum observed drawdown in the archived risk snapshots was **−1.5754%**. Across 2,761 risk snapshots, the agent was exposed **93.65%** of observed time; duration-weighted average gross exposure was **27.24% of NAV** and peak gross exposure was **82.42% ($81,263.60)**. The worst current open lot is the 15-share QQQ lot at $639.784, marked $633.93, for **−$87.81 gross**. Four completed session returns produce an annualized Sharpe of **−1.90**, but that figure is not statistically meaningful and is not used as a strategy claim. The current broker NAV of $99,958.28 is $8.43 above the last runner mark, consistent with normal mark-to-market drift. See [session_performance.json](moomoo-dual-strategy/reports/competition/submission_assets/session_performance.json).
+Through the four completed sessions before 27 November, the maximum observed drawdown was **−1.5754%**. Across those 2,761 risk snapshots, the agent was exposed **93.65%** of observed time; duration-weighted average gross exposure was **27.24% of NAV** and peak gross exposure was **82.42% ($81,263.60)**. The worst open lot at the 25 November snapshot was the 15-share QQQ lot at $639.784, marked $633.93, for **−$87.81 gross**. Four completed session returns produce an annualized Sharpe of **−1.90**, but that figure is not statistically meaningful and is not used as a strategy claim. The current post-liquidation broker NAV of **$100,393.24** is $5.19 above the last runner mark, consistent with normal mark-to-market drift. The book is flat, the buying loop is stopped, and the 13:00 ET final close is pending with no positions to mark. See [session_performance.json](moomoo-dual-strategy/reports/competition/submission_assets/session_performance.json).
 
 ![Live equity](moomoo-dual-strategy/reports/competition/submission_assets/equity_curve.svg)
 
@@ -291,11 +292,11 @@ The maximum observed drawdown in the archived risk snapshots was **−1.5754%**.
 
 | Component | USD |
 |---|---:|
-| Realized gross, 13 closed trades | +$176.04 |
-| Open unrealized gross, identified entry lots | −$187.91 |
-| Gross total | −$11.87 |
-| Implied fees and other broker cash flows | −$29.85 |
-| **Account net change** | **−$41.72** |
+| Realized gross, 16 closed trades | +$426.09 |
+| Open unrealized gross, identified entry lots | $0.00 |
+| Gross total | +$426.09 |
+| Implied fees and other broker cash flows | −$32.85 |
+| **Account net change** | **+$393.24** |
 
 Open-lot cost basis comes from the runner's identified lots, not Moomoo's cumulative position `cost_price`/`profit` fields, which can reflect realized P&L adjustments.
 
@@ -306,6 +307,7 @@ Open-lot cost basis comes from the runner's identified lots, not Moomoo's cumula
 - `submission_results.json`: redacted current account, risk, performance and configuration snapshot.
 - `submission_equity.csv`: raw equity/drawdown points behind the charts.
 - `dashboard-current.png`: current local dashboard capture.
+- `dashboard-positive-2026-11-27.png`: broker-verified intraday capture at 15:21 UTC showing NAV **$100,213.59**, high-water $100,414.86, cash $71,623.28 and zero order errors.
 
 Account IDs, OAuth tokens, private account files and credentials are excluded.
 
@@ -367,11 +369,14 @@ The full DOM regression requires Node.js on PATH; the verified local and clean-r
 - Native scheduler with read-only preflight.
 - Read-only dashboard and redacted CSV/JSON exports.
 - `refresh_submission_assets.py` regenerates results, trade/decision logs, equity CSV and SVG charts from broker/dashboard snapshots.
+- `refresh_session_performance.py` regenerates session returns, drawdown, Sharpe, exposure and worst-open-lot metrics from the equity and audit evidence.
 - `AGENTS.md` safety contract and independent verification prompt.
 
 ### 8.4 Package contents
 
 The draft runnable package (submitted separately) contains source, config, tests, README, `AGENTS.md`, HTML/PPTX/PDF reports, redacted logs, relevant research outputs, cached bars and evidence. It excludes `.venv`, caches, `private/`, account files, tokens, credentials and unrelated heavy research outputs. The [manifest](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package-Manifest.json) is included inside the zip and records every payload file's size and SHA-256; the separate [package checksum](moomoo-dual-strategy/reports/competition/Moo-Moo-Submission-Draft-Package.sha256) records the zip hash without a circular dependency. An **approximately 27 MB lightweight public package** is linked directly from the hosted report; it includes the source, tests, deck/PDF, redacted evidence and the cache fixtures required to reproduce the local suite. The largest historical cache remains in GitHub and the full evidence package. The package will be refreshed after the 27 Nov results.
+
+The public repository history was rewritten to remove private state and device paths before release. GitHub secret scanning and push protection are enabled, with zero secret-scanning alerts at the final audit.
 
 ---
 
@@ -401,6 +406,7 @@ No numeric “100/100” claim is made before the final session and package audi
 - [ ] Refresh NAV, positions, P&L, equity curve, trade log and deck from final regular-market closes.
 - [x] Fold in the redacted Windows and Mac evidence manifests; Linux remains the sole execution host.
 - [x] Build and visually inspect the current 13-slide PowerPoint and rendered PDF; final-session numbers remain pending.
+- [ ] Recreate the public `Double-check` repository from the sanitized history and verify old private objects are inaccessible.
 - [ ] Refresh the draft runnable package zip and SHA-256 manifest after final changes; verify no private material is included.
 - [ ] Submit through the official Luma link before **30 Nov 2026, 23:59 SGT**.
 

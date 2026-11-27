@@ -110,19 +110,19 @@ What it shows:
 
 ## 4. Live paper results (snapshot)
 
-Latest broker-reconciled snapshot before the 27 November half-day final session. Final figures will be refreshed after that session's regular-market close.
+Post-liquidation broker-reconciled snapshot at **16:00 UTC on 27 November 2026**, near submission preparation. The user directed a full liquidation: QQQ closed on vote exits and SPY was sold through the deterministic flatten command; the buying loop is stopped. The account is positive by **$393.24 (+0.3932%)** and the book is flat. The 13:00 ET regular-market close is still pending, but there are no positions or working orders.
 
 | Measure | Value |
 |---|---|
-| Account NAV | $99,958.28 (−$41.72, −0.0417%) on $100,000 |
-| High-water mark / drawdown | $100,174.35 / −0.2157% |
-| Cash / open market value | $71,623.28 / $28,335.00 |
-| Open positions | SPY 13 · QQQ 30 |
-| Open unrealized gross, identified-lot basis | −$187.91 |
-| Closed trades (all sleeves) | 13 · win rate 69.2% · average win $102.98 · average loss −$187.70 |
-| Expectancy / profit factor | +$13.54 per closed trade / 1.2345 |
-| Realized gross | Two-vote $163.66 · H ETF $12.38; fees and other cash flows −$29.85 |
-| Broker orders | 30 total · 29 filled · 1 reconciled cancellation · 0 open |
+| Account NAV | $100,393.24 (+$393.24, +0.3932%) on $100,000 |
+| High-water mark / drawdown | $100,463.97 / −0.0704% |
+| Cash / open market value | $100,393.24 / $0.00 |
+| Open positions | None — fully flat |
+| Open unrealized gross, identified-lot basis | $0.00 |
+| Closed trades (all sleeves) | 16 · win rate 75.0% · average win $98.07 · average loss −$187.70 |
+| Expectancy / profit factor | +$26.63 per closed trade / 1.5675 |
+| Realized gross | Two-vote $413.71 · H ETF $12.38; fees and other cash flows −$32.85 |
+| Broker orders | 33 total · 32 filled · 1 reconciled cancellation · 0 open |
 
 Notable sessions:
 
@@ -133,6 +133,7 @@ Notable sessions:
   - At 10:30 ET Two-vote opened a QQQ short on a Donchian + Keltner agreement and took +$54.38.
   - A second short opened at 11:55 ET. When three rules flipped to buy at 12:30 ET, the vote-flip exit closed it at −$76.20. The independent check confirmed every vote. Holding on would have reached −$90.45 by 12:46 ET, and the +$50 target was never reached.
   - That loss prompted the exit backtest above.
+- **27 Nov:** Two-vote closed both QQQ lots on vote exits, then the user directed a full liquidation. The deterministic flatten command sold SPY 13 at $725.466; the buying loop was stopped and the profit-only guard restored. The book ended flat at **$100,393.24 (+$393.24)** with 33/33 broker orders reconciled.
 
 ## 5. Architecture and agents
 

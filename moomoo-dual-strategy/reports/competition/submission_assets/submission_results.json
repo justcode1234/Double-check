@@ -1,62 +1,63 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T08:11:19Z",
+  "generated_at": "2026-11-27T15:58:44.257389+00:00",
   "scope": "Moomoo x Qoder competition paper account; public/redacted submission snapshot",
   "account": {
     "initial_nav": 100000.0,
-    "nav": 99958.28,
-    "cash": 71623.28,
-    "market_value": 28335.0,
-    "net_change_usd": -41.72,
-    "net_change_pct": -0.0417,
-    "high_water": 100174.348,
-    "drawdown_pct": -0.2157,
-    "day_start_nav": 99228.128,
-    "day_change_pct": 0.7358,
+    "nav": 100393.238,
+    "cash": 100393.238,
+    "market_value": 0.0,
+    "net_change_usd": 393.24,
+    "net_change_pct": 0.3932,
+    "high_water": 100463.9706,
+    "drawdown_pct": -0.0704,
+    "day_start_nav": 100414.86,
+    "day_change_pct": -0.0215,
     "halted": null,
     "locked_day": null
   },
   "positions": [
     {
       "symbol": "SPY",
-      "qty": 13,
-      "current_price": 716.7,
-      "market_value": 9317.1,
-      "cost_basis": 9355.19,
-      "unrealized_gross": -38.09
+      "qty": 0,
+      "current_price": 725.67,
+      "market_value": 0.0,
+      "cost_basis": 0.0,
+      "unrealized_gross": 0.0
     },
     {
       "symbol": "QQQ",
-      "qty": 30,
-      "current_price": 633.93,
-      "market_value": 19017.9,
-      "cost_basis": 19167.72,
-      "unrealized_gross": -149.82
+      "qty": 0,
+      "current_price": 645.35,
+      "market_value": 0.0,
+      "cost_basis": 0.0,
+      "unrealized_gross": 0.0
     }
   ],
-  "open_unrealized_gross": -187.91,
+  "open_unrealized_gross": 0.0,
   "performance": {
-    "realized_gross": 176.04,
-    "closed_trade_count": 13,
-    "win_rate_pct": 69.23,
-    "average_win": 102.98,
+    "realized_gross": 426.09,
+    "closed_trade_count": 16,
+    "win_rate_pct": 75.0,
+    "average_win": 98.07,
     "average_loss": -187.7,
-    "expectancy_dollars": 13.54,
-    "profit_factor": 1.2345,
-    "automatic_exits": 9,
+    "expectancy_dollars": 26.63,
+    "profit_factor": 1.5675,
+    "automatic_exits": 12,
     "manual_exits": 5
   },
   "orders": {
-    "total": 30,
+    "total": 33,
     "status_counts": {
-      "4": 29,
+      "4": 32,
       "5": 1
     },
     "by_session_et": {
       "2026-11-20": 2,
       "2026-11-23": 9,
       "2026-11-24": 8,
-      "2026-11-25": 11
+      "2026-11-25": 11,
+      "2026-11-27": 3
     },
     "all_terminal": true
   },
@@ -89,23 +90,26 @@
         "2026-11-24_mismatched_risk_records": 148,
         "2026-11-25_mismatched_risk_records": 12
       }
+    },
+    {
+      "issue": "Cloud automation task creation is confirmed, but execution outputs are not exposed to either the Linux or Windows agent; no completed Cloud output is claimed.",
+      "source": "moomoo-dual-strategy/reports/competition/submission_assets/cloud_audit_runs.json"
     }
   ],
   "limitations": [
     "Paper fills do not predict live returns.",
-    "The 27 November half-day session is not yet included.",
     "Independent rule implementation matches live signal code on 264 identical-input checks; current Moomoo historical bars reproduce 189/264 recorded rows, with 75 provider-revision differences disclosed in independent_live_vote_audit.json.",
-    "Last verified 17 Nov: Cloud auditor/watchdog deployments had no schedule and zero runs; no Moomoo Vault was attached.",
-    "Two one-time Cloud automations were created on 27 Nov; task creation is confirmed, but execution outputs are not exposed to the local agent and are not claimed as completed evidence.",
-    "The 27 November final settlement will use regular-market closing prices."
+    "Two one-time Cloud automations were created on 27 Nov; task creation is confirmed, but execution outputs are not exposed to the Linux or Windows agent and are not claimed as completed evidence.",
+    "The 27 November half-day final session is not yet included.",
+    "Final settlement will use regular-market closing prices."
   ],
-  "position_cost_method": "Identified entry-lot cost basis from the runner ledger; Moomoo cumulative position cost/profit fields are not used as open unrealized P&L.",
+  "position_cost_method": "Identified entry-lot cost basis from the runner ledger; Moomoo cumulative position cost/profit fields are not used when dashboard lot basis is available.",
   "reconciliation": {
-    "realized_gross": 176.04,
-    "open_unrealized_gross": -187.91,
-    "gross_total": -11.87,
-    "account_net_change_usd": -41.72,
-    "implied_fees_and_other_cash_flows_usd": -29.85
+    "realized_gross": 426.09,
+    "open_unrealized_gross": 0.0,
+    "gross_total": 426.09,
+    "account_net_change_usd": 393.24,
+    "implied_fees_and_other_cash_flows_usd": -32.85
   },
   "test_summary": {
     "run_at": "2026-11-27T13:17:35Z",
@@ -119,9 +123,9 @@
     "functional_failures": 0
   },
   "order_reconciliation": {
-    "broker_orders": 30,
-    "ledger_orders": 30,
-    "matched_order_ids": 30,
+    "broker_orders": 33,
+    "ledger_orders": 33,
+    "matched_order_ids": 33,
     "missing_from_broker": [],
     "missing_from_ledger": [],
     "status_legend": {
@@ -130,7 +134,7 @@
       "7": "REJECTED"
     },
     "status_counts": {
-      "FILLED": 29,
+      "FILLED": 32,
       "CANCELLED": 1
     },
     "open_orders": 0,
